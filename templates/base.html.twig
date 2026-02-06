@@ -1,17 +1,55 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}agrismart{% endblock %}</title>
+<link rel="icon" type="image/png" href="{{ asset('assets/images/logo-titre.png') }}">
+    <!-- Dark mode script -->
+    <script>
+        const storedTheme = localStorage.getItem('theme')
+        const getPreferredTheme = () => {
+            if (storedTheme) return storedTheme
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light'
+        }
+        const setTheme = function(theme){
+            if(theme==='auto' && window.matchMedia('(prefers-color-scheme: dark)').matches){
+                document.documentElement.setAttribute('data-bs-theme','dark')
+            }else{
+                document.documentElement.setAttribute('data-bs-theme',theme)
+            }
+        }
+        setTheme(getPreferredTheme())
+    </script>
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap">
+
+    {% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/tiny-slider/tiny-slider.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/glightbox/css/glightbox.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/flatpickr/css/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/choices/css/choices.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    {% endblock %}
+</head>
+
+<body>
+
+{% block body %}
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/tiny-slider/tiny-slider.js') }}"></script>
+<script src="{{ asset('assets/vendor/glightbox/js/glightbox.js') }}"></script>
+<script src="{{ asset('assets/vendor/flatpickr/js/flatpickr.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/choices/js/choices.min.js') }}"></script>
+<script src="{{ asset('assets/js/functions.js') }}"></script>
+{% endblock %}
+
+</body>
 </html>

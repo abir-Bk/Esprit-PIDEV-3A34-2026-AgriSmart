@@ -1,0 +1,53 @@
+<div class="modal fade" id="modalAjouterParcelle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title w-100 text-center fw-bold">Ajouter une Parcelle</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                {{ form_start(form, {'attr': {'id': 'form-parcelle'}}) }}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Nom (auto-complété par la carte)</label>
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control bg-light border-0', 'id': 'parcelle_nom'}}) }}
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Surface (Ha)</label>
+                            {{ form_widget(form.surface, {'attr': {'class': 'form-control bg-light border-0', 'id': 'parcelle_surface'}}) }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Type de Sol</label>
+                            {{ form_widget(form.typeSol, {'attr': {'class': 'form-control bg-light border-0', 'id': 'parcelle_typeSol'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted">Latitude</label>
+                            {{ form_widget(form.latitude, {'attr': {'class': 'form-control bg-light border-0', 'readonly': 'readonly', 'id': 'parcelle_latitude'}}) }}
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted">Longitude</label>
+                            {{ form_widget(form.longitude, {'attr': {'class': 'form-control bg-light border-0', 'readonly': 'readonly', 'id': 'parcelle_longitude'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-success"><i class="fa-solid fa-map-pin"></i> Cliquez sur la carte</label>
+                        <div id="map" style="height: 250px; border-radius: 8px; border: 1px solid #ddd;"></div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Enregistrer</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-light w-100 fw-bold py-2" data-bs-dismiss="modal">Annuler</button>
+                        </div>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>

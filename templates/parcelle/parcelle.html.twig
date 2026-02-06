@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<main x-data="{ 
+    selectedTab: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
+    parcelles: [
+        {% for p in parcelles %}
+        { 
+            id: {{ p.id }}, 
+            nom: '{{ p.nom|e('js') }}', 
+            surface: '{{ p.surface }}', 
+            typeSol: '{{ p.typeSol|e('js') }}',
+            latitude: '{{ p.latitude }}',
+            longitude: '{{ p.longitude }}',
+            csrfToken: '{{ csrf_token('delete' ~ p.id) }}'
+        },
+        {% endfor %}
+    ],
+    editParcelle(p) {
+        document.getElementById('parcelle_nom').value = p.nom;
+        document.getElementById('parcelle_surface').value = p.surface;
+        document.getElementById('parcelle_typeSol').value = p.typeSol;
+        document.getElementById('parcelle_latitude').value = p.latitude;
+        document.getElementById('parcelle_longitude').value = p.longitude;
+
+        document.getElementById('form-parcelle').action = '/parcelle/' + p.id + '/edit';
+        document.querySelector('#modalAjouterParcelle .modal-title').innerText = 'Modifier la Parcelle';
+
+        if (p.latitude && p.longitude) {
+            let coords = [p.latitude, p.longitude];
+            setTimeout(() => {
+                window.map.setView(coords, 13);
+                if (window.marker) window.marker.setLatLng(coords);
+                else window.marker = L.marker(coords).addTo(window.map);
+            }, 200);
+        }
+    },
+    resetForm() {
+        document.getElementById('form-parcelle').reset();
+        document.getElementById('form-parcelle').action = '/parcelle/';
+        document.querySelector('#modalAjouterParcelle .modal-title').innerText = 'Ajouter une Parcelle';
+        if (window.marker) window.map.removeLayer(window.marker);
+        window.marker = null;
+    }
+}">
+    <div class="container py-4">
+        <div class="title-bar d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm mb-4 border">
+            <h2 class="h4 fw-bold mb-0">Gestion des Parcelles</h2>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle" @click="resetForm()">
+                + Nouvelle Parcelle
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <template x-for="parcelle in parcelles" :key="parcelle.id">
+                    <div class="agri-card mb-3 p-3 bg-white rounded shadow-sm border-start border-4" 
+                         :class="selectedTab == parcelle.id ? 'border-success' : 'border-light'"
+                         @click="selectedTab = parcelle.id" style="cursor:pointer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-1" x-text="parcelle.nom"></h5>
+                                <span class="badge bg-light text-dark border" x-text="parcelle.typeSol"></span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-muted"></i>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="col-lg-7">
+                <template x-for="parcelle in parcelles" :key="parcelle.id">
+                    <div class="details-panel bg-white p-4 rounded shadow-sm border" x-show="selectedTab == parcelle.id" x-transition>
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <h3 class="fw-bold" x-text="parcelle.nom"></h3>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle" @click="editParcelle(parcelle)">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <form :action="'/parcelle/delete/' + parcelle.id" method="post" onsubmit="return confirm('Supprimer ?');">
+                                    <input type="hidden" name="_token" :value="parcelle.csrfToken">
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6"><label class="small text-muted d-block">Surface</label><p class="fw-bold fs-5" x-text="parcelle.surface + ' Ha'"></p></div>
+                            <div class="col-6"><label class="small text-muted d-block">Type de Sol</label><p class="fw-bold fs-5" x-text="parcelle.typeSol"></p></div>
+                            <div class="col-12">
+                                <div class="p-3 bg-light rounded border text-center">
+                                    <i class="fa-solid fa-location-dot me-2 text-success"></i>
+                                    <span x-text="'Lat: ' + parcelle.latitude + ' / Long: ' + parcelle.longitude"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</main>
+
+{{ include('parcelle/modalAjouterParcelle.twig') }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    window.map = L.map('map').setView([36.8, 10.2], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.map);
+    window.marker = null;
+
+    var modalEl = document.getElementById('modalAjouterParcelle');
+    modalEl.addEventListener('shown.bs.modal', function () {
+        window.map.invalidateSize();
+    });
+
+    window.map.on('click', function(e) {
+        var lat = e.latlng.lat.toFixed(6);
+        var lng = e.latlng.lng.toFixed(6);
+        
+        if (window.marker) window.marker.setLatLng([lat, lng]);
+        else window.marker = L.marker([lat, lng]).addTo(window.map);
+        
+        document.getElementById('parcelle_latitude').value = lat;
+        document.getElementById('parcelle_longitude').value = lng;
+
+        // Indiquer à l'utilisateur que la recherche est en cours
+        document.getElementById('parcelle_nom').value = "Recherche du lieu...";
+
+        // Utilisation de l'API Nominatim avec une gestion d'erreurs plus robuste
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, {
+            headers: {
+                'Accept-Language': 'fr' // Pour avoir les noms en français
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.address); // Pour déboguer dans ta console F12
+            
+            let addr = data.address;
+            // On cherche le nom le plus précis disponible
+            let name = addr.suburb || 
+                       addr.neighbourhood || 
+                       addr.village || 
+                       addr.town || 
+                       addr.city || 
+                       addr.county || 
+                       addr.state;
+
+            if (name) {
+                // On ajoute la ville si on a trouvé un quartier/village pour être précis
+                let city = addr.city || addr.town || addr.village || "";
+                let finalName = (name !== city && city !== "") ? `${name}, ${city}` : name;
+                document.getElementById('parcelle_nom').value = finalName;
+            } else {
+                // Si vraiment rien n'est trouvé, on met "Parcelle" + les coordonnées
+                document.getElementById('parcelle_nom').value = "Parcelle " + lat.substring(0,5);
+            }
+        })
+        .catch(err => {
+            console.error("Erreur Geocoding:", err);
+            document.getElementById('parcelle_nom').value = ""; // Laisser vide en cas d'erreur
+        });
+    });
+});
+</script>
+{% endblock %}

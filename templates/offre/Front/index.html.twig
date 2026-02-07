@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Offres d'Emploi{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Offres d'Emploi Disponibles</h1>
+
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Titre</th>
+                    <th>Type Poste</th>
+                    <th>Contrat</th>
+                    <th>Lieu</th>
+                    <th>Salaire</th>
+                    <th>Statut</th>
+                    <th>Dates</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offre in offres %}
+                    <tr>
+                        <td><strong>{{ offre.title }}</strong></td>
+                        <td>{{ offre.typePoste }}</td>
+                        <td>{{ offre.typeContrat }}</td>
+                        <td>{{ offre.lieu }}</td>
+                        <td>{{ offre.salaire ? offre.salaire ~ ' TND' : 'N/A' }}</td>
+                        <td>
+                            <span class="badge {{ offre.statut == 'Ouvert' ? 'bg-success' : 'bg-secondary' }}">
+                                {{ offre.statut }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>
+                                Du: {{ offre.dateDebut|date('d/m/Y') }}<br>
+                                Au: {{ offre.dateFin|date('d/m/Y') }}
+                            </small>
+                        </td>
+                        <td>
+                            <ul class="vertical-list">
+                                <li><a href="{{ path('app_offre_show', {'id': offre.id}) }}" class="btn btn-sm btn-primary">Voir détails</a></li>
+                                <li><span class="badge bg-info text-dark">{{ offre.demandes|length }} candidatures</span></li>
+                            </ul>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">Aucune offre trouvée.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+        .vertical-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .vertical-list li {
+            margin-bottom: 10px;  
+        }
+    </style>
+
+{% endblock %}

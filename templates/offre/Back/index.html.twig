@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin - Liste des Offres</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap">
+
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/choices/css/choices.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+</head>
+
+<body>
+    <main>
+        <nav class="navbar sidebar navbar-expand-xl navbar-light"></nav>
+
+        <div class="page-content">
+            <nav class="navbar top-bar navbar-light py-0 py-xl-3"></nav>
+
+            <div class="page-content-wrapper p-xxl-4">
+                <div class="row">
+                    <div class="col-12 mb-4 mb-sm-5">
+                        <div class="d-sm-flex justify-content-between align-items-center">
+                            <h1 class="h3 mb-3 mb-sm-0">Gestion des Offres</h1>
+                            <div class="d-grid">
+                                <a href="{{ path('app_offre_new') }}" class="btn btn-primary mb-0">
+                                    <i class="bi bi-plus-lg me-2"></i>Ajouter une Offre
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Functional Search Form #}
+                <div class="row g-3 align-items-center justify-content-between mb-5">
+                    <div class="col-md-8">
+                        <form class="rounded position-relative" method="get" action="{{ path('app_admin_offre_index') }}">
+                            <input id="offreSearchInput" name="search" class="form-control pe-5" type="search" 
+                                   placeholder="Rechercher une offre (titre ou lieu)..." 
+                                   value="{{ app.request.query.get('search') }}">
+                            <button class="btn border-0 px-3 py-0 position-absolute top-50 end-0 translate-middle-y" type="submit">
+                                <i class="fas fa-search fs-6"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {# Offers Grid #}
+                <div class="row g-4" id="offreList">
+                    {% for offre in offres %}
+                    <div class="col-md-6 col-lg-4 col-xxl-3 offre-card">
+                        <div class="card border h-100 shadow-hover">
+                            {# Dropdown Menu #}
+                            <div class="dropdown position-absolute top-0 end-0 m-3">
+                                <a href="#" class="btn btn-sm btn-light btn-round small mb-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots fa-fw"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded">
+                                    <li><a class="dropdown-item" href="{{ path('app_offre_edit', {'id': offre.id}) }}"><i class="bi bi-pencil-square fa-fw me-2"></i>Modifier</a></li>
+                                    <li>
+                                        <form method="post" action="{{ path('app_offre_delete', {'id': offre.id}) }}" onsubmit="return confirm('Supprimer cette offre ?');" style="display:inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offre.id) }}">
+                                            <button class="dropdown-item text-danger border-0 bg-transparent"><i class="bi bi-trash fa-fw me-2"></i>Supprimer</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="card-body text-center pt-4">
+                                <h5 class="mb-1 offre-title">{{ offre.title }}</h5>
+                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i><span class="offre-lieu">{{ offre.lieu }}</span></small>
+                                
+                                <hr class="my-3">
+
+                                <div class="d-flex justify-content-between">
+                                    <div class="text-start">
+                                        <small class="text-muted d-block">Salaire</small>
+                                        <h6 class="mb-0 small">{{ offre.salaire }} DT</h6>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block">Contrat</small>
+                                        <h6 class="mb-0 small">{{ offre.typeContrat }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-transparent border-top-0 pt-0">
+                                <a href="{{ path('app_admin_offre_details', {'id': offre.id}) }}" class="btn btn-sm btn-primary-soft mb-0 w-100">
+                                    <i class="bi bi-info-circle me-2"></i>Détails de l'offre
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">Aucune offre disponible pour le moment.</div>
+                    </div>
+                    {% endfor %}
+                </div> {# End of #offreList row #}
+            </div> {# End of page-content-wrapper #}
+        </div> {# End of page-content #}
+    </main>
+
+    {# JavaScript for Dynamic Live Filtering #}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('offreSearchInput');
+        const cards = document.querySelectorAll('.offre-card');
+
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase();
+
+            cards.forEach(card => {
+                const title = card.querySelector('.offre-title').textContent.toLowerCase();
+                const lieu = card.querySelector('.offre-lieu').textContent.toLowerCase();
+
+                if (title.includes(query) || lieu.includes(query)) {
+                    card.style.display = ""; 
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    });
+    </script>
+
+    <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/functions.js') }}"></script>
+</body>
+</html>

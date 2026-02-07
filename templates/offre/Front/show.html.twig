@@ -1,0 +1,87 @@
+{# templates/offre/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails - {{ offre.title }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    {# Correct path for return button #}
+    <a href="{{ path('app_offre_emploi') }}" class="btn btn-outline-secondary mb-3">← Retour à la liste</a>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">{{ offre.title }}</h2>
+            <span class="badge bg-light text-primary">{{ offre.typeContrat }}</span>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                {# Main Content #}
+                <div class="col-md-8">
+                    <h4>Description</h4>
+                    <p class="text-muted">{{ offre.description }}</p>
+                    
+                    <hr>
+                    
+                    <h5>Détails du poste</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>📍 Lieu:</strong> {{ offre.lieu }}</li>
+                        <li><strong>💼 Type de poste:</strong> {{ offre.typePoste }}</li>
+                        <li><strong>💰 Salaire:</strong> {{ offre.salaire }} TND</li>
+                    </ul>
+                </div>
+                
+                {# Sidebar Content #}
+                <div class="col-md-4 border-start">
+                    <h5>Informations Clés</h5>
+                    <p><strong>Statut:</strong> {{ offre.statut }}</p>
+                    <p><strong>Début:</strong> {{ offre.dateDebut|date('d/m/Y') }}</p>
+                    <p><strong>Fin:</strong> {{ offre.dateFin|date('d/m/Y') }}</p>
+                    
+                    <div class="mt-4 d-grid">
+    {# --- LOGIC CHECKS --- #}
+    {% set isExpired = offre.dateFin < date("now") %}
+    {% set isCloture = offre.statut|lower == 'clôturée' %}
+    
+    {# Check if user already applied #}
+    {% set hasAlreadyApplied = false %}
+    
+    {# 
+       USER MODULE INTEGRATION:
+       Uncomment the lines below once the User module is ready.
+       For now, we assume a dummy ID (e.g., 1) to test the logic.
+    #}
+    {# 
+    {% if app.user %}
+        {% for d in offre.demandes %}
+            {% if d.users and d.users.id == app.user.id %}
+                {% set hasAlreadyApplied = true %}
+            {% endif %}
+        {% endfor %}
+    {% endif %} 
+    #}
+
+    {% if isExpired or isCloture %}
+        <button class="btn btn-danger btn-lg" disabled>
+            <i class="bi bi-lock-fill"></i> Offre clôturée
+        </button>
+    {% elseif hasAlreadyApplied %}
+        <button class="btn btn-info btn-lg text-white" disabled>
+            <i class="bi bi-check-circle-fill"></i> Déjà postulé
+        </button>
+    {% else %}
+        <a href="{{ path('app_demande_postuler', {'id': offre.id}) }}" class="btn btn-success btn-lg">
+            Postuler maintenant
+        </a>
+    {% endif %}
+</div>
+                </div>
+            </div>
+        </div> 
+
+        <div class="card-footer text-muted">
+            Nombre de candidatures actuelles : {{ offre.demandes|length }}
+        </div>
+    </div>
+</div>
+{% endblock %}

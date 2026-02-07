@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ editMode ? 'Modifier' : 'Créer' }} - Offre d'emploi</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-0">
+                    
+                    {# Header style copied from Demande #}
+                    <div class="card-header {{ editMode ? 'bg-warning' : 'bg-success' }} text-white py-3">
+                        <h4 class="mb-0 text-center">
+                            {{ editMode ? 'Modifier l\'offre d\'emploi' : 'Nouvelle Offre d\'Emploi' }}
+                        </h4>
+                    </div>
+
+                    <div class="card-body p-4">
+                        {# Form Start with novalidate #}
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            
+                            {# Main Info #}
+                            <div class="mb-3">
+                                {{ form_row(form.title, {'label': 'Titre du poste', 'attr': {'placeholder': 'Ex: Ingénieur Agronome'}}) }}
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    {{ form_row(form.typePoste, {'label': 'Département / Type Poste'}) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.typeContrat, {'label': 'Type de Contrat'}) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                {{ form_row(form.description, {'label': 'Description détaillée', 'attr': {'rows': '6'}}) }}
+                            </div>
+
+                            <hr class="text-muted">
+                            <h6 class="text-uppercase small fw-bold mb-3 text-secondary">Détails et Logistique</h6>
+
+                            {# Location and Salary #}
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    {{ form_row(form.lieu, {'label': 'Localisation', 'attr': {'placeholder': 'Ex: Tunis, Remote...'}}) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.salaire, {'label': 'Salaire (DT)'}) }}
+                                </div>
+                            </div>
+
+                            {# Dates and Status #}
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    {{ form_row(form.statut, {'label': 'Statut de l\'offre'}) }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(form.dateDebut, {'label': 'Date de Début'}) }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(form.dateFin, {'label': 'Date d\'Expiration'}) }}
+                                </div>
+                            </div>
+
+                            {# Action Buttons: Large stack style like the Demande form #}
+                            <div class="d-grid gap-2 mt-5">
+                                <button type="submit" class="btn {{ editMode ? 'btn-warning' : 'btn-success' }} btn-lg">
+                                    {{ editMode ? 'Enregistrer les modifications' : 'Publier cette offre' }}
+                                </button>
+                                <a href="{{ path('app_admin_offres') }}" class="btn btn-link text-muted text-decoration-none text-center">
+                                    <i class="bi bi-arrow-left me-1"></i> Annuler et retourner à la liste
+                                </a>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

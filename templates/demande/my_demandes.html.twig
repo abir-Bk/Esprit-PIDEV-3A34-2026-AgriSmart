@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Candidatures{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Mes Candidatures</h1>
+
+    <div class="table-responsive">
+        <table class="table table-hover shadow-sm border align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Offre</th>
+                    <th>Téléphone</th>
+                    <th>Postulé le</th>
+                    <th>Fichiers</th>
+                    <th>Statut Candidature</th> {# New Column for Application Status #}
+                    <th>Statut de l'Offre</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandes %}
+                    <tr>
+                        <td>
+                            <strong>{{ demande.offre.title }}</strong><br>
+                            <small class="text-muted">{{ demande.offre.lieu }}</small>
+                        </td>
+                        <td>{{ demande.phoneNumber }}</td>
+                        <td>{{ demande.datePostulation|date('d/m/Y H:i') }}</td>
+
+                        <td>
+                            <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="badge bg-info text-dark text-decoration-none">
+                                <i class="bi bi-file-earmark-pdf"></i> CV
+                            </a>
+                            <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" target="_blank" class="badge bg-secondary text-decoration-none">
+                                <i class="bi bi-file-earmark-text"></i> Lettre
+                            </a>
+                        </td>
+                        
+                        {# New Column: Statut of the Application (Demande) #}
+                        <td>
+                            {% set dem_status = demande.statut|lower %}
+                            {% if dem_status == 'acceptée' or dem_status == 'accepte' %}
+                                <span class="badge rounded-pill bg-success">
+                                    <i class="bi bi-check-circle me-1"></i> Acceptée
+                                </span>
+                            {% elseif dem_status == 'refusée' or dem_status == 'refuse' %}
+                                <span class="badge rounded-pill bg-danger">
+                                    <i class="bi bi-x-circle me-1"></i> Refusée
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-warning text-dark">
+                                    <i class="bi bi-clock me-1"></i> En cours
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        {# Existing Column: Statut of the Job (Offre) #}
+                        <td>
+                            {% set off_status = demande.offre.statut|lower %}
+                            {% set off_class = 'bg-secondary' %}
+                            
+                            {% if off_status in ['ouvert', 'open'] %}
+                                {% set off_class = 'bg-primary' %}
+                            {% elseif off_status in ['clôturée', 'closed'] %}
+                                {% set off_class = 'bg-dark' %}
+                            {% endif %}
+
+                            <span class="badge {{ off_class }} bg-opacity-10 text-{{ off_class|replace({'bg-': ''}) }}">
+                                {{ demande.offre.statut }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ path('app_offre_show', {'id': demande.offre.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir l'offre">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ path('app_demande_edit', {'id': demande.id}) }}" class="btn btn-sm btn-warning" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{{ path('app_demande_delete', {'id': demande.id}) }}" style="display:inline-block" onsubmit="return confirm('Supprimer ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ demande.id) }}">
+                                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <p class="text-muted mb-0">Aucune candidature trouvée.</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

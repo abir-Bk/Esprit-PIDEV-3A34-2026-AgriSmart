@@ -1,30 +1,36 @@
 {{ form_start(form, {
-  attr: { class: 'needs-validation', novalidate: 'novalidate', id: 'produit-form' }
+  attr: {
+    class: 'am-form needs-validation',
+    novalidate: 'novalidate',
+    enctype: 'multipart/form-data',
+    id: 'produit-form'
+  }
 }) }}
 
 <div class="row g-3">
+
   <div class="col-md-6">
     <label class="form-label">Nom *</label>
-    {{ form_widget(form.nom, {attr: {class:'form-control', placeholder:'Ex: Tomates bio', required:true}}) }}
+    {{ form_widget(form.nom, {'attr': {'class':'form-control', 'placeholder':'Ex: Tomates bio', 'required':'required'}}) }}
     <div class="invalid-feedback">Nom obligatoire</div>
   </div>
 
   <div class="col-md-6">
     <label class="form-label">Catégorie *</label>
-    {{ form_widget(form.categorie, {attr: {class:'form-control', placeholder:'Ex: Légumes', required:true}}) }}
+    {{ form_widget(form.categorie, {'attr': {'class':'form-select', 'required':'required'}}) }}
     <div class="invalid-feedback">Catégorie obligatoire</div>
   </div>
 
   <div class="col-md-6">
     <label class="form-label">Type (vente/location) *</label>
-    {{ form_widget(form.type, {attr: {class:'form-select', required:true}}) }}
+    {{ form_widget(form.type, {'attr': {'class':'form-select', 'required':'required'}}) }}
     <div class="invalid-feedback">Type obligatoire</div>
   </div>
 
   <div class="col-md-6">
     <label class="form-label">Prix (TND) *</label>
     <div class="input-group">
-      {{ form_widget(form.prix, {attr: {class:'form-control', placeholder:'Ex: 12.5', required:true, min:0, step:'0.01'}}) }}
+      {{ form_widget(form.prix, {'attr': {'class':'form-control', 'required':'required', 'min':'0', 'step':'0.01', 'placeholder':'Ex: 12.5'}}) }}
       <span class="input-group-text">TND</span>
       <div class="invalid-feedback">Prix ≥ 0</div>
     </div>
@@ -32,55 +38,92 @@
 
   <div class="col-md-6">
     <label class="form-label">Quantité en stock *</label>
-    {{ form_widget(form.quantiteStock, {attr: {class:'form-control', placeholder:'Ex: 50', required:true, min:0, step:'1'}}) }}
+    {{ form_widget(form.quantiteStock, {'attr': {'class':'form-control', 'required':'required', 'min':'0', 'step':'1', 'placeholder':'Ex: 50'}}) }}
     <div class="invalid-feedback">Stock ≥ 0</div>
   </div>
 
   <div class="col-md-6">
     <label class="form-label">Image (fichier / caméra)</label>
-    {{ form_widget(form.imageFile, {attr: {class:'form-control', accept:'image/*', capture:'environment'}}) }}
-    <small class="text-muted d-block mt-1">Sur mobile: tu peux ouvrir la caméra.</small>
+    {{ form_widget(form.imageFile, {'attr': {'class':'form-control', 'accept':'image/*', 'capture':'environment'}}) }}
+    <small class="text-muted d-block mt-2">
+      Sur mobile : tu peux choisir un fichier ou ouvrir la caméra.
+    </small>
 
     <div class="mt-2">
       <label class="form-label mb-1">ou URL (optionnel)</label>
-      {{ form_widget(form.image, {attr: {class:'form-control', placeholder:'https://...'}}) }}
+      {{ form_widget(form.image, {'attr': {'class':'form-control', 'placeholder':'Ex: https://... (optionnel)'}}) }}
       <small class="text-muted">Si vide, placeholder.</small>
     </div>
   </div>
 
   <div class="col-12">
     <label class="form-label">Description</label>
-    {{ form_widget(form.description, {attr: {class:'form-control', rows:4, placeholder:'Origine, qualité, etc.'}}) }}
+    {{ form_widget(form.description, {'attr': {'class':'form-control', 'rows':'4', 'placeholder':'Origine, qualité, conditionnement…'}}) }}
   </div>
 
+  {# LOCATION fields (hidden unless type=location) #}
+  <div class="col-12" id="locationFields" style="display:none;">
+    <div class="card border-0 bg-light p-3">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-geo-alt"></i>
+        <div class="fw-semibold">Informations de location</div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Disponible à partir du *</label>
+          {{ form_widget(form.locationStart, {'attr': {'class':'form-control', 'required':'required'}}) }}
+          <div class="invalid-feedback">Date de début obligatoire</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Disponible jusqu’au (optionnel)</label>
+          {{ form_widget(form.locationEnd, {'attr': {'class':'form-control'}}) }}
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Emplacement *</label>
+          {{ form_widget(form.locationAddress, {'attr': {'class':'form-control', 'required':'required', 'placeholder':'Ex: Ariana, Tunis / Sousse…'}}) }}
+          <div class="invalid-feedback">Emplacement obligatoire</div>
+        </div>
+      </div>
+
+      <small class="text-muted mt-2 d-block">
+        Ces champs s’affichent uniquement si le type = <b>Location</b>.
+      </small>
+    </div>
+  </div>
+
+  {# PROMO #}
   <div class="col-12">
     <div class="card border-0 bg-light p-3">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div class="form-check form-switch m-0">
-          {{ form_widget(form.isPromotion, {attr: {class:'form-check-input', id:'isPromotion'}}) }}
-          <label class="form-check-label" for="isPromotion">En promotion</label>
+          {{ form_widget(form.isPromotion, {'attr': {'class': 'form-check-input', 'id':'isPromotion'}}) }}
+          <label class="form-check-label" for="isPromotion">Activer promo</label>
         </div>
 
         <div class="d-flex align-items-center gap-2" style="min-width:320px;">
           <label class="form-label mb-0 fw-semibold">Prix promo (TND)</label>
           <div class="input-group">
-            {{ form_widget(form.promotionPrice, {attr: {class:'form-control', placeholder:'Ex: 9.9', min:0, step:'0.01', id:'promotionPrice'}}) }}
+            {{ form_widget(form.promotionPrice, {'attr': {'class':'form-control', 'placeholder':'Ex: 9.9', 'min':'0', 'step':'0.01', 'id':'promotionPrice'}}) }}
             <span class="input-group-text">TND</span>
           </div>
         </div>
       </div>
-      <small class="text-muted mt-2">Prix promo ≤ prix normal.</small>
+      <small class="text-muted mt-2">Le prix promo doit être ≤ prix normal.</small>
     </div>
   </div>
 
   <div class="col-12 d-flex gap-2 mt-2">
-    <button class="btn btn-dark" type="submit" id="btnSubmit">
+    <button class="btn btn-dark am-btn" type="submit" id="btnSubmit">
       <i class="bi bi-check2-circle me-2"></i>Publier
     </button>
-    <a class="btn btn-outline-secondary" href="{{ path('app_produit_index') }}">
+    <a class="btn btn-outline-secondary am-btn" href="{{ path('app_produit_index') }}">
       <i class="bi bi-x-lg me-2"></i>Annuler
     </a>
   </div>
+
 </div>
 
 {{ form_end(form) }}
@@ -90,65 +133,140 @@
   const formEl = document.getElementById('produit-form');
   if (!formEl) return;
 
+  // Symfony IDs
   const nom = document.getElementById('{{ form.nom.vars.id }}');
   const cat = document.getElementById('{{ form.categorie.vars.id }}');
   const type = document.getElementById('{{ form.type.vars.id }}');
   const prix = document.getElementById('{{ form.prix.vars.id }}');
   const stock = document.getElementById('{{ form.quantiteStock.vars.id }}');
-
   const imageUrl = document.getElementById('{{ form.image.vars.id }}');
   const fileInput = document.getElementById('{{ form.imageFile.vars.id }}');
 
   const isPromo = document.getElementById('isPromotion');
-  const promotionPrice = document.getElementById('promotionPrice');
+  const promoPrix = document.getElementById('promotionPrice');
 
+  // Location fields
+  const locationFields = document.getElementById('locationFields');
+  const locStart = document.getElementById('{{ form.locationStart.vars.id }}');
+  const locEnd = document.getElementById('{{ form.locationEnd.vars.id }}');
+  const locAddr = document.getElementById('{{ form.locationAddress.vars.id }}');
+
+  // Preview elements (in new.html.twig)
   const previewTitle = document.getElementById('previewTitle');
   const previewSub = document.getElementById('previewSub');
   const previewPrice = document.getElementById('previewPrice');
   const previewStock = document.getElementById('previewStock');
   const previewImage = document.getElementById('previewImage');
+  const previewLocationBox = document.getElementById('previewLocationBox');
+  const previewLocationText = document.getElementById('previewLocationText');
 
   function safe(v, fallback) {
     v = (v || '').toString().trim();
     return v ? v : fallback;
   }
 
+  function currentTypeValue() {
+    return (type?.value || '').toString().toLowerCase().trim();
+  }
+
+  function updateLocationVisibility() {
+    const t = currentTypeValue();
+    const isLoc = (t === 'location');
+
+    if (locationFields) locationFields.style.display = isLoc ? '' : 'none';
+
+    // Toggle required (front)
+    if (locStart) locStart.required = isLoc;
+    if (locAddr)  locAddr.required  = isLoc;
+
+    // Preview
+    if (previewLocationBox) {
+      previewLocationBox.classList.toggle('d-none', !isLoc);
+    }
+    if (!isLoc) {
+      if (locStart) locStart.value = '';
+      if (locEnd) locEnd.value = '';
+      if (locAddr) locAddr.value = '';
+      if (previewLocationText) previewLocationText.textContent = 'Dates + emplacement';
+    }
+  }
+
   function updatePreview() {
-    previewTitle.textContent = safe(nom?.value, 'Titre du produit');
-    previewSub.textContent = `${safe(cat?.value, 'Catégorie')} • ${safe(type?.value, 'Type')}`;
+    if (!previewTitle) return;
+
+    const n = safe(nom?.value, 'Titre du produit');
+
+    // categorie label (select)
+    let c = 'Catégorie';
+    if (cat) {
+      const opt = cat.options[cat.selectedIndex];
+      c = safe(opt?.text, 'Catégorie');
+      if (opt && !opt.value) c = 'Catégorie';
+    }
+
+    // type label
+    let t = 'Type';
+    if (type) {
+      const optt = type.options[type.selectedIndex];
+      t = safe(optt?.text, 'Type');
+      if (optt && !optt.value) t = 'Type';
+    }
+
+    previewTitle.textContent = n;
+    previewSub.textContent = `${c} • ${t}`;
 
     const p = (prix?.value || '').toString().trim();
     previewPrice.textContent = p ? `${p} DT` : 'Prix';
 
     const s = (stock?.value || '').toString().trim();
     previewStock.textContent = s ? `Stock: ${s}` : 'Stock';
+
+    // location preview
+    const isLoc = (currentTypeValue() === 'location');
+    if (isLoc && previewLocationText) {
+      const ds = safe(locStart?.value, '---');
+      const de = safe(locEnd?.value, '---');
+      const ad = safe(locAddr?.value, '---');
+      previewLocationText.textContent = `Du ${ds} au ${de} • ${ad}`;
+    }
   }
 
   function setPromoState() {
     const on = !!isPromo?.checked;
-    if (promotionPrice) {
-      promotionPrice.disabled = !on;
-      if (!on) promotionPrice.value = '';
+    if (promoPrix) {
+      promoPrix.disabled = !on;
+      if (!on) promoPrix.value = '';
     }
   }
 
   function setImageFromUrl(url) {
+    if (!previewImage) return;
     url = (url || '').toString().trim();
     previewImage.src = url ? url : "{{ asset('assets/images/placeholder-product.png') }}";
   }
 
   function setImageFromFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!previewImage || !file) return;
+    if (!file.type || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (e) => previewImage.src = e.target.result;
     reader.readAsDataURL(file);
   }
 
-  [nom, cat, type, prix, stock].forEach(el => {
+  // Bind preview updates
+  [nom, prix, stock, locStart, locEnd, locAddr].forEach(el => {
     if (!el) return;
     el.addEventListener('input', updatePreview);
     el.addEventListener('change', updatePreview);
   });
+
+  if (cat) cat.addEventListener('change', updatePreview);
+  if (type) {
+    type.addEventListener('change', () => {
+      updateLocationVisibility();
+      updatePreview();
+    });
+  }
 
   if (imageUrl) {
     imageUrl.addEventListener('input', () => setImageFromUrl(imageUrl.value));
@@ -164,6 +282,7 @@
 
   if (isPromo) isPromo.addEventListener('change', setPromoState);
 
+  // Toggle preview on small screens
   const toggleBtn = document.getElementById('togglePreviewBtn');
   const previewCol = document.getElementById('previewCol');
   if (toggleBtn && previewCol) {
@@ -173,8 +292,8 @@
     });
   }
 
+  // Client-side validation (bloque vide / négatif / promo)
   formEl.addEventListener('submit', function (event) {
-    // bloque champs vides HTML5
     if (!formEl.checkValidity()) {
       event.preventDefault();
       event.stopPropagation();
@@ -183,25 +302,36 @@
     const p = parseFloat((prix?.value || '0').toString().replace(',', '.'));
     const s = parseInt(stock?.value || '0', 10);
 
-    if (p < 0 || s < 0) {
+    if (isNaN(p) || p < 0 || isNaN(s) || s < 0) {
       event.preventDefault();
       event.stopPropagation();
       alert('Erreur: prix/stock ne peuvent pas être négatifs.');
     }
 
-    if (isPromo?.checked && promotionPrice?.value) {
-      const pp = parseFloat(promotionPrice.value.toString().replace(',', '.'));
-      if (pp < 0 || pp > p) {
+    if (isPromo?.checked && promoPrix && promoPrix.value) {
+      const pp = parseFloat(promoPrix.value.toString().replace(',', '.'));
+      if (isNaN(pp) || pp < 0 || pp > p) {
         event.preventDefault();
         event.stopPropagation();
-        alert('Erreur: prix promo doit être >= 0 et <= prix normal.');
+        alert('Erreur: prix promo doit être ≥ 0 et ≤ prix normal.');
+      }
+    }
+
+    // location required if type=location
+    if (currentTypeValue() === 'location') {
+      if (!locStart?.value || !locAddr?.value) {
+        event.preventDefault();
+        event.stopPropagation();
+        alert('Erreur: pour une location, la date de début et l’emplacement sont obligatoires.');
       }
     }
 
     formEl.classList.add('was-validated');
   });
 
+  // init
   setPromoState();
+  updateLocationVisibility();
   updatePreview();
 })();
 </script>

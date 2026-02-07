@@ -3,193 +3,122 @@
 {% block title %}Nouvelle annonce{% endblock %}
 
 {% block body %}
-{% include 'components/_header.html.twig' %}
 
 <section class="pt-4 pt-md-5">
   <div class="container">
 
-    <div class="card shadow-sm mb-4" style="border-radius: 18px;">
+    {# HERO #}
+    <div class="am-hero card shadow-sm am-hero-soft mb-4">
       <div class="card-body p-4 p-md-5">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
           <div>
-            <div class="badge bg-light text-dark border mb-2"><i class="bi bi-plus-circle me-2"></i>Publier</div>
-            <h1 class="mb-1" style="color:#153b2a;font-weight:800;">Nouvelle annonce</h1>
-            <p class="text-muted mb-0">Créez une annonce claire : titre, prix, stock, catégorie et image.</p>
+            <span class="badge rounded-pill text-bg-light border am-badge-pill">
+              <i class="bi bi-plus-circle me-2"></i>Publier
+            </span>
+            <h1 class="mt-3 mb-2 am-hero-title">Nouvelle annonce</h1>
+            <p class="text-muted mb-0">
+              Créez une annonce claire : titre, catégorie, type, prix, stock, image — et si c’est une location : dates & emplacement.
+            </p>
           </div>
-          <a class="btn btn-outline-dark" href="{{ path('app_produit_index') }}">
+
+          <a class="btn btn-outline-dark am-btn" href="{{ path('app_produit_index') }}">
             <i class="bi bi-arrow-left me-2"></i>Retour Marketplace
           </a>
         </div>
+
+        <div class="row g-3 mt-4">
+          <div class="col-md-4">
+            <div class="am-tip">
+              <div class="am-tip-k">Astuce</div>
+              <div class="am-tip-v">Une bonne description = + de contacts</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="am-tip">
+              <div class="am-tip-k">Promo</div>
+              <div class="am-tip-v">Activez seulement si utile</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="am-tip">
+              <div class="am-tip-k">Image</div>
+              <div class="am-tip-v">Format carré conseillé</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
+    {# FORM + PREVIEW (dynamic) #}
     <div class="row g-4 align-items-start">
       <div class="col-lg-7">
-        <div class="card shadow-sm">
-          <div class="card-header bg-transparent">
+        <div class="card shadow-sm am-card-soft">
+          <div class="card-header bg-transparent border-0 pb-0">
             <div class="d-flex align-items-center gap-2">
               <i class="bi bi-pencil-square"></i>
               <h5 class="mb-0">Informations de l’annonce</h5>
             </div>
-            <small class="text-muted">Les champs marqués * sont obligatoires</small>
+            <small class="text-muted">Les champs marqués <b>*</b> sont obligatoires</small>
           </div>
-          <div class="card-body">
-            {# IMPORTANT : on passe bien form=form #}
-            {% include 'produit/_form.html.twig' with { form: form } %}
+          <div class="card-body pt-3">
+            {{ include('produit/_form.html.twig', { form: form }) }}
           </div>
         </div>
       </div>
 
-      <div class="col-lg-5">
-        <div class="card shadow-sm sticky-lg-top" style="top: 110px;">
-          <div class="card-header bg-transparent">
+      <div class="col-lg-5" id="previewCol">
+        <div class="card shadow-sm am-card-soft sticky-lg-top" style="top: 110px;">
+          <div class="card-header bg-transparent border-0 pb-0">
             <div class="d-flex align-items-center gap-2">
               <i class="bi bi-eye"></i>
               <h6 class="mb-0">Aperçu</h6>
             </div>
           </div>
 
-          <div class="card-body">
-            <div class="rounded-4 border bg-light d-flex align-items-center justify-content-center p-3" style="min-height:220px;">
-              <img id="previewImage" src="{{ asset('assets/images/placeholder-product.png') }}" alt="preview" style="max-width:100%;max-height:200px;object-fit:contain;">
+          <div class="card-body pt-3">
+            <div class="am-preview-img">
+              <img id="previewImage" src="{{ asset('assets/images/placeholder-product.png') }}" alt="preview">
             </div>
 
             <div class="mt-3">
-              <div id="previewTitle" class="fw-bold fs-5">Titre du produit</div>
-              <div id="previewSub" class="text-muted">Catégorie • Type</div>
+              <div class="am-preview-title" id="previewTitle">Titre du produit</div>
+              <div class="am-preview-sub" id="previewSub">Catégorie • Type</div>
 
-              <div class="d-flex gap-2 mt-3 flex-wrap">
-                <span class="badge rounded-pill bg-light text-dark border">
-                  <i class="bi bi-tag me-2"></i><span id="previewPrice">Prix</span>
-                </span>
-                <span class="badge rounded-pill bg-light text-dark border">
-                  <i class="bi bi-box-seam me-2"></i><span id="previewStock">Stock</span>
-                </span>
+              <div class="am-preview-pills mt-3">
+                <span class="am-pill2"><i class="bi bi-tag me-2"></i><span id="previewPrice">Prix</span></span>
+                <span class="am-pill2"><i class="bi bi-box-seam me-2"></i><span id="previewStock">Stock</span></span>
               </div>
 
-              <div class="alert alert-warning mt-3 mb-0">
-                <i class="bi bi-shield-check me-2"></i>
-                Vérifiez le prix, le stock et la promo avant publication.
+              <div class="mt-3" id="previewLocationBox" class="d-none">
+                <div class="am-preview-sub fw-semibold mb-1">Location</div>
+                <div class="text-muted small" id="previewLocationText">Dates + emplacement</div>
               </div>
+
+              <div class="mt-3">
+                <button class="btn btn-dark am-btn w-100" type="button" disabled>
+                  <i class="bi bi-check2-circle me-2"></i>Publier
+                </button>
+                <small class="text-muted d-block mt-2">
+                  Aperçu live — mis à jour automatiquement.
+                </small>
+              </div>
+            </div>
+
+            <div class="alert alert-warning mt-3 mb-0">
+              <i class="bi bi-shield-check me-2"></i>
+              Vérifiez le prix, le stock, la promo et les infos location avant publication.
             </div>
           </div>
         </div>
+
+        <button class="btn btn-light am-btn w-100 mt-3 d-lg-none" type="button" id="togglePreviewBtn">
+          <i class="bi bi-eye me-2"></i>Afficher/Masquer l’aperçu
+        </button>
       </div>
     </div>
 
   </div>
 </section>
 
-{% include 'components/_footer.html.twig' %}
-
-<script>
-(function () {
-  const formEl = document.getElementById('produit-form');
-  if (!formEl) return;
-
-  const nom = document.getElementById('{{ form.nom.vars.id }}');
-  const cat = document.getElementById('{{ form.categorie.vars.id }}');
-  const type = document.getElementById('{{ form.type.vars.id }}');
-  const prix = document.getElementById('{{ form.prix.vars.id }}');
-  const stock = document.getElementById('{{ form.quantiteStock.vars.id }}');
-  const imageUrl = document.getElementById('{{ form.image.vars.id }}');
-  const fileInput = document.getElementById('{{ form.imageFile.vars.id }}');
-
-  const isPromo = document.getElementById('isPromotion');
-  const promoPrice = document.getElementById('promotionPrice');
-
-  const previewTitle = document.getElementById('previewTitle');
-  const previewSub = document.getElementById('previewSub');
-  const previewPrice = document.getElementById('previewPrice');
-  const previewStock = document.getElementById('previewStock');
-  const previewImage = document.getElementById('previewImage');
-
-  function safe(v, fallback) {
-    v = (v || '').toString().trim();
-    return v ? v : fallback;
-  }
-
-  function updatePreview() {
-    previewTitle.textContent = safe(nom?.value, 'Titre du produit');
-    previewSub.textContent = `${safe(cat?.value, 'Catégorie')} • ${safe(type?.value, 'Type')}`;
-
-    const p = (prix?.value || '').toString().trim();
-    previewPrice.textContent = p ? `${p} DT` : 'Prix';
-
-    const s = (stock?.value || '').toString().trim();
-    previewStock.textContent = s ? `Stock: ${s}` : 'Stock';
-  }
-
-  function setPromoState() {
-    const on = !!isPromo?.checked;
-    if (promoPrice) {
-      promoPrice.disabled = !on;
-      if (!on) promoPrice.value = '';
-    }
-  }
-
-  function setImageFromUrl(url) {
-    url = (url || '').toString().trim();
-    previewImage.src = url || "{{ asset('assets/images/placeholder-product.png') }}";
-  }
-
-  function setImageFromFile(file) {
-    if (!file || !file.type || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (e) => previewImage.src = e.target.result;
-    reader.readAsDataURL(file);
-  }
-
-  [nom, cat, type, prix, stock].forEach(el => {
-    if (!el) return;
-    el.addEventListener('input', updatePreview);
-    el.addEventListener('change', updatePreview);
-  });
-
-  if (imageUrl) {
-    imageUrl.addEventListener('input', () => setImageFromUrl(imageUrl.value));
-    imageUrl.addEventListener('change', () => setImageFromUrl(imageUrl.value));
-  }
-
-  if (fileInput) {
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files && fileInput.files[0];
-      if (f) setImageFromFile(f);
-    });
-  }
-
-  if (isPromo) isPromo.addEventListener('change', setPromoState);
-
-  // validation front
-  formEl.addEventListener('submit', function (event) {
-    if (!formEl.checkValidity()) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    const p = parseFloat((prix?.value || '0').toString().replace(',', '.'));
-    const s = parseInt(stock?.value || '0', 10);
-
-    if (p < 0 || s < 0) {
-      event.preventDefault();
-      event.stopPropagation();
-      alert('Erreur: prix/stock ne peuvent pas être négatifs.');
-    }
-
-    if (isPromo?.checked && promoPrice && promoPrice.value) {
-      const pp = parseFloat(promoPrice.value.toString().replace(',', '.'));
-      if (pp < 0 || pp > p) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert('Erreur: prix promo doit être ≥ 0 et ≤ prix normal.');
-      }
-    }
-
-    formEl.classList.add('was-validated');
-  });
-
-  setPromoState();
-  updatePreview();
-})();
-</script>
 {% endblock %}

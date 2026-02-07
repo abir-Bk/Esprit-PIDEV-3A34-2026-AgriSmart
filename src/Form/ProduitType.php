@@ -6,10 +6,12 @@ use App\Entity\Produit;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -18,48 +20,46 @@ class ProduitType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('nom', TextType::class, ['required' => true])
+            ->add('nom', TextType::class)
             ->add('categorie', ChoiceType::class, [
-                'required' => true,
-                'placeholder' => 'Choisir une catégorie',
+                'placeholder' => 'Choisir...',
                 'choices' => [
                     'Légumes' => 'legumes',
                     'Fruits' => 'fruits',
                     'Céréales' => 'cereales',
                     'Engrais' => 'engrais',
                     'Semences' => 'semences',
-                    'Matériel' => 'materiel',
+                    'Matériel agricole' => 'materiel',
                     'Services' => 'services',
+                    'Autre' => 'autre',
                 ],
             ])
             ->add('type', ChoiceType::class, [
-                'required' => true,
-                'placeholder' => 'Choisir',
+                'placeholder' => 'Choisir...',
                 'choices' => [
                     'Vente' => 'vente',
                     'Location' => 'location',
                 ],
             ])
-            ->add('prix', MoneyType::class, [
-                'required' => true,
-                'currency' => 'TND',
+            ->add('prix', NumberType::class)
+            ->add('quantiteStock', NumberType::class)
+            ->add('image', TextType::class, [
+                'required' => false, // URL optionnelle
             ])
-            ->add('quantiteStock', IntegerType::class, [
-                'required' => true,
+            ->add('imageFile', FileType::class, [
+                'mapped' => false,
+                'required' => false,
             ])
             ->add('description', TextareaType::class, [
                 'required' => false,
             ])
-            ->add('image', TextType::class, [
+            ->add('isPromotion', CheckboxType::class, [
                 'required' => false,
-                'help' => 'URL optionnelle (sinon upload via champ fichier).',
             ])
-            ->add('isPromotion')
-            ->add('promotionPrice', MoneyType::class, [
+            ->add('promotionPrice', NumberType::class, [
                 'required' => false,
-                'currency' => 'TND',
             ])
-            // Champs location (nullable dans l’Entity) :
+            // LOCATION (only used when type=location, we hide/show via JS)
             ->add('locationStart', DateType::class, [
                 'required' => false,
                 'widget' => 'single_text',
@@ -68,11 +68,16 @@ class ProduitType extends AbstractType
                 'required' => false,
                 'widget' => 'single_text',
             ])
+            ->add('locationAddress', TextType::class, [
+                'required' => false,
+            ])
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Produit::class]);
+        $resolver->setDefaults([
+            'data_class' => Produit::class,
+        ]);
     }
 }

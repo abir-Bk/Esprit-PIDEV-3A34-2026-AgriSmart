@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}Marketplace{% endblock %}
+
+{% block body %}
+
+<section class="am-hero">
+  <div class="container">
+    <div class="am-hero-card">
+      <div class="am-hero-top">
+        <div>
+          <div class="am-pill"><span class="am-pill-dot">+</span> Marketplace</div>
+          <h1 class="am-hero-title">Marketplace agricole</h1>
+          <p class="am-hero-sub">Trouvez des offres de <b>vente</b> et <b>location</b> en quelques clics.</p>
+        </div>
+
+        <div class="am-hero-actions">
+          <a class="btn btn-dark am-btn" href="{{ path('app_produit_new') }}">
+            <i class="bi bi-plus-circle me-2"></i>Publier une annonce
+          </a>
+        </div>
+      </div>
+
+      <form class="am-filters" method="get" action="{{ path('app_produit_index') }}">
+        <div class="am-tabs">
+          <a class="am-tab {{ filters.type == '' ? 'active' : '' }}" href="{{ path('app_produit_index', filters|merge({'type': ''})) }}">Tous</a>
+          <a class="am-tab {{ filters.type == 'vente' ? 'active' : '' }}" href="{{ path('app_produit_index', filters|merge({'type': 'vente'})) }}">Vente</a>
+          <a class="am-tab {{ filters.type == 'location' ? 'active' : '' }}" href="{{ path('app_produit_index', filters|merge({'type': 'location'})) }}">Location</a>
+        </div>
+
+        <div class="am-filter-row">
+          <div class="am-input">
+            <i class="bi bi-search"></i>
+            <input name="q" value="{{ filters.q }}" type="search" placeholder="Rechercher un produit (nom / description)">
+          </div>
+
+          <select class="form-select am-select" name="categorie">
+            <option value="">Toutes catégories</option>
+            {% for c in categories %}
+              <option value="{{ c }}" {{ filters.categorie == c ? 'selected' : '' }}>{{ c }}</option>
+            {% endfor %}
+          </select>
+
+          <label class="am-check">
+            <input type="checkbox" name="promo" value="1" {{ filters.promo == '1' ? 'checked' : '' }}>
+            <span>Promo</span>
+          </label>
+
+          <button class="btn btn-outline-secondary am-btn" type="submit">Appliquer</button>
+          <a class="btn btn-light am-btn" href="{{ path('app_produit_index') }}">Reset</a>
+        </div>
+      </form>
+
+      <div class="am-tips">
+        <div class="am-tip"><small>Astuce</small><b>Filtre rapide</b> par type + catégorie</div>
+        <div class="am-tip"><small>Paiement</small><b>En ligne (simulé)</b> & Cash on Delivery</div>
+        <div class="am-tip"><small>Stock</small><b>Stock & promos</b> gérés proprement</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container am-section">
+  <div class="am-grid">
+    {% for produit in produits %}
+      <div class="am-card">
+        <div class="am-card-media">
+          {% set img = produit.image is defined ? produit.image : null %}
+          {% if img %}
+            <img src="{{ asset(img) }}" alt="{{ produit.nom }}">
+          {% else %}
+            <img src="{{ asset('assets/images/placeholder-product.png') }}" alt="placeholder">
+          {% endif %}
+
+          <div class="am-badges">
+            <span class="am-badge">{{ produit.type|default('vente') }}</span>
+            {% if produit.isPromotion is defined and produit.isPromotion %}
+              <span class="am-badge am-badge-warn">Promo</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="am-card-body">
+          <div class="am-card-head">
+            <div>
+              <div class="am-card-title">{{ produit.nom }}</div>
+              <div class="am-card-sub">{{ produit.categorie }}</div>
+            </div>
+
+            <div class="am-price">
+              <div class="am-price-now">{{ produit.prix }} DT</div>
+              {% if produit.isPromotion is defined and produit.isPromotion and produit.promotionPrice is defined %}
+                <div class="am-price-old">{{ produit.promotionPrice }} DT</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="am-meta">
+            <span><i class="bi bi-box-seam me-2"></i>Stock: {{ produit.quantiteStock }}</span>
+            <span class="text-muted">#{{ produit.id }}</span>
+          </div>
+
+          <div class="am-card-actions">
+            <a class="btn btn-outline-secondary am-btn w-50" href="{{ path('app_produit_show', {'id': produit.id}) }}">Détails</a>
+            <a class="btn btn-dark am-btn w-50" href="{{ path('app_produit_edit', {'id': produit.id}) }}">Modifier</a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="am-empty">
+        <h5>Aucun résultat</h5>
+        <p>Essaie de retirer des filtres ou de modifier la recherche.</p>
+        <a class="btn btn-dark am-btn" href="{{ path('app_produit_new') }}">
+          <i class="bi bi-plus-circle me-2"></i>Publier une annonce
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

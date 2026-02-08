@@ -59,10 +59,11 @@
         font-size: 1.2rem;
     }
 
-    /* Styles pour les deux cartes */
     #map { height: 320px; width: 100%; border-radius: 15px; }
+    
+    /* On garde l'ID ici, mais il sera unique dans le DOM */
     #map-preview { 
-        height: 180px; 
+        height: 250px; 
         width: 100%; 
         border-radius: 15px; 
         border: 3px solid white; 
@@ -206,12 +207,11 @@
             </div>
 
             <div class="col-lg-8">
-                <template x-for="parcelle in parcelles" :key="parcelle.id">
-                    <div x-show="selectedTab == parcelle.id" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4">
-                        <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
-                            
-                            <div class="row align-items-start mb-4">
-                                <div class="col-md-7">
+                <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
+                    <div class="row align-items-start">
+                        <div class="col-md-7">
+                            <template x-for="parcelle in parcelles" :key="parcelle.id">
+                                <div x-show="selectedTab == parcelle.id">
                                     <h2 class="fw-bold text-dark mb-1" x-text="parcelle.nom"></h2>
                                     <div class="d-flex gap-2 align-items-center mb-3">
                                         <span class="badge bg-success px-3 py-2 rounded-pill" x-text="parcelle.typeSol"></span>
@@ -232,56 +232,60 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="col-md-5">
-                                    <div id="map-preview"></div>
-                                </div>
+                            </template>
+                        </div>
+                        <div class="col-md-5">
+                            <div id="map-preview"></div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <template x-for="parcelle in parcelles" :key="parcelle.id">
+                        <div x-show="selectedTab == parcelle.id">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0"><i class="fa-solid fa-seedling text-success me-2"></i>Suivi des Cultures</h5>
+                                <button class="btn btn-sm btn-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAjouterCulture" @click="selectedParcelleId = parcelle.id">
+                                    <i class="fa-solid fa-plus me-2"></i>Planter
+                                </button>
                             </div>
 
-                            <div class="mt-5">
-                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-seedling text-success me-2"></i>Suivi des Cultures</h5>
-                                    <button class="btn btn-sm btn-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAjouterCulture" @click="selectedParcelleId = parcelle.id">
-                                        <i class="fa-solid fa-plus me-2"></i>Planter
-                                    </button>
-                                </div>
-
-                                <div class="row g-3">
-                                    <template x-for="c in parcelle.cultures" :key="c.id">
-                                        <div class="col-md-6">
-                                            <div class="culture-item">
-                                                <div class="d-flex justify-content-between mb-3">
-                                                    <div class="icon-circle"><i class="fa-solid fa-leaf"></i></div>
-                                                    <div class="d-flex gap-1">
-                                                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle" @click="editCulture(c)" data-bs-toggle="modal" data-bs-target="#modalEditCulture" style="width:32px;height:32px"><i class="fa-solid fa-pencil text-primary" style="font-size:0.8rem"></i></button>
-                                                        <form :action="'/culture/' + c.id + '/delete'" method="post">
-                                                            <input type="hidden" name="_token" :value="c.csrfDeleteToken">
-                                                            <button class="btn btn-sm btn-white border shadow-sm rounded-circle" style="width:32px;height:32px" onclick="return confirm('Supprimer ?')"><i class="fa-solid fa-trash text-danger" style="font-size:0.8rem"></i></button>
-                                                        </form>
-                                                    </div>
+                            <div class="row g-3">
+                                <template x-for="c in parcelle.cultures" :key="c.id">
+                                    <div class="col-md-6">
+                                        <div class="culture-item">
+                                            <div class="d-flex justify-content-between mb-3">
+                                                <div class="icon-circle"><i class="fa-solid fa-leaf"></i></div>
+                                                <div class="d-flex gap-1">
+                                                    <button class="btn btn-sm btn-white border shadow-sm rounded-circle" @click="editCulture(c)" data-bs-toggle="modal" data-bs-target="#modalEditCulture" style="width:32px;height:32px"><i class="fa-solid fa-pencil text-primary" style="font-size:0.8rem"></i></button>
+                                                    <form :action="'/culture/' + c.id + '/delete'" method="post">
+                                                        <input type="hidden" name="_token" :value="c.csrfDeleteToken">
+                                                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle" style="width:32px;height:32px" onclick="return confirm('Supprimer ?')"><i class="fa-solid fa-trash text-danger" style="font-size:0.8rem"></i></button>
+                                                    </form>
                                                 </div>
-                                                <h6 class="fw-bold mb-1" x-text="c.typeCulture"></h6>
-                                                <p class="text-muted small mb-3">Variété : <span class="text-dark fw-600" x-text="c.variete"></span></p>
-                                                <div class="bg-light rounded-3 p-2 mb-3 d-flex justify-content-around text-center">
-                                                    <div><span class="d-block small text-muted">Plantation</span><b class="small" x-text="c.datePFr"></b></div>
-                                                    <div class="border-start"></div>
-                                                    <div><span class="d-block small text-muted">Récolte</span><b class="small" x-text="c.dateRFr"></b></div>
-                                                </div>
-                                                <span class="badge badge-soft-info w-100 py-2 rounded-3" x-text="c.statut"></span>
                                             </div>
+                                            <h6 class="fw-bold mb-1" x-text="c.typeCulture"></h6>
+                                            <p class="text-muted small mb-3">Variété : <span class="text-dark fw-600" x-text="c.variete"></span></p>
+                                            <div class="bg-light rounded-3 p-2 mb-3 d-flex justify-content-around text-center">
+                                                <div><span class="d-block small text-muted">Plantation</span><b class="small" x-text="c.datePFr"></b></div>
+                                                <div class="border-start"></div>
+                                                <div><span class="d-block small text-muted">Récolte</span><b class="small" x-text="c.dateRFr"></b></div>
+                                            </div>
+                                            <span class="badge badge-soft-info w-100 py-2 rounded-3" x-text="c.statut"></span>
                                         </div>
-                                    </template>
-                                </div>
-
-                                <template x-if="parcelle.cultures.length === 0">
-                                    <div class="text-center py-5 border rounded-4 bg-light border-dashed">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/2312/2312411.png" width="60" class="opacity-25 mb-3">
-                                        <p class="text-muted">Aucune culture active sur cette parcelle.</p>
                                     </div>
                                 </template>
                             </div>
+
+                            <template x-if="parcelle.cultures.length === 0">
+                                <div class="text-center py-5 border rounded-4 bg-light border-dashed">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2312/2312411.png" width="60" class="opacity-25 mb-3">
+                                    <p class="text-muted">Aucune culture active sur cette parcelle.</p>
+                                </div>
+                            </template>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
         </div>
     </div>
@@ -323,7 +327,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="modal fade" id="modalEditCulture" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">

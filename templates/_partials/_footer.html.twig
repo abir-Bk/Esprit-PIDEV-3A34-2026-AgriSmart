@@ -1,74 +1,63 @@
-<footer class="bg-white border-top pt-5 pb-4 mt-auto">
+<footer class="bg-white border-top pt-5 pb-3 mt-auto">
     <div class="container">
         <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-4">
                 <a class="d-flex align-items-center text-decoration-none mb-3" href="{{ path('app_produit_index') }}">
                     <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
-                    <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.2rem;">
-                        Agri<span style="color: #28a745;">Smart</span>
+                    <span class="fw-bold ms-2 text-dark" style="font-size: 1.2rem;">
+                        Agri<span class="text-success">Smart</span>
                     </span>
                 </a>
-                <p class="text-muted small pe-lg-5">
-                    La plateforme leader pour l'agriculture connectée en Tunisie. Gérez vos cultures, vos tâches et votre marketplace en un seul endroit.
+                <p class="text-muted small pe-lg-4">
+                    La solution complète pour l'agriculture moderne : Marketplace, gestion de culture, et recrutement de talents.
                 </p>
-                <div class="d-flex gap-2 mt-4">
-                    <a href="#" class="btn btn-sm btn-light rounded-circle text-primary"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="btn btn-sm btn-light rounded-circle text-info"><i class="bi bi-twitter-x"></i></a>
-                    <a href="#" class="btn btn-sm btn-light rounded-circle text-danger"><i class="bi bi-instagram"></i></a>
+                <div class="d-flex gap-3 mt-3">
+                    <a href="#" class="text-muted"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="text-muted"><i class="bi bi-linkedin fs-5"></i></a>
+                    <a href="#" class="text-muted"><i class="bi bi-instagram fs-5"></i></a>
                 </div>
             </div>
 
-            <div class="col-lg-2 col-md-3 col-6">
-                <h6 class="fw-bold mb-3 small text-uppercase" style="color: #1a4331; letter-spacing: 1px;">Plateforme</h6>
-                <ul class="nav flex-column gap-2">
-                    <li class="nav-item"><a href="{{ path('app_produit_index') }}" class="nav-link p-0 small text-muted hover-green">Marketplace</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link p-0 small text-muted hover-green">Gestion Tâches</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link p-0 small text-muted hover-green">Suivi Culture</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link p-0 small text-muted hover-green">Offres d'emploi</a></li>
+            <div class="col-lg-2 offset-lg-1 col-6">
+                <h6 class="mb-3 fw-bold small text-uppercase" style="color: #1a4331;">Marketplace</h6>
+                <ul class="nav flex-column gap-2 small">
+                    <li class="nav-item"><a href="{{ path('app_produit_index') }}" class="nav-link p-0 text-muted">Boutique</a></li>
+                    <li class="nav-item"><a href="{{ path('app_produit_new') }}" class="nav-link p-0 text-muted">Vendre un produit</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link p-0 text-muted">Mes annonces</a></li>
                 </ul>
             </div>
 
-            <div class="col-lg-2 col-md-3 col-6">
-                <h6 class="fw-bold mb-3 small text-uppercase" style="color: #1a4331; letter-spacing: 1px;">Aide</h6>
-                <ul class="nav flex-column gap-2">
-                    <li class="nav-item"><a href="#" class="nav-link p-0 small text-muted hover-green">Centre d'aide</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link p-0 small text-muted hover-green">Conditions d'utilisation</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link p-0 small text-muted hover-green">Confidentialité</a></li>
+            <div class="col-lg-2 col-6">
+                <h6 class="mb-3 fw-bold small text-uppercase" style="color: #1a4331;">Navigation</h6>
+                <ul class="nav flex-column gap-2 small">
+                    <li class="nav-item"><a href="#" class="nav-link p-0 text-muted">Tâches</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link p-0 text-muted">Cultures</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link p-0 text-muted">Recrutement</a></li>
                 </ul>
             </div>
 
-            <div class="col-lg-4 col-md-12">
-                <h6 class="fw-bold mb-3 small text-uppercase" style="color: #1a4331; letter-spacing: 1px;">Restez informé</h6>
-                <p class="small text-muted mb-3">Inscrivez-vous pour recevoir les dernières offres de la marketplace.</p>
-                <form class="row g-2">
-                    <div class="col-8">
-                        <input type="email" class="form-control form-control-sm border-0 bg-light px-3 py-2" placeholder="Votre email" style="border-radius: 8px;">
-                    </div>
-                    <div class="col-4">
-                        <button type="submit" class="btn btn-sm btn-success w-100 py-2" style="border-radius: 8px; background-color: #1a4331;">OK</button>
-                    </div>
-                </form>
+            <div class="col-lg-3">
+                <h6 class="mb-3 fw-bold small text-uppercase" style="color: #1a4331;">Support</h6>
+                <p class="text-muted small mb-2"><i class="bi bi-envelope me-2"></i> support@agrismart.tn</p>
+                <p class="text-muted small"><i class="bi bi-geo-alt me-2"></i> Ariana, Tunisie</p>
             </div>
         </div>
 
         <hr class="my-4 opacity-10">
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <span class="text-muted small">© 2026 <strong>AgriSmart</strong> Tunisie. Tous droits réservés.</span>
-            <div class="d-flex align-items-center gap-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Flag_of_Tunisia.svg" width="20" class="rounded-sm shadow-sm" alt="Tunisia">
-                <span class="small text-muted">Ariana, Tunisie</span>
+        <div class="d-flex justify-content-between align-items-center small text-muted">
+            <span>© 2026 <strong>AgriSmart</strong>. Built for PIDEV.</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-none d-sm-inline">Plateforme 100% tunisienne</span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Flag_of_Tunisia.svg" width="20" class="rounded-1" alt="Tunisie">
             </div>
         </div>
     </div>
 </footer>
 
 <style>
-    .hover-green:hover {
-        color: #28a745 !important;
-        text-decoration: underline !important;
-    }
-    footer .nav-link {
-        transition: 0.3s ease;
+    footer .nav-link:hover {
+        color: #198754 !important;
+        text-decoration: underline;
     }
 </style>

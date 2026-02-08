@@ -1,8 +1,7 @@
 security:
-    enable_authenticator_manager: true
-
     password_hashers:
-        App\Entity\User: 'auto'
+        App\Entity\User:
+            algorithm: auto
 
     providers:
         app_user_provider:
@@ -11,53 +10,22 @@ security:
                 property: email
 
     firewalls:
-        # ────────────────────────────────────────────────
-        # Web firewall – session + CSRF + forms
-        # ────────────────────────────────────────────────
-        web:
-            pattern: ^/(?!api)               # everything except /api
+        main:
             lazy: true
             provider: app_user_provider
-
             form_login:
                 login_path: app_login
                 check_path: app_login
-                enable_csrf: true
-                default_target_path: /dashboard
-
+                success_handler: App\Security\LoginSuccessHandler
             logout:
                 path: app_logout
-                target: app_home
-
+                target: /login
             remember_me:
                 secret: '%kernel.secret%'
-                lifetime: 2592000           # 30 days
+                lifetime: 604800 # 1 week
                 path: /
-                name: REMEMBERME            # optional - custom name
 
-        # ────────────────────────────────────────────────
-        # API firewall – stateless JWT (no session, no CSRF)
-        # ────────────────────────────────────────────────
-        api:
-            pattern: ^/api
-            stateless: true
-            provider: app_user_provider
-            jwt: ~
-            # Optional: allow json login to generate token
-            json_login:
-                check_path:       api_login
-                username_path:    email
-                password_path:    password
-                success_handler:  lexik_jwt_authentication.handler.authentication_success
-                failure_handler:  lexik_jwt_authentication.handler.authentication_failure
-
+   
+        # protect dashboard routes
     access_control:
-        # Public API routes (no auth needed)
-        - { path: ^/api/(login|register|forgot-password|reset-password|refresh), roles: PUBLIC_ACCESS }
-
-        # Protected API routes
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-
-        # Web routes – session-based
-        - { path: ^/(dashboard|profile|admin|cart), roles: ROLE_USER }
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/users/dashboard, roles: [ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_AGRICULTEUR, ROLE_FOURNISSEUR] }

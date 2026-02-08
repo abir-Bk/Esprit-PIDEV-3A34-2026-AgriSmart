@@ -3,23 +3,4 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
-# config/routes.yaml
 
-app_login:
-    path: /login
-    methods: [GET, POST]
-
-app_logout:
-    path: /logout
-
-api_login:
-    path: /api/login
-    methods: [POST]
-
-api_register:
-    path: /api/register
-    methods: [POST]
-
-api_profile:
-    path: /api/profile
-    methods: [GET]

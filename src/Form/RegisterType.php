@@ -12,9 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\File;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RegisterType extends AbstractType
 {
@@ -23,83 +21,111 @@ class RegisterType extends AbstractType
         $builder
             ->add('firstName', TextType::class, [
                 'label' => 'Prénom',
-                'attr' => ['placeholder' => 'Votre prénom'],
+                'constraints' => [
+                    new Assert\NotBlank(['message'=>'Le prénom est obligatoire']),
+                    new Assert\Length(['min'=>2,'max'=>50]),
+                    new Assert\Regex([
+                        'pattern'=>"/^[a-zA-ZÀ-ÿ\s'-]+$/u",
+                        'message'=>'Caractères invalides dans le prénom'
+                    ])
+                ],
             ])
             ->add('lastName', TextType::class, [
                 'label' => 'Nom',
-                'attr' => ['placeholder' => 'Votre nom'],
+                'constraints' => [
+                    new Assert\NotBlank(['message'=>'Le nom est obligatoire']),
+                    new Assert\Length(['min'=>2,'max'=>50]),
+                    new Assert\Regex([
+                        'pattern'=>"/^[a-zA-ZÀ-ÿ\s'-]+$/u",
+                        'message'=>'Caractères invalides dans le nom'
+                    ])
+                ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'attr' => ['placeholder' => 'exemple@domaine.com'],
+                'constraints'=>[
+                    new Assert\NotBlank(['message'=>'Email obligatoire']),
+                    new Assert\Email(['message'=>'Email invalide']),
+                    new Assert\Length(['max'=>180])
+                ]
             ])
             ->add('role', ChoiceType::class, [
-                'label' => 'Type de compte',
-                'choices' => [
-                    'Agriculteur'    => 'agriculteur',
-                    'Fournisseur'    => 'fournisseur',
-                    'Employé'        => 'employee',
-                    'Administrateur' => 'admin',
+                'label'=>'Type de compte',
+                'choices'=>[
+                    'Agriculteur'=>'agriculteur',
+                    'Fournisseur'=>'fournisseur',
+                    'Employé'=>'employee',
+                    'Administrateur'=>'admin'
                 ],
-                'placeholder' => 'Choisissez votre rôle',
-                'required'    => true,
+                'constraints'=>[
+                    new Assert\NotBlank(['message'=>'Choisissez un rôle']),
+                    new Assert\Choice([
+                        'choices'=>['agriculteur','fournisseur','employee','admin'],
+                        'message'=>'Rôle invalide'
+                    ])
+                ]
             ])
             ->add('plainPassword', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options'  => [
-                    'label' => 'Mot de passe',
-                    'attr'  => ['placeholder' => '••••••••'],
-                ],
-                'second_options' => [
-                    'label' => 'Confirmer le mot de passe',
-                    'attr'  => ['placeholder' => '••••••••'],
-                ],
-                'mapped'       => false,
-                'constraints'  => [
-                    new NotBlank(['message' => 'Veuillez entrer un mot de passe']),
-                    new Length(min: 6, minMessage: 'Le mot de passe doit contenir au moins 6 caractères'),
-                ],
+                'type'=>PasswordType::class,
+                'mapped'=>false,
+                'first_options'=>['label'=>'Mot de passe'],
+                'second_options'=>['label'=>'Confirmer le mot de passe'],
+                'constraints'=>[
+                    new Assert\NotBlank(['message'=>'Mot de passe obligatoire']),
+                    new Assert\Length(['min'=>8,'minMessage'=>'Minimum {{ limit }} caractères']),
+                    new Assert\Regex(['pattern'=>'/[A-Z]/','message'=>'Au moins une lettre majuscule']),
+                    new Assert\Regex(['pattern'=>'/[a-z]/','message'=>'Au moins une lettre minuscule']),
+                    new Assert\Regex(['pattern'=>'/[0-9]/','message'=>'Au moins un chiffre']),
+                    new Assert\Regex(['pattern'=>'/[\W]/','message'=>'Au moins un caractère spécial'])
+                ]
             ])
             ->add('phone', TextType::class, [
-                'label'    => 'Téléphone',
-                'required' => false,
-                'attr'     => ['placeholder' => '+216 12 345 678'],
+                'required'=>false,
+                'label'=>'Téléphone',
+                'constraints'=>[
+                    new Assert\Regex([
+                        'pattern'=>'/^(\+216)?[2459]\d{7}$/',
+                        'message'=>'Numéro tunisien invalide'
+                    ])
+                ]
             ])
             ->add('address', TextType::class, [
-                'label'    => 'Adresse',
-                'required' => false,
-                'attr'     => ['placeholder' => 'Votre adresse complète'],
+                'required'=>false,
+                'label'=>'Adresse',
+                'constraints'=>[
+                    new Assert\Length(['min'=>5,'max'=>255])
+                ]
             ])
-
             ->add('documentFileFile', FileType::class, [
-                'label'    => 'Document justificatif',
-                'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize'   => '5M',
-                        'mimeTypes' => ['image/jpeg', 'image/png', 'application/pdf'],
-                        'mimeTypesMessage' => 'Veuillez uploader un fichier PDF, JPEG ou PNG valide',
+                'label'=>'Document justificatif',
+                'required'=>false,
+                'mapped'=>true,
+                'constraints'=>[
+                    new Assert\File([
+                        'maxSize'=>'5M',
+                        'mimeTypes'=>['image/jpeg','image/png','application/pdf'],
+                        'mimeTypesMessage'=>'PDF, JPEG ou PNG seulement'
                     ])
-                ],
+                ]
             ])
-
             ->add('imageFile', FileType::class, [
-                'label'    => 'Photo de profil',
-                'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize'   => '5M',
-                        'mimeTypes' => ['image/jpeg', 'image/png'],
-                        'mimeTypesMessage' => 'Veuillez uploader une image JPEG ou PNG',
+                'label'=>'Photo de profil',
+                'required'=>false,
+                'mapped'=>true,
+                'constraints'=>[
+                    new Assert\File([
+                        'maxSize'=>'5M',
+                        'mimeTypes'=>['image/jpeg','image/png'],
+                        'mimeTypesMessage'=>'JPEG ou PNG seulement'
                     ])
-                ],
-            ])
-                    ;
-                }
+                ]
+            ]);
+    }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class'=>User::class,
         ]);
     }
 }

@@ -1,81 +1,28 @@
 <header class="navbar-light header-sticky bg-white border-bottom py-1">
     <nav class="navbar navbar-expand-xl py-1">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center py-0" href="{{ path('app_produit_index') }}">
+            <a class="navbar-brand d-flex align-items-center py-0" href="#">
                 <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
-                <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.2rem; letter-spacing: -0.5px;">
+                <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">
                     Agri<span style="color: #28a745;">Smart</span>
                 </span>
             </a>
 
-            <button class="navbar-toggler ms-auto p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="navbar-toggler-animation"><span></span><span></span><span></span></span>
-            </button>
-
-            <div class="navbar-collapse collapse" id="navbarCollapse">
-                <ul class="navbar-nav navbar-nav-scroll mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link small px-3 {{ app.request.get('_route') starts with 'app_tache' ? 'am-active' : '' }}" href="#">
-                            <i class="bi bi-list-task me-1"></i> Tâches
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link small px-3 {{ app.request.get('_route') starts with 'app_produit' ? 'am-active' : '' }}" href="{{ path('app_produit_index') }}">
-                            <i class="bi bi-shop me-1"></i> Marketplace
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link small px-3 {{ app.request.get('_route') starts with 'app_culture' ? 'am-active' : '' }}" href="#">
-                            <i class="bi bi-flower1 me-1"></i> Culture
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link small px-3 {{ app.request.get('_route') starts with 'app_candidat' ? 'am-active' : '' }}" href="#">
-                            <i class="bi bi-person-badge me-1"></i> Candidature
-                        </a>
-                    </li>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
+                    <li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+                    <li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-flower1 me-1"></i>Culture</a></li>
+                    <li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
                 </ul>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
-                {# Notification Button #}
-                <button class="btn btn-sm btn-light rounded-circle border-0" style="width: 35px; height: 35px; background: #f5f7f9;">
-                    <i class="bi bi-bell text-dark"></i>
-                </button>
-
-                {# User Profil (Style Booking) #}
-                <div class="dropdown ms-1">
-                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle no-caret" data-bs-toggle="dropdown">
-                        <div class="avatar-container shadow-sm border border-2 border-white rounded-3 overflow-hidden" style="width: 35px; height: 35px;">
-                            <img src="https://ui-avatars.com/api/?name=US&background=1a4331&color=fff" class="w-100 h-100">
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3">
-                        <li><a class="dropdown-item small py-2" href="#"><i class="bi bi-person me-2"></i>Mon Profil</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item small py-2 text-danger" href="#"><i class="bi bi-power me-2"></i>Déconnexion</a></li>
-                    </ul>
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-bell fs-5 text-muted" style="cursor:pointer;"></i>
+                <div class="avatar-static">
+                    <img src="https://ui-avatars.com/api/?name=User&background=1a4331&color=fff" class="rounded-circle border" width="32" height="32" alt="user">
                 </div>
             </div>
         </div>
     </nav>
 </header>
-
-<style>
-    /* Style pour le lien actif */
-    .am-active { 
-        background: #f0f7f4 !important; 
-        color: #1a4331 !important; 
-        border-radius: 8px; 
-        font-weight: 600; 
-    }
-    .nav-link { 
-        font-size: 0.85rem !important; 
-        color: #555 !important;
-        transition: 0.2s ease;
-    }
-    .nav-link:hover { color: #1a4331 !important; }
-    
-    /* Supprimer la flèche du dropdown profil */
-    .no-caret::after { display: none !important; }
-</style>

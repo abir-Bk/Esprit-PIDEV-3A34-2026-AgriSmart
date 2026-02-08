@@ -21,6 +21,8 @@ final class DemandeController extends AbstractController
         ]);
     }
 
+
+
 #[Route('/mes-demandes', name: 'app_my_demandes')]
 public function myDemandes(EntityManagerInterface $entityManager): Response
 {
@@ -43,6 +45,8 @@ public function myDemandes(EntityManagerInterface $entityManager): Response
     return $this->render('demande/my_demandes.html.twig', [
         'demandes' => $demandes,
     ]);
+
+
 }
 #[Route('/offre/{id}/postuler', name: 'app_demande_postuler')]
 public function postuler(int $id, Request $request, EntityManagerInterface $entityManager): Response
@@ -51,7 +55,7 @@ public function postuler(int $id, Request $request, EntityManagerInterface $enti
     if (!$offre) throw $this->createNotFoundException('Offre non trouvée');
 if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) === 'clôturée') {
         $this->addFlash('danger', 'Cette offre n\'accepte plus de candidatures.');
-        return $this->redirectToRoute('app_offre_emploi');
+        return $this->redirectToRoute('app_offre_index_front');
     }
     /* USER MODULE INTEGRATION:
     $currentUser = $this->getUser();
@@ -92,13 +96,16 @@ if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) ==
         $entityManager->flush();
 
         $this->addFlash('success', 'Candidature envoyée !');
-        return $this->redirectToRoute('app_offre_emploi');
+        return $this->redirectToRoute('app_offre_index_front');
     }
 
     return $this->render('demande/form.html.twig', [
         'form' => $form->createView(),
         'offre' => $offre
     ]);
+
+
+    
 }
 #[Route('/admin/demande/{id}/update-status', name: 'app_admin_demande_update_status', methods: ['POST'])]
 public function updateStatus(Demande $demande, Request $request, EntityManagerInterface $em): Response

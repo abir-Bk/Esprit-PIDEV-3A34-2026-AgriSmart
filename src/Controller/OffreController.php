@@ -61,7 +61,9 @@ public function adminIndex(EntityManagerInterface $entityManager): Response
         'offres' => $offres,
     ]);
 }
-    #[Route('/offre/{id}', name: 'app_offre_show')]
+
+#[Route('/offre/{id}', name: 'app_offre_show', requirements: ['id' => '\d+'])]
+
 public function show(int $id, EntityManagerInterface $entityManager): Response
 {
     $offre = $entityManager->getRepository(Offre::class)->find($id);
@@ -112,4 +114,26 @@ public function details(Offre $offre): Response
         'demandes' => $offre->getDemandes(),
     ]);
 }
+
+#[Route('/offres-emploi', name: 'app_offre_index_front')] // Change le nom ici pour le front
+public function indexFront(Request $request, OffreRepository $repo): Response
+{
+    $searchTerm = $request->query->get('search');
+    
+    if ($searchTerm) {
+        $offres = $repo->createQueryBuilder('o')
+            ->where('o.title LIKE :term OR o.lieu LIKE :term')
+            ->setParameter('term', '%'.$searchTerm.'%')
+            ->getQuery()
+            ->getResult();
+    } else {
+        $offres = $repo->findAll();
+    }
+
+    // IMPORTANT : On envoie vers le dossier FRONT
+    return $this->render('offre/Front/index.html.twig', [
+        'offres' => $offres
+    ]);
+}
+
 }

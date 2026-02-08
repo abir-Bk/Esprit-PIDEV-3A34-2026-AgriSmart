@@ -1,2 +1,76 @@
-{% extends './base.html.twig' %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<title>{% block title %}AgriSmart Admin{% endblock %}</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+	<script>
+		const storedTheme = localStorage.getItem('theme')
+		const getPreferredTheme = () => { if (storedTheme) return storedTheme; return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light' }
+		const setTheme = function (theme) {
+			document.documentElement.setAttribute('data-bs-theme', (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : theme)
+		}
+		setTheme(getPreferredTheme())
+	</script>
+
+	{% block stylesheets %}
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/overlay-scrollbar/css/overlayscrollbars.min.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+	{% endblock %}
+</head>
+
+<body>
+<main>
+	<nav class="navbar sidebar navbar-expand-xl navbar-light">
+		<div class="d-flex align-items-center">
+			<a class="navbar-brand" href="#">
+				<img class="navbar-brand-item" src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:35px;">
+			</a>
+		</div>
+
+		<div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" tabindex="-1" id="offcanvasSidebar">
+			<div class="offcanvas-body sidebar-content d-flex flex-column pt-4">
+				<ul class="navbar-nav flex-column" id="navbar-sidebar">
+					<li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
+					<li class="nav-item"><a class="nav-link active" href="{{ path('app_produit_index') }}"><i class="bi bi-cart4 fa-fw me-2"></i>Gestion Produits</a></li>
+					<li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people fa-fw me-2"></i>Utilisateurs</a></li>
+				</ul>
+				<div class="mt-auto p-3 bg-light rounded">
+					<div class="d-flex align-items-center">
+						<div class="avatar avatar-sm me-2">
+							<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+						</div>
+						<h6 class="mb-0">Admin PIDEV</h6>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div class="page-content">
+		<nav class="navbar top-bar navbar-light py-0 py-xl-3">
+			<div class="container-fluid p-0">
+				<div class="d-flex align-items-center w-100">
+					<div class="d-flex align-items-center d-xl-none">
+						<a class="navbar-brand" href="#">
+							<img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo.png') }}" alt="">
+						</a>
+					</div>
+					<h4 class="m-0 ms-3">Administration</h4>
+				</div>
+			</div>
+		</nav>
+		<div class="page-content-wrapper p-xxl-4">
+			{% block body %}{% endblock %}
+		</div>
+	</div>
+</main>
+
+{% block javascripts %}
+	<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+	<script src="{{ asset('assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js') }}"></script>
+{% endblock %}
+</body>
+</html>

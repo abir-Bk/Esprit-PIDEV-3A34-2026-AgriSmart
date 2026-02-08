@@ -17,6 +17,7 @@ class ParcelleController extends AbstractController
     #[Route('/', name: 'app_parcelle_index', methods: ['GET', 'POST'])]
     public function index(ParcelleRepository $parcelleRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Création d'une nouvelle parcelle (Modale Ajouter)
         $parcelle = new Parcelle();
         $form = $this->createForm(ParcelleType::class, $parcelle);
         $form->handleRequest($request);
@@ -24,10 +25,13 @@ class ParcelleController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($parcelle);
             $entityManager->flush();
+            
+            $this->addFlash('success', 'Parcelle créée !');
             return $this->redirectToRoute('app_parcelle_index');
         }
 
         return $this->render('parcelle/parcelle.html.twig', [
+            // On récupère tout pour que AlpineJS puisse boucler dessus
             'parcelles' => $parcelleRepository->findAll(),
             'form' => $form->createView(),
         ]);
@@ -41,6 +45,7 @@ class ParcelleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+            $this->addFlash('success', 'Parcelle mise à jour !');
         }
 
         return $this->redirectToRoute('app_parcelle_index');
@@ -50,9 +55,12 @@ class ParcelleController extends AbstractController
     public function delete(Request $request, Parcelle $parcelle, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$parcelle->getId(), $request->request->get('_token'))) {
+            // Doctrine supprimera automatiquement les cultures liées si vous avez mis "onDelete: CASCADE"
             $entityManager->remove($parcelle);
             $entityManager->flush();
+            $this->addFlash('success', 'Parcelle supprimée.');
         }
+        
         return $this->redirectToRoute('app_parcelle_index');
     }
 }

@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Culture{% endblock %}
+
+{% block body %}
+    <h1>Edit Culture</h1>
+
+    {{ include('culture/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_culture_index') }}">back to list</a>
+
+    {{ include('culture/_delete_form.html.twig') }}
+{% endblock %}

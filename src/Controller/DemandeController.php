@@ -13,7 +13,7 @@ use App\Entity\Demande;
 
 final class DemandeController extends AbstractController
 {
-    #[Route('/demande', name: 'app_demande')]
+  /*  #[Route('/demande', name: 'app_demande')]
     public function index(): Response
     {
         return $this->render('demande/index.html.twig', [
@@ -21,7 +21,7 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-
+*/
 
 #[Route('/mes-demandes', name: 'app_my_demandes')]
 public function myDemandes(EntityManagerInterface $entityManager): Response
@@ -107,6 +107,8 @@ if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) ==
 
     
 }
+
+
 #[Route('/admin/demande/{id}/update-status', name: 'app_admin_demande_update_status', methods: ['POST'])]
 public function updateStatus(Demande $demande, Request $request, EntityManagerInterface $em): Response
 {

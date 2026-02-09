@@ -23,14 +23,12 @@
 <body class="d-flex flex-column min-vh-100">
 
 	{# Inclusion du Header réduit #}
-	{{ include('_partials/_header.html.twig') }}
 
 	<main class="flex-grow-1">
 		{% block body %}{% endblock %}
 	</main>
 
 	{# Inclusion du Footer #}
-	{{ include('_partials/_footer.html.twig') }}
 
 	{% block javascripts %}
 		<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>

@@ -1,4 +1,6 @@
 security:
+    enable_authenticator_manager: true   # ⭐ add this
+
     password_hashers:
         App\Entity\User:
             algorithm: auto
@@ -10,6 +12,11 @@ security:
                 property: email
 
     firewalls:
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+
         main:
             lazy: true
             provider: app_user_provider
@@ -22,10 +29,8 @@ security:
                 target: /login
             remember_me:
                 secret: '%kernel.secret%'
-                lifetime: 604800 # 1 week
+                lifetime: 604800
                 path: /
 
-   
-        # protect dashboard routes
     access_control:
-        - { path: ^back/users/dashboard, roles: [ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_AGRICULTEUR, ROLE_FOURNISSEUR] }
+        - { path: ^/back/users/dashboard, roles: [ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_AGRICULTEUR, ROLE_FOURNISSEUR] }

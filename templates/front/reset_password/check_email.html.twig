@@ -1,0 +1,269 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Password Reset Email Sent{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .reset-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #8B9D83 0%, #A8B89F 50%, #C9D4C3 100%);
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reset-container::before,
+        .reset-container::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .reset-container::before {
+            width: 500px; height: 500px;
+            top: -250px; right: -250px;
+            animation: float 7s ease-in-out infinite;
+        }
+
+        .reset-container::after {
+            width: 400px; height: 400px;
+            bottom: -200px; left: -200px;
+            animation: float 9s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(20px); }
+        }
+
+        .reset-card {
+            background: #FDFBF7;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(80, 90, 70, 0.15);
+            max-width: 700px;
+            width: 100%;
+            padding: 2.8rem 3.2rem;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+            border: 1px solid rgba(139, 157, 131, 0.12);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2.2rem;
+            align-items: center;
+        }
+
+        .icon-container {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #7D9B6D 0%, #9CB88A 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(125, 155, 109, 0.35); }
+            50%      { box-shadow: 0 0 0 18px rgba(125, 155, 109, 0); }
+        }
+
+        .icon-container svg {
+            width: 36px;
+            height: 36px;
+            stroke: #FDFBF7;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .checkmark {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: draw 0.7s ease forwards 0.4s;
+        }
+
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .text-content h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0e130c;
+            margin-bottom: 0.9rem;
+        }
+
+        .text-content p {
+            color: #1a2416;
+            line-height: 1.55;
+            margin-bottom: 1rem;
+            font-size: 0.97rem;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #F5F3EE 0%, #EBE8DF 100%);
+            border-left: 4px solid #9CB88A;
+            padding: 1.1rem 1.4rem;
+            border-radius: 10px;
+            margin: 1.4rem 0;
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 0.94rem;
+        }
+
+        .expiration-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #E0D2BB 0%, #D4C5A9 100%);
+            color: #3D4A36;
+            padding: 0.45rem 1rem;
+            border-radius: 20px;
+            font-size: 0.87rem;
+            font-weight: 600;
+            margin-top: 0.7rem;
+        }
+
+        /* ── Buttons area ──────────────────────────────────────── */
+        .actions {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(139, 157, 131, 0.18);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7D9B6D 0%, #9CB88A 100%);
+            color: #FDFBF7;
+            padding: 0.8rem 1.9rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(125, 155, 109, 0.3);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(125, 155, 109, 0.4);
+        }
+
+        .btn-secondary {
+            color: #5F7D50;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            padding: 0.8rem 1.4rem;
+            border-radius: 10px;
+            background: rgba(95, 125, 80, 0.07);
+            border: 1px solid rgba(95, 125, 80, 0.25);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(95, 125, 80, 0.14);
+            color: #4a633f;
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+                gap: 1.8rem;
+                text-align: center;
+            }
+
+            .icon-container {
+                margin: 0 auto;
+            }
+
+            .text-content {
+                text-align: center;
+            }
+
+            .actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                text-align: center;
+            }
+
+            .reset-card {
+                padding: 2.2rem 1.8rem;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .reset-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="reset-container">
+        <div class="reset-card">
+            <div class="content-wrapper">
+                <div class="icon-container">
+                    <svg viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="25"/>
+                        <path class="checkmark" d="M14 27l7.5 7.5L38 18"/>
+                    </svg>
+                </div>
+
+                <div class="text-content">
+                    <h1>Check Your Email</h1>
+
+                    <p>
+                        <strong>🌱 Email Sent Successfully!</strong><br>
+                        If an account matching your email exists, we've just sent you a password reset link.
+                    </p>
+
+                    <div class="info-box">
+                        <p>
+                            <strong>Next step:</strong> Check your inbox (and spam folder) and click the link to reset your password.
+                        </p>
+                        <span class="expiration-badge">
+                            ⏱️ Expires in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}
+                        </span>
+                    </div>
+
+                    <p style="font-size: 0.9rem; color: #1a2416;">
+                        <strong>💡 Tip:</strong> If the email doesn't arrive within a few minutes, check your spam/junk folder.
+                    </p>
+
+                    <!-- Improved buttons area -->
+                    <div class="actions">
+                        <a href="{{ path('app_forgot_password_request') }}" class="btn-primary">
+                            ↻ Resend Reset Link
+                        </a>
+
+                        <a href="{{ path('app_login') }}" class="btn-secondary">
+                            ← Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

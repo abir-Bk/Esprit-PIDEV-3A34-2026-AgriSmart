@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'front/base.html.twig' %}
 
 {% block body %}
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -13,6 +13,7 @@
         --agri-dark: #064e3b;
         --bg-light: #f8fafc; 
         --glass: rgba(255, 255, 255, 0.9);
+        --weather-blue: #0ea5e9;
     }
     
     body { 
@@ -61,7 +62,6 @@
 
     #map { height: 320px; width: 100%; border-radius: 15px; }
     
-    /* On garde l'ID ici, mais il sera unique dans le DOM */
     #map-preview { 
         height: 250px; 
         width: 100%; 
@@ -69,6 +69,19 @@
         border: 3px solid white; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         z-index: 1;
+    }
+
+    .weather-widget {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 1rem;
+    }
+
+    /* Nouveau style pour les conseils */
+    .advice-card {
+        border-radius: 1rem;
+        border-left: 5px solid;
+        transition: all 0.3s ease;
     }
 
     .badge-soft-success { background: #dcfce7; color: #166534; }
@@ -83,6 +96,10 @@
 <main x-data="{ 
     selectedTab: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
     selectedParcelleId: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
+    weather: { temp: '--', desc: 'Chargement...', icon: 'fa-sun', wind: '--' },
+    // AJOUT : Objet pour stocker la recommandation
+    advice: { text: 'Analyse en cours...', color: '#64748b', icon: 'fa-info-circle', bg: '#f1f5f9' },
+    
     parcelles: [
         {% for p in parcelles %}
         { 
@@ -111,6 +128,48 @@
         },
         {% endfor %}
     ],
+
+    async getWeather(lat, lng) {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+            const data = await res.json();
+            const w = data.current_weather;
+            
+            const codes = {
+                0: { desc: 'Ciel dégagé', icon: 'fa-sun text-warning' },
+                1: { desc: 'Principalement dégagé', icon: 'fa-cloud-sun text-warning' },
+                2: { desc: 'Partiellement nuageux', icon: 'fa-cloud-sun text-secondary' },
+                3: { desc: 'Nuageux', icon: 'fa-cloud text-secondary' },
+                45: { desc: 'Brouillard', icon: 'fa-smog text-muted' },
+                61: { desc: 'Pluie légère', icon: 'fa-cloud-rain text-primary' },
+                80: { desc: 'Averses', icon: 'fa-cloud-showers-heavy text-primary' },
+                95: { desc: 'Orage', icon: 'fa-bolt text-dark' }
+            };
+            
+            const config = codes[w.weathercode] || { desc: 'Variable', icon: 'fa-cloud' };
+            this.weather = {
+                temp: Math.round(w.temperature),
+                desc: config.desc,
+                icon: config.icon,
+                wind: w.windspeed
+            };
+
+            // AJOUT : LOGIQUE DE RECOMMANDATION (IF / ELSE)
+            if (this.weather.temp > 30) {
+                this.advice = { text: 'Forte chaleur : Irriguer impérativement tôt le matin ou tard le soir.', color: '#ef4444', icon: 'fa-droplet', bg: '#fef2f2' };
+            } else if (this.weather.wind > 20) {
+                this.advice = { text: 'Vent fort : Reportez les traitements par pulvérisation (risque de dérive).', color: '#f59e0b', icon: 'fa-wind', bg: '#fffbe6' };
+            } else if (w.weathercode >= 61) {
+                this.advice = { text: 'Pluie prévue : Bonne période pour l\'apport d\'engrais solide.', color: '#3b82f6', icon: 'fa-cloud-showers-water', bg: '#eff6ff' };
+            } else if (this.weather.temp < 5) {
+                this.advice = { text: 'Risque de froid : Surveillez les jeunes plants sensibles au gel.', color: '#0ea5e9', icon: 'fa-snowflake', bg: '#f0f9ff' };
+            } else {
+                this.advice = { text: 'Conditions idéales pour l\'entretien et la plantation aujourd\'hui.', color: '#10b981', icon: 'fa-check-circle', bg: '#f0fdf4' };
+            }
+
+        } catch (e) { this.weather.desc = 'Indisponible'; }
+    },
+
     updatePreviewMap(lat, lng) {
         if (window.previewMap) {
             const coords = [lat, lng];
@@ -159,6 +218,7 @@
             window.previewMap = L.map('map-preview').setView([parcelles[0].latitude, parcelles[0].longitude], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.previewMap);
             window.previewMarker = L.marker([parcelles[0].latitude, parcelles[0].longitude]).addTo(window.previewMap);
+            getWeather(parcelles[0].latitude, parcelles[0].longitude);
         }
     })
 ">
@@ -185,7 +245,7 @@
                     <template x-for="parcelle in parcelles" :key="parcelle.id">
                         <div class="agri-card p-3 bg-white rounded-4 shadow-sm" 
                              :class="selectedTab == parcelle.id ? 'active' : ''"
-                             @click="selectedTab = parcelle.id; selectedParcelleId = parcelle.id; updatePreviewMap(parcelle.latitude, parcelle.longitude)">
+                             @click="selectedTab = parcelle.id; selectedParcelleId = parcelle.id; updatePreviewMap(parcelle.latitude, parcelle.longitude); getWeather(parcelle.latitude, parcelle.longitude)">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div class="fw-bold text-dark mb-1" x-text="parcelle.nom"></div>
@@ -217,6 +277,33 @@
                                         <span class="badge bg-success px-3 py-2 rounded-pill" x-text="parcelle.typeSol"></span>
                                         <span class="text-muted small"><i class="fa-solid fa-maximize me-1"></i> <span x-text="parcelle.surface"></span> Ha</span>
                                     </div>
+
+                                    <div class="weather-widget p-3 mb-3 d-flex align-items-center">
+                                        <div class="me-4 fs-1">
+                                            <i :class="'fa-solid ' + weather.icon"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-baseline">
+                                                <h3 class="fw-bold mb-0 me-2" x-text="weather.temp + '°C'"></h3>
+                                                <span class="text-muted small fw-bold text-uppercase" x-text="weather.desc"></span>
+                                            </div>
+                                            <div class="text-muted small mt-1">
+                                                <i class="fa-solid fa-wind me-1"></i> Vent: <span x-text="weather.wind"></span> km/h
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="advice-card p-3 mb-4 d-flex align-items-center shadow-sm" 
+                                         :style="'background-color:' + advice.bg + '; border-color:' + advice.color">
+                                        <div class="me-3 fs-4" :style="'color:' + advice.color">
+                                            <i :class="'fa-solid ' + advice.icon"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small text-uppercase opacity-75 mb-1" :style="'color:' + advice.color">Conseil Agricole</div>
+                                            <div class="text-dark fw-600 small" x-text="advice.text"></div>
+                                        </div>
+                                    </div>
+                                    
                                     <p class="text-muted small mb-0">
                                         <i class="fa-solid fa-location-dot me-1 text-danger"></i> 
                                         Coordonnées: <span x-text="parseFloat(parcelle.latitude).toFixed(4)"></span>, <span x-text="parseFloat(parcelle.longitude).toFixed(4)"></span>
@@ -390,16 +477,32 @@ document.addEventListener('DOMContentLoaded', function() {
     window.map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(6);
         var lng = e.latlng.lng.toFixed(6);
-        if (window.marker) window.marker.setLatLng([lat, lng]);
-        else window.marker = L.marker([lat, lng]).addTo(window.map);
+        
+        if (window.marker) {
+            window.marker.setLatLng([lat, lng]);
+        } else {
+            window.marker = L.marker([lat, lng]).addTo(window.map);
+        }
         document.getElementById('parcelle_latitude').value = lat;
         document.getElementById('parcelle_longitude').value = lng;
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+        document.getElementById('parcelle_nom').value = "Recherche du lieu...";
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18`)
         .then(response => response.json())
         .then(data => {
-            let addr = data.address;
-            let name = addr.suburb || addr.village || addr.town || addr.city || "Parcelle";
-            document.getElementById('parcelle_nom').value = name;
+            if (data && data.address) {
+                const a = data.address;
+                let name = a.neighbourhood || a.suburb || a.village || a.town || a.city || a.county || a.state || "Nouvelle Parcelle";
+                let detail = a.suburb || a.neighbourhood ? (a.suburb || a.neighbourhood) : "";
+                let city = a.village || a.town || a.city || "";
+                let finalName = detail && city && detail !== city ? `${detail}, ${city}` : (city || name);
+                document.getElementById('parcelle_nom').value = finalName;
+            } else {
+                document.getElementById('parcelle_nom').value = "Parcelle (" + lat + ")";
+            }
+        })
+        .catch(err => {
+            document.getElementById('parcelle_nom').value = "Parcelle locale";
         });
     });
 });

@@ -42,7 +42,7 @@ public function myDemandes(EntityManagerInterface $entityManager): Response
          */
     ]);
 
-    return $this->render('demande/my_demandes.html.twig', [
+    return $this->render('front/demande/my_demandes.html.twig', [
         'demandes' => $demandes,
     ]);
 
@@ -81,6 +81,7 @@ if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) ==
             $demande->setCv($cvName); // Saves "65a123.pdf" to DB
         }
 
+        
         $lettreFile = $form->get('lettreMotivation')->getData();
         if ($lettreFile) {
             $lettreName = uniqid().'.'.$lettreFile->guessExtension();
@@ -99,7 +100,7 @@ if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) ==
         return $this->redirectToRoute('app_offre_index_front');
     }
 
-    return $this->render('demande/form.html.twig', [
+    return $this->render('front/demande/form.html.twig', [
         'form' => $form->createView(),
         'offre' => $offre
     ]);
@@ -127,7 +128,7 @@ public function updateStatus(Demande $demande, Request $request, EntityManagerIn
 #[Route('/admin/demande/{id}/details', name: 'app_admin_demande_details')]
 public function demandeDetails(Demande $demande): Response
 {
-    return $this->render('demande/back/details.html.twig', [
+    return $this->render('back/demande/details.html.twig', [
         'demande' => $demande,
     ]);
 }
@@ -199,7 +200,7 @@ public function edit(int $id, Request $request, EntityManagerInterface $entityMa
         return $this->redirectToRoute('app_my_demandes');
     }
 
-    return $this->render('demande/form.html.twig', [
+    return $this->render('front/demande/form.html.twig', [
         'form' => $form->createView(),
         'offre' => $demande->getOffre(),
         'demande' => $demande 

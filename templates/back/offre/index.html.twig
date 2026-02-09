@@ -1,0 +1,163 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Administration - Gestion des offres d'emploi{% endblock %}
+
+{% block body %}
+<div class="page-content-wrapper p-4 p-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 mb-lg-5 gap-3">
+        <div>
+            <h1 class="h3 fw-semibold mb-1">Gestion des offres</h1>
+            <p class="text-muted mb-0">Création, modification et suivi des offres publiées</p>
+        </div>
+        <a href="{{ path('app_offre_new') }}" class="btn btn-success d-inline-flex align-items-center">
+            <i class="bi bi-plus-lg me-2"></i> Nouvelle offre
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4 mb-lg-5">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-8">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input 
+                            id="offreSearchInput" 
+                            class="form-control border-start-0 shadow-none" 
+                            type="search" 
+                            placeholder="Rechercher par titre ou lieu..." 
+                            aria-label="Recherche d'offre">
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <small id="offreCount" class="text-muted">
+                        {{ offres|length }} offre{{ offres|length > 1 ? 's' : '' }} trouvée{{ offres|length > 1 ? 's' : '' }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if offres is empty %}
+    <div class="text-center py-5 my-5">
+        <div class="alert alert-light border shadow-sm py-5">
+            <i class="bi bi-briefcase fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="text-muted mb-2">Aucune offre disponible</h5>
+            <p class="text-muted mb-4">Commencez par créer votre première offre d'emploi.</p>
+            <a href="{{ path('app_offre_new') }}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i> Créer une offre
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="row g-4" id="offreList">
+        {% for offre in offres %}
+        {# AJOUT DE LA CLASSE offre-card POUR LE JAVASCRIPT #}
+        <div class="col-md-6 col-lg-4 col-xl-3 offre-card">
+            <div class="card h-100 shadow-sm border-0 hover-shadow transition">
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="position-absolute top-0 end-0 mt-3 me-3">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light rounded-circle p-2 shadow-sm" 
+                                    type="button" 
+                                    data-bs-toggle="dropdown" 
+                                    aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_offre_edit', {'id': offre.id}) }}">
+                                        <i class="bi bi-pencil me-2 text-primary"></i>Modifier
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider my-1">
+                                </li>
+                                <li>
+                                    <form method="post" 
+                                          action="{{ path('app_offre_delete', {'id': offre.id}) }}" 
+                                          onsubmit="return confirm('Supprimer cette offre définitivement ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offre.id) }}">
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-trash me-2"></i>Supprimer
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h5 class="card-title fw-semibold mb-2 text-dark offre-title">
+                        {{ offre.title }}
+                    </h5>
+
+                    <div class="d-flex align-items-center text-muted mb-3 small">
+                        <i class="bi bi-geo-alt me-2"></i>
+                        <span class="offre-lieu">{{ offre.lieu|default('Lieu non précisé') }}</span>
+                    </div>
+
+                    <div class="row g-3 mt-auto mb-4">
+                        <div class="col-6">
+                            <div class="small text-muted mb-1">Salaire</div>
+                            <div class="fw-medium">
+                                {% if offre.salaire %}
+                                    {{ offre.salaire }} DT
+                                {% else %}
+                                    <span class="text-muted">Non indiqué</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted mb-1">Type de contrat</div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                                {{ offre.typeContrat|default('Non précisé') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <a href="{{ path('app_admin_offre_details', {'id': offre.id}) }}" 
+                       class="btn btn-outline-success w-100 mt-auto">
+                        <i class="bi bi-arrow-right-circle me-2"></i>Voir l'offre complète
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('offreSearchInput');
+    const cards = document.querySelectorAll('.offre-card');
+    const countElement = document.getElementById('offreCount');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const title = card.querySelector('.offre-title')?.textContent.toLowerCase() || '';
+                const location = card.querySelector('.offre-lieu')?.textContent.toLowerCase() || '';
+
+                if (title.includes(query) || location.includes(query)) {
+                    card.style.display = ''; 
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (countElement) {
+                countElement.textContent = `${visibleCount} offre${visibleCount !== 1 ? 's' : ''} trouvée${visibleCount !== 1 ? 's' : ''}`;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -25,7 +25,7 @@ public function add(Request $request, EntityManagerInterface $em): Response
         return $this->redirectToRoute('app_admin_offres');
     }
 
-    return $this->render('offre/back/add.html.twig', [
+    return $this->render('back/offre/add.html.twig', [
         'form' => $form->createView(),
     ]);
 }
@@ -47,7 +47,7 @@ public function index(Request $request, OffreRepository $repo): Response
         $offres = $repo->findAll();
     }
 
-    return $this->render('offre/back/index.html.twig', [
+    return $this->render('back/offre/index.html.twig', [
         'offres' => $offres
     ]);
 }
@@ -57,7 +57,7 @@ public function adminIndex(EntityManagerInterface $entityManager): Response
     // Fetch all offers from the database
     $offres = $entityManager->getRepository(Offre::class)->findAll();
 
-    return $this->render('offre/Back/index.html.twig', [
+    return $this->render('front/offre/show.html.twig', [
         'offres' => $offres,
     ]);
 }
@@ -72,7 +72,7 @@ public function show(int $id, EntityManagerInterface $entityManager): Response
         throw $this->createNotFoundException("L'offre demandée n'existe pas.");
     }
 
-    return $this->render('offre/Front/show.html.twig', [
+    return $this->render('front/offre/show.html.twig', [
         'offre' => $offre,
     ]);
 }
@@ -91,7 +91,7 @@ public function form(Offre $offre = null, Request $request, EntityManagerInterfa
         return $this->redirectToRoute('app_admin_offres');
     }
 
-    return $this->render('offre/back/form.html.twig', [
+    return $this->render('back/offre/form.html.twig', [
         'form' => $form->createView(),
         'editMode' => $offre->getId() !== null
     ]);
@@ -109,7 +109,7 @@ public function delete(Offre $offre, Request $request, EntityManagerInterface $e
 #[Route('/admin/offre/{id}/details', name: 'app_admin_offre_details')]
 public function details(Offre $offre): Response
 {
-    return $this->render('offre/back/details.html.twig', [
+    return $this->render('back/offre/details.html.twig', [
         'offre' => $offre,
         'demandes' => $offre->getDemandes(),
     ]);
@@ -131,7 +131,7 @@ public function indexFront(Request $request, OffreRepository $repo): Response
     }
 
     // IMPORTANT : On envoie vers le dossier FRONT
-    return $this->render('offre/Front/index.html.twig', [
+    return $this->render('front/offre/index.html.twig', [
         'offres' => $offres
     ]);
 }

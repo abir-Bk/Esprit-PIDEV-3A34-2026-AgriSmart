@@ -1,0 +1,56 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Liste des tâches - AgriSmart Admin{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Tâches agricoles</h5>
+            <a href="{{ path('admin_tasks_new') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Nouvelle tâche
+            </a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Titre</th>
+                    <th>Type</th>
+                    <th>Priorité</th>
+                    <th>Statut</th>
+                    <th>Date début</th>
+                    <th>Date fin</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.idTask }}</td>
+                        <td>{{ task.titre }}</td>
+                        <td>{{ task.type }}</td>
+                        <td>{{ task.priorite }}</td>
+                        <td>{{ task.statut }}</td>
+                        <td>{{ task.dateDebut ? task.dateDebut|date('d/m/Y H:i') : '' }}</td>
+                        <td>{{ task.dateFin ? task.dateFin|date('d/m/Y H:i') : '' }}</td>
+                        <td class="text-end">
+                            <a href="{{ path('admin_tasks_show', {id: task.idTask}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+                            <a href="{{ path('admin_tasks_edit', {id: task.idTask}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+                            <form method="post" action="{{ path('admin_tasks_delete', {id: task.idTask}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette tâche ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.idTask) }}">
+                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Aucune tâche enregistrée.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+

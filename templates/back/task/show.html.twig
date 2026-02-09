@@ -1,0 +1,60 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Détail de la tâche - AgriSmart Admin{% endblock %}
+
+{% block body %}
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Détails de la tâche</h5>
+            <div>
+                <a href="{{ path('admin_tasks_edit', {id: task.idTask}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                <a href="{{ path('admin_tasks_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">{{ task.idTask }}</dd>
+
+                <dt class="col-sm-3">Titre</dt>
+                <dd class="col-sm-9">{{ task.titre }}</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">{{ task.description }}</dd>
+
+                <dt class="col-sm-3">Type</dt>
+                <dd class="col-sm-9">{{ task.type }}</dd>
+
+                <dt class="col-sm-3">Priorité</dt>
+                <dd class="col-sm-9">{{ task.priorite }}</dd>
+
+                <dt class="col-sm-3">Statut</dt>
+                <dd class="col-sm-9">{{ task.statut }}</dd>
+
+                <dt class="col-sm-3">Date début</dt>
+                <dd class="col-sm-9">{{ task.dateDebut ? task.dateDebut|date('d/m/Y H:i') : '' }}</dd>
+
+                <dt class="col-sm-3">Date fin</dt>
+                <dd class="col-sm-9">{{ task.dateFin ? task.dateFin|date('d/m/Y H:i') : '' }}</dd>
+
+                <dt class="col-sm-3">Localisation</dt>
+                <dd class="col-sm-9">{{ task.localisation }}</dd>
+
+                <dt class="col-sm-3">ID Parcelle</dt>
+                <dd class="col-sm-9">{{ task.parcelleId }}</dd>
+
+                <dt class="col-sm-3">ID Culture</dt>
+                <dd class="col-sm-9">{{ task.cultureId }}</dd>
+
+                <dt class="col-sm-3">Créée par (ID utilisateur)</dt>
+                <dd class="col-sm-9">{{ task.createdBy }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <form method="post" action="{{ path('admin_tasks_delete', {id: task.idTask}) }}" onsubmit="return confirm('Supprimer cette tâche ?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.idTask) }}">
+        <button class="btn btn-danger">Supprimer</button>
+    </form>
+{% endblock %}
+

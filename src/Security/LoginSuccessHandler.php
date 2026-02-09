@@ -19,7 +19,6 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): RedirectResponse
     {
-        // Redirect **all roles** to the single dashboard route
         return new RedirectResponse($this->router->generate('user_dashboard'));
     }
 }

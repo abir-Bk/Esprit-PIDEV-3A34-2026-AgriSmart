@@ -28,4 +28,4 @@ security:
    
         # protect dashboard routes
     access_control:
-        - { path: ^/users/dashboard, roles: [ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_AGRICULTEUR, ROLE_FOURNISSEUR] }
+        - { path: ^back/users/dashboard, roles: [ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_AGRICULTEUR, ROLE_FOURNISSEUR] }

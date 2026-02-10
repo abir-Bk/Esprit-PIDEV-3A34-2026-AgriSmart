@@ -37,7 +37,7 @@ class RegisterController extends AbstractController
                 $em->flush();
 
                 $this->addFlash('success', 'Compte créé avec succès !');
-                return $this->redirectToRoute('app_login'); // redirect to login
+                return $this->redirectToRoute('app_login'); 
             }
         }
 

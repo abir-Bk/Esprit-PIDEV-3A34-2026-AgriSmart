@@ -4,3 +4,10 @@ controllers:
         namespace: App\Controller
     type: attribute
 
+connect_google_start:
+    path: /connect/google
+    controller: App\Controller\GoogleController::connect
+
+connect_google_check:
+    path: /connect/google/check
+    controller: App\Controller\GoogleController::connectCheck

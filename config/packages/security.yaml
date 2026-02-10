@@ -1,5 +1,5 @@
 security:
-    enable_authenticator_manager: true   # ⭐ add this
+    enable_authenticator_manager: true
 
     password_hashers:
         App\Entity\User:
@@ -31,6 +31,12 @@ security:
                 secret: '%kernel.secret%'
                 lifetime: 604800
                 path: /
-
+            custom_authenticators:
+                - App\Security\GoogleAuthenticator
+            entry_point: App\Security\GoogleAuthenticator
+            user_checker: App\Security\AccountStatusChecker
     access_control:
-        - { path: ^/back/users/dashboard, roles: [ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_AGRICULTEUR, ROLE_FOURNISSEUR] }
+        - { path: ^/back/admin, roles: ROLE_ADMIN }
+        - { path: ^/semi-public/users/agriculteur, roles: ROLE_AGRICULTEUR }
+        - { path: ^/semi-public/users/employe, roles: ROLE_EMPLOYEE }
+        - { path: ^/semi-public/users/fournisseur, roles: ROLE_FOURNISSEUR }

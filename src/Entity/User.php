@@ -80,6 +80,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private \DateTimeImmutable $updatedAt;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $googleId = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -189,4 +192,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static { $this->updatedAt = $updatedAt; return $this; }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): static
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
 }

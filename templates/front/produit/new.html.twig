@@ -1,124 +1,221 @@
-{% extends 'base.html.twig' %}
+{# templates/front/produit/new.html.twig #}
+{% extends 'front/produit/base_dashboard.html.twig' %}
 
-{% block title %}Nouvelle annonce{% endblock %}
+{% block title %}AgriSmart - Nouvelle annonce{% endblock %}
 
 {% block body %}
+<div class="container-fluid">
+    <div class="row g-4">
 
-<section class="pt-4 pt-md-5">
-  <div class="container">
+        <div class="col-lg-7">
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 class="fw-bold mb-0" style="color: #1a4331;">
+                        <i class="bi bi-plus-circle me-2"></i>Nouvelle Annonce
+                    </h2>
+                    <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i>Retour
+                    </a>
+                </div>
 
-    {# HERO #}
-    <div class="am-hero card shadow-sm am-hero-soft mb-4">
-      <div class="card-body p-4 p-md-5">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-          <div>
-            <span class="badge rounded-pill text-bg-light border am-badge-pill">
-              <i class="bi bi-plus-circle me-2"></i>Publier
-            </span>
-            <h1 class="mt-3 mb-2 am-hero-title">Nouvelle annonce</h1>
-            <p class="text-muted mb-0">
-              Créez une annonce claire : titre, catégorie, type, prix, stock, image — et si c’est une location : dates & emplacement.
-            </p>
-          </div>
-
-          <a class="btn btn-outline-dark am-btn" href="{{ path('app_produit_index') }}">
-            <i class="bi bi-arrow-left me-2"></i>Retour Marketplace
-          </a>
+                {% include 'front/produit/_form.html.twig' with { button_label: "Publier l'annonce" } %}
+            </div>
         </div>
 
-        <div class="row g-3 mt-4">
-          <div class="col-md-4">
-            <div class="am-tip">
-              <div class="am-tip-k">Astuce</div>
-              <div class="am-tip-v">Une bonne description = + de contacts</div>
+        <div class="col-lg-5">
+            <div class="sticky-top" style="top: 20px;">
+                <p class="text-muted fw-bold text-uppercase small mb-3">Aperçu en temps réel</p>
+
+                <div id="live-card" class="card border-0 shadow rounded-4 overflow-hidden">
+                    <div class="position-relative">
+                        <span id="p-badge-promo" class="badge bg-warning text-dark position-absolute m-3 fw-bold" style="display:none; z-index:10;">
+                            <i class="bi bi-lightning-fill"></i> PROMO
+                        </span>
+
+                        <span id="p-badge-type" class="badge bg-success position-absolute m-3 fw-bold" style="right: 0; z-index:10;">
+                            VENTE
+                        </span>
+
+                        <img id="p-img"
+                             src="{{ asset('assets/images/placeholder-product.png') }}"
+                             class="w-100"
+                             alt="preview"
+                             style="height:250px; object-fit:cover;">
+                    </div>
+
+                    <div class="card-body p-4">
+                        <small id="p-cat" class="text-success fw-bold text-uppercase" style="font-size: 0.75rem;">
+                            Catégorie
+                        </small>
+
+                        <h4 id="p-name" class="fw-bold my-2 text-dark">Nom de l'annonce</h4>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="d-flex align-items-baseline gap-2">
+                                <h3 class="text-dark fw-bold mb-0">
+                                    <span id="p-price">0</span>
+                                    <small class="fs-6">TND</small>
+                                </h3>
+                                <small id="p-price-old" class="text-muted text-decoration-line-through" style="display:none;">0 TND</small>
+                            </div>
+
+                            <span id="p-stock" class="badge bg-light text-muted border">Stock: 0</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-geo-alt-fill text-danger"></i>
+                                <div>
+                                    <div class="small text-muted">Ville / Région</div>
+                                    <div id="p-loc" class="fw-semibold">Non définie</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="p-loc-dates" class="mt-3 d-none">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-calendar-event text-primary"></i>
+                                <div>
+                                    <div class="small text-muted">Période de location</div>
+                                    <div id="p-dates" class="fw-semibold">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <p id="p-desc" class="text-muted small mb-0">Description...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border small mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    L’aperçu est indicatif. Les validations (promo/location) sont vérifiées côté serveur.
+                </div>
             </div>
-          </div>
-          <div class="col-md-4">
-            <div class="am-tip">
-              <div class="am-tip-k">Promo</div>
-              <div class="am-tip-v">Activez seulement si utile</div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="am-tip">
-              <div class="am-tip-k">Image</div>
-              <div class="am-tip-v">Format carré conseillé</div>
-            </div>
-          </div>
         </div>
 
-      </div>
     </div>
+</div>
+{% endblock %}
 
-    {# FORM + PREVIEW (dynamic) #}
-    <div class="row g-4 align-items-start">
-      <div class="col-lg-7">
-        <div class="card shadow-sm am-card-soft">
-          <div class="card-header bg-transparent border-0 pb-0">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-pencil-square"></i>
-              <h5 class="mb-0">Informations de l’annonce</h5>
-            </div>
-            <small class="text-muted">Les champs marqués <b>*</b> sont obligatoires</small>
-          </div>
-          <div class="card-body pt-3">
-            {{ include('produit/_form.html.twig', { form: form }) }}
-          </div>
-        </div>
-      </div>
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('produit-form');
+    if (!form) return;
 
-      <div class="col-lg-5" id="previewCol">
-        <div class="card shadow-sm am-card-soft sticky-lg-top" style="top: 110px;">
-          <div class="card-header bg-transparent border-0 pb-0">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-eye"></i>
-              <h6 class="mb-0">Aperçu</h6>
-            </div>
-          </div>
+    const q = (sel) => form.querySelector(sel);
+    const val = (el) => el ? (el.value || '').trim() : '';
+    const checked = (el) => el ? !!el.checked : false;
 
-          <div class="card-body pt-3">
-            <div class="am-preview-img">
-              <img id="previewImage" src="{{ asset('assets/images/placeholder-product.png') }}" alt="preview">
-            </div>
+    const elName  = q('.js-sync-name');
+    const elPrice = q('.js-sync-price');
+    const elPromoPrice = q('.js-sync-promo-price');
+    const elStock = q('.js-sync-stock');
+    const elType  = q('.js-type-selector');
+    const elPromo = q('.js-promo-switch');
+    const elLoc   = q('.js-sync-loc');
+    const elCat   = q('.js-sync-cat');
+    const elDesc  = q('.js-sync-desc');
+    const elImg   = q('.js-image-file');
+    const elStart = q('.js-loc-start');
+    const elEnd   = q('.js-loc-end');
 
-            <div class="mt-3">
-              <div class="am-preview-title" id="previewTitle">Titre du produit</div>
-              <div class="am-preview-sub" id="previewSub">Catégorie • Type</div>
+    function typeBadge() {
+        const badge = document.getElementById('p-badge-type');
+        if (!elType) return;
+        if (elType.value === 'location') {
+            badge.className = 'badge bg-info position-absolute m-3 fw-bold';
+            badge.style.right = '0';
+            badge.innerText = 'LOCATION';
+        } else {
+            badge.className = 'badge bg-success position-absolute m-3 fw-bold';
+            badge.style.right = '0';
+            badge.innerText = 'VENTE';
+        }
+    }
 
-              <div class="am-preview-pills mt-3">
-                <span class="am-pill2"><i class="bi bi-tag me-2"></i><span id="previewPrice">Prix</span></span>
-                <span class="am-pill2"><i class="bi bi-box-seam me-2"></i><span id="previewStock">Stock</span></span>
-              </div>
+    function stockBadge(stockStr) {
+        const stock = parseInt(stockStr || '0', 10) || 0;
+        const el = document.getElementById('p-stock');
 
-              <div class="mt-3" id="previewLocationBox" class="d-none">
-                <div class="am-preview-sub fw-semibold mb-1">Location</div>
-                <div class="text-muted small" id="previewLocationText">Dates + emplacement</div>
-              </div>
+        if (stock <= 0) {
+            el.className = 'badge bg-danger';
+            el.innerText = 'Rupture';
+        } else if (stock <= 3) {
+            el.className = 'badge bg-warning text-dark border';
+            el.innerText = 'Stock faible: ' + stock;
+        } else {
+            el.className = 'badge bg-light text-muted border';
+            el.innerText = 'Stock: ' + stock;
+        }
+    }
 
-              <div class="mt-3">
-                <button class="btn btn-dark am-btn w-100" type="button" disabled>
-                  <i class="bi bi-check2-circle me-2"></i>Publier
-                </button>
-                <small class="text-muted d-block mt-2">
-                  Aperçu live — mis à jour automatiquement.
-                </small>
-              </div>
-            </div>
+    function sync() {
+        document.getElementById('p-name').innerText = val(elName) || "Nom de l'annonce";
+        document.getElementById('p-price').innerText = val(elPrice) || '0';
+        document.getElementById('p-desc').innerText = val(elDesc) || 'Description...';
 
-            <div class="alert alert-warning mt-3 mb-0">
-              <i class="bi bi-shield-check me-2"></i>
-              Vérifiez le prix, le stock, la promo et les infos location avant publication.
-            </div>
-          </div>
-        </div>
+        // Catégorie
+        if (elCat && elCat.selectedOptions && elCat.selectedOptions[0]) {
+            document.getElementById('p-cat').innerText = elCat.selectedOptions[0].text;
+        }
 
-        <button class="btn btn-light am-btn w-100 mt-3 d-lg-none" type="button" id="togglePreviewBtn">
-          <i class="bi bi-eye me-2"></i>Afficher/Masquer l’aperçu
-        </button>
-      </div>
-    </div>
+        // Type badge
+        typeBadge();
 
-  </div>
-</section>
+        // Stock badge
+        stockBadge(val(elStock));
 
+        // Ville / région (toujours)
+        document.getElementById('p-loc').innerText = val(elLoc) || 'Non définie';
+
+        // Promo
+        const isPromo = checked(elPromo);
+        const promoVal = val(elPromoPrice);
+        const badgePromo = document.getElementById('p-badge-promo');
+        const old = document.getElementById('p-price-old');
+
+        if (isPromo && promoVal) {
+            badgePromo.style.display = 'block';
+            old.style.display = 'inline';
+            old.innerText = (val(elPrice) || '0') + ' TND';
+            document.getElementById('p-price').innerText = promoVal;
+        } else {
+            badgePromo.style.display = 'none';
+            old.style.display = 'none';
+        }
+
+        // Dates location uniquement
+        const isLocation = (elType && elType.value === 'location');
+        const datesBox = document.getElementById('p-loc-dates');
+
+        if (isLocation) {
+            datesBox.classList.remove('d-none');
+            const start = val(elStart);
+            const end = val(elEnd);
+            document.getElementById('p-dates').innerText = (start || '—') + ' → ' + (end || '—');
+        } else {
+            datesBox.classList.add('d-none');
+        }
+    }
+
+    form.addEventListener('input', sync);
+    form.addEventListener('change', sync);
+    sync();
+
+    // Image preview
+    if (elImg) {
+        elImg.addEventListener('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (ev) => { document.getElementById('p-img').src = ev.target.result; };
+            reader.readAsDataURL(file);
+        });
+    }
+});
+</script>
 {% endblock %}

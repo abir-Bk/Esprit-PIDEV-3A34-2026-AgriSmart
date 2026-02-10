@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Produit
 {
     public const TYPE_VENTE = 'vente';
@@ -38,10 +39,13 @@ class Produit
     #[Assert\Length(max: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    // ✅ Obligatoire (cohérent avec NotBlank)
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'Veuillez décrire votre produit.')]
+    #[Assert\Length(min: 10, minMessage: 'La description doit faire au moins 10 caractères.')]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: 'Le type est obligatoire.')]
     #[Assert\Choice(choices: [self::TYPE_VENTE, self::TYPE_LOCATION], message: 'Type invalide.')]
     private ?string $type = null;
@@ -51,7 +55,7 @@ class Produit
     #[Assert\PositiveOrZero(message: 'Le prix doit être ≥ 0.')]
     private ?float $prix = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire.')]
     #[Assert\Choice(callback: 'getCategorieValues', message: 'Catégorie invalide.')]
     private ?string $categorie = null;
@@ -61,30 +65,39 @@ class Produit
     #[Assert\PositiveOrZero(message: 'Le stock doit être ≥ 0.')]
     private ?int $quantiteStock = null;
 
-    // image = soit URL, soit nom de fichier uploadé (ex: uploads/produits/xxx.jpg)
+    // ✅ On stocke un chemin relatif (uploads/produits/xxx.webp)
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
     #[ORM\Column(options: ['default' => false])]
-    private ?bool $isPromotion = false;
+    private bool $isPromotion = false;
 
     #[ORM\Column(nullable: true)]
     #[Assert\PositiveOrZero(message: 'Le prix promo doit être ≥ 0.')]
     private ?float $promotionPrice = null;
 
-    // Location only
+    // ✅ nullable DB ; obligatoire seulement si location (validation callback)
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $locationAddress = null;
+
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    #[Assert\GreaterThanOrEqual('today', message: 'La date de début ne peut pas être passée.')]
     private ?\DateTimeImmutable $locationStart = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $locationEnd = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $locationAddress = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    /**
-     * @var Collection<int, Commande>
-     */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'produits')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $vendeur = null;
+
+    /** @var Collection<int, Commande> */
     #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'produit')]
     private Collection $commandes;
 
@@ -93,15 +106,37 @@ class Produit
         $this->commandes = new ArrayCollection();
     }
 
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $now = new \DateTimeImmutable();
+        $this->createdAt = $now;
+        $this->updatedAt = $now;
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
     public static function getCategorieValues(): array
     {
         return array_values(self::CATEGORIES);
     }
 
+    public function getPrixEffectif(): ?float
+    {
+        if ($this->isPromotion && $this->promotionPrice !== null) {
+            return $this->promotionPrice;
+        }
+        return $this->prix;
+    }
+
     #[Assert\Callback]
     public function validateBusinessRules(ExecutionContextInterface $context): void
     {
-        // promo logic
+        // Promo
         if ($this->isPromotion) {
             if ($this->promotionPrice === null) {
                 $context->buildViolation('Prix promo obligatoire si promotion activée.')
@@ -112,16 +147,9 @@ class Produit
                     ->atPath('promotionPrice')
                     ->addViolation();
             }
-        } else {
-            // if no promo, ignore promo price
-            if ($this->promotionPrice !== null) {
-                $context->buildViolation('Désactivez la promo ou videz le prix promo.')
-                    ->atPath('promotionPrice')
-                    ->addViolation();
-            }
         }
 
-        // location logic
+        // Location
         if ($this->type === self::TYPE_LOCATION) {
             if ($this->locationStart === null) {
                 $context->buildViolation('Date de disponibilité obligatoire pour la location.')
@@ -129,7 +157,7 @@ class Produit
                     ->addViolation();
             }
             if ($this->locationAddress === null || trim($this->locationAddress) === '') {
-                $context->buildViolation('Emplacement obligatoire pour la location.')
+                $context->buildViolation("L'emplacement (Ville/Région) est obligatoire pour la location.")
                     ->atPath('locationAddress')
                     ->addViolation();
             }
@@ -141,48 +169,157 @@ class Produit
         }
     }
 
-    public function getId(): ?int { return $this->id; }
+    // --- GETTERS & SETTERS ---
 
-    public function getNom(): ?string { return $this->nom; }
-    public function setNom(string $nom): static { $this->nom = $nom; return $this; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
-    public function getDescription(): ?string { return $this->description; }
-    public function setDescription(?string $description): static { $this->description = $description; return $this; }
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+        return $this;
+    }
 
-    public function getType(): ?string { return $this->type; }
-    public function setType(string $type): static { $this->type = $type; return $this; }
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+    public function setDescription(string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
 
-    public function getPrix(): ?float { return $this->prix; }
-    public function setPrix(float $prix): static { $this->prix = $prix; return $this; }
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+        return $this;
+    }
 
-    public function getCategorie(): ?string { return $this->categorie; }
-    public function setCategorie(string $categorie): static { $this->categorie = $categorie; return $this; }
+    public function getPrix(): ?float
+    {
+        return $this->prix;
+    }
+    public function setPrix(float $prix): static
+    {
+        $this->prix = $prix;
+        return $this;
+    }
 
-    public function getQuantiteStock(): ?int { return $this->quantiteStock; }
-    public function setQuantiteStock(int $quantiteStock): static { $this->quantiteStock = $quantiteStock; return $this; }
+    public function getCategorie(): ?string
+    {
+        return $this->categorie;
+    }
+    public function setCategorie(string $categorie): static
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
 
-    public function getImage(): ?string { return $this->image; }
-    public function setImage(?string $image): static { $this->image = $image; return $this; }
+    public function getQuantiteStock(): ?int
+    {
+        return $this->quantiteStock;
+    }
+    public function setQuantiteStock(int $quantiteStock): static
+    {
+        $this->quantiteStock = $quantiteStock;
+        return $this;
+    }
 
-    public function isPromotion(): ?bool { return $this->isPromotion; }
-    public function setIsPromotion(bool $isPromotion): static { $this->isPromotion = $isPromotion; return $this; }
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
 
-    public function getPromotionPrice(): ?float { return $this->promotionPrice; }
-    public function setPromotionPrice(?float $promotionPrice): static { $this->promotionPrice = $promotionPrice; return $this; }
+    public function isPromotion(): bool
+    {
+        return $this->isPromotion;
+    }
+    public function setIsPromotion(bool $isPromotion): static
+    {
+        $this->isPromotion = $isPromotion;
+        return $this;
+    }
 
-    public function getLocationStart(): ?\DateTimeImmutable { return $this->locationStart; }
-    public function setLocationStart(?\DateTimeImmutable $locationStart): static { $this->locationStart = $locationStart; return $this; }
+    public function getPromotionPrice(): ?float
+    {
+        return $this->promotionPrice;
+    }
+    public function setPromotionPrice(?float $promotionPrice): static
+    {
+        $this->promotionPrice = $promotionPrice;
+        return $this;
+    }
 
-    public function getLocationEnd(): ?\DateTimeImmutable { return $this->locationEnd; }
-    public function setLocationEnd(?\DateTimeImmutable $locationEnd): static { $this->locationEnd = $locationEnd; return $this; }
+    public function getLocationAddress(): ?string
+    {
+        return $this->locationAddress;
+    }
+    public function setLocationAddress(?string $locationAddress): static
+    {
+        $this->locationAddress = $locationAddress;
+        return $this;
+    }
 
-    public function getLocationAddress(): ?string { return $this->locationAddress; }
-    public function setLocationAddress(?string $locationAddress): static { $this->locationAddress = $locationAddress; return $this; }
+    public function getLocationStart(): ?\DateTimeImmutable
+    {
+        return $this->locationStart;
+    }
+    public function setLocationStart(?\DateTimeImmutable $locationStart): static
+    {
+        $this->locationStart = $locationStart;
+        return $this;
+    }
 
-    /**
-     * @return Collection<int, Commande>
-     */
-    public function getCommandes(): Collection { return $this->commandes; }
+    public function getLocationEnd(): ?\DateTimeImmutable
+    {
+        return $this->locationEnd;
+    }
+    public function setLocationEnd(?\DateTimeImmutable $locationEnd): static
+    {
+        $this->locationEnd = $locationEnd;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function getVendeur(): ?User
+    {
+        return $this->vendeur;
+    }
+    public function setVendeur(?User $vendeur): static
+    {
+        $this->vendeur = $vendeur;
+        return $this;
+    }
+
+    /** @return Collection<int, Commande> */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
 
     public function addCommande(Commande $commande): static
     {

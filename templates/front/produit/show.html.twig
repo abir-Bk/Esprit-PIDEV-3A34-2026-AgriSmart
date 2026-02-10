@@ -1,58 +1,222 @@
-{% extends 'base.html.twig' %}
+{# templates/front/produit/show.html.twig #}
+{% extends 'front/base.html.twig' %}
 
-{% block title %}Produit{% endblock %}
+{% block title %}{{ produit.nom }} | AgriSmart{% endblock %}
 
 {% block body %}
-    <h1>Produit</h1>
+<section class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h1 class="h4 fw-bold mb-1">{{ produit.nom }}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 small">
+                        <li class="breadcrumb-item"><a class="text-success text-decoration-none" href="{{ path('app_produit_index') }}">Marketplace</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Détails</li>
+                    </ol>
+                </nav>
+            </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ produit.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ produit.nom }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ produit.description }}</td>
-            </tr>
-            <tr>
-                <th>Type</th>
-                <td>{{ produit.type }}</td>
-            </tr>
-            <tr>
-                <th>Prix</th>
-                <td>{{ produit.prix }}</td>
-            </tr>
-            <tr>
-                <th>Categorie</th>
-                <td>{{ produit.categorie }}</td>
-            </tr>
-            <tr>
-                <th>QuantiteStock</th>
-                <td>{{ produit.quantiteStock }}</td>
-            </tr>
-            <tr>
-                <th>Image</th>
-                <td>{{ produit.image }}</td>
-            </tr>
-            <tr>
-                <th>IsPromotion</th>
-                <td>{{ produit.isPromotion ? 'Yes' : 'No' }}</td>
-            </tr>
-            <tr>
-                <th>PromotionPrice</th>
-                <td>{{ produit.promotionPrice }}</td>
-            </tr>
-        </tbody>
-    </table>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="bi bi-arrow-left me-1"></i> Retour
+                </a>
+                <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-dark rounded-pill">
+                    <i class="bi bi-person-circle me-1"></i> Espace vendeur
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 
-    <a href="{{ path('app_produit_index') }}">back to list</a>
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
 
-    <a href="{{ path('app_produit_edit', {'id': produit.id}) }}">edit</a>
+            {# ===== Colonne image + description ===== #}
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="position-relative bg-dark">
+                        <img
+                            src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
+                            alt="{{ produit.nom }}"
+                            class="w-100"
+                            style="height: 420px; object-fit: cover;"
+                        >
 
-    {{ include('produit/_delete_form.html.twig') }}
+                        <div class="position-absolute top-0 start-0 m-3 d-flex gap-2 flex-wrap">
+                            <span class="badge bg-{{ produit.type == 'location' ? 'info' : 'success' }} shadow-sm">
+                                <i class="bi bi-tag me-1"></i>{{ produit.type == 'location' ? 'LOCATION' : 'VENTE' }}
+                            </span>
+
+                            <span class="badge bg-light text-dark border shadow-sm">
+                                <i class="bi bi-grid-1x2 me-1"></i>{{ produit.categorie|upper }}
+                            </span>
+
+                            {% if produit.isPromotion %}
+                                <span class="badge bg-warning text-dark shadow-sm">
+                                    <i class="bi bi-lightning-fill me-1"></i>PROMO
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <h2 class="h5 fw-bold mb-2">Description</h2>
+                                <p class="text-muted mb-0" style="white-space: pre-line;">
+                                    {{ produit.description ?: 'Aucune description fournie.' }}
+                                </p>
+                            </div>
+
+                            <div class="text-end d-none d-md-block">
+                                <button class="btn btn-outline-secondary btn-sm rounded-pill" type="button" id="copyLinkBtn">
+                                    <i class="bi bi-link-45deg me-1"></i> Copier le lien
+                                </button>
+                                <div class="small text-muted mt-2">
+                                    ID: #{{ produit.id }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border bg-light h-100">
+                                    <div class="small text-muted mb-1">Localisation</div>
+                                    <div class="fw-semibold">
+                                        <i class="bi bi-geo-alt me-1 text-danger"></i>
+                                        {{ produit.locationAddress ?: 'Non précisée' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border bg-light h-100">
+                                    <div class="small text-muted mb-1">Stock</div>
+                                    {% set stock = produit.quantiteStock ?? 0 %}
+                                    {% if stock <= 0 %}
+                                        <span class="badge bg-danger">Rupture de stock</span>
+                                    {% elseif stock <= 3 %}
+                                        <span class="badge bg-warning text-dark">Stock faible ({{ stock }})</span>
+                                    {% else %}
+                                        <span class="badge bg-success-subtle text-dark border">Disponible ({{ stock }})</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if produit.type == 'location' %}
+                                <div class="col-12">
+                                    <div class="p-3 rounded-4 border bg-light">
+                                        <div class="small text-muted mb-1">Disponibilité (Location)</div>
+                                        <div class="fw-semibold">
+                                            <i class="bi bi-calendar-event me-1 text-success"></i>
+                                            {% if produit.locationStart %}
+                                                Du {{ produit.locationStart|date('d/m/Y') }}
+                                            {% else %}
+                                                Date de début non définie
+                                            {% endif %}
+                                            {% if produit.locationEnd %}
+                                                — Au {{ produit.locationEnd|date('d/m/Y') }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            Réserve cette annonce pour une période.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {# ===== Colonne carte prix / actions ===== #}
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 18px;">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="small text-muted">Prix</div>
+
+                                    {% if produit.isPromotion and produit.promotionPrice is not null %}
+                                        <div class="h3 fw-bold mb-0 text-danger">
+                                            {{ produit.promotionPrice }} <span class="fs-6 text-muted">TND</span>
+                                        </div>
+                                        <div class="text-muted">
+                                            <small class="text-decoration-line-through">{{ produit.prix }} TND</small>
+                                            <small class="ms-2 badge bg-warning text-dark">
+                                                -{{ ((1 - (produit.promotionPrice / produit.prix)) * 100)|round }}%
+                                            </small>
+                                        </div>
+                                    {% else %}
+                                        <div class="h3 fw-bold mb-0">
+                                            {{ produit.prix }} <span class="fs-6 text-muted">TND</span>
+                                        </div>
+                                        <div class="text-muted"><small>&nbsp;</small></div>
+                                    {% endif %}
+                                </div>
+
+                                <span class="badge bg-light text-dark border">
+                                    {{ produit.type == 'location' ? 'Location' : 'Vente' }}
+                                </span>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-grid gap-2">
+                                {% if produit.type == 'location' %}
+                                    <button class="btn btn-info text-white rounded-pill py-2" type="button" disabled>
+                                        <i class="bi bi-calendar-check me-1"></i> Réserver (bientôt)
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-success rounded-pill py-2" type="button" disabled>
+                                        <i class="bi bi-bag-check me-1"></i> Acheter (bientôt)
+                                    </button>
+                                {% endif %}
+
+                                <button class="btn btn-outline-secondary rounded-pill py-2" type="button" id="copyLinkBtnMobile">
+                                    <i class="bi bi-link-45deg me-1"></i> Copier le lien
+                                </button>
+                            </div>
+
+                            <div class="mt-4 p-3 rounded-4 bg-light border">
+                                <div class="small text-muted mb-1">Conseil</div>
+                                <div class="small">
+                                    Ajoute une image claire + une description détaillée pour augmenter les demandes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 small text-muted text-center">
+                        Mis à jour : {{ produit.updatedAt ? produit.updatedAt|date('d/m/Y H:i') : (produit.createdAt ? produit.createdAt|date('d/m/Y H:i') : '—') }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+(function(){
+    function copyLink(){
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(function(){
+            // petit feedback simple
+            alert('Lien copié ✅');
+        });
+    }
+
+    const btn1 = document.getElementById('copyLinkBtn');
+    const btn2 = document.getElementById('copyLinkBtnMobile');
+    if(btn1) btn1.addEventListener('click', copyLink);
+    if(btn2) btn2.addEventListener('click', copyLink);
+})();
+</script>
 {% endblock %}

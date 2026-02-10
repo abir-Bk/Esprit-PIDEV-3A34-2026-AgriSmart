@@ -1,337 +1,316 @@
+{# templates/front/produit/_form.html.twig #}
+
 {{ form_start(form, {
-  attr: {
-    class: 'am-form needs-validation',
-    novalidate: 'novalidate',
-    enctype: 'multipart/form-data',
-    id: 'produit-form'
-  }
+    attr: {
+        class: 'am-form',
+        id: 'produit-form',
+        novalidate: 'novalidate'
+    }
 }) }}
+
+{# Alert global si formulaire invalide #}
+{% if form is defined and form.vars is defined and (not form.vars.valid) %}
+    <div class="alert alert-danger rounded-4 mb-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Corrige les champs en rouge puis réessaie.
+    </div>
+{% endif %}
+
+{% macro field_row(field, label, requiredText, helpText) %}
+    {# Macro helper (optionnel) - non utilisé ici car on veut classes spécifiques #}
+{% endmacro %}
 
 <div class="row g-3">
 
-  <div class="col-md-6">
-    <label class="form-label">Nom *</label>
-    {{ form_widget(form.nom, {'attr': {'class':'form-control', 'placeholder':'Ex: Tomates bio', 'required':'required'}}) }}
-    <div class="invalid-feedback">Nom obligatoire</div>
-  </div>
-
-  <div class="col-md-6">
-    <label class="form-label">Catégorie *</label>
-    {{ form_widget(form.categorie, {'attr': {'class':'form-select', 'required':'required'}}) }}
-    <div class="invalid-feedback">Catégorie obligatoire</div>
-  </div>
-
-  <div class="col-md-6">
-    <label class="form-label">Type (vente/location) *</label>
-    {{ form_widget(form.type, {'attr': {'class':'form-select', 'required':'required'}}) }}
-    <div class="invalid-feedback">Type obligatoire</div>
-  </div>
-
-  <div class="col-md-6">
-    <label class="form-label">Prix (TND) *</label>
-    <div class="input-group">
-      {{ form_widget(form.prix, {'attr': {'class':'form-control', 'required':'required', 'min':'0', 'step':'0.01', 'placeholder':'Ex: 12.5'}}) }}
-      <span class="input-group-text">TND</span>
-      <div class="invalid-feedback">Prix ≥ 0</div>
+    {# NOM #}
+    <div class="col-12">
+        <label class="form-label fw-bold">
+            Nom de l'annonce {% if form.nom.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.nom, {
+            attr: {
+                class: (form.nom.vars.errors|length ? 'form-control am-input is-invalid js-sync-name' : 'form-control am-input js-sync-name'),
+                placeholder: "Ex: Tracteur, Panier de légumes..."
+            }
+        }) }}
+        {% if form.nom.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.nom) }}
+            </div>
+        {% endif %}
     </div>
-  </div>
 
-  <div class="col-md-6">
-    <label class="form-label">Quantité en stock *</label>
-    {{ form_widget(form.quantiteStock, {'attr': {'class':'form-control', 'required':'required', 'min':'0', 'step':'1', 'placeholder':'Ex: 50'}}) }}
-    <div class="invalid-feedback">Stock ≥ 0</div>
-  </div>
-
-  <div class="col-md-6">
-    <label class="form-label">Image (fichier / caméra)</label>
-    {{ form_widget(form.imageFile, {'attr': {'class':'form-control', 'accept':'image/*', 'capture':'environment'}}) }}
-    <small class="text-muted d-block mt-2">
-      Sur mobile : tu peux choisir un fichier ou ouvrir la caméra.
-    </small>
-
-    <div class="mt-2">
-      <label class="form-label mb-1">ou URL (optionnel)</label>
-      {{ form_widget(form.image, {'attr': {'class':'form-control', 'placeholder':'Ex: https://... (optionnel)'}}) }}
-      <small class="text-muted">Si vide, placeholder.</small>
+    {# CATEGORIE #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Catégorie {% if form.categorie.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.categorie, {
+            attr: {
+                class: (form.categorie.vars.errors|length ? 'form-select am-input is-invalid js-sync-cat' : 'form-select am-input js-sync-cat')
+            }
+        }) }}
+        {% if form.categorie.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.categorie) }}
+            </div>
+        {% endif %}
     </div>
-  </div>
 
-  <div class="col-12">
-    <label class="form-label">Description</label>
-    {{ form_widget(form.description, {'attr': {'class':'form-control', 'rows':'4', 'placeholder':'Origine, qualité, conditionnement…'}}) }}
-  </div>
-
-  {# LOCATION fields (hidden unless type=location) #}
-  <div class="col-12" id="locationFields" style="display:none;">
-    <div class="card border-0 bg-light p-3">
-      <div class="d-flex align-items-center gap-2 mb-2">
-        <i class="bi bi-geo-alt"></i>
-        <div class="fw-semibold">Informations de location</div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Disponible à partir du *</label>
-          {{ form_widget(form.locationStart, {'attr': {'class':'form-control', 'required':'required'}}) }}
-          <div class="invalid-feedback">Date de début obligatoire</div>
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Disponible jusqu’au (optionnel)</label>
-          {{ form_widget(form.locationEnd, {'attr': {'class':'form-control'}}) }}
-        </div>
-
-        <div class="col-12">
-          <label class="form-label">Emplacement *</label>
-          {{ form_widget(form.locationAddress, {'attr': {'class':'form-control', 'required':'required', 'placeholder':'Ex: Ariana, Tunis / Sousse…'}}) }}
-          <div class="invalid-feedback">Emplacement obligatoire</div>
-        </div>
-      </div>
-
-      <small class="text-muted mt-2 d-block">
-        Ces champs s’affichent uniquement si le type = <b>Location</b>.
-      </small>
+    {# TYPE #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Type d'offre {% if form.type.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.type, {
+            attr: {
+                class: (form.type.vars.errors|length ? 'form-select am-input is-invalid js-type-selector' : 'form-select am-input js-type-selector')
+            }
+        }) }}
+        {% if form.type.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.type) }}
+            </div>
+        {% endif %}
     </div>
-  </div>
 
-  {# PROMO #}
-  <div class="col-12">
-    <div class="card border-0 bg-light p-3">
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <div class="form-check form-switch m-0">
-          {{ form_widget(form.isPromotion, {'attr': {'class': 'form-check-input', 'id':'isPromotion'}}) }}
-          <label class="form-check-label" for="isPromotion">Activer promo</label>
-        </div>
-
-        <div class="d-flex align-items-center gap-2" style="min-width:320px;">
-          <label class="form-label mb-0 fw-semibold">Prix promo (TND)</label>
-          <div class="input-group">
-            {{ form_widget(form.promotionPrice, {'attr': {'class':'form-control', 'placeholder':'Ex: 9.9', 'min':'0', 'step':'0.01', 'id':'promotionPrice'}}) }}
-            <span class="input-group-text">TND</span>
-          </div>
-        </div>
-      </div>
-      <small class="text-muted mt-2">Le prix promo doit être ≤ prix normal.</small>
+    {# PRIX #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Prix (TND) {% if form.prix.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.prix, {
+            attr: {
+                class: (form.prix.vars.errors|length ? 'form-control am-input is-invalid js-sync-price' : 'form-control am-input js-sync-price'),
+                placeholder: '0.00',
+                min: 0,
+                step: '0.01'
+            }
+        }) }}
+        {% if form.prix.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.prix) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Utilise un prix ≥ 0.</div>
     </div>
-  </div>
 
-  <div class="col-12 d-flex gap-2 mt-2">
-    <button class="btn btn-dark am-btn" type="submit" id="btnSubmit">
-      <i class="bi bi-check2-circle me-2"></i>Publier
-    </button>
-    <a class="btn btn-outline-secondary am-btn" href="{{ path('app_produit_index') }}">
-      <i class="bi bi-x-lg me-2"></i>Annuler
-    </a>
-  </div>
+    {# STOCK #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Stock disponible
+        </label>
+        {{ form_widget(form.quantiteStock, {
+            attr: {
+                class: (form.quantiteStock.vars.errors|length ? 'form-control am-input is-invalid js-sync-stock' : 'form-control am-input js-sync-stock'),
+                min: 0,
+                step: '1'
+            }
+        }) }}
+        {% if form.quantiteStock.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.quantiteStock) }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# VILLE / REGION (OBLIGATOIRE POUR VENTE + LOCATION) #}
+    <div class="col-12">
+        <label class="form-label fw-bold">
+            Ville / Région {% if form.locationAddress.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.locationAddress, {
+            attr: {
+                class: (form.locationAddress.vars.errors|length ? 'form-control am-input is-invalid js-sync-loc' : 'form-control am-input js-sync-loc'),
+                placeholder: 'Ex: Béja, Tunisie'
+            }
+        }) }}
+        {% if form.locationAddress.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.locationAddress) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Sert pour la livraison/retrait et les filtres.</div>
+    </div>
+
+    {# DESCRIPTION #}
+    <div class="col-12">
+        <label class="form-label fw-bold">
+            Description {% if form.description.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.description, {
+            attr: {
+                class: (form.description.vars.errors|length ? 'form-control am-input is-invalid js-sync-desc' : 'form-control am-input js-sync-desc'),
+                rows: 4,
+                placeholder: 'Décrivez votre produit...'
+            }
+        }) }}
+        {% if form.description.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.description) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Minimum 10 caractères.</div>
+    </div>
+
+    {# SECTION LOCATION: dates uniquement (actif seulement si type=location) #}
+    <div class="col-12">
+        <div id="section-location" class="p-4 rounded-4 border bg-light" style="display:none;">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-calendar-event text-success me-2"></i>
+                <h6 class="mb-0 fw-bold">Période de location</h6>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small">
+                        Disponible du <span class="text-danger">*</span>
+                    </label>
+                    {{ form_widget(form.locationStart, {
+                        attr: {
+                            class: (form.locationStart.vars.errors|length ? 'form-control am-input is-invalid js-loc-start' : 'form-control am-input js-loc-start')
+                        }
+                    }) }}
+                    {% if form.locationStart.vars.errors|length %}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.locationStart) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small">
+                        Au <span class="text-danger">*</span>
+                    </label>
+                    {{ form_widget(form.locationEnd, {
+                        attr: {
+                            class: (form.locationEnd.vars.errors|length ? 'form-control am-input is-invalid js-loc-end' : 'form-control am-input js-loc-end')
+                        }
+                    }) }}
+                    {% if form.locationEnd.vars.errors|length %}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.locationEnd) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <div class="alert alert-info py-2 small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Ces dates sont obligatoires uniquement si le type = <strong>Location</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# SECTION PROMO #}
+    <div class="col-12">
+        <div class="p-4 rounded-4 border" style="border-style:dashed;">
+            <div class="form-check form-switch">
+                {{ form_widget(form.isPromotion, {
+                    attr: {
+                        class: (form.isPromotion.vars.errors|length ? 'form-check-input is-invalid js-promo-switch' : 'form-check-input js-promo-switch')
+                    }
+                }) }}
+                <label class="form-check-label fw-bold">
+                    🚀 Activer un prix promotionnel
+                </label>
+            </div>
+
+            {% if form.isPromotion.vars.errors|length %}
+                <div class="invalid-feedback d-block">
+                    {{ form_errors(form.isPromotion) }}
+                </div>
+            {% endif %}
+
+            <div id="section-promo-price" class="mt-3" style="display:none;">
+                <label class="form-label fw-bold small text-warning">Prix réduit (TND)</label>
+                {{ form_widget(form.promotionPrice, {
+                    attr: {
+                        class: (form.promotionPrice.vars.errors|length ? 'form-control am-input is-invalid js-sync-promo-price' : 'form-control am-input js-sync-promo-price'),
+                        placeholder: '0.00',
+                        min: 0,
+                        step: '0.01'
+                    }
+                }) }}
+                {% if form.promotionPrice.vars.errors|length %}
+                    <div class="invalid-feedback d-block">
+                        {{ form_errors(form.promotionPrice) }}
+                    </div>
+                {% endif %}
+                <div class="form-text">Doit être ≤ prix normal.</div>
+            </div>
+        </div>
+    </div>
+
+    {# IMAGE #}
+    <div class="col-12">
+        <label class="form-label fw-bold">Image du produit</label>
+        {{ form_widget(form.imageFile, {
+            attr: {
+                class: (form.imageFile.vars.errors|length ? 'form-control am-input is-invalid js-image-file' : 'form-control am-input js-image-file'),
+                accept: 'image/*'
+            }
+        }) }}
+        {% if form.imageFile.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.imageFile) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Formats acceptés: jpg / png / webp (max 3MB).</div>
+    </div>
+
+    <div class="col-12 mt-4 pb-2">
+        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold" style="background:#1a4331; border:none;">
+            {{ button_label|default("Publier l'annonce") }}
+        </button>
+    </div>
 
 </div>
 
 {{ form_end(form) }}
 
 <script>
-(function () {
-  const formEl = document.getElementById('produit-form');
-  if (!formEl) return;
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('produit-form');
+    if (!form) return;
 
-  // Symfony IDs
-  const nom = document.getElementById('{{ form.nom.vars.id }}');
-  const cat = document.getElementById('{{ form.categorie.vars.id }}');
-  const type = document.getElementById('{{ form.type.vars.id }}');
-  const prix = document.getElementById('{{ form.prix.vars.id }}');
-  const stock = document.getElementById('{{ form.quantiteStock.vars.id }}');
-  const imageUrl = document.getElementById('{{ form.image.vars.id }}');
-  const fileInput = document.getElementById('{{ form.imageFile.vars.id }}');
+    const typeSelector = form.querySelector('.js-type-selector');
+    const promoSwitch  = form.querySelector('.js-promo-switch');
 
-  const isPromo = document.getElementById('isPromotion');
-  const promoPrix = document.getElementById('promotionPrice');
+    const sectionLocation = document.getElementById('section-location');
+    const sectionPromoPrice = document.getElementById('section-promo-price');
 
-  // Location fields
-  const locationFields = document.getElementById('locationFields');
-  const locStart = document.getElementById('{{ form.locationStart.vars.id }}');
-  const locEnd = document.getElementById('{{ form.locationEnd.vars.id }}');
-  const locAddr = document.getElementById('{{ form.locationAddress.vars.id }}');
+    const startInput = form.querySelector('.js-loc-start');
+    const endInput   = form.querySelector('.js-loc-end');
 
-  // Preview elements (in new.html.twig)
-  const previewTitle = document.getElementById('previewTitle');
-  const previewSub = document.getElementById('previewSub');
-  const previewPrice = document.getElementById('previewPrice');
-  const previewStock = document.getElementById('previewStock');
-  const previewImage = document.getElementById('previewImage');
-  const previewLocationBox = document.getElementById('previewLocationBox');
-  const previewLocationText = document.getElementById('previewLocationText');
+    function toggleSections() {
+        const isLocation = typeSelector && typeSelector.value === 'location';
 
-  function safe(v, fallback) {
-    v = (v || '').toString().trim();
-    return v ? v : fallback;
-  }
+        if (sectionLocation) {
+            sectionLocation.style.display = isLocation ? 'block' : 'none';
+        }
 
-  function currentTypeValue() {
-    return (type?.value || '').toString().toLowerCase().trim();
-  }
+        // Disable + clear dates when not location (évite incohérences + évite envoyer des valeurs)
+        if (startInput) {
+            startInput.disabled = !isLocation;
+            if (!isLocation) startInput.value = '';
+        }
+        if (endInput) {
+            endInput.disabled = !isLocation;
+            endInput.min = startInput && startInput.value ? startInput.value : '';
+            if (!isLocation) endInput.value = '';
+        }
 
-  function updateLocationVisibility() {
-    const t = currentTypeValue();
-    const isLoc = (t === 'location');
-
-    if (locationFields) locationFields.style.display = isLoc ? '' : 'none';
-
-    // Toggle required (front)
-    if (locStart) locStart.required = isLoc;
-    if (locAddr)  locAddr.required  = isLoc;
-
-    // Preview
-    if (previewLocationBox) {
-      previewLocationBox.classList.toggle('d-none', !isLoc);
-    }
-    if (!isLoc) {
-      if (locStart) locStart.value = '';
-      if (locEnd) locEnd.value = '';
-      if (locAddr) locAddr.value = '';
-      if (previewLocationText) previewLocationText.textContent = 'Dates + emplacement';
-    }
-  }
-
-  function updatePreview() {
-    if (!previewTitle) return;
-
-    const n = safe(nom?.value, 'Titre du produit');
-
-    // categorie label (select)
-    let c = 'Catégorie';
-    if (cat) {
-      const opt = cat.options[cat.selectedIndex];
-      c = safe(opt?.text, 'Catégorie');
-      if (opt && !opt.value) c = 'Catégorie';
+        // Promo price
+        if (promoSwitch && sectionPromoPrice) {
+            sectionPromoPrice.style.display = promoSwitch.checked ? 'block' : 'none';
+        }
     }
 
-    // type label
-    let t = 'Type';
-    if (type) {
-      const optt = type.options[type.selectedIndex];
-      t = safe(optt?.text, 'Type');
-      if (optt && !optt.value) t = 'Type';
-    }
-
-    previewTitle.textContent = n;
-    previewSub.textContent = `${c} • ${t}`;
-
-    const p = (prix?.value || '').toString().trim();
-    previewPrice.textContent = p ? `${p} DT` : 'Prix';
-
-    const s = (stock?.value || '').toString().trim();
-    previewStock.textContent = s ? `Stock: ${s}` : 'Stock';
-
-    // location preview
-    const isLoc = (currentTypeValue() === 'location');
-    if (isLoc && previewLocationText) {
-      const ds = safe(locStart?.value, '---');
-      const de = safe(locEnd?.value, '---');
-      const ad = safe(locAddr?.value, '---');
-      previewLocationText.textContent = `Du ${ds} au ${de} • ${ad}`;
-    }
-  }
-
-  function setPromoState() {
-    const on = !!isPromo?.checked;
-    if (promoPrix) {
-      promoPrix.disabled = !on;
-      if (!on) promoPrix.value = '';
-    }
-  }
-
-  function setImageFromUrl(url) {
-    if (!previewImage) return;
-    url = (url || '').toString().trim();
-    previewImage.src = url ? url : "{{ asset('assets/images/placeholder-product.png') }}";
-  }
-
-  function setImageFromFile(file) {
-    if (!previewImage || !file) return;
-    if (!file.type || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (e) => previewImage.src = e.target.result;
-    reader.readAsDataURL(file);
-  }
-
-  // Bind preview updates
-  [nom, prix, stock, locStart, locEnd, locAddr].forEach(el => {
-    if (!el) return;
-    el.addEventListener('input', updatePreview);
-    el.addEventListener('change', updatePreview);
-  });
-
-  if (cat) cat.addEventListener('change', updatePreview);
-  if (type) {
-    type.addEventListener('change', () => {
-      updateLocationVisibility();
-      updatePreview();
-    });
-  }
-
-  if (imageUrl) {
-    imageUrl.addEventListener('input', () => setImageFromUrl(imageUrl.value));
-    imageUrl.addEventListener('change', () => setImageFromUrl(imageUrl.value));
-  }
-
-  if (fileInput) {
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files && fileInput.files[0];
-      if (f) setImageFromFile(f);
-    });
-  }
-
-  if (isPromo) isPromo.addEventListener('change', setPromoState);
-
-  // Toggle preview on small screens
-  const toggleBtn = document.getElementById('togglePreviewBtn');
-  const previewCol = document.getElementById('previewCol');
-  if (toggleBtn && previewCol) {
-    toggleBtn.addEventListener('click', () => {
-      previewCol.classList.toggle('d-none');
-      previewCol.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }
-
-  // Client-side validation (bloque vide / négatif / promo)
-  formEl.addEventListener('submit', function (event) {
-    if (!formEl.checkValidity()) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    const p = parseFloat((prix?.value || '0').toString().replace(',', '.'));
-    const s = parseInt(stock?.value || '0', 10);
-
-    if (isNaN(p) || p < 0 || isNaN(s) || s < 0) {
-      event.preventDefault();
-      event.stopPropagation();
-      alert('Erreur: prix/stock ne peuvent pas être négatifs.');
-    }
-
-    if (isPromo?.checked && promoPrix && promoPrix.value) {
-      const pp = parseFloat(promoPrix.value.toString().replace(',', '.'));
-      if (isNaN(pp) || pp < 0 || pp > p) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert('Erreur: prix promo doit être ≥ 0 et ≤ prix normal.');
-      }
-    }
-
-    // location required if type=location
-    if (currentTypeValue() === 'location') {
-      if (!locStart?.value || !locAddr?.value) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert('Erreur: pour une location, la date de début et l’emplacement sont obligatoires.');
-      }
-    }
-
-    formEl.classList.add('was-validated');
-  });
-
-  // init
-  setPromoState();
-  updateLocationVisibility();
-  updatePreview();
-})();
+    toggleSections();
+    form.addEventListener('change', toggleSections);
+    form.addEventListener('input', toggleSections);
+});
 </script>

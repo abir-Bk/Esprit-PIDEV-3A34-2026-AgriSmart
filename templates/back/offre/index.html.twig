@@ -1,24 +1,355 @@
 {% extends 'back/admin_base.html.twig' %}
 
-{% block title %}Administration - Gestion des offres d'emploi{% endblock %}
+{% block title %}Dashboard - Gestion des offres d'emploi{% endblock %}
 
 {% block body %}
-<div class="page-content-wrapper p-4 p-lg-5">
+<div class="page-content-wrapper p-xxl-5">
+    <!-- Header avec statistiques -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 mb-lg-5 gap-3">
         <div>
-            <h1 class="h3 fw-semibold mb-1">Gestion des offres</h1>
-            <p class="text-muted mb-0">Création, modification et suivi des offres publiées</p>
+            <h1 class="h3 fw-bold mb-2 text-dark">Dashboard Offres Emploi</h1>
+            <p class="text-muted mb-0">Tableau de bord complet des offres d'emploi</p>
         </div>
-        <a href="{{ path('app_offre_new') }}" class="btn btn-success d-inline-flex align-items-center">
-            <i class="bi bi-plus-lg me-2"></i> Nouvelle offre
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_offre_new') }}" class="btn btn-success d-inline-flex align-items-center shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i> Nouvelle offre
+            </a>
+        </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4 mb-lg-5">
-        <div class="card-body">
+    <!-- Cartes de statistiques avec mini-graphiques -->
+    <div class="row g-4 mb-4">
+        <!-- Carte 1: Total Offres -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-briefcase-fill text-primary fs-4"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="#" onclick="refreshStats()">Actualiser</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h6 class="text-muted mb-3">Total Offres</h6>
+                    <h2 class="fw-bold mb-3 text-primary">{{ offres|length }}</h2>
+                    
+                    <!-- Mini graphique circulaire -->
+                    <div class="mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="mini-chart-circle me-3">
+                                <svg width="50" height="50" viewBox="0 0 50 50">
+                                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e9ecef" stroke-width="8"/>
+                                    <circle cx="25" cy="25" r="20" fill="none" stroke="#0d6efd" stroke-width="8" 
+                                            stroke-dasharray="126" stroke-dashoffset="{{ 126 - (126 * offres|length / 10)|round(0) }}"
+                                            stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="small">
+                                <div class="text-success">
+                                    <i class="bi bi-arrow-up me-1"></i>
+                                    {{ (offres|length / 10 * 100)|round(0) }}% capacité
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carte 2: Salaire Moyen -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                    <i class="bi bi-currency-exchange text-success fs-4"></i>                        
+                    </div>
+                    </div>
+                    <h6 class="text-muted mb-3">Salaire Moyen</h6>
+                    {% set salaries = [] %}
+                    {% for offre in offres %}
+                        {% if offre.salaire and offre.salaire > 0 %}
+                            {% set salaries = salaries|merge([offre.salaire]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if salaries|length > 0 %}
+                        {% set sum = 0 %}
+                        {% for salary in salaries %}
+                            {% set sum = sum + salary %}
+                        {% endfor %}
+                        {% set avg_salary = (sum / salaries|length)|round(0) %}
+                    {% else %}
+                        {% set avg_salary = 0 %}
+                    {% endif %}
+                    <h2 class="fw-bold mb-3 text-success">{{ avg_salary }} DT</h2>
+                    
+                    <!-- Bar chart miniature -->
+                    <div class="mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="mini-bar-chart me-3 flex-grow-1">
+                                <div class="d-flex align-items-end" style="height: 30px;">
+                                    {% for i in 1..5 %}
+                                    <div class="mini-bar flex-grow-1 me-1" 
+                                         style="height: {{ (20 + random(15)) }}%; 
+                                                background-color: {{ avg_salary > 2000 ? '#198754' : (avg_salary > 1000 ? '#ffc107' : '#6c757d') }};
+                                                opacity: {{ 0.3 + (i * 0.15) }}; 
+                                                border-radius: 3px;">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="small">
+                                <div class="{{ avg_salary > 2000 ? 'text-success' : (avg_salary > 1000 ? 'text-warning' : 'text-muted') }}">
+                                    {% if avg_salary > 0 %}
+                                        {{ avg_salary > 2000 ? 'Élevé' : (avg_salary > 1000 ? 'Moyen' : 'Bas') }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carte 3: Types de Contrats -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-file-earmark-text-fill text-info fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-muted mb-3">Types Différents</h6>
+                    {% set unique_contracts = [] %}
+                    {% for offre in offres %}
+                        {% if offre.typeContrat and offre.typeContrat not in unique_contracts %}
+                            {% set unique_contracts = unique_contracts|merge([offre.typeContrat]) %}
+                        {% endif %}
+                    {% endfor %}
+                    <h2 class="fw-bold mb-3 text-info">{{ unique_contracts|length }}</h2>
+                    
+                    <!-- Mini graphique en anneau -->
+                    <div class="mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="mini-donut-chart me-3 position-relative" style="width: 50px; height: 50px;">
+                                <svg width="50" height="50" viewBox="0 0 50 50">
+                                    {% set colors = ['#0dcaf0', '#20c997', '#6f42c1', '#fd7e14', '#d63384'] %}
+                                    {% set total = offres|length %}
+                                    {% set angle = 0 %}
+                                    {% for contrat in unique_contracts %}
+                                        {% set count = 0 %}
+                                        {% for offre in offres %}
+                                            {% if offre.typeContrat == contrat %}
+                                                {% set count = count + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% set percentage = (count / total * 100)|round(0) %}
+                                        {% set segment = (percentage * 3.6)|round(0) %}
+                                        <circle cx="25" cy="25" r="20" fill="none" 
+                                                stroke="{{ colors[loop.index0] }}" 
+                                                stroke-width="8" 
+                                                stroke-dasharray="{{ segment }} {{ 360 - segment }}" 
+                                                stroke-dashoffset="{{ -angle }}"
+                                                transform="rotate(-90 25 25)"/>
+                                        {% set angle = angle + segment %}
+                                    {% endfor %}
+                                </svg>
+                            </div>
+                            <div class="small">
+                                <div class="text-info">
+                                    <i class="bi bi-pie-chart me-1"></i>
+                                    {{ unique_contracts|length }} type{% if unique_contracts|length > 1 %}s{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carte 4: Localisations -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-geo-alt-fill text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-muted mb-3">Localisations</h6>
+                    {% set unique_locations = [] %}
+                    {% for offre in offres %}
+                        {% if offre.lieu and offre.lieu not in unique_locations %}
+                            {% set unique_locations = unique_locations|merge([offre.lieu]) %}
+                        {% endif %}
+                    {% endfor %}
+                    <h2 class="fw-bold mb-3 text-warning">{{ unique_locations|length }}</h2>
+                    
+                    <!-- Mini carte avec points -->
+                    <div class="mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="mini-map me-3 position-relative" style="width: 50px; height: 50px;">
+                                <div class="bg-light rounded" style="width: 100%; height: 100%; position: relative;">
+                                    {% for i in 1..unique_locations|length %}
+                                        {% if i <= 5 %}
+                                            <div class="mini-map-dot position-absolute rounded-circle bg-warning" 
+                                                 style="width: 8px; height: 8px; 
+                                                        top: {{ 10 + random(30) }}px; 
+                                                        left: {{ 10 + random(30) }}px;
+                                                        opacity: 0.{{ 5 + random(5) }};"></div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="small">
+                                <div class="text-warning">
+                                    <i class="bi bi-geo me-1"></i>
+                                    {{ unique_locations|length }} ville{% if unique_locations|length > 1 %}s{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Graphique principal -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart me-2"></i>Répartition des offres par type de contrat</h6>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Graphique en barres simple -->
+                    <div class="chart-container" style="height: 200px;">
+                        <div class="d-flex align-items-end h-100">
+                            {% set contract_counts = {} %}
+                            {% for offre in offres %}
+                                {% set contract_type = offre.typeContrat|default('Non spécifié') %}
+                                {% set contract_counts = contract_counts|merge({(contract_type): (contract_counts[contract_type]|default(0)) + 1}) %}
+                            {% endfor %}
+                            
+                            {# Calculer la valeur maximale #}
+                            {% set max_count = 0 %}
+                            {% for count in contract_counts %}
+                                {% if count > max_count %}
+                                    {% set max_count = count %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% set colors = ['#0d6efd', '#198754', '#6c757d', '#ffc107', '#0dcaf0', '#dc3545'] %}
+                            
+                            {% for contract, count in contract_counts %}
+                                {% if loop.index <= 6 %}
+                                <div class="d-flex flex-column align-items-center me-3" style="width: {{ 100 / (contract_counts|length > 6 ? 6 : contract_counts|length) }}%">
+                                    <div class="chart-bar mb-2 rounded-top" 
+                                         style="height: {{ max_count > 0 ? (count / max_count * 150)|round(0) : 0 }}px; 
+                                                width: 80%; 
+                                                background-color: {{ colors[loop.index0 % colors|length] }};
+                                                opacity: 0.8;"></div>
+                                    <div class="text-center">
+                                        <small class="text-muted d-block">{{ count }}</small>
+                                        <small class="text-dark fw-medium d-block" style="font-size: 0.7rem;">
+                                            {% if contract|length > 8 %}
+                                                {{ contract|slice(0, 8) }}.
+                                            {% else %}
+                                                {{ contract }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-pie-chart me-2"></i>Statut des offres</h6>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Graphique circulaire simple -->
+                    <div class="d-flex justify-content-center align-items-center mb-3" style="height: 150px;">
+                        <div class="position-relative">
+                            <!-- Graphique circulaire simulé -->
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                {% set active_count = 0 %}
+                                {% set expired_count = 0 %}
+                                {% for offre in offres %}
+                                    {% if offre.isActive is defined and offre.isActive %}
+                                        {% set active_count = active_count + 1 %}
+                                    {% endif %}
+                                    {% if offre.dateExpiration is defined and offre.dateExpiration < date() %}
+                                        {% set expired_count = expired_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set other_count = offres|length - active_count - expired_count %}
+                                
+                                {% set total = offres|length %}
+                                {% set active_angle = total > 0 ? (active_count / total * 360)|round(0) : 0 %}
+                                {% set expired_angle = total > 0 ? (expired_count / total * 360)|round(0) : 0 %}
+                                {% set other_angle = 360 - active_angle - expired_angle %}
+                                
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#198754" stroke-width="20" 
+                                        stroke-dasharray="{{ active_angle }} {{ 360 - active_angle }}" stroke-dashoffset="0"/>
+                                
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#ffc107" stroke-width="20" 
+                                        stroke-dasharray="{{ expired_angle }} {{ 360 - expired_angle }}" 
+                                        stroke-dashoffset="{{ -active_angle }}"/>
+                                
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#6c757d" stroke-width="20" 
+                                        stroke-dasharray="{{ other_angle }} {{ 360 - other_angle }}" 
+                                        stroke-dashoffset="{{ -(active_angle + expired_angle) }}"/>
+                            </svg>
+                            
+                            <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <div class="h4 mb-0 fw-bold">{{ offres|length }}</div>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Légende -->
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
             <div class="row g-3 align-items-center">
-                <div class="col-lg-8">
-                    <div class="input-group input-group-lg">
+                <div class="col-md-8">
+                    <div class="input-group">
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-search text-muted"></i>
                         </span>
@@ -26,26 +357,46 @@
                             id="offreSearchInput" 
                             class="form-control border-start-0 shadow-none" 
                             type="search" 
-                            placeholder="Rechercher par titre ou lieu..." 
+                            placeholder="Rechercher par titre, lieu, description..." 
                             aria-label="Recherche d'offre">
+                        <button id="clearSearch" class="btn btn-outline-secondary d-none" type="button">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <small id="offreCount" class="text-muted">
-                        {{ offres|length }} offre{{ offres|length > 1 ? 's' : '' }} trouvée{{ offres|length > 1 ? 's' : '' }}
-                    </small>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <small id="offreCount" class="text-muted fw-medium">
+                            {{ offres|length }} offre{{ offres|length > 1 ? 's' : '' }}
+                        </small>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-funnel me-1"></i>Filtrer
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">Type de contrat</h6></li>
+                                <li><a class="dropdown-item filter-option" href="#" data-filter="contrat" data-value="">Tous</a></li>
+                                <li><a class="dropdown-item filter-option" href="#" data-filter="contrat" data-value="CDI">CDI</a></li>
+                                <li><a class="dropdown-item filter-option" href="#" data-filter="contrat" data-value="CDD">CDD</a></li>
+                                <li><a class="dropdown-item filter-option" href="#" data-filter="contrat" data-value="Stage">Stage</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="resetFilters"><i class="bi bi-x-circle me-2"></i>Réinitialiser</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Liste des offres (contenu existant préservé) -->
     {% if offres is empty %}
     <div class="text-center py-5 my-5">
         <div class="alert alert-light border shadow-sm py-5">
             <i class="bi bi-briefcase fs-1 text-muted mb-3 d-block"></i>
             <h5 class="text-muted mb-2">Aucune offre disponible</h5>
             <p class="text-muted mb-4">Commencez par créer votre première offre d'emploi.</p>
-            <a href="{{ path('app_offre_new') }}" class="btn btn-success">
+            <a href="{{ path('app_offre_new') }}" class="btn btn-success shadow-sm">
                 <i class="bi bi-plus-lg me-1"></i> Créer une offre
             </a>
         </div>
@@ -53,30 +404,36 @@
     {% else %}
     <div class="row g-4" id="offreList">
         {% for offre in offres %}
-        {# AJOUT DE LA CLASSE offre-card POUR LE JAVASCRIPT #}
-        <div class="col-md-6 col-lg-4 col-xl-3 offre-card">
-            <div class="card h-100 shadow-sm border-0 hover-shadow transition">
-                <div class="card-body d-flex flex-column p-4">
-                    <div class="position-absolute top-0 end-0 mt-3 me-3">
+        <div class="col-md-6 col-lg-4 col-xl-3 offre-card" 
+             data-title="{{ offre.title|lower }}" 
+             data-lieu="{{ offre.lieu|default('')|lower }}"
+             data-contrat="{{ offre.typeContrat|default('') }}"
+             data-description="{{ offre.description|default('')|lower }}">
+            <div class="card h-100 border-0 shadow-sm hover-lift">
+                <div class="card-body p-4 d-flex flex-column">
+                    <!-- En-tête avec badge -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                            {{ offre.typeContrat|default('CDI') }}
+                        </span>
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-light rounded-circle p-2 shadow-sm" 
-                                    type="button" 
-                                    data-bs-toggle="dropdown" 
-                                    aria-expanded="false">
+                            <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li>
                                     <a class="dropdown-item" href="{{ path('app_offre_edit', {'id': offre.id}) }}">
-                                        <i class="bi bi-pencil me-2 text-primary"></i>Modifier
+                                        <i class="bi bi-pencil me-2"></i>Modifier
                                     </a>
                                 </li>
                                 <li>
-                                    <hr class="dropdown-divider my-1">
+                                    <a class="dropdown-item" href="{{ path('app_admin_offre_details', {'id': offre.id}) }}">
+                                        <i class="bi bi-eye me-2"></i>Voir détails
+                                    </a>
                                 </li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" 
-                                          action="{{ path('app_offre_delete', {'id': offre.id}) }}" 
+                                    <form method="post" action="{{ path('app_offre_delete', {'id': offre.id}) }}" 
                                           onsubmit="return confirm('Supprimer cette offre définitivement ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offre.id) }}">
                                         <button type="submit" class="dropdown-item text-danger">
@@ -88,38 +445,85 @@
                         </div>
                     </div>
 
-                    <h5 class="card-title fw-semibold mb-2 text-dark offre-title">
+                    <!-- Titre COMPLET -->
+                    <h6 class="card-title fw-bold mb-3 offre-title text-dark">
                         {{ offre.title }}
-                    </h5>
+                    </h6>
 
-                    <div class="d-flex align-items-center text-muted mb-3 small">
-                        <i class="bi bi-geo-alt me-2"></i>
-                        <span class="offre-lieu">{{ offre.lieu|default('Lieu non précisé') }}</span>
+                    <!-- Lieu COMPLET -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-geo-alt text-muted me-2 fs-6"></i>
+                            <span class="offre-lieu fw-medium">{{ offre.lieu|default('Non spécifié') }}</span>
+                        </div>
                     </div>
 
-                    <div class="row g-3 mt-auto mb-4">
-                        <div class="col-6">
-                            <div class="small text-muted mb-1">Salaire</div>
-                            <div class="fw-medium">
+                    <!-- Salaire COMPLET -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-cash-coin text-muted me-2 fs-6"></i>
+                            <span class="fw-semibold">
                                 {% if offre.salaire %}
-                                    {{ offre.salaire }} DT
+                                    {{ offre.salaire|number_format(0, ',', ' ') }} DT
                                 {% else %}
-                                    <span class="text-muted">Non indiqué</span>
+                                    <span class="text-muted">Salaire non indiqué</span>
                                 {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="small text-muted mb-1">Type de contrat</div>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
-                                {{ offre.typeContrat|default('Non précisé') }}
                             </span>
                         </div>
                     </div>
 
-                    <a href="{{ path('app_admin_offre_details', {'id': offre.id}) }}" 
-                       class="btn btn-outline-success w-100 mt-auto">
-                        <i class="bi bi-arrow-right-circle me-2"></i>Voir l'offre complète
-                    </a>
+                    <!-- Description -->
+                    {% if offre.description %}
+                    <div class="mb-4 flex-grow-1">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-text-left text-muted me-2 fs-6 mt-1"></i>
+                            <div class="offre-description small text-muted">
+                                {% if offre.description|length > 150 %}
+                                    {{ offre.description|slice(0, 150) }}...
+                                    <a href="#" class="text-primary see-more" data-description="{{ offre.description }}">Voir plus</a>
+                                {% else %}
+                                    {{ offre.description }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Date de création -->
+                    {% if offre.createdAt is defined %}
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-calendar3 text-muted me-2 fs-6"></i>
+                            <small class="text-muted">Publiée le {{ offre.createdAt|date('d/m/Y') }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Candidatures -->
+                    {% if offre.candidatures is defined %}
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-people text-muted me-2 fs-6"></i>
+                                <small class="text-muted">{{ offre.candidatures|length }} candidature(s)</small>
+                            </div>
+                            {% if offre.candidatures|length > 0 %}
+                            <a href="{{ path('app_admin_candidatures', {'id': offre.id}) }}" class="btn btn-sm btn-outline-info">
+                                Voir
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Bouton Voir Offre Complète -->
+                    <div class="mt-auto pt-3 border-top">
+                        <a href="{{ path('app_admin_offre_details', {'id': offre.id}) }}" 
+                           class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-eye me-2"></i>
+                            Voir l'offre complète
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -127,37 +531,411 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Modal pour voir la description complète -->
+<div class="modal fade" id="descriptionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Description complète</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="fullDescription"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Éléments DOM
     const searchInput = document.getElementById('offreSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
     const cards = document.querySelectorAll('.offre-card');
     const countElement = document.getElementById('offreCount');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const filterOptions = document.querySelectorAll('.filter-option');
+    const seeMoreLinks = document.querySelectorAll('.see-more');
+    const descriptionModal = new bootstrap.Modal(document.getElementById('descriptionModal'));
+    const fullDescriptionElement = document.getElementById('fullDescription');
 
+    let activeFilters = {
+        search: '',
+        contrat: ''
+    };
+
+    // Fonction pour mettre à jour le compteur
+    function updateCount(visibleCount) {
+        if (countElement) {
+            countElement.textContent = `${visibleCount} offre${visibleCount !== 1 ? 's' : ''} trouvée${visibleCount !== 1 ? 's' : ''}`;
+        }
+    }
+
+    // Fonction pour filtrer les cartes
+    function filterCards() {
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = card.dataset.title || '';
+            const location = card.dataset.lieu || '';
+            const description = card.dataset.description || '';
+            const contrat = card.dataset.contrat || '';
+            
+            let matchesSearch = true;
+            let matchesContrat = true;
+
+            // Filtre par recherche
+            if (activeFilters.search) {
+                const searchTerm = activeFilters.search;
+                matchesSearch = title.includes(searchTerm) || 
+                               location.includes(searchTerm) ||
+                               description.includes(searchTerm);
+            }
+
+            // Filtre par type de contrat
+            if (activeFilters.contrat) {
+                matchesContrat = contrat === activeFilters.contrat.toLowerCase();
+            }
+
+            if (matchesSearch && matchesContrat) {
+                card.style.display = '';
+                visibleCount++;
+                
+                // Animation d'apparition
+                card.style.animation = 'fadeInUp 0.5s ease forwards';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        updateCount(visibleCount);
+        
+        // Afficher message si aucun résultat
+        if (visibleCount === 0) {
+            showNotification('Aucune offre ne correspond à vos critères', 'warning');
+        }
+    }
+
+    // Gestion de la recherche
     if (searchInput) {
         searchInput.addEventListener('input', () => {
-            const query = searchInput.value.toLowerCase().trim();
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const title = card.querySelector('.offre-title')?.textContent.toLowerCase() || '';
-                const location = card.querySelector('.offre-lieu')?.textContent.toLowerCase() || '';
-
-                if (title.includes(query) || location.includes(query)) {
-                    card.style.display = ''; 
-                    visibleCount++;
+            activeFilters.search = searchInput.value.toLowerCase().trim();
+            
+            if (clearSearchBtn) {
+                if (activeFilters.search) {
+                    clearSearchBtn.classList.remove('d-none');
                 } else {
-                    card.style.display = 'none';
+                    clearSearchBtn.classList.add('d-none');
                 }
-            });
+            }
+            
+            filterCards();
+        });
+    }
 
-            if (countElement) {
-                countElement.textContent = `${visibleCount} offre${visibleCount !== 1 ? 's' : ''} trouvée${visibleCount !== 1 ? 's' : ''}`;
+    // Bouton pour effacer la recherche
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                activeFilters.search = '';
+                clearSearchBtn.classList.add('d-none');
+                filterCards();
+                searchInput.focus();
             }
         });
     }
+
+    // Gestion des filtres
+    filterOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            const filterType = option.dataset.filter;
+            const filterValue = option.dataset.value;
+            
+            activeFilters[filterType] = filterValue.toLowerCase();
+            filterCards();
+            
+            // Mettre à jour le texte du bouton filtre
+            const filterBtn = document.querySelector('[data-bs-toggle="dropdown"]');
+            if (filterValue) {
+                filterBtn.innerHTML = `<i class="bi bi-funnel-fill me-1"></i>Filtré`;
+            } else {
+                filterBtn.innerHTML = `<i class="bi bi-funnel me-1"></i>Filtrer`;
+            }
+            
+            showNotification('Filtre appliqué', 'success');
+        });
+    });
+
+    // Réinitialiser les filtres
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Réinitialiser tous les filtres
+            activeFilters = {
+                search: '',
+                contrat: ''
+            };
+            
+            // Réinitialiser l'interface
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            if (clearSearchBtn) {
+                clearSearchBtn.classList.add('d-none');
+            }
+            
+            // Réinitialiser le bouton filtre
+            const filterBtn = document.querySelector('[data-bs-toggle="dropdown"]');
+            filterBtn.innerHTML = `<i class="bi bi-funnel me-1"></i>Filtrer`;
+            
+            filterCards();
+            showNotification('Filtres réinitialisés', 'info');
+        });
+    }
+
+    // Gestion des "Voir plus" pour les descriptions
+    seeMoreLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const description = link.dataset.description;
+            
+            if (fullDescriptionElement && descriptionModal) {
+                fullDescriptionElement.textContent = description;
+                descriptionModal.show();
+            }
+        });
+    });
+
+    // Fonction de notification
+    function showNotification(message, type = 'info') {
+        // Créer une notification toast simple
+        const toast = document.createElement('div');
+        toast.className = `position-fixed bottom-0 end-0 m-3 p-3 rounded shadow-lg`;
+        toast.style.zIndex = '1060';
+        toast.style.backgroundColor = type === 'success' ? '#198754' : 
+                                     type === 'warning' ? '#ffc107' : 
+                                     type === 'danger' ? '#dc3545' : '#0d6efd';
+        toast.style.color = 'white';
+        
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${type === 'success' ? 'bi-check-circle' : 
+                              type === 'warning' ? 'bi-exclamation-triangle' : 
+                              type === 'danger' ? 'bi-x-circle' : 'bi-info-circle'} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        // Auto-remove après 3 secondes
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 3000);
+    }
+
+    // Animation d'entrée initiale
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.classList.add('fade-in-up');
+    });
+
+    // Focus sur la recherche au chargement
+    if (searchInput) {
+        setTimeout(() => {
+            searchInput.focus();
+        }, 500);
+    }
+
+    // Fonction pour rafraîchir les statistiques
+    window.refreshStats = function() {
+        showNotification('Statistiques actualisées', 'success');
+    };
 });
 </script>
+
+<style>
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+/* Cards styles */
+.hover-lift {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    border-color: rgba(25, 135, 84, 0.2);
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* Mini charts */
+.mini-chart-circle circle {
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.mini-bar {
+    transition: height 0.5s ease, opacity 0.3s ease;
+}
+
+.mini-donut-chart circle {
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.mini-map-dot {
+    animation: pulse 2s infinite;
+}
+
+/* Chart styles */
+.chart-bar {
+    transition: height 0.5s ease;
+}
+
+.chart-bar:hover {
+    opacity: 1 !important;
+}
+
+/* Typography */
+.card-title {
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+/* Boutons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Input styles */
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Description */
+.see-more {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.see-more:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .row.g-4 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+}
+
+/* Amélioration des ombres */
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Espacement amélioré */
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Flex utilities */
+.flex-grow-1 {
+    flex-grow: 1 !important;
+}
+
+/* Transition pour les cartes */
+.card, .btn, .badge {
+    transition: all 0.2s ease;
+}
+
+/* Bordure supérieure pour séparation */
+.border-top {
+    border-top: 1px solid rgba(0,0,0,0.1) !important;
+}
+
+/* Ajustement des icônes */
+.bi {
+    font-size: 1rem;
+}
+
+/* Graphiques */
+.chart-bar {
+    border-radius: 4px 4px 0 0;
+}
+
+.mini-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+</style>
 {% endblock %}

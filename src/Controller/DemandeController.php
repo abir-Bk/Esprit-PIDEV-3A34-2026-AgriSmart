@@ -10,6 +10,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;  
 use App\Entity\Offre;
 use App\Entity\Demande;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 final class DemandeController extends AbstractController
 {
@@ -109,22 +112,64 @@ if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) ==
     
 }
 
-
 #[Route('/admin/demande/{id}/update-status', name: 'app_admin_demande_update_status', methods: ['POST'])]
-public function updateStatus(Demande $demande, Request $request, EntityManagerInterface $em): Response
-{
+public function updateStatus(
+    Demande $demande, 
+    Request $request, 
+    EntityManagerInterface $em, 
+    MailerInterface $mailer
+): Response {
     $newStatus = $request->request->get('statut');
     
     if ($newStatus) {
+        // 1. Mise à jour en base de données
         $demande->setStatut($newStatus);
         $demande->setDateModification(new \DateTime());
         $em->flush();
-        
-        $this->addFlash('success', 'Le statut de la candidature a été mis à jour.');
+
+        // 2. Logique d'envoi d'email
+        if ($newStatus === 'Acceptée' || $newStatus === 'Refusée') {
+            
+            $subject = ($newStatus === 'Acceptée') ? 'Candidature Acceptée - AgriSmart' : 'Réponse à votre candidature - AgriSmart';
+            
+            // Utilisez votre adresse académique pour être sûr que Gmail accepte l'envoi
+            $votreEmailTest = 'akrem.zaied@etudiant-fsegt.utm.tn'; 
+
+            $email = (new Email())
+                ->from('akrem.zaied@etudiant-fsegt.utm.tn')
+                ->to($votreEmailTest) 
+                ->subject($subject)
+                ->html("
+                    <div style='font-family: Arial, sans-serif; border: 1px solid #eee; padding: 20px;'>
+                        <h2 style='color: #2c3e50;'>Notification AgriSmart</h2>
+                        <p>Bonjour <strong>" . $demande->getPrenom() . "</strong>,</p>
+                        <p>Le statut de votre candidature a été mis à jour : <strong>" . $newStatus . "</strong>.</p>
+                        <hr>
+                        <p><small>Ceci est un test technique expédié depuis votre compte Gmail.</small></p>
+                    </div>
+                ");
+
+            try {
+                $mailer->send($email);
+                $this->addFlash('success', 'Statut mis à jour et email envoyé avec succès.');
+            } catch (TransportExceptionInterface $e) {
+                // Cette partie capture les erreurs spécifiques au transport (problème de connexion SMTP)
+                $this->addFlash('warning', 'Problème de connexion Mailer : ' . $e->getMessage());
+            } catch (\Exception $e) {
+                // Cette partie capture toutes les autres erreurs
+                $this->addFlash('danger', 'Erreur lors de l\'envoi : ' . $e->getMessage());
+            }
+        } else {
+            $this->addFlash('success', 'Le statut a été mis à jour (aucun email envoyé pour "En cours").');
+        }
     }
 
     return $this->redirectToRoute('app_admin_demande_details', ['id' => $demande->getId()]);
 }
+
+
+
+
 #[Route('/admin/demande/{id}/details', name: 'app_admin_demande_details')]
 public function demandeDetails(Demande $demande): Response
 {

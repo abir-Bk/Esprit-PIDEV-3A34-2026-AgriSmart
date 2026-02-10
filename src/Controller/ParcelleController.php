@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Parcelle;
 use App\Form\ParcelleType;
 use App\Repository\ParcelleRepository;
+use App\Repository\RessourceRepository; 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,9 +16,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class ParcelleController extends AbstractController
 {
     #[Route('/', name: 'app_parcelle_index', methods: ['GET', 'POST'])]
-    public function index(ParcelleRepository $parcelleRepository, Request $request, EntityManagerInterface $entityManager): Response
-    {
-        // Création d'une nouvelle parcelle (Modale Ajouter)
+    public function index(
+        ParcelleRepository $parcelleRepository, 
+        RessourceRepository $ressourceRepository, 
+        Request $request, 
+        EntityManagerInterface $entityManager
+    ): Response {
         $parcelle = new Parcelle();
         $form = $this->createForm(ParcelleType::class, $parcelle);
         $form->handleRequest($request);
@@ -25,14 +29,13 @@ class ParcelleController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($parcelle);
             $entityManager->flush();
-            
             $this->addFlash('success', 'Parcelle créée !');
             return $this->redirectToRoute('app_parcelle_index');
         }
 
         return $this->render('parcelle/parcelle.html.twig', [
-            // On récupère tout pour que AlpineJS puisse boucler dessus
             'parcelles' => $parcelleRepository->findAll(),
+            'ressources' => $ressourceRepository->findAll(), // Correction : Variable envoyée à Twig
             'form' => $form->createView(),
         ]);
     }
@@ -47,7 +50,6 @@ class ParcelleController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Parcelle mise à jour !');
         }
-
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -55,12 +57,10 @@ class ParcelleController extends AbstractController
     public function delete(Request $request, Parcelle $parcelle, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$parcelle->getId(), $request->request->get('_token'))) {
-            // Doctrine supprimera automatiquement les cultures liées si vous avez mis "onDelete: CASCADE"
             $entityManager->remove($parcelle);
             $entityManager->flush();
             $this->addFlash('success', 'Parcelle supprimée.');
         }
-        
         return $this->redirectToRoute('app_parcelle_index');
     }
 }

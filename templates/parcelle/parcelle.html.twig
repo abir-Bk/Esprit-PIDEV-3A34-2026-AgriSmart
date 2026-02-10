@@ -77,7 +77,6 @@
         border-radius: 1rem;
     }
 
-    /* Nouveau style pour les conseils */
     .advice-card {
         border-radius: 1rem;
         border-left: 5px solid;
@@ -97,7 +96,6 @@
     selectedTab: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
     selectedParcelleId: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
     weather: { temp: '--', desc: 'Chargement...', icon: 'fa-sun', wind: '--' },
-    // AJOUT : Objet pour stocker la recommandation
     advice: { text: 'Analyse en cours...', color: '#64748b', icon: 'fa-info-circle', bg: '#f1f5f9' },
     
     parcelles: [
@@ -121,7 +119,16 @@
                     dateRecoltePrevue: '{{ c.dateRecoltePrevue|date('Y-m-d') }}',
                     datePFr: '{{ c.datePlantation|date('d/m/Y') }}',
                     dateRFr: '{{ c.dateRecoltePrevue|date('d/m/Y') }}',
-                    csrfDeleteToken: '{{ csrf_token('delete' ~ c.id) }}'
+                    csrfDeleteToken: '{{ csrf_token('delete' ~ c.id) }}',
+                    consommations: [
+                        {% for conso in c.consommations %}
+                        {
+                            ressource: '{{ conso.ressource.nom|e('js') }}',
+                            quantite: '{{ conso.quantite }}',
+                            unite: '{{ conso.ressource.unite|e('js') }}'
+                        },
+                        {% endfor %}
+                    ]
                 },
                 {% endfor %}
             ]
@@ -154,7 +161,6 @@
                 wind: w.windspeed
             };
 
-            // AJOUT : LOGIQUE DE RECOMMANDATION (IF / ELSE)
             if (this.weather.temp > 30) {
                 this.advice = { text: 'Forte chaleur : Irriguer impérativement tôt le matin ou tard le soir.', color: '#ef4444', icon: 'fa-droplet', bg: '#fef2f2' };
             } else if (this.weather.wind > 20) {
@@ -222,7 +228,7 @@
         }
     })
 ">
-    <header class="main-header py-4 mb-5 shadow-sm">
+    <header class="main-header py-4 mb-3 shadow-sm">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
                 <h2 class="h3 fw-bold mb-1 text-dark">Tableau de Bord</h2>
@@ -233,6 +239,18 @@
             </button>
         </div>
     </header>
+
+    <div class="container mb-4">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'danger' ? 'danger' : 'success' }} alert-dismissible fade show rounded-4 shadow-sm border-0" role="alert">
+                    <i class="fa-solid {{ label == 'danger' ? 'fa-triangle-exclamation' : 'fa-circle-check' }} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
 
     <div class="container">
         <div class="row g-4">
@@ -344,6 +362,12 @@
                                             <div class="d-flex justify-content-between mb-3">
                                                 <div class="icon-circle"><i class="fa-solid fa-leaf"></i></div>
                                                 <div class="d-flex gap-1">
+                                                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 me-1" 
+                                                            data-bs-toggle="modal" 
+                                                            :data-bs-target="'#modalConsommer' + c.id" 
+                                                            style="font-size: 0.75rem;">
+                                                        <i class="fa-solid fa-flask"></i> Utiliser
+                                                    </button>
                                                     <button class="btn btn-sm btn-white border shadow-sm rounded-circle" @click="editCulture(c)" data-bs-toggle="modal" data-bs-target="#modalEditCulture" style="width:32px;height:32px"><i class="fa-solid fa-pencil text-primary" style="font-size:0.8rem"></i></button>
                                                     <form :action="'/culture/' + c.id + '/delete'" method="post">
                                                         <input type="hidden" name="_token" :value="c.csrfDeleteToken">
@@ -353,12 +377,59 @@
                                             </div>
                                             <h6 class="fw-bold mb-1" x-text="c.typeCulture"></h6>
                                             <p class="text-muted small mb-3">Variété : <span class="text-dark fw-600" x-text="c.variete"></span></p>
+                                            
                                             <div class="bg-light rounded-3 p-2 mb-3 d-flex justify-content-around text-center">
                                                 <div><span class="d-block small text-muted">Plantation</span><b class="small" x-text="c.datePFr"></b></div>
                                                 <div class="border-start"></div>
                                                 <div><span class="d-block small text-muted">Récolte</span><b class="small" x-text="c.dateRFr"></b></div>
                                             </div>
-                                            <span class="badge badge-soft-info w-100 py-2 rounded-3" x-text="c.statut"></span>
+                                            
+                                            <span class="badge badge-soft-info w-100 py-2 rounded-3 mb-3" x-text="c.statut"></span>
+
+                                            <div class="mt-2 pt-2 border-top">
+                                                <p class="small fw-bold text-muted mb-2" style="font-size: 0.7rem;">RESSOURCES UTILISÉES</p>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <template x-for="conso in c.consommations">
+                                                        <span class="badge bg-light text-dark border rounded-pill py-1 px-2" style="font-size: 0.65rem;">
+                                                            <span x-text="conso.ressource"></span>: <b x-text="conso.quantite + ' ' + conso.unite"></b>
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="c.consommations.length === 0">
+                                                        <span class="text-muted small italic" style="font-size: 0.65rem;">Aucun intrant enregistré</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            </div>
+
+                                        <div class="modal fade" :id="'modalConsommer' + c.id" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                                    <div class="modal-header border-0 p-4 pb-0">
+                                                        <h5 class="fw-bold">Utiliser une ressource pour <span x-text="c.typeCulture"></span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form :action="'/culture/' + c.id + '/consommer'" method="POST">
+                                                        <div class="modal-body p-4">
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-bold">Ressource disponible</label>
+                                                                <select name="ressource_id" class="form-select rounded-3" required>
+                                                                    <option value="">-- Choisir --</option>
+                                                                    {% for r in ressources %}
+                                                                        <option value="{{ r.id }}">{{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-bold">Quantité à utiliser</label>
+                                                                <input type="number" name="quantite" step="0.1" class="form-control rounded-3" placeholder="Quantité en kg ou L" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-0 p-4">
+                                                            <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold">Confirmer l'utilisation</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
@@ -497,12 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let city = a.village || a.town || a.city || "";
                 let finalName = detail && city && detail !== city ? `${detail}, ${city}` : (city || name);
                 document.getElementById('parcelle_nom').value = finalName;
-            } else {
-                document.getElementById('parcelle_nom').value = "Parcelle (" + lat + ")";
             }
-        })
-        .catch(err => {
-            document.getElementById('parcelle_nom').value = "Parcelle locale";
         });
     });
 });

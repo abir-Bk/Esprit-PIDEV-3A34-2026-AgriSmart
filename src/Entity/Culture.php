@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CultureRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,6 +34,17 @@ class Culture
     #[ORM\ManyToOne(inversedBy: 'cultures')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Parcelle $parcelle = null;
+
+    /**
+     * @var Collection<int, Consommation>
+     */
+    #[ORM\OneToMany(targetEntity: Consommation::class, mappedBy: 'culture')]
+    private Collection $consommations;
+
+    public function __construct()
+    {
+        $this->consommations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -106,6 +119,36 @@ class Culture
     public function setParcelle(?Parcelle $parcelle): static
     {
         $this->parcelle = $parcelle;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consommation>
+     */
+    public function getConsommations(): Collection
+    {
+        return $this->consommations;
+    }
+
+    public function addConsommation(Consommation $consommation): static
+    {
+        if (!$this->consommations->contains($consommation)) {
+            $this->consommations->add($consommation);
+            $consommation->setCulture($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsommation(Consommation $consommation): static
+    {
+        if ($this->consommations->removeElement($consommation)) {
+            // set the owning side to null (unless already changed)
+            if ($consommation->getCulture() === $this) {
+                $consommation->setCulture(null);
+            }
+        }
 
         return $this;
     }

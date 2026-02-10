@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Culture;
+use App\Entity\Ressource;
+use App\Entity\Consommation;
 use App\Repository\ParcelleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +32,45 @@ class CultureController extends AbstractController
         $entityManager->persist($culture);
         $entityManager->flush();
 
+        $this->addFlash('success', 'Nouvelle culture ajoutée avec succès.');
+        return $this->redirectToRoute('app_parcelle_index');
+    }
+
+    #[Route('/{id}/consommer', name: 'app_culture_consommer', methods: ['POST'])]
+    public function consommer(Request $request, Culture $culture, EntityManagerInterface $em): Response
+    {
+        $ressourceId = $request->request->get('ressource_id');
+        $quantiteUtilisee = (float) $request->request->get('quantite');
+
+        $ressource = $em->getRepository(Ressource::class)->find($ressourceId);
+
+        if (!$ressource) {
+            $this->addFlash('danger', 'Ressource introuvable.');
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
+        if ($ressource->getStockRestan() < $quantiteUtilisee) {
+            $this->addFlash('danger', "Stock insuffisant pour {$ressource->getNom()}");
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
+        // Mise à jour du stock
+        $ressource->setStockRestan($ressource->getStockRestan() - $quantiteUtilisee);
+
+        // Création de l'historique
+        $consommation = new Consommation();
+        $consommation->setRessource($ressource);
+        $consommation->setCulture($culture);
+        $consommation->setQuantite($quantiteUtilisee);
+        $consommation->setDateConsommation(new \DateTimeImmutable());
+        
+        // Correction ici : On ne définit pas l'agriculteur sur la consommation 
+        // car le champ n'existe pas dans l'entité Consommation fournie.
+
+        $em->persist($consommation);
+        $em->flush();
+
+        $this->addFlash('success', "Stock mis à jour (-{$quantiteUtilisee})");
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -42,6 +83,7 @@ class CultureController extends AbstractController
         $culture->setDatePlantation(new \DateTime($request->request->get('datePlantation')));
         
         $entityManager->flush();
+        $this->addFlash('info', 'Culture mise à jour.');
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -51,6 +93,7 @@ class CultureController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$culture->getId(), $request->request->get('_token'))) {
             $entityManager->remove($culture);
             $entityManager->flush();
+            $this->addFlash('warning', 'Culture supprimée.');
         }
         return $this->redirectToRoute('app_parcelle_index');
     }

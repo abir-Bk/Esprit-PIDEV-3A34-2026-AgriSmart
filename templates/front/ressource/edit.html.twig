@@ -1,0 +1,127 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}AgriSmart | Modifier Stock{% endblock %}
+
+{% block body %}
+<style>
+    :root { 
+        --agri-green: #10b981; 
+        --agri-green-soft: #ecfdf5;
+        --agri-dark: #064e3b;
+    }
+    
+    body { background-color: #f8fafc; }
+
+    /* Carte principale style AgriSmart */
+    .main-card { 
+        border: none; 
+        border-radius: 1.5rem; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+    }
+
+    .form-label { 
+        font-weight: 600; 
+        color: #475569; 
+        font-size: 0.9rem; 
+        margin-bottom: 0.5rem; 
+    }
+
+    /* Champs personnalisés */
+    .form-control, .form-select { 
+        border: 1px solid #e2e8f0; 
+        padding: 0.75rem 1rem; 
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus { 
+        border-color: var(--agri-green); 
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); 
+        outline: none;
+    }
+
+    /* Boîte d'icône en thème vert */
+    .icon-box-edit { 
+        background: var(--agri-green-soft); 
+        color: var(--agri-green); 
+        width: 65px; 
+        height: 65px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        border-radius: 1.2rem; 
+        margin: 0 auto 1.5rem; 
+    }
+
+    /* Bouton principal AgriSmart */
+    .btn-agri {
+        background-color: var(--agri-green);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-agri:hover {
+        background-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        color: white;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="main-card card p-4 p-md-5 bg-white">
+                <div class="text-center">
+                    <div class="icon-box-edit">
+                        <i class="fas fa-sync-alt fa-2x"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-1">Mettre à jour</h2>
+                    <p class="text-muted small mb-4">Modification des données pour <strong>{{ ressource.nom }}</strong></p>
+                </div>
+
+                {{ form_start(form) }}
+                    <div class="mb-3">
+                        <label class="form-label">Nom de l'article</label>
+                        {{ form_widget(form.nom) }}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Catégorie</label>
+                            {{ form_widget(form.type) }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Unité</label>
+                            {{ form_widget(form.unite) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Nouveau stock disponible</label>
+                        {{ form_widget(form.stockRestan) }}
+                    </div>
+
+                    <button type="submit" class="btn btn-agri w-100 py-3 fw-bold rounded-4 shadow-sm">
+                        <i class="fas fa-check-circle me-2"></i> Appliquer les changements
+                    </button>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ path('app_ressource_index') }}" class="text-muted text-decoration-none small fw-medium hover-link">
+                            <i class="fas fa-times me-1"></i> Annuler et quitter
+                        </a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Effet hover discret sur le lien de retour */
+    .hover-link:hover {
+        color: var(--agri-green) !important;
+    }
+</style>
+{% endblock %}

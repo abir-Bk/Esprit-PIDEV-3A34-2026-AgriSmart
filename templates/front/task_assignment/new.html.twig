@@ -1,4 +1,4 @@
-{% extends 'back/admin_base.html.twig' %}
+{% extends 'front/base.html.twig' %}
 
 {% block title %}Nouvelle affectation - AgriSmart Admin{% endblock %}
 
@@ -8,7 +8,7 @@
             <h5 class="mb-0">Créer une nouvelle affectation</h5>
         </div>
         <div class="card-body">
-            {% include 'back/task_assignment/_form.html.twig' with {form: form, button_label: 'Créer'} %}
+            {% include 'front/task_assignment/_form.html.twig' with {form: form, button_label: 'Créer'} %}
         </div>
     </div>
 {% endblock %}

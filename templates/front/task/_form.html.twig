@@ -1,0 +1,76 @@
+{{ form_start(form) }}
+<div class="row g-3">
+
+    <div class="col-md-6">
+        {{ form_label(form.titre) }}
+        {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_errors(form.titre) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_label(form.type) }}
+        {{ form_widget(form.type, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.type) }}
+    </div>
+
+    <div class="col-md-12">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control form-control-sm', 'rows': 3}}) }}
+        {{ form_errors(form.description) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_label(form.dateDebut) }}
+        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_errors(form.dateDebut) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_label(form.dateFin) }}
+        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_errors(form.dateFin) }}
+    </div>
+
+    <div class="col-md-4">
+        {{ form_label(form.priorite) }}
+        {{ form_widget(form.priorite, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.priorite) }}
+    </div>
+
+    <div class="col-md-4">
+        {{ form_label(form.statut) }}
+        {{ form_widget(form.statut, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.statut) }}
+    </div>
+
+    <div class="col-md-4">
+        {{ form_label(form.localisation) }}
+        {{ form_widget(form.localisation, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_errors(form.localisation) }}
+    </div>
+
+    <div class="col-md-4">
+        {{ form_label(form.parcelleId) }}
+        {{ form_widget(form.parcelleId, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.parcelleId) }}
+    </div>
+
+    <div class="col-md-4">
+        {{ form_label(form.cultureId) }}
+        {{ form_widget(form.cultureId, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.cultureId) }}
+    </div>
+
+    <div class="col-md-4">
+        {{ form_label(form.createdBy) }}
+        {{ form_widget(form.createdBy, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.createdBy) }}
+    </div>
+
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <button class="btn btn-primary btn-sm">{{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('admin_tasks_index') }}" class="btn btn-secondary btn-sm">Annuler</a>
+</div>
+{{ form_end(form) }}

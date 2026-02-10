@@ -17,7 +17,7 @@ class TaskAssignmentCrudController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(TaskAssignmentRepository $assignmentRepository): Response
     {
-        return $this->render('back/task_assignment/index.html.twig', [
+        return $this->render('front/task_assignment/index.html.twig', [
             'assignments' => $assignmentRepository->findAll(),
         ]);
     }
@@ -38,7 +38,7 @@ class TaskAssignmentCrudController extends AbstractController
             return $this->redirectToRoute('admin_task_assignments_index');
         }
 
-        return $this->render('back/task_assignment/new.html.twig', [
+        return $this->render('front/task_assignment/new.html.twig', [
             'assignment' => $assignment,
             'form' => $form->createView(),
         ]);
@@ -52,7 +52,7 @@ class TaskAssignmentCrudController extends AbstractController
             throw $this->createNotFoundException('Affectation introuvable.');
         }
 
-        return $this->render('back/task_assignment/show.html.twig', [
+        return $this->render('front/task_assignment/show.html.twig', [
             'assignment' => $assignment,
         ]);
     }
@@ -76,7 +76,7 @@ class TaskAssignmentCrudController extends AbstractController
             return $this->redirectToRoute('admin_task_assignments_index');
         }
 
-        return $this->render('back/task_assignment/edit.html.twig', [
+        return $this->render('front/task_assignment/edit.html.twig', [
             'assignment' => $assignment,
             'form' => $form->createView(),
         ]);

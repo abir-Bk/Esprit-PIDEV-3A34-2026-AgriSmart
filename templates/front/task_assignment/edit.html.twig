@@ -1,4 +1,4 @@
-{% extends 'back/admin_base.html.twig' %}
+{% extends 'front/base.html.twig' %}
 
 {% block title %}Modifier l'affectation - AgriSmart Admin{% endblock %}
 
@@ -9,7 +9,7 @@
             <a href="{{ path('admin_task_assignments_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
         </div>
         <div class="card-body">
-            {% include 'back/task_assignment/_form.html.twig' with {form: form, button_label: 'Mettre à jour'} %}
+            {% include 'front/task_assignment/_form.html.twig' with {form: form, button_label: 'Mettre à jour'} %}
         </div>
     </div>
 {% endblock %}

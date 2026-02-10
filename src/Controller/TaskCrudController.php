@@ -17,7 +17,7 @@ class TaskCrudController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(TaskRepository $taskRepository): Response
     {
-        return $this->render('back/task/index.html.twig', [
+        return $this->render('front/task/index.html.twig', [
             'tasks' => $taskRepository->findAll(),
         ]);
     }
@@ -38,7 +38,7 @@ class TaskCrudController extends AbstractController
             return $this->redirectToRoute('admin_tasks_index');
         }
 
-        return $this->render('back/task/new.html.twig', [
+        return $this->render('front/task/new.html.twig', [
             'task' => $task,
             'form' => $form->createView(),
         ]);
@@ -52,7 +52,7 @@ class TaskCrudController extends AbstractController
             throw $this->createNotFoundException('Tâche introuvable.');
         }
 
-        return $this->render('back/task/show.html.twig', [
+        return $this->render('front/task/show.html.twig', [
             'task' => $task,
         ]);
     }
@@ -76,7 +76,7 @@ class TaskCrudController extends AbstractController
             return $this->redirectToRoute('admin_tasks_index');
         }
 
-        return $this->render('back/task/edit.html.twig', [
+        return $this->render('front/task/edit.html.twig', [
             'task' => $task,
             'form' => $form->createView(),
         ]);

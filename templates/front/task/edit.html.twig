@@ -1,4 +1,4 @@
-{% extends 'back/admin_base.html.twig' %}
+{% extends 'front/base.html.twig' %}
 
 {% block title %}Modifier la tâche - AgriSmart Admin{% endblock %}
 
@@ -9,7 +9,7 @@
             <a href="{{ path('admin_tasks_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
         </div>
         <div class="card-body">
-            {% include 'back/task/_form.html.twig' with {form: form, button_label: 'Mettre à jour'} %}
+            {% include 'front/task/_form.html.twig' with {form: form, button_label: 'Mettre à jour'} %}
         </div>
     </div>
 {% endblock %}

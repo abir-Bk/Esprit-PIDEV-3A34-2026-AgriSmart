@@ -14,57 +14,49 @@ class PanierController extends AbstractController
     #[Route('', name: 'app_panier_index', methods: ['GET'])]
     public function index(PanierService $panier): Response
     {
-        $data = $panier->getDetails();
+        $details = $panier->getDetails();
 
         return $this->render('front/panier/index.html.twig', [
-            'items' => $data['items'],
-            'totalQty' => $data['totalQty'],
-            'total' => $data['total'],
+            'items' => $details['items'],
+            'total' => $details['total'],
+            'count' => $details['count'],
         ]);
     }
 
-    #[Route('/add/{id}', name: 'app_panier_add', requirements: ['id' => '\d+'], methods: ['POST', 'GET'])]
+    #[Route('/add/{id}', name: 'app_panier_add', methods: ['GET', 'POST'])]
     public function add(int $id, Request $request, PanierService $panier): Response
     {
-        $qty = (int) $request->request->get('qty', 1);
+        $qty = (int) $request->get('qty', 1);
         $panier->add($id, $qty);
 
-        $this->addFlash('success', 'Ajouté au panier ✅');
-
-        // si tu viens d’une page produit, on revient
-        $referer = $request->headers->get('referer');
-        return $referer ? $this->redirect($referer) : $this->redirectToRoute('app_panier_index');
+        $this->addFlash('success', 'Produit ajouté au panier ✅');
+        return $this->redirectToRoute('app_panier_index');
     }
 
-    #[Route('/remove-one/{id}', name: 'app_panier_remove', requirements: ['id' => '\d+'], methods: ['POST', 'GET'])]
-    public function removeOne(int $id, Request $request, PanierService $panier): Response
+    #[Route('/qty/{id}', name: 'app_panier_qty', methods: ['POST'])]
+    public function qty(int $id, Request $request, PanierService $panier): Response
     {
-        $panier->removeOne($id);
+        $qty = (int) $request->request->get('qty', 1);
+        $panier->setQty($id, $qty);
 
-        $referer = $request->headers->get('referer');
-        return $referer ? $this->redirect($referer) : $this->redirectToRoute('app_panier_index');
+        return $this->redirectToRoute('app_panier_index');
     }
 
-    #[Route('/remove-all/{id}', name: 'app_panier_remove_all', requirements: ['id' => '\d+'], methods: ['POST', 'GET'])]
-    public function removeAll(int $id, Request $request, PanierService $panier): Response
+    #[Route('/remove/{id}', name: 'app_panier_remove', methods: ['GET', 'POST'])]
+    public function remove(int $id, PanierService $panier): Response
     {
-        $panier->removeAll($id);
+        $panier->remove($id);
 
-        $referer = $request->headers->get('referer');
-        return $referer ? $this->redirect($referer) : $this->redirectToRoute('app_panier_index');
+        $this->addFlash('info', 'Produit retiré du panier.');
+        return $this->redirectToRoute('app_panier_index');
     }
 
-    #[Route('/clear', name: 'app_panier_clear', methods: ['POST'])]
-    public function clear(Request $request, PanierService $panier): Response
+    #[Route('/clear', name: 'app_panier_clear', methods: ['GET', 'POST'])]
+    public function clear(PanierService $panier): Response
     {
-        // CSRF optionnel (recommandé)
-        if (!$this->isCsrfTokenValid('panier_clear', (string) $request->request->get('_token'))) {
-            $this->addFlash('danger', 'Token CSRF invalide.');
-            return $this->redirectToRoute('app_panier_index');
-        }
-
         $panier->clear();
-        $this->addFlash('success', 'Panier vidé ✅');
+
+        $this->addFlash('info', 'Panier vidé.');
         return $this->redirectToRoute('app_panier_index');
     }
 }

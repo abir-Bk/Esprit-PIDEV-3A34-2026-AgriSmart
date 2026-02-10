@@ -1,0 +1,15 @@
+<h2>Merci pour votre commande #{{ commande.id }} ✅</h2>
+
+<p>Bonjour <strong>{{ commande.customerName }}</strong>,</p>
+
+<p>Nous avons bien reçu votre commande.</p>
+
+<ul>
+  <li><strong>Total :</strong> {{ commande.total|number_format(2, '.', ' ') }} TND</li>
+  <li><strong>Mode paiement :</strong> {{ commande.paymentMethod }}</li>
+  <li><strong>Statut :</strong> {{ commande.paymentStatus }}</li>
+</ul>
+
+<p>Adresse : {{ commande.customerAddress }}</p>
+
+<p>— AgriSmart</p>

@@ -4,219 +4,412 @@
 {% block title %}{{ produit.nom }} | AgriSmart{% endblock %}
 
 {% block body %}
-<section class="py-4 bg-light border-bottom">
+<style>
+/* ====== AgriSmart Product Show (scoped) ====== */
+.ag-show{
+  --ag-primary:#1A4331;
+  --ag-primary-2:#2E7D32;
+  --ag-accent:#F4B400;
+  --ag-cream:#FBF7EE;
+  --ag-bg:#F6F8F7;
+  --ag-text:#111827;
+  --ag-muted:#6B7280;
+  --ag-border:rgba(17,24,39,.08);
+}
+
+.ag-show .ag-hero{
+  background:
+    radial-gradient(900px 420px at 15% 35%, rgba(46,125,50,.16), transparent 60%),
+    radial-gradient(700px 320px at 85% 10%, rgba(244,180,0,.14), transparent 55%),
+    linear-gradient(180deg, var(--ag-cream), #ffffff);
+  border-bottom: 1px solid var(--ag-border);
+  padding: 1.25rem 0;
+}
+
+.ag-show .ag-card{
+  border: 1px solid var(--ag-border);
+  border-radius: 22px;
+  overflow: hidden;
+  background:#fff;
+  box-shadow: 0 .8rem 1.6rem rgba(0,0,0,.06);
+}
+
+.ag-show .ag-img{
+  height: 440px;
+  object-fit: cover;
+  width: 100%;
+  display:block;
+}
+
+.ag-show .ag-badges{
+  position:absolute; top: 14px; left: 14px;
+  display:flex; flex-wrap:wrap; gap:.4rem;
+}
+
+.ag-show .ag-badge{
+  border-radius: 999px;
+  padding: .38rem .62rem;
+  font-weight: 900;
+  font-size: .72rem;
+  letter-spacing: .06em;
+  backdrop-filter: blur(6px);
+}
+
+.ag-show .ag-badge.type-vente{ background: rgba(26,67,49,.92); color:#fff; }
+.ag-show .ag-badge.type-location{ background: rgba(30,136,229,.92); color:#fff; }
+.ag-show .ag-badge.promo{ background: rgba(244,180,0,.95); color:#111827; }
+.ag-show .ag-badge.cat{ background: rgba(255,255,255,.90); color:#111827; border:1px solid rgba(17,24,39,.10); }
+
+.ag-show .ag-muted{ color: var(--ag-muted); }
+
+.ag-show .ag-mini{
+  border: 1px solid var(--ag-border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.ag-show .ag-mini.soft{
+  background: rgba(246,248,247,.75);
+}
+
+.ag-show .ag-btn-primary{
+  background: var(--ag-primary);
+  border:none;
+}
+.ag-show .ag-btn-primary:hover{ background:#163828; }
+
+.ag-show .ag-btn-accent{
+  background: var(--ag-accent);
+  border:none;
+  color:#111827;
+  font-weight: 800;
+}
+.ag-show .ag-btn-accent:hover{ filter: brightness(.96); }
+
+.ag-show .ag-pill{
+  display:inline-flex; align-items:center; gap:.4rem;
+  border: 1px solid var(--ag-border);
+  background: #fff;
+  color: var(--ag-text);
+  border-radius: 999px;
+  padding: .45rem .8rem;
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.ag-show .ag-price{
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.ag-show .ag-sticky{ position: sticky; top: 18px; }
+
+.ag-show .ag-qty{
+  width: 110px;
+  border-radius: 999px;
+  border: 1px solid var(--ag-border);
+  padding: .55rem .8rem;
+}
+
+.ag-show .ag-divider{ border-top:1px solid var(--ag-border); }
+
+.ag-show .toast-container{
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 1080;
+}
+</style>
+
+<div class="ag-show">
+
+  {# ===== HERO / breadcrumb ===== #}
+  <section class="ag-hero">
     <div class="container">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-                <h1 class="h4 fw-bold mb-1">{{ produit.nom }}</h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0 small">
-                        <li class="breadcrumb-item"><a class="text-success text-decoration-none" href="{{ path('app_produit_index') }}">Marketplace</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Détails</li>
-                    </ol>
-                </nav>
-            </div>
-
-            <div class="d-flex gap-2">
-                <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
-                    <i class="bi bi-arrow-left me-1"></i> Retour
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <h1 class="h4 fw-bold mb-1" style="color:var(--ag-text);">{{ produit.nom }}</h1>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+              <li class="breadcrumb-item">
+                <a class="text-decoration-none" style="color:var(--ag-primary);" href="{{ path('app_produit_index') }}">
+                  Marketplace
                 </a>
-                <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-dark rounded-pill">
-                    <i class="bi bi-person-circle me-1"></i> Espace vendeur
-                </a>
-            </div>
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">Détails</li>
+            </ol>
+          </nav>
         </div>
-    </div>
-</section>
 
-<section class="py-5">
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+          </a>
+          <button class="btn btn-outline-dark rounded-pill" type="button" data-copy-link>
+            <i class="bi bi-link-45deg me-1"></i> Copier le lien
+          </button>
+          <a href="{{ path('app_panier_index') }}" class="btn ag-btn-primary text-white rounded-pill">
+            <i class="bi bi-cart3 me-1"></i> Panier
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ===== CONTENT ===== #}
+  <section class="py-5" style="background:var(--ag-bg);">
     <div class="container">
-        <div class="row g-4">
+      <div class="row g-4">
 
-            {# ===== Colonne image + description ===== #}
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="position-relative bg-dark">
-                        <img
-                            src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
-                            alt="{{ produit.nom }}"
-                            class="w-100"
-                            style="height: 420px; object-fit: cover;"
-                        >
+        {# ===== Left: image + details ===== #}
+        <div class="col-lg-8">
+          <div class="ag-card">
+            <div class="position-relative">
+              <img
+                src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
+                alt="{{ produit.nom }}"
+                class="ag-img"
+              >
 
-                        <div class="position-absolute top-0 start-0 m-3 d-flex gap-2 flex-wrap">
-                            <span class="badge bg-{{ produit.type == 'location' ? 'info' : 'success' }} shadow-sm">
-                                <i class="bi bi-tag me-1"></i>{{ produit.type == 'location' ? 'LOCATION' : 'VENTE' }}
-                            </span>
-
-                            <span class="badge bg-light text-dark border shadow-sm">
-                                <i class="bi bi-grid-1x2 me-1"></i>{{ produit.categorie|upper }}
-                            </span>
-
-                            {% if produit.isPromotion %}
-                                <span class="badge bg-warning text-dark shadow-sm">
-                                    <i class="bi bi-lightning-fill me-1"></i>PROMO
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="card-body p-4 p-md-5">
-                        <div class="d-flex justify-content-between align-items-start gap-3">
-                            <div>
-                                <h2 class="h5 fw-bold mb-2">Description</h2>
-                                <p class="text-muted mb-0" style="white-space: pre-line;">
-                                    {{ produit.description ?: 'Aucune description fournie.' }}
-                                </p>
-                            </div>
-
-                            <div class="text-end d-none d-md-block">
-                                <button class="btn btn-outline-secondary btn-sm rounded-pill" type="button" id="copyLinkBtn">
-                                    <i class="bi bi-link-45deg me-1"></i> Copier le lien
-                                </button>
-                                <div class="small text-muted mt-2">
-                                    ID: #{{ produit.id }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="p-3 rounded-4 border bg-light h-100">
-                                    <div class="small text-muted mb-1">Localisation</div>
-                                    <div class="fw-semibold">
-                                        <i class="bi bi-geo-alt me-1 text-danger"></i>
-                                        {{ produit.locationAddress ?: 'Non précisée' }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="p-3 rounded-4 border bg-light h-100">
-                                    <div class="small text-muted mb-1">Stock</div>
-                                    {% set stock = produit.quantiteStock ?? 0 %}
-                                    {% if stock <= 0 %}
-                                        <span class="badge bg-danger">Rupture de stock</span>
-                                    {% elseif stock <= 3 %}
-                                        <span class="badge bg-warning text-dark">Stock faible ({{ stock }})</span>
-                                    {% else %}
-                                        <span class="badge bg-success-subtle text-dark border">Disponible ({{ stock }})</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            {% if produit.type == 'location' %}
-                                <div class="col-12">
-                                    <div class="p-3 rounded-4 border bg-light">
-                                        <div class="small text-muted mb-1">Disponibilité (Location)</div>
-                                        <div class="fw-semibold">
-                                            <i class="bi bi-calendar-event me-1 text-success"></i>
-                                            {% if produit.locationStart %}
-                                                Du {{ produit.locationStart|date('d/m/Y') }}
-                                            {% else %}
-                                                Date de début non définie
-                                            {% endif %}
-                                            {% if produit.locationEnd %}
-                                                — Au {{ produit.locationEnd|date('d/m/Y') }}
-                                            {% endif %}
-                                        </div>
-                                        <div class="small text-muted mt-1">
-                                            Réserve cette annonce pour une période.
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-
-                    </div>
-                </div>
+              <div class="ag-badges">
+                <span class="ag-badge {{ produit.type == 'location' ? 'type-location' : 'type-vente' }}">
+                  {{ produit.type == 'location' ? 'LOCATION' : 'VENTE' }}
+                </span>
+                <span class="ag-badge cat">
+                  <i class="bi bi-grid-1x2 me-1"></i>{{ produit.categorie|upper }}
+                </span>
+                {% if produit.isPromotion %}
+                  <span class="ag-badge promo">
+                    <i class="bi bi-lightning-fill me-1"></i>PROMO
+                  </span>
+                {% endif %}
+              </div>
             </div>
 
-            {# ===== Colonne carte prix / actions ===== #}
-            <div class="col-lg-4">
-                <div class="sticky-top" style="top: 18px;">
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="small text-muted">Prix</div>
+            <div class="p-4 p-md-5">
 
-                                    {% if produit.isPromotion and produit.promotionPrice is not null %}
-                                        <div class="h3 fw-bold mb-0 text-danger">
-                                            {{ produit.promotionPrice }} <span class="fs-6 text-muted">TND</span>
-                                        </div>
-                                        <div class="text-muted">
-                                            <small class="text-decoration-line-through">{{ produit.prix }} TND</small>
-                                            <small class="ms-2 badge bg-warning text-dark">
-                                                -{{ ((1 - (produit.promotionPrice / produit.prix)) * 100)|round }}%
-                                            </small>
-                                        </div>
-                                    {% else %}
-                                        <div class="h3 fw-bold mb-0">
-                                            {{ produit.prix }} <span class="fs-6 text-muted">TND</span>
-                                        </div>
-                                        <div class="text-muted"><small>&nbsp;</small></div>
-                                    {% endif %}
-                                </div>
-
-                                <span class="badge bg-light text-dark border">
-                                    {{ produit.type == 'location' ? 'Location' : 'Vente' }}
-                                </span>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <div class="d-grid gap-2">
-                                {% if produit.type == 'location' %}
-                                    <button class="btn btn-info text-white rounded-pill py-2" type="button" disabled>
-                                        <i class="bi bi-calendar-check me-1"></i> Réserver (bientôt)
-                                    </button>
-                                {% else %}
-                                    <button class="btn btn-success rounded-pill py-2" type="button" disabled>
-                                        <i class="bi bi-bag-check me-1"></i> Acheter (bientôt)
-                                    </button>
-                                {% endif %}
-
-                                <button class="btn btn-outline-secondary rounded-pill py-2" type="button" id="copyLinkBtnMobile">
-                                    <i class="bi bi-link-45deg me-1"></i> Copier le lien
-                                </button>
-                            </div>
-
-                            <div class="mt-4 p-3 rounded-4 bg-light border">
-                                <div class="small text-muted mb-1">Conseil</div>
-                                <div class="small">
-                                    Ajoute une image claire + une description détaillée pour augmenter les demandes.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-3 small text-muted text-center">
-                        Mis à jour : {{ produit.updatedAt ? produit.updatedAt|date('d/m/Y H:i') : (produit.createdAt ? produit.createdAt|date('d/m/Y H:i') : '—') }}
-                    </div>
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <h2 class="h5 fw-bold mb-2">Description</h2>
+                  <p class="ag-muted mb-0" style="white-space: pre-line;">
+                    {{ produit.description ?: 'Aucune description fournie.' }}
+                  </p>
                 </div>
-            </div>
 
+                <div class="text-end d-none d-md-block">
+                  <span class="ag-pill">
+                    <i class="bi bi-hash"></i> ID: {{ produit.id }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="ag-divider my-4"></div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="ag-mini soft p-3 h-100">
+                    <div class="small ag-muted mb-1">Localisation</div>
+                    <div class="fw-semibold">
+                      <i class="bi bi-geo-alt me-1 text-danger"></i>
+                      {{ produit.locationAddress ?: 'Non précisée' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="ag-mini soft p-3 h-100">
+                    <div class="small ag-muted mb-1">Stock</div>
+                    {% set stock = produit.quantiteStock ?? 0 %}
+                    {% if stock <= 0 %}
+                      <span class="badge bg-danger">Rupture</span>
+                    {% elseif stock <= 3 %}
+                      <span class="badge bg-warning text-dark">Faible ({{ stock }})</span>
+                    {% else %}
+                      <span class="badge bg-success-subtle text-dark border">Disponible ({{ stock }})</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if produit.type == 'location' %}
+                  <div class="col-12">
+                    <div class="ag-mini soft p-3">
+                      <div class="small ag-muted mb-1">Disponibilité (Location)</div>
+                      <div class="fw-semibold">
+                        <i class="bi bi-calendar-event me-1 text-success"></i>
+                        {% if produit.locationStart %}
+                          Du {{ produit.locationStart|date('d/m/Y') }}
+                        {% else %}
+                          Date début non définie
+                        {% endif %}
+                        {% if produit.locationEnd %}
+                          — Au {{ produit.locationEnd|date('d/m/Y') }}
+                        {% endif %}
+                      </div>
+                      <div class="small ag-muted mt-1">
+                        (La réservation sera gérée plus tard via Commande/Calendrier.)
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+
+            </div>
+          </div>
         </div>
+
+        {# ===== Right: pricing / actions ===== #}
+        <div class="col-lg-4">
+          <div class="ag-sticky">
+
+            <div class="ag-card">
+              <div class="p-4">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <div class="small ag-muted">Prix</div>
+
+                    {% if produit.isPromotion and produit.promotionPrice is not null %}
+                      <div class="ag-price text-danger">
+                        {{ produit.promotionPrice }} <span class="fs-6 ag-muted">TND</span>
+                      </div>
+                      <div class="ag-muted">
+                        <small class="text-decoration-line-through">{{ produit.prix }} TND</small>
+                        {% if produit.prix %}
+                          <small class="ms-2 badge" style="background: rgba(244,180,0,.35); color:#111827;">
+                            -{{ ((1 - (produit.promotionPrice / produit.prix)) * 100)|round }}%
+                          </small>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <div class="ag-price" style="color:var(--ag-text);">
+                        {{ produit.prix }} <span class="fs-6 ag-muted">TND</span>
+                      </div>
+                      <div class="ag-muted"><small>&nbsp;</small></div>
+                    {% endif %}
+                  </div>
+
+                  <span class="badge bg-light text-dark border">
+                    {{ produit.type == 'location' ? 'Location' : 'Vente' }}
+                  </span>
+                </div>
+
+                <div class="ag-divider my-4"></div>
+
+                {% set stock = produit.quantiteStock ?? 0 %}
+
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                  <div class="small ag-muted">Quantité</div>
+                  <input
+                    class="ag-qty text-center"
+                    type="number"
+                    min="1"
+                    value="1"
+                    name="qty_ui"
+                    {% if stock > 0 %}max="{{ stock }}"{% endif %}
+                    data-qty
+                  >
+                </div>
+
+                <div class="d-grid gap-2">
+                  {% if produit.type == 'vente' %}
+                    {% if stock <= 0 %}
+                      <button class="btn btn-secondary rounded-pill py-2" type="button" disabled>
+                        <i class="bi bi-x-circle me-1"></i> Indisponible
+                      </button>
+                    {% else %}
+                      {# ✅ POST recommandé #}
+                      <form method="post" action="{{ path('app_panier_add', {id: produit.id}) }}" class="d-grid">
+                        <input type="hidden" name="_token" value="{{ csrf_token('panier_add_' ~ produit.id) }}">
+                        <input type="hidden" name="qty" value="1" data-qty-hidden>
+                        <button class="btn ag-btn-primary text-white rounded-pill py-2" type="submit">
+                          <i class="bi bi-cart-plus me-1"></i> Ajouter au panier
+                        </button>
+                      </form>
+
+                      <a href="{{ path('app_panier_index') }}" class="btn btn-outline-dark rounded-pill py-2">
+                        <i class="bi bi-basket me-1"></i> Voir mon panier
+                      </a>
+                    {% endif %}
+                  {% else %}
+                    <button class="btn btn-info text-white rounded-pill py-2" type="button" disabled>
+                      <i class="bi bi-calendar-check me-1"></i> Réserver (bientôt)
+                    </button>
+                  {% endif %}
+
+                  <button class="btn btn-outline-secondary rounded-pill py-2" type="button" data-copy-link>
+                    <i class="bi bi-link-45deg me-1"></i> Copier le lien
+                  </button>
+                </div>
+
+                <div class="mt-4 p-3 rounded-4" style="background: rgba(246,248,247,.9); border:1px solid var(--ag-border);">
+                  <div class="small ag-muted mb-1">Conseil</div>
+                  <div class="small">
+                    Des photos nettes + une description précise augmentent les commandes.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 small ag-muted text-center">
+              Mis à jour :
+              {{ produit.updatedAt ? produit.updatedAt|date('d/m/Y H:i') : (produit.createdAt ? produit.createdAt|date('d/m/Y H:i') : '—') }}
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-</section>
+  </section>
+
+  {# ===== Toast container ===== #}
+  <div class="toast-container"></div>
+</div>
 
 <script>
 (function(){
-    function copyLink(){
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(function(){
-            // petit feedback simple
-            alert('Lien copié ✅');
-        });
-    }
+  const toastContainer = document.querySelector('.ag-show .toast-container');
 
-    const btn1 = document.getElementById('copyLinkBtn');
-    const btn2 = document.getElementById('copyLinkBtnMobile');
-    if(btn1) btn1.addEventListener('click', copyLink);
-    if(btn2) btn2.addEventListener('click', copyLink);
+  function toast(message){
+    if(!toastContainer) return alert(message);
+    const el = document.createElement('div');
+    el.className = 'toast align-items-center text-bg-dark border-0 show mb-2';
+    el.role = 'alert';
+    el.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close"></button>
+      </div>`;
+    toastContainer.appendChild(el);
+    el.querySelector('button').addEventListener('click', () => el.remove());
+    setTimeout(() => el.remove(), 2200);
+  }
+
+  // Copy link buttons
+  document.querySelectorAll('[data-copy-link]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(window.location.href);
+        toast('Lien copié ✅');
+      }catch(e){
+        toast('Copie impossible (navigateur).');
+      }
+    });
+  });
+
+  // Qty sync (UI -> hidden input for panier_add)
+  const qtyInput = document.querySelector('[data-qty]');
+  const hiddenQty = document.querySelector('[data-qty-hidden]');
+  if(qtyInput && hiddenQty){
+    const sync = () => {
+      let v = parseInt(qtyInput.value || '1', 10);
+      if(isNaN(v) || v < 1) v = 1;
+      qtyInput.value = v;
+      hiddenQty.value = v;
+    };
+    qtyInput.addEventListener('input', sync);
+    sync();
+  }
 })();
 </script>
 {% endblock %}

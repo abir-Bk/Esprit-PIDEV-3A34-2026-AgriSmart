@@ -1,0 +1,15 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Nouvelle affectation - AgriSmart {% endblock %}
+
+{% block task_content %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Créer une nouvelle affectation</h5>
+        </div>
+        <div class="card-body">
+            {% include 'front/task_assignment/_form.html.twig' with {form: form, button_label: 'Créer'} %}
+        </div>
+    </div>
+{% endblock %}
+

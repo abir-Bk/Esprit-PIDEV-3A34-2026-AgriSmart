@@ -12411,9 +12411,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "platform-overrides": {
-        "ext-gd": "1.0",
-        "ext-zip": "1.0"
-    },
     "plugin-api-version": "2.6.0"
 }

@@ -1,0 +1,52 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Affectations de tâches - AgriSmart {% endblock %}
+
+{% block task_content %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Affectations de tâches</h5>
+            <a href="{{ path('task_assignments_new') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Nouvelle affectation
+            </a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tâche</th>
+                    <th>Ouvrier (ID)</th>
+                    <th>Date d'affectation</th>
+                    <th>Statut</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for assignment in assignments %}
+                    <tr>
+                        <td>{{ assignment.idAssignment }}</td>
+                        <td>{{ assignment.task ? assignment.task.titre : '' }}</td>
+                        <td>{{ assignment.workerId }}</td>
+                        <td>{{ assignment.dateAssignment ? assignment.dateAssignment|date('d/m/Y H:i') : '' }}</td>
+                        <td>{{ assignment.statut }}</td>
+                        <td class="text-end">
+                            <a href="{{ path('task_assignments_show', {id: assignment.idAssignment}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+                            <a href="{{ path('task_assignments_edit', {id: assignment.idAssignment}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+                            <form method="post" action="{{ path('task_assignments_delete', {id: assignment.idAssignment}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette affectation ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assignment.idAssignment) }}">
+                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Aucune affectation enregistrée.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+

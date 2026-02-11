@@ -1,0 +1,88 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Mes tâches - AgriSmart{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h3 class="mb-4">Mes tâches affectées</h3>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase small">Total</h6>
+                        <h3 class="fw-bold mb-0">{{ totalAssignments }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase small">Assignées</h6>
+                        <h3 class="fw-bold mb-0 text-primary">{{ assignesCount }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase small">Acceptées</h6>
+                        <h3 class="fw-bold mb-0 text-warning">{{ accepteesCount }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase small">Réalisées</h6>
+                        <h3 class="fw-bold mb-0 text-success">{{ realiseesCount }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Liste de mes tâches</h5>
+            </div>
+            <div class="card-body">
+                {% if assignments is empty %}
+                    <p class="text-muted mb-0">Aucune tâche ne vous a encore été affectée.</p>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th>Tâche</th>
+                                <th>Type</th>
+                                <th>Priorité</th>
+                                <th>Statut</th>
+                                <th>Début</th>
+                                <th>Fin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for assignment in assignments %}
+                                {% set task = assignment.task %}
+                                <tr>
+                                    <td>{{ task ? task.titre : '—' }}</td>
+                                    <td>{{ task ? task.type : '—' }}</td>
+                                    <td>{{ task ? task.priorite : '—' }}</td>
+                                    <td>{{ assignment.statut }}</td>
+                                    <td>
+                                        {{ task and task.dateDebut ? task.dateDebut|date('d/m/Y H:i') : '' }}
+                                    </td>
+                                    <td>
+                                        {{ task and task.dateFin ? task.dateFin|date('d/m/Y H:i') : '' }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

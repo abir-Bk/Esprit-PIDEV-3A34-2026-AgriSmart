@@ -1,0 +1,20 @@
+{{ form_start(form) }}
+    <div class="row g-3">
+        <div class="col-md-6">
+            {{ form_row(form.task) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.workerId) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.dateAssignment) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.statut) }}
+        </div>
+    </div>
+    <div class="mt-3">
+        <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+        <a href="{{ path('task_assignments_index') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+{{ form_end(form) }}

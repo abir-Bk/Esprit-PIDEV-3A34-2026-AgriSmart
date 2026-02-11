@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\RessourceRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RessourceRepository::class)]
@@ -22,24 +20,14 @@ class Ressource
     private ?string $type = null;
 
     #[ORM\Column]
-    private ?float $stock_restan = null;
+    private ?float $stockRestan = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 50)]
     private ?string $unite = null;
 
-    #[ORM\Column]
-    private ?int $agriculteur_id = null;
-
-    /**
-     * @var Collection<int, Consommation>
-     */
-    #[ORM\OneToMany(targetEntity: Consommation::class, mappedBy: 'ressource')]
-    private Collection $consommations;
-
-    public function __construct()
-    {
-        $this->consommations = new ArrayCollection();
-    }
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -51,10 +39,9 @@ class Ressource
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -63,22 +50,20 @@ class Ressource
         return $this->type;
     }
 
-    public function setType(string $type): static
+    public function setType(string $type): self
     {
         $this->type = $type;
-
         return $this;
     }
 
     public function getStockRestan(): ?float
     {
-        return $this->stock_restan;
+        return $this->stockRestan;
     }
 
-    public function setStockRestan(float $stock_restan): static
+    public function setStockRestan(float $stockRestan): self
     {
-        $this->stock_restan = $stock_restan;
-
+        $this->stockRestan = $stockRestan;
         return $this;
     }
 
@@ -87,52 +72,20 @@ class Ressource
         return $this->unite;
     }
 
-    public function setUnite(string $unite): static
+    public function setUnite(string $unite): self
     {
         $this->unite = $unite;
-
         return $this;
     }
 
-    public function getAgriculteurId(): ?int
+    public function getUser(): ?User
     {
-        return $this->agriculteur_id;
+        return $this->user;
     }
 
-    public function setAgriculteurId(int $agriculteur_id): static
+    public function setUser(?User $user): self
     {
-        $this->agriculteur_id = $agriculteur_id;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Consommation>
-     */
-    public function getConsommations(): Collection
-    {
-        return $this->consommations;
-    }
-
-    public function addConsommation(Consommation $consommation): static
-    {
-        if (!$this->consommations->contains($consommation)) {
-            $this->consommations->add($consommation);
-            $consommation->setRessource($this);
-        }
-
-        return $this;
-    }
-
-    public function removeConsommation(Consommation $consommation): static
-    {
-        if ($this->consommations->removeElement($consommation)) {
-            // set the owning side to null (unless already changed)
-            if ($consommation->getRessource() === $this) {
-                $consommation->setRessource(null);
-            }
-        }
-
+        $this->user = $user;
         return $this;
     }
 }

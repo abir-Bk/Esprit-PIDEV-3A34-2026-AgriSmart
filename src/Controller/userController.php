@@ -26,7 +26,7 @@ class userController extends AbstractController
         } elseif (in_array('ROLE_EMPLOYEE', $user->getRoles())) {
             return $this->render('users/employe/dashboard.html.twig');
         } elseif (in_array('ROLE_AGRICULTEUR', $user->getRoles())) {
-            return $this->render('back/users/agriculteur/dashboard.html.twig');
+            return $this->render('front/semi-public/users/agriculteur/dashboard.html.twig');
         } elseif (in_array('ROLE_FOURNISSEUR', $user->getRoles())) {
             return $this->render('back/users/fournisseur/dashboard.html.twig');
         }

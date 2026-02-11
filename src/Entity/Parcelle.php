@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ParcelleRepository;
+use App\Entity\User; // Import de l'entité User
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -30,8 +31,10 @@ class Parcelle
     #[ORM\Column(length: 255)]
     private ?string $typeSol = null;
 
-    #[ORM\Column]
-    private ?int $userId = null;
+    // La nouvelle relation correcte vers l'utilisateur
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     /**
      * @var Collection<int, Culture>
@@ -57,7 +60,6 @@ class Parcelle
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -69,7 +71,6 @@ class Parcelle
     public function setSurface(float $surface): static
     {
         $this->surface = $surface;
-
         return $this;
     }
 
@@ -81,7 +82,6 @@ class Parcelle
     public function setLatitude(float $latitude): static
     {
         $this->latitude = $latitude;
-
         return $this;
     }
 
@@ -93,7 +93,6 @@ class Parcelle
     public function setLongitude(float $longitude): static
     {
         $this->longitude = $longitude;
-
         return $this;
     }
 
@@ -105,19 +104,18 @@ class Parcelle
     public function setTypeSol(string $typeSol): static
     {
         $this->typeSol = $typeSol;
-
         return $this;
     }
 
-    public function getUserId(): ?int
+    // Getters et Setters pour l'objet User
+    public function getUser(): ?User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): static
+    public function setUser(?User $user): static
     {
-        $this->userId = $userId;
-
+        $this->user = $user;
         return $this;
     }
 
@@ -135,19 +133,16 @@ class Parcelle
             $this->cultures->add($culture);
             $culture->setParcelle($this);
         }
-
         return $this;
     }
 
     public function removeCulture(Culture $culture): static
     {
         if ($this->cultures->removeElement($culture)) {
-            // set the owning side to null (unless already changed)
             if ($culture->getParcelle() === $this) {
                 $culture->setParcelle(null);
             }
         }
-
         return $this;
     }
 }

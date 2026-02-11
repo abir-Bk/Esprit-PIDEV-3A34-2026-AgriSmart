@@ -12,7 +12,8 @@
                         <div class="col-6">{{ form_row(form.type) }}</div>
                         <div class="col-6">{{ form_row(form.unite) }}</div>
                     </div>
-                    <div class="mb-4">{{ form_row(form.stockRestan) }}</div>
+                    {# CORRECTION ICI : stock_restan au lieu de stockRestan #}
+                    <div class="mb-4">{{ form_row(form.stock_restan) }}</div>
                     
                     <button class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm" style="background-color: #10b981; border:none;">
                         Enregistrer

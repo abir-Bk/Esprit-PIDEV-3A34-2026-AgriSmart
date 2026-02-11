@@ -412,12 +412,18 @@
                                                         <div class="modal-body p-4">
                                                             <div class="mb-3">
                                                                 <label class="form-label small fw-bold">Ressource disponible</label>
-                                                                <select name="ressource_id" class="form-select rounded-3" required>
-                                                                    <option value="">-- Choisir --</option>
-                                                                    {% for r in ressources %}
-                                                                        <option value="{{ r.id }}">{{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})</option>
-                                                                    {% endfor %}
-                                                                </select>
+                                                           {# ... dans la modale modalConsommer ... #}
+<select name="ressource_id" class="form-select rounded-3" required>
+    <option value="">-- Choisir --</option>
+    {% for r in ressources %}
+        {# Filtrage côté Twig pour n'afficher que les ressources du user connecté #}
+        {% if r.user == app.user %}
+            <option value="{{ r.id }}">
+                {{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})
+            </option>
+        {% endif %}
+    {% endfor %}
+</select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="form-label small fw-bold">Quantité à utiliser</label>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<title>Consommation index</title>
+
+{% block body %}
+    <h1>Consommation index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Quantite</th>
+                <th>DateConsommation</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for consommation in consommations %}
+            <tr>
+                <td>{{ consommation.id }}</td>
+                <td>{{ consommation.quantite }}</td>
+                <td>{{ consommation.dateConsommation ? consommation.dateConsommation|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_consommation_show', {'id': consommation.id}) }}">show</a>
+                    <a href="{{ path('app_consommation_edit', {'id': consommation.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_consommation_new') }}">Create new</a>
+{% endblock %}

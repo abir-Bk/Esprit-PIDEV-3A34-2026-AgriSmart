@@ -1,15 +1,444 @@
-<ul class="navbar-nav flex-column">
-
-    <li class="nav-item">
-        <a class="nav-link" href="{{ path('user_dashboard') }}">
-            Dashboard
+<!-- Sidebar START -->
+<nav class="navbar sidebar navbar-expand-xl navbar-light">
+    <!-- Navbar brand for mobile -->
+    <div class="d-flex align-items-center justify-content-between w-100 px-3 py-2 d-xl-none">
+        <a class="navbar-brand d-flex align-items-center py-0" href="#">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
+            <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">
+                Agri<span style="color: #28a745;">Smart</span>
+            </span>
         </a>
-    </li>
+        <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+            <i class="fa-solid fa-bars fa-lg"></i>
+        </button>
+    </div>
 
-    <li class="nav-item">
-        <a class="nav-link" href="{{ path('admin_users') }}">
-            Users
-        </a>
-    </li>
+    <!-- Offcanvas Sidebar -->
+    <div class="offcanvas-xl offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1" id="offcanvasSidebar">
+        <!-- Offcanvas header (mobile only) -->
+        <div class="offcanvas-header d-xl-none border-bottom">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
+                <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">
+                    Agri<span style="color: #28a745;">Smart</span>
+                </span>
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasSidebar" aria-label="Close"></button>
+        </div>
 
-</ul>
+        <!-- Offcanvas body -->
+        <div class="offcanvas-body sidebar-content d-flex flex-column p-0">
+            
+            <!-- Brand for desktop -->
+            <div class="d-none d-xl-flex align-items-center px-4 py-3 border-bottom">
+                <a class="navbar-brand d-flex align-items-center py-0 w-100" href="#">
+                    <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:32px;">
+                    <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.2rem;">
+                        Agri<span style="color: #28a745;">Smart</span>
+                    </span>
+                </a>
+            </div>
+
+            <!-- Sidebar menu -->
+            <ul class="navbar-nav flex-column px-3 pt-4 flex-grow-1" id="navbar-sidebar">
+
+                <!-- Main Navigation -->
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'user_dashboard' %}active{% endif %}" href="{{ path('user_dashboard') }}">
+                        <i class="fa-solid fa-house me-2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}" href="{{ path('admin_users') }}">
+                        <i class="fa-solid fa-users me-2"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+
+                <!-- Section Divider -->
+                <li class="nav-item mt-4 mb-2">
+                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Pages</span>
+                </li>
+
+                <!-- Collapsible Menu -->
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link collapsed" data-bs-toggle="collapse" href="#collapseBookings" role="button" aria-expanded="false" aria-controls="collapseBookings">
+                        <i class="fa-solid fa-calendar-check me-2"></i>
+                        <span>Bookings</span>
+                        <i class="fa-solid fa-chevron-down ms-auto sidebar-arrow"></i>
+                    </a>
+                    <ul class="nav collapse flex-column submenu" id="collapseBookings" data-bs-parent="#navbar-sidebar">
+                        <li class="nav-item">
+                            <a class="nav-link sidebar-sublink" href="#">
+                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
+                                Booking List
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sidebar-sublink" href="#">
+                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
+                                Booking Detail
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Additional Menu Items (Examples) -->
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link collapsed" data-bs-toggle="collapse" href="#collapseReports" role="button" aria-expanded="false" aria-controls="collapseReports">
+                        <i class="fa-solid fa-chart-line me-2"></i>
+                        <span>Reports</span>
+                        <i class="fa-solid fa-chevron-down ms-auto sidebar-arrow"></i>
+                    </a>
+                    <ul class="nav collapse flex-column submenu" id="collapseReports" data-bs-parent="#navbar-sidebar">
+                        <li class="nav-item">
+                            <a class="nav-link sidebar-sublink" href="#">
+                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
+                                Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sidebar-sublink" href="#">
+                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
+                                Statistics
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Section Divider -->
+                <li class="nav-item mt-4 mb-2">
+                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Documentation</span>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link" href="#">
+                        <i class="fa-solid fa-book me-2"></i>
+                        <span>Documentation</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link" href="#">
+                        <i class="fa-solid fa-circle-question me-2"></i>
+                        <span>Help & Support</span>
+                    </a>
+                </li>
+
+            </ul>
+            <!-- Sidebar menu end -->
+
+            <!-- Sidebar footer -->
+            <div class="sidebar-footer border-top mt-auto">
+                <div class="d-flex align-items-center justify-content-between p-3">
+                    <a class="sidebar-footer-link d-flex align-items-center text-decoration-none" href="{{ path('app_logout') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>
+                        <span class="small fw-medium">Log out</span>
+                    </a>
+                    <a class="sidebar-footer-link" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+                        <i class="fa-solid fa-gear"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- Sidebar END -->
+
+<style>
+/* ================================
+   SIDEBAR STYLES
+   ================================ */
+
+/* Sidebar Base */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background: #ffffff;
+    border-right: 1px solid #e9ecef;
+    transition: all 0.3s ease-in-out;
+    z-index: 1040;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #a0aec0;
+}
+
+/* Sidebar Content */
+.sidebar-content {
+    height: 100%;
+}
+
+/* Sidebar Headings */
+.sidebar-heading {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+/* Navigation Links */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #4a5568;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    margin: 0 0.25rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+.sidebar-link i:first-child {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.sidebar-link:hover {
+    background: #f7fafc;
+    color: #1a4331;
+    transform: translateX(2px);
+}
+
+.sidebar-link:hover i {
+    opacity: 1;
+}
+
+/* Active Link */
+.sidebar-link.active {
+    background: linear-gradient(135deg, #1a4331 0%, #28a745 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(26, 67, 49, 0.2);
+}
+
+.sidebar-link.active i {
+    opacity: 1;
+    color: #ffffff;
+}
+
+/* Collapse Arrow */
+.sidebar-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-link:not(.collapsed) .sidebar-arrow {
+    transform: rotate(180deg);
+}
+
+/* Submenu */
+.submenu {
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+}
+
+.sidebar-sublink {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    color: #718096;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    margin: 0 0.25rem 0.25rem;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+.sidebar-sublink::before {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.sidebar-sublink i.fa-circle {
+    font-size: 0.4rem;
+    opacity: 0.6;
+}
+
+.sidebar-sublink:hover {
+    background: #f7fafc;
+    color: #28a745;
+    padding-left: 2.7rem;
+}
+
+.sidebar-sublink:hover::before {
+    opacity: 1;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    background: #f8f9fa;
+}
+
+.sidebar-footer-link {
+    color: #4a5568;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar-footer-link:hover {
+    color: #1a4331;
+}
+
+.sidebar-footer-link i {
+    font-size: 1.1rem;
+}
+
+/* ================================
+   RESPONSIVE STYLES
+   ================================ */
+
+/* Tablet and below */
+@media (max-width: 1199.98px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .offcanvas-start {
+        width: 280px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 575.98px) {
+    .offcanvas-start {
+        width: 85% !important;
+        max-width: 300px;
+    }
+
+    .sidebar-link {
+        font-size: 0.9rem;
+        padding: 0.65rem 0.875rem;
+    }
+
+    .sidebar-sublink {
+        font-size: 0.85rem;
+        padding: 0.55rem 0.875rem 0.55rem 2.25rem;
+    }
+}
+
+/* Desktop - add padding to main content */
+@media (min-width: 1200px) {
+    body {
+        padding-left: 280px;
+    }
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-item {
+    animation: slideInLeft 0.3s ease forwards;
+}
+
+.nav-item:nth-child(1) { animation-delay: 0.05s; }
+.nav-item:nth-child(2) { animation-delay: 0.1s; }
+.nav-item:nth-child(3) { animation-delay: 0.15s; }
+.nav-item:nth-child(4) { animation-delay: 0.2s; }
+.nav-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* Smooth collapse animation */
+.collapse {
+    transition: height 0.35s ease;
+}
+
+/* Focus states for accessibility */
+.sidebar-link:focus,
+.sidebar-sublink:focus {
+    outline: 2px solid #28a745;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .sidebar {
+        display: none;
+    }
+}
+</style>
+
+<script>
+// Initialize Bootstrap tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Close mobile menu on link click
+    const navLinks = document.querySelectorAll('.sidebar-link:not([data-bs-toggle="collapse"])');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasSidebar'));
+            if (offcanvas && window.innerWidth < 1200) {
+                offcanvas.hide();
+            }
+        });
+    });
+
+    // Active submenu parent highlighting
+    const activeSublink = document.querySelector('.sidebar-sublink.active');
+    if (activeSublink) {
+        const parentCollapse = activeSublink.closest('.collapse');
+        if (parentCollapse) {
+            const parentLink = document.querySelector(`[href="#${parentCollapse.id}"]`);
+            if (parentLink) {
+                parentLink.classList.add('active-parent');
+                new bootstrap.Collapse(parentCollapse, { toggle: true });
+            }
+        }
+    }
+});
+</script>

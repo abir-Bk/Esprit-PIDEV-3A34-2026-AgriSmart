@@ -2,7 +2,11 @@
 
 namespace App\Entity;
 
+use App\Entity\Commande;
+use App\Entity\Produit;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -83,10 +87,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $googleId = null;
 
+    /** @var Collection<int, Commande> */
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Commande::class)]
+    private Collection $commandes;
+
+    /** @var Collection<int, Produit> */
+    #[ORM\OneToMany(mappedBy: 'vendeur', targetEntity: Produit::class)]
+    private Collection $produits;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->commandes = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -203,5 +217,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->googleId = $googleId;
 
         return $this;
+    }
+
+    /** @return Collection<int, Commande> */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    /** @return Collection<int, Produit> */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
     }
 }

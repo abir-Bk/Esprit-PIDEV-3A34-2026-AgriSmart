@@ -1,0 +1,30 @@
+{% extends 'front/base.html.twig' %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg rounded-4 p-4">
+                <h3 class="fw-bold text-center mb-4">Détails Ressource</h3>
+                {{ form_start(form) }}
+                    <div class="mb-3">{{ form_row(form.nom) }}</div>
+                    <div class="row mb-3">
+                        <div class="col-6">{{ form_row(form.type) }}</div>
+                        <div class="col-6">{{ form_row(form.unite) }}</div>
+                    </div>
+                    {# CORRECTION ICI : stock_restan au lieu de stockRestan #}
+                    <div class="mb-4">{{ form_row(form.stock_restan) }}</div>
+                    
+                    <button class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm" style="background-color: #10b981; border:none;">
+                        Enregistrer
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ path('app_ressource_index') }}" class="text-muted small">Retour au stock</a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

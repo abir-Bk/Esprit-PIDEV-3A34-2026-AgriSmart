@@ -10,7 +10,7 @@
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6",
-        "dompdf/dompdf": "*",
+        "dompdf/dompdf": "^3.1",
         "knplabs/knp-paginator-bundle": "^6.10",
         "knpuniversity/oauth2-client-bundle": "^2.20",
         "league/oauth2-google": "^4.1",
@@ -60,7 +60,11 @@
             "symfony/flex": true,
             "symfony/runtime": true
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "ext-gd": "1.0",
+            "ext-zip": "1.0"
+        }
     },
     "autoload": {
         "psr-4": {

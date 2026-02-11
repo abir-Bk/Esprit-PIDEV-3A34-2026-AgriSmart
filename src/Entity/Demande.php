@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DemandeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 // [cite: 39, 105, 106]
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -44,14 +45,15 @@ class Demande
     #[ORM\Column(length: 255)]
     private ?string $cv = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "users_id", referencedColumnName: "id", onDelete: "SET NULL")]
+    private ?User $user = null;
+
     #[ORM\Column(length: 255)]
     private ?string $lettreMotivation = null;
 
     #[ORM\ManyToOne(inversedBy: 'demandes')]
     private ?Offre $offre = null;
-
-    #[ORM\ManyToOne(inversedBy: 'demande')]
-    private ?Users $users = null;
 
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
@@ -133,6 +135,18 @@ class Demande
         return $this;
     }
 
+    
+    public function getUser(): ?User
+    {
+    return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+    $this->user = $user;
+
+    return $this;
+    }
     public function getLettreMotivation(): ?string
     {
         return $this->lettreMotivation;
@@ -157,17 +171,7 @@ class Demande
         return $this;
     }
 
-    public function getUsers(): ?Users
-    {
-        return $this->users;
-    }
 
-    public function setUsers(?Users $users): static
-    {
-        $this->users = $users;
-
-        return $this;
-    }
 
     public function getStatut(): ?string
     {

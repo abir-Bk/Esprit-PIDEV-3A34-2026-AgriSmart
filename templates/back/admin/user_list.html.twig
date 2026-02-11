@@ -4,12 +4,14 @@
 
 {% block body %}
 <!-- Page content START -->
-<div class="page-content">
+   <div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+    
+    <div class="flex-grow-1 p-3">
 
                          
 
     <!-- Page main content START -->
-    <div class="page-content-wrapper p-xxl-4">
 
         <!-- Flash Messages -->
         {% for message in app.flashes('success') %}

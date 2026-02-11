@@ -60,6 +60,9 @@ public function edit(Request $request, EntityManagerInterface $em, UserPasswordH
     // Handle profile form
     if ($form->isSubmitted() && $form->isValid()) {
         $em->flush();
+          $user->setImageFile(null);
+        $user->setDocumentFileFile(null);
+
         $this->addFlash('success', 'Profile updated successfully');
         return $this->redirectToRoute('app_profile_show');
     }

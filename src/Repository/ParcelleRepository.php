@@ -15,6 +15,25 @@ class ParcelleRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Parcelle::class);
     }
+    public function findBySearchQuery($user, $searchTerm, $sortBy, $direction)
+{
+    $qb = $this->createQueryBuilder('p')
+        ->where('p.user = :user')
+        ->setParameter('user', $user);
+
+    if (!empty($searchTerm)) {
+        $qb->andWhere('p.nom LIKE :search') // Remplacez 'nom' par le champ souhaité
+           ->setParameter('search', '%'.$searchTerm.'%');
+    }
+
+    // Sécurisation du tri pour éviter les injections SQL
+    $validFields = ['id', 'nom', 'surface']; // Ajoutez vos champs ici
+    if (in_array($sortBy, $validFields)) {
+        $qb->orderBy('p.' . $sortBy, $direction === 'DESC' ? 'DESC' : 'ASC');
+    }
+
+    return $qb->getQuery()->getResult();
+}
 
     //    /**
     //     * @return Parcelle[] Returns an array of Parcelle objects

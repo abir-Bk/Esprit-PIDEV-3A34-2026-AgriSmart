@@ -8,102 +8,94 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-    :root { 
-        --agri-green: #10b981; 
+    :root {
+        --agri-green: #10b981;
         --agri-dark: #064e3b;
-        --bg-light: #f8fafc; 
+        --bg-light: #f8fafc;
         --glass: rgba(255, 255, 255, 0.9);
         --weather-blue: #0ea5e9;
     }
-    
-    body { 
-        background-color: var(--bg-light); 
+   
+    body {
+        background-color: var(--bg-light);
         font-family: 'Plus Jakarta Sans', sans-serif;
         color: #1e293b;
     }
-
     .rounded-4 { border-radius: 1.25rem !important; }
-    
-    .agri-card { 
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+   
+    .agri-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid #e2e8f0;
         position: relative;
         overflow: hidden;
         cursor: pointer;
     }
     .agri-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-    .agri-card.active { 
-        border-color: var(--agri-green); 
+    .agri-card.active {
+        border-color: var(--agri-green);
         background-color: #f0fdf4 !important;
         box-shadow: inset 4px 0 0 0 var(--agri-green);
     }
-
-    .culture-item { 
-        background: white; 
-        border: 1px solid #f1f5f9; 
-        border-radius: 1rem; 
-        padding: 1.25rem; 
+    .culture-item {
+        background: white;
+        border: 1px solid #f1f5f9;
+        border-radius: 1rem;
+        padding: 1.25rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-    .culture-item:hover { 
+    .culture-item:hover {
         border-color: var(--agri-green);
         background: #fafafa;
     }
-
-    .icon-circle { 
-        width: 48px; height: 48px; 
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); 
-        color: var(--agri-green); 
-        border-radius: 12px; 
-        display: flex; align-items: center; justify-content: center; 
+    .icon-circle {
+        width: 48px; height: 48px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        color: var(--agri-green);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
         font-size: 1.2rem;
     }
-
     #map { height: 320px; width: 100%; border-radius: 15px; }
-    
-    #map-preview { 
-        height: 250px; 
-        width: 100%; 
-        border-radius: 15px; 
-        border: 3px solid white; 
+   
+    #map-preview {
+        height: 250px;
+        width: 100%;
+        border-radius: 15px;
+        border: 3px solid white;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         z-index: 1;
     }
-
     .weather-widget {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border: 1px solid #bae6fd;
         border-radius: 1rem;
     }
-
     .advice-card {
         border-radius: 1rem;
         border-left: 5px solid;
         transition: all 0.3s ease;
     }
-
     .badge-soft-success { background: #dcfce7; color: #166534; }
     .badge-soft-info { background: #e0f2fe; color: #075985; }
-
     .main-header {
         background: linear-gradient(to right, #ffffff, #f8fafc);
         border-bottom: 1px solid #e2e8f0;
     }
 </style>
 
-<main x-data="{ 
+<main x-data="{
     selectedTab: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
     selectedParcelleId: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
     weather: { temp: '--', desc: 'Chargement...', icon: 'fa-sun', wind: '--' },
     advice: { text: 'Analyse en cours...', color: '#64748b', icon: 'fa-info-circle', bg: '#f1f5f9' },
-    
+   
     parcelles: [
         {% for p in parcelles %}
-        { 
-            id: {{ p.id }}, 
-            nom: '{{ p.nom|e('js') }}', 
-            surface: '{{ p.surface }}', 
+        {
+            id: {{ p.id }},
+            nom: '{{ p.nom|e('js') }}',
+            surface: '{{ p.surface }}',
             typeSol: '{{ p.typeSol|e('js') }}',
             latitude: {{ p.latitude|default(36.8) }},
             longitude: {{ p.longitude|default(10.2) }},
@@ -135,13 +127,12 @@
         },
         {% endfor %}
     ],
-
     async getWeather(lat, lng) {
         try {
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
             const data = await res.json();
             const w = data.current_weather;
-            
+           
             const codes = {
                 0: { desc: 'Ciel dégagé', icon: 'fa-sun text-warning' },
                 1: { desc: 'Principalement dégagé', icon: 'fa-cloud-sun text-warning' },
@@ -152,7 +143,7 @@
                 80: { desc: 'Averses', icon: 'fa-cloud-showers-heavy text-primary' },
                 95: { desc: 'Orage', icon: 'fa-bolt text-dark' }
             };
-            
+           
             const config = codes[w.weathercode] || { desc: 'Variable', icon: 'fa-cloud' };
             this.weather = {
                 temp: Math.round(w.temperature),
@@ -160,7 +151,6 @@
                 icon: config.icon,
                 wind: w.windspeed
             };
-
             if (this.weather.temp > 30) {
                 this.advice = { text: 'Forte chaleur : Irriguer impérativement tôt le matin ou tard le soir.', color: '#ef4444', icon: 'fa-droplet', bg: '#fef2f2' };
             } else if (this.weather.wind > 20) {
@@ -172,10 +162,8 @@
             } else {
                 this.advice = { text: 'Conditions idéales pour l\'entretien et la plantation aujourd\'hui.', color: '#10b981', icon: 'fa-check-circle', bg: '#f0fdf4' };
             }
-
         } catch (e) { this.weather.desc = 'Indisponible'; }
     },
-
     updatePreviewMap(lat, lng) {
         if (window.previewMap) {
             const coords = [lat, lng];
@@ -193,7 +181,6 @@
         document.getElementById('parcelle_longitude').value = p.longitude;
         document.getElementById('form-parcelle').action = '/parcelle/' + p.id + '/edit';
         document.querySelector('#modalAjouterParcelle .modal-title').innerText = 'Modifier la Parcelle';
-
         if (p.latitude && p.longitude) {
             let coords = [p.latitude, p.longitude];
             setTimeout(() => {
@@ -228,15 +215,54 @@
         }
     })
 ">
+
     <header class="main-header py-4 mb-3 shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <h2 class="h3 fw-bold mb-1 text-dark">Tableau de Bord</h2>
                 <p class="text-muted small mb-0"><i class="fa-solid fa-calendar-day me-2"></i>{{ "now"|date("d F Y") }}</p>
             </div>
-            <button class="btn btn-success rounded-4 px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle" @click="resetForm()">
-                <i class="fa-solid fa-plus me-2"></i>Nouvelle Parcelle
-            </button>
+
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <form method="GET" class="d-flex flex-wrap gap-2 align-items-center" style="max-width: 100%;">
+                    <input 
+                        type="search" 
+                        name="search" 
+                        class="form-control rounded-4" 
+                        placeholder="Rechercher une parcelle..." 
+                        value="{{ search|default('') }}"
+                        style="min-width: 220px; max-width: 260px;"
+                    >
+
+                    <select name="sort" class="form-select rounded-4" style="min-width: 190px;">
+                        <option value="nbCultures" {{ sort|default('nbCultures') == 'nbCultures' ? 'selected' : '' }}>
+                            Tri : Nombre de cultures
+                        </option>
+                        <option value="nom" {{ sort|default('nbCultures') == 'nom' ? 'selected' : '' }}>
+                            Tri : Nom de la parcelle
+                        </option>
+                        <option value="surface" {{ sort|default('nbCultures') == 'surface' ? 'selected' : '' }}>
+                            Tri : Surface
+                        </option>
+                    </select>
+
+                    <select name="direction" class="form-select rounded-4" style="min-width: 150px;">
+                        <option value="DESC" {{ direction|default('DESC') == 'DESC' ? 'selected' : '' }}>Décroissant</option>
+                        <option value="ASC" {{ direction|default('DESC') == 'ASC' ? 'selected' : '' }}>Croissant</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-outline-success rounded-4 px-4">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+
+                <button class="btn btn-success rounded-4 px-4 py-2 fw-bold shadow-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalAjouterParcelle" 
+                        @click="resetForm()">
+                    <i class="fa-solid fa-plus me-2"></i>Nouvelle Parcelle
+                </button>
+            </div>
         </div>
     </header>
 
@@ -261,7 +287,7 @@
                 </div>
                 <div class="vstack gap-3">
                     <template x-for="parcelle in parcelles" :key="parcelle.id">
-                        <div class="agri-card p-3 bg-white rounded-4 shadow-sm" 
+                        <div class="agri-card p-3 bg-white rounded-4 shadow-sm"
                              :class="selectedTab == parcelle.id ? 'active' : ''"
                              @click="selectedTab = parcelle.id; selectedParcelleId = parcelle.id; updatePreviewMap(parcelle.latitude, parcelle.longitude); getWeather(parcelle.latitude, parcelle.longitude)">
                             <div class="d-flex justify-content-between align-items-start">
@@ -281,6 +307,16 @@
                             </div>
                         </div>
                     </template>
+
+                    <template x-if="parcelles.length === 0">
+                        <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-dashed">
+                            <i class="fa-solid fa-seedling fa-3x text-muted opacity-50 mb-3"></i>
+                            <p class="text-muted mb-2">Aucune parcelle trouvée</p>
+                            {% if search is defined and search != '' %}
+                                <p class="small text-muted">Essayez avec un autre nom ou <a href="{{ path('app_parcelle_index') }}">effacez la recherche</a></p>
+                            {% endif %}
+                        </div>
+                    </template>
                 </div>
             </div>
 
@@ -295,7 +331,6 @@
                                         <span class="badge bg-success px-3 py-2 rounded-pill" x-text="parcelle.typeSol"></span>
                                         <span class="text-muted small"><i class="fa-solid fa-maximize me-1"></i> <span x-text="parcelle.surface"></span> Ha</span>
                                     </div>
-
                                     <div class="weather-widget p-3 mb-3 d-flex align-items-center">
                                         <div class="me-4 fs-1">
                                             <i :class="'fa-solid ' + weather.icon"></i>
@@ -310,8 +345,7 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="advice-card p-3 mb-4 d-flex align-items-center shadow-sm" 
+                                    <div class="advice-card p-3 mb-4 d-flex align-items-center shadow-sm"
                                          :style="'background-color:' + advice.bg + '; border-color:' + advice.color">
                                         <div class="me-3 fs-4" :style="'color:' + advice.color">
                                             <i :class="'fa-solid ' + advice.icon"></i>
@@ -321,12 +355,12 @@
                                             <div class="text-dark fw-600 small" x-text="advice.text"></div>
                                         </div>
                                     </div>
-                                    
+                                   
                                     <p class="text-muted small mb-0">
-                                        <i class="fa-solid fa-location-dot me-1 text-danger"></i> 
+                                        <i class="fa-solid fa-location-dot me-1 text-danger"></i>
                                         Coordonnées: <span x-text="parseFloat(parcelle.latitude).toFixed(4)"></span>, <span x-text="parseFloat(parcelle.longitude).toFixed(4)"></span>
                                     </p>
-                                    
+                                   
                                     <div class="mt-3">
                                         <button class="btn btn-sm btn-outline-primary rounded-pill me-2" @click="editParcelle(parcelle)" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle">
                                             <i class="fa-solid fa-pen me-1"></i> Modifier
@@ -362,28 +396,32 @@
                                             <div class="d-flex justify-content-between mb-3">
                                                 <div class="icon-circle"><i class="fa-solid fa-leaf"></i></div>
                                                 <div class="d-flex gap-1">
-                                                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 me-1" 
-                                                            data-bs-toggle="modal" 
-                                                            :data-bs-target="'#modalConsommer' + c.id" 
+                                                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 me-1"
+                                                            data-bs-toggle="modal"
+                                                            :data-bs-target="'#modalConsommer' + c.id"
                                                             style="font-size: 0.75rem;">
                                                         <i class="fa-solid fa-flask"></i> Utiliser
                                                     </button>
-                                                    <button class="btn btn-sm btn-white border shadow-sm rounded-circle" @click="editCulture(c)" data-bs-toggle="modal" data-bs-target="#modalEditCulture" style="width:32px;height:32px"><i class="fa-solid fa-pencil text-primary" style="font-size:0.8rem"></i></button>
+                                                    <button class="btn btn-sm btn-white border shadow-sm rounded-circle" @click="editCulture(c)" data-bs-toggle="modal" data-bs-target="#modalEditCulture" style="width:32px;height:32px">
+                                                        <i class="fa-solid fa-pencil text-primary" style="font-size:0.8rem"></i>
+                                                    </button>
                                                     <form :action="'/culture/' + c.id + '/delete'" method="post">
                                                         <input type="hidden" name="_token" :value="c.csrfDeleteToken">
-                                                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle" style="width:32px;height:32px" onclick="return confirm('Supprimer ?')"><i class="fa-solid fa-trash text-danger" style="font-size:0.8rem"></i></button>
+                                                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle" style="width:32px;height:32px" onclick="return confirm('Supprimer ?')">
+                                                            <i class="fa-solid fa-trash text-danger" style="font-size:0.8rem"></i>
+                                                        </button>
                                                     </form>
                                                 </div>
                                             </div>
                                             <h6 class="fw-bold mb-1" x-text="c.typeCulture"></h6>
                                             <p class="text-muted small mb-3">Variété : <span class="text-dark fw-600" x-text="c.variete"></span></p>
-                                            
+                                           
                                             <div class="bg-light rounded-3 p-2 mb-3 d-flex justify-content-around text-center">
                                                 <div><span class="d-block small text-muted">Plantation</span><b class="small" x-text="c.datePFr"></b></div>
                                                 <div class="border-start"></div>
                                                 <div><span class="d-block small text-muted">Récolte</span><b class="small" x-text="c.dateRFr"></b></div>
                                             </div>
-                                            
+                                           
                                             <span class="badge badge-soft-info w-100 py-2 rounded-3 mb-3" x-text="c.statut"></span>
 
                                             <div class="mt-2 pt-2 border-top">
@@ -399,7 +437,7 @@
                                                     </template>
                                                 </div>
                                             </div>
-                                            </div>
+                                        </div>
 
                                         <div class="modal fade" :id="'modalConsommer' + c.id" tabindex="-1">
                                             <div class="modal-dialog modal-dialog-centered">
@@ -412,18 +450,16 @@
                                                         <div class="modal-body p-4">
                                                             <div class="mb-3">
                                                                 <label class="form-label small fw-bold">Ressource disponible</label>
-                                                           {# ... dans la modale modalConsommer ... #}
-<select name="ressource_id" class="form-select rounded-3" required>
-    <option value="">-- Choisir --</option>
-    {% for r in ressources %}
-        {# Filtrage côté Twig pour n'afficher que les ressources du user connecté #}
-        {% if r.user == app.user %}
-            <option value="{{ r.id }}">
-                {{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})
-            </option>
-        {% endif %}
-    {% endfor %}
-</select>
+                                                                <select name="ressource_id" class="form-select rounded-3" required>
+                                                                    <option value="">-- Choisir --</option>
+                                                                    {% for r in ressources %}
+                                                                        {% if r.user == app.user %}
+                                                                            <option value="{{ r.id }}">
+                                                                                {{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})
+                                                                            </option>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="form-label small fw-bold">Quantité à utiliser</label>
@@ -454,6 +490,7 @@
         </div>
     </div>
 
+    <!-- Modal Ajouter Culture -->
     <div class="modal fade" id="modalAjouterCulture" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
@@ -492,6 +529,7 @@
         </div>
     </div>
 
+    <!-- Modal Modifier Culture -->
     <div class="modal fade" id="modalEditCulture" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
@@ -536,6 +574,7 @@
             </div>
         </div>
     </div>
+
 </main>
 
 {{ include('parcelle/modalAjouterParcelle.twig') }}
@@ -547,14 +586,16 @@ document.addEventListener('DOMContentLoaded', function() {
     window.marker = null;
 
     var modalEl = document.getElementById('modalAjouterParcelle');
-    modalEl.addEventListener('shown.bs.modal', function () {
-        window.map.invalidateSize();
-    });
+    if (modalEl) {
+        modalEl.addEventListener('shown.bs.modal', function () {
+            window.map.invalidateSize();
+        });
+    }
 
     window.map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(6);
         var lng = e.latlng.lng.toFixed(6);
-        
+       
         if (window.marker) {
             window.marker.setLatLng([lat, lng]);
         } else {
@@ -579,4 +620,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 {% endblock %}

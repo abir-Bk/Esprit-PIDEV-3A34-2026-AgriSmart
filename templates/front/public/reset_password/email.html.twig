@@ -1,0 +1,87 @@
+{% extends 'emails/base_email.html.twig' %}
+
+{% block subject %}Réinitialisation de votre mot de passe - AgriSmart{% endblock %}
+
+{% block body %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9f5; padding: 40px 0;">
+    <tr>
+        <td align="center">
+
+            <!-- Conteneur principal -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.08);">
+                
+                <!-- Header -->
+                <tr>
+                    <td style="background: linear-gradient(135deg, #8B9D83 0%, #A8B89F 100%); padding: 40px 30px; text-align: center;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                            AgriSmart
+                        </h1>
+                        <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                            Plateforme agricole intelligente
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Contenu principal -->
+                <tr>
+                    <td style="padding: 40px 50px 30px; background: #ffffff;">
+                        
+                        <!-- Salutation -->
+                        <p style="margin: 0 0 24px; color: #2d3f22; font-size: 18px; font-weight: 600;">
+                            Bonjour,
+                        </p>
+
+                        <!-- Message principal -->
+                        <p style="margin: 0 0 28px; color: #3f5238; font-size: 16px; line-height: 1.65;">
+                            Vous avez demandé à réinitialiser votre mot de passe sur <strong>AgriSmart</strong>.<br>
+                            Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :
+                        </p>
+
+                        <!-- Bouton principal -->
+                        <table cellpadding="0" cellspacing="0" border="0" style="margin: 32px auto 40px;">
+                            <tr>
+                                <td align="center" style="border-radius: 12px; background: linear-gradient(135deg, #7D9B6D 0%, #9CB88A 100%);">
+                                    <a href="{{ url('app_reset_password', {token: resetToken.token}) }}"
+                                       target="_blank"
+                                       style="display: inline-block; padding: 16px 48px; color: #ffffff; font-size: 17px; font-weight: 600; text-decoration: none; border-radius: 12px;">
+                                        Réinitialiser mon mot de passe
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Expiration -->
+                        <p style="margin: 0 0 20px; color: #5c6b5a; font-size: 15px; text-align: center; background: #f5f7f3; padding: 16px; border-radius: 10px; border: 1px solid #e0e6d8;">
+                            <strong>Ce lien expire dans :</strong><br>
+                            <span style="color: #3d4a36; font-weight: 600;">
+                                {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}
+                            </span>
+                        </p>
+
+                        <!-- Texte de sécurité -->
+                        <p style="margin: 32px 0 0; color: #6b7a6a; font-size: 14px; line-height: 1.6; text-align: center;">
+                            Si vous n’êtes pas à l’origine de cette demande, vous pouvez ignorer cet email en toute sécurité.<br>
+                            Votre compte reste protégé.
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background: #f8f9f5; padding: 30px 40px; text-align: center; border-top: 1px solid #e0e6d8;">
+                        <p style="margin: 0 0 12px; color: #5c6b5a; font-size: 14px;">
+                            AgriSmart – Accompagner les agriculteurs vers l’avenir
+                        </p>
+                        <p style="margin: 0; color: #8a9a88; font-size: 13px;">
+                            © {{ "now"|date("Y") }} AgriSmart – Tous droits réservés
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+{% endblock %}

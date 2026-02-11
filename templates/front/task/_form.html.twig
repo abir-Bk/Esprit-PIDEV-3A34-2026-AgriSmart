@@ -62,15 +62,15 @@
     </div>
 
     <div class="col-md-4">
-        {{ form_label(form.createdBy) }}
-        {{ form_widget(form.createdBy, {'attr': {'class': 'form-select form-select-sm'}}) }}
-        {{ form_errors(form.createdBy) }}
+        {{ form_label(form.createdByUser) }}
+        {{ form_widget(form.createdByUser, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_errors(form.createdByUser) }}
     </div>
 
 </div>
 
 <div class="mt-4 d-flex gap-2">
     <button class="btn btn-primary btn-sm">{{ button_label|default('Enregistrer') }}</button>
-    <a href="{{ path('admin_tasks_index') }}" class="btn btn-secondary btn-sm">Annuler</a>
+    <a href="{{ path('tasks_index') }}" class="btn btn-secondary btn-sm">Annuler</a>
 </div>
 {{ form_end(form) }}

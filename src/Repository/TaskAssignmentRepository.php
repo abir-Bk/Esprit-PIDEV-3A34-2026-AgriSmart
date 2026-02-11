@@ -15,5 +15,22 @@ class TaskAssignmentRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TaskAssignment::class);
     }
+
+    /**
+     * Retourne les affectations pour un ouvrier (employé) donné.
+     *
+     * @return TaskAssignment[]
+     */
+    public function findForWorker(int $workerId): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.workerId = :wid')
+            ->setParameter('wid', $workerId)
+            ->leftJoin('a.task', 't')
+            ->addSelect('t')
+            ->orderBy('t.dateDebut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
 

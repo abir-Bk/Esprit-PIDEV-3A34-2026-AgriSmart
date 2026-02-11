@@ -1,14 +1,14 @@
-{% extends 'front/base.html.twig' %}
+{% extends 'front/task/layout.html.twig' %}
 
-{% block title %}Détail de l'affectation - AgriSmart Admin{% endblock %}
+{% block title %}Détail de l'affectation - AgriSmart {% endblock %}
 
-{% block body %}
+{% block task_content %}
     <div class="card mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Détails de l'affectation</h5>
             <div>
-                <a href="{{ path('admin_task_assignments_edit', {id: assignment.idAssignment}) }}" class="btn btn-sm btn-primary">Modifier</a>
-                <a href="{{ path('admin_task_assignments_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
+                <a href="{{ path('task_assignments_edit', {id: assignment.idAssignment}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                <a href="{{ path('task_assignments_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
             </div>
         </div>
         <div class="card-body">
@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <form method="post" action="{{ path('admin_task_assignments_delete', {id: assignment.idAssignment}) }}" onsubmit="return confirm('Supprimer cette affectation ?');">
+    <form method="post" action="{{ path('task_assignments_delete', {id: assignment.idAssignment}) }}" onsubmit="return confirm('Supprimer cette affectation ?');">
         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assignment.idAssignment) }}">
         <button class="btn btn-danger">Supprimer</button>
     </form>

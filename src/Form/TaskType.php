@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Entity\Task;
+use App\Entity\User;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -133,9 +135,16 @@ class TaskType extends AbstractType
                 'label' => 'ID Culture',
                 'required' => false,
             ])
-            ->add('createdBy', IntegerType::class, [
-                'label' => 'Créée par (ID utilisateur)',
+            // Champ pour choisir un utilisateur existant, sans modifier l'entité Task (on stocke toujours l'id)
+            ->add('createdByUser', EntityType::class, [
+                'class' => User::class,
+                'choice_label' => function (User $user): string {
+                    return sprintf('%s %s (%s)',$user->getId(), $user->getFirstName(), $user->getLastName());
+                },
+                'label' => 'Créée par',
                 'required' => false,
+                'placeholder' => 'Sélectionner un utilisateur',
+                'mapped' => false,
             ])
         ;
     }

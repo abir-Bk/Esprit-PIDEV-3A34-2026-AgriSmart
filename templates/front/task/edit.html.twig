@@ -1,12 +1,12 @@
-{% extends 'front/base.html.twig' %}
+{% extends 'front/task/layout.html.twig' %}
 
-{% block title %}Modifier la tâche - AgriSmart Admin{% endblock %}
+{% block title %}Modifier la tâche - AgriSmart {% endblock %}
 
-{% block body %}
+{% block task_content %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Modifier la tâche</h5>
-            <a href="{{ path('admin_tasks_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
+            <a href="{{ path('tasks_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
         </div>
         <div class="card-body">
             {% include 'front/task/_form.html.twig' with {form: form, button_label: 'Mettre à jour'} %}

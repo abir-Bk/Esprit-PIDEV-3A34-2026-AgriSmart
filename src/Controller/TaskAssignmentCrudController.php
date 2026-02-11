@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/admin/task-assignments', name: 'admin_task_assignments_')]
+#[Route('/task-assignments', name: 'task_assignments_')]
 class TaskAssignmentCrudController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
@@ -35,7 +35,7 @@ class TaskAssignmentCrudController extends AbstractController
 
             $this->addFlash('success', 'Affectation créée avec succès.');
 
-            return $this->redirectToRoute('admin_task_assignments_index');
+            return $this->redirectToRoute('task_assignments_index');
         }
 
         return $this->render('front/task_assignment/new.html.twig', [
@@ -73,7 +73,7 @@ class TaskAssignmentCrudController extends AbstractController
 
             $this->addFlash('success', 'Affectation mise à jour avec succès.');
 
-            return $this->redirectToRoute('admin_task_assignments_index');
+            return $this->redirectToRoute('task_assignments_index');
         }
 
         return $this->render('front/task_assignment/edit.html.twig', [
@@ -96,7 +96,7 @@ class TaskAssignmentCrudController extends AbstractController
             $this->addFlash('success', 'Affectation supprimée avec succès.');
         }
 
-        return $this->redirectToRoute('admin_task_assignments_index');
+        return $this->redirectToRoute('task_assignments_index');
     }
 }
 

@@ -1,0 +1,61 @@
+<main>
+	<nav class="navbar sidebar navbar-expand-xl navbar-light">
+		<div class="d-flex align-items-center">
+			<a class="navbar-brand" href="#">
+				<img class="navbar-brand-item" src="{{ asset('/public/assets/images/logo-hotel.svg') }}" alt="logo" style="height:35px;">
+			</a>
+		</div>
+
+		<div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" tabindex="-1" id="offcanvasSidebar">
+			<div class="offcanvas-body sidebar-content d-flex flex-column pt-4">
+				<ul class="navbar-nav flex-column" id="navbar-sidebar">
+					<li class="nav-item">
+						<a class="nav-link" href="#">
+							<i class="bi bi-house fa-fw me-2"></i>Dashboard
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{ path('tasks_index') }}">
+							<i class="bi bi-list-check fa-fw me-2"></i>Gestion des tâches
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{ path('task_assignments_index') }}">
+							<i class="bi bi-person-check fa-fw me-2"></i>Affectations de tâches
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">
+							<i class="bi bi-people fa-fw me-2"></i>Utilisateurs
+						</a>
+					</li>
+				</ul>
+				<div class="mt-auto p-3 bg-light rounded">
+					<div class="d-flex align-items-center">
+						<div class="avatar avatar-sm me-2">
+							<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+						</div>
+						<h6 class="mb-0"> PIDEV</h6>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div class="page-content">
+		<nav class="navbar top-bar navbar-light py-0 py-xl-3">
+			<div class="container-fluid p-0">
+				<div class="d-flex align-items-center w-100">
+					<div class="d-flex align-items-center d-xl-none">
+						<a class="navbar-brand" href="#">
+							<img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo.png') }}" alt="">
+						</a>
+					</div>
+					<h4 class="m-0 ms-3">Agriculteur</h4>
+				</div>
+			</div>
+		</nav>
+		<div class="page-content-wrapper p-xxl-4">
+			{% block body %}{% endblock %}
+		</div>
+	</div>
+</main>

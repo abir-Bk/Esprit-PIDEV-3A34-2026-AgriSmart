@@ -1,14 +1,14 @@
-{% extends 'front/base.html.twig' %}
+{% extends 'front/task/layout.html.twig' %}
 
-{% block title %}Détail de la tâche - AgriSmart Admin{% endblock %}
+{% block title %}Détail de la tâche - AgriSmart {% endblock %}
 
-{% block body %}
+{% block task_content %}
     <div class="card mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Détails de la tâche</h5>
             <div>
-                <a href="{{ path('admin_tasks_edit', {id: task.idTask}) }}" class="btn btn-sm btn-primary">Modifier</a>
-                <a href="{{ path('admin_tasks_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
+                <a href="{{ path('tasks_edit', {id: task.idTask}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                <a href="{{ path('tasks_index') }}" class="btn btn-sm btn-outline-secondary">Retour à la liste</a>
             </div>
         </div>
         <div class="card-body">
@@ -52,7 +52,7 @@
         </div>
     </div>
 
-    <form method="post" action="{{ path('admin_tasks_delete', {id: task.idTask}) }}" onsubmit="return confirm('Supprimer cette tâche ?');">
+    <form method="post" action="{{ path('tasks_delete', {id: task.idTask}) }}" onsubmit="return confirm('Supprimer cette tâche ?');">
         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.idTask) }}">
         <button class="btn btn-danger">Supprimer</button>
     </form>

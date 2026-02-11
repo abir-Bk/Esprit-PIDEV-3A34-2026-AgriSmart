@@ -64,6 +64,10 @@ class Offre
     #[ORM\Column]
     private ?bool $isActive = null;
 
+    #[ORM\ManyToOne(inversedBy: 'offres')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $agriculteur = null;
+
     public function __construct()
     {
         $this->demandes = new ArrayCollection();
@@ -217,14 +221,25 @@ class Offre
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function getIsActive(): ?bool
     {
-        return $this->isActive;
+    return $this->isActive;
     }
 
-    public function setIsActive(bool $isActive): static
+    public function setIsActive(bool $isActive): self
     {
-        $this->isActive = $isActive;
+    $this->isActive = $isActive;
+    return $this;
+    }
+
+    public function getAgriculteur(): ?User
+    {
+        return $this->agriculteur;
+    }
+
+    public function setAgriculteur(?User $agriculteur): static
+    {
+        $this->agriculteur = $agriculteur;
 
         return $this;
     }

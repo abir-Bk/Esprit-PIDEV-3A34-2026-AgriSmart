@@ -13,24 +13,31 @@ use Doctrine\ORM\EntityManagerInterface;
 
 final class OffreController extends AbstractController
 {
-    #[Route('/admin/offre/new', name: 'app_offre_new', methods: ['GET', 'POST'])]
-    public function add(Request $request, EntityManagerInterface $em): Response
-    {
-        $offre = new Offre();
-        $form = $this->createForm(OffreType::class, $offre);
-        $form->handleRequest($request);
+#[Route('/admin/offre/new', name: 'app_offre_new', methods: ['GET', 'POST'])]
+public function add(Request $request, EntityManagerInterface $em): Response
+{
+    $offre = new Offre();
+    $form = $this->createForm(OffreType::class, $offre);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($offre);
-            $em->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
+        // 1. On lie l'agriculteur (indispensable)
+        $offre->setAgriculteur($this->getUser()); 
 
-            return $this->redirectToRoute('app_admin_offres');
-        }
+        // 2. On définit is_active sur true par défaut (CORRIGE TON ERREUR)
+        $offre->setIsActive(true);
 
-        return $this->render('back/offre/add.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        $em->persist($offre);
+        $em->flush();
+
+        $this->addFlash('success', 'Offre créée avec succès !');
+        return $this->redirectToRoute('app_admin_offres');
     }
+
+    return $this->render('back/offre/add.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 
     // Cette route sert à ta liste admin spécifique
     #[Route('/admin/liste-offres', name: 'app_offre_admin_index')]
@@ -53,17 +60,15 @@ final class OffreController extends AbstractController
         ]);
     }
 
-    // CORRECTION : J'ai mis le nom 'app_admin_offres' ici pour corriger ton erreur
+    // voci le dhashbord agriculture
     #[Route('/admin/offres', name: 'app_admin_offres')]
     public function adminIndex(OffreRepository $repo): Response
     {
-        $offres = $repo->findAll();
+    $offres = $repo->findBy(['agriculteur' => $this->getUser()]);
 
-        // ATTENTION : Ici j'ai pointé vers le template back (index) et pas show (front)
-        // car show.html.twig attend une seule offre, pas une liste.
-        return $this->render('back/offre/index.html.twig', [
-            'offres' => $offres,
-        ]);
+    return $this->render('back/offre/index.html.twig', [
+        'offres' => $offres,
+    ]);
     }
 
     #[Route('/offre/{id}', name: 'app_offre_show', requirements: ['id' => '\d+'])]
@@ -140,19 +145,22 @@ final class OffreController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/offre/toggle/{id}', name: 'app_offre_toggle')]
-    public function toggle(int $id, OffreRepository $repo, EntityManagerInterface $em): Response
-    {
-        $offre = $repo->find($id);
+#[Route('/admin/offre/toggle/{id}', name: 'app_offre_toggle')]
+public function toggle(Offre $offre, EntityManagerInterface $em, Request $request): Response
+{
+    // On inverse le statut
+    $offre->setIsActive(!$offre->getIsActive());
+    $em->flush();
 
-        if (!$offre) {
-            throw $this->createNotFoundException('Offre non trouvée');
-        }
+    $this->addFlash('success', 'Le statut de l\'offre a été mis à jour.');
 
-        $offre->setIsActive(!$offre->isActive());
-        $em->flush();
 
-        $this->addFlash('success', 'Le statut de l\'offre a été mis à jour !');
-        return $this->redirectToRoute('app_admin_offres');
+    $referer = $request->headers->get('referer');
+    
+    if ($referer) {
+        return $this->redirect($referer);
     }
+
+    return $this->redirectToRoute('app_admin_offres');
+}
 }

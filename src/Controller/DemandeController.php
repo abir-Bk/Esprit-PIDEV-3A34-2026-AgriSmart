@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\DemandeType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Repository\DemandeRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;  
@@ -13,6 +14,9 @@ use App\Entity\Demande;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use App\Entity\User;
 
 final class DemandeController extends AbstractController
 {
@@ -124,10 +128,10 @@ final class DemandeController extends AbstractController
                 $votreEmailTest = 'akrem.zaied@etudiant-fsegt.utm.tn'; 
 
                 $email = (new Email())
-                    ->from('akrem.zaied@etudiant-fsegt.utm.tn')
-                    ->to($votreEmailTest) 
-                    ->subject($subject)
-                    ->html("<h2>Notification AgriSmart</h2><p>Le statut de votre candidature est : " . $newStatus . "</p>");
+             ->from('akrem.zaied@etudiant-fsegt.utm.tn')
+             ->to('akrem.zaied@etudiant-fsegt.utm.tn') // C'est ici que tu recevras le mail
+             ->subject('Candidature ' . $newStatus)
+             ->html("...");
 
                 try {
                     $mailer->send($email);
@@ -186,4 +190,30 @@ final class DemandeController extends AbstractController
             'demande' => $demande 
         ]);
     }
+
+#[Route('/mes-candidatures/pdf', name: 'app_my_demandes_pdf')]
+public function exportMyListPdf(DemandeRepository $repo): Response
+{
+    // 1. Récupérer l'utilisateur connecté
+    $user = $this->getUser();
+    
+    // 2. Récupérer uniquement SES candidatures
+    $demandes = $repo->findBy(['user' => $user]);
+
+    // 3. Préparer le HTML
+    $html = $this->renderView('back/demande/pdf_list.html.twig', [
+        'demandes' => $demandes
+    ]);
+
+    // 4. Générer le PDF
+    $dompdf = new \Dompdf\Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'landscape'); // Paysage c'est mieux pour un tableau
+    $dompdf->render();
+
+    return new Response($dompdf->output(), 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="mes_candidatures.pdf"'
+    ]);
+}
 }

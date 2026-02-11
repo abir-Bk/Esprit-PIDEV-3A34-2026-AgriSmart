@@ -1,0 +1,80 @@
+<!-- Sidebar START -->
+<div class="col-lg-4 col-xl-3">
+
+<div class="offcanvas-lg offcanvas-end" tabindex="-1" id="offcanvasSidebar">
+
+<div class="offcanvas-header justify-content-end pb-2">
+<button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+</div>
+
+<div class="offcanvas-body p-3 p-lg-0">
+<div class="card bg-light w-100">
+
+<!-- edit icon -->
+<div class="position-absolute top-0 end-0 p-3">
+<a href="{{ path('app_profile_edit') }}" class="text-primary-hover">
+<i class="bi bi-pencil-square"></i>
+</a>
+</div>
+
+<div class="card-body p-3">
+
+<div class="text-center mb-3">
+<div class="avatar avatar-xl mb-2">
+    {% if app.user.image %}
+        <img class="avatar-img rounded-circle border border-2 border-white"
+             src="{{ asset('uploads/images/' ~ app.user.image) }}" 
+             alt="{{ app.user.firstName ~ ' ' ~ app.user.lastName }}">
+    {% else %}
+        <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+             style="width:64px; height:64px; font-size:1.5rem;">
+            {{ app.user.firstName|slice(0,1)|upper }}{{ app.user.lastName|slice(0,1)|upper }}
+        </div>
+    {% endif %}
+</div>
+
+<h6 class="mb-0">{{ app.user.fullName ?? app.user.email }}</h6>
+<a href="#" class="text-reset small">{{ app.user.email }}</a>
+
+<hr>
+</div>
+
+<ul class="nav nav-pills-primary-soft flex-column">
+
+<li class="nav-item">
+<a class="nav-link {{ app.request.get('_route') == 'app_profile_show' ? 'active' }}"
+href="{{ path('app_profile_show') }}">
+<i class="bi bi-person fa-fw me-2"></i>My Profile
+</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link {{ app.request.get('_route') == 'app_profile_edit' ? 'active' }}"
+href="{{ path('app_profile_edit') }}">
+<i class="bi bi-pencil fa-fw me-2"></i>Edit Profile
+</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link {{ app.request.get('_route') == 'app_profile_delete_page' ? 'active' }}"
+href="{{ path('app_profile_delete_page') }}">
+<i class="bi bi-trash fa-fw me-2"></i>Delete Profile
+</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link text-danger bg-danger-soft-hover"
+href="{{ path('app_logout') }}">
+<i class="fas fa-sign-out-alt fa-fw me-2"></i>Sign Out
+</a>
+</li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<!-- Sidebar END -->

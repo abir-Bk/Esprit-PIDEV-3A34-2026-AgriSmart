@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Agrismart - Liste des utilisateurs</title>
+    <style type="text/css">
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333;
+            font-size: 11pt;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            background-color: #1A4331;
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 8px solid #2e7d32;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 22pt;
+            letter-spacing: 1px;
+        }
+        
+        .header .subtitle {
+            font-size: 12pt;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+        
+        .logo-line {
+            height: 4px;
+            background: linear-gradient(to right, #1A4331, #4CAF50, #81C784);
+            margin: 0 0 15px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        th {
+            background-color: #1A4331;
+            color: white;
+            font-weight: bold;
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 3px solid #2e7d32;
+        }
+        
+        td {
+            padding: 11px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fbf8;
+        }
+        
+        tr:hover {
+            background-color: #e8f5e9;
+        }
+        
+        .status-active {
+            color: #1A4331;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .green-accent {
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-line"></div>
+        <h1>Agrismart</h1>
+        <div class="subtitle">Gestion intelligente des exploitations agricoles</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#ID</th>
+                <th>Nom complet</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.id }}</strong></td>
+                <td>{{ user.firstName|default('–') }} {{ user.lastName|default('–') }}</td>
+                <td>{{ user.email|default('Non renseigné') }}</td>
+                <td>
+                    <span class="green-accent">
+                        {{ user.role|default('–') }}
+                    </span>
+                </td>
+                <td>
+                    {% if user.status == 'active' or user.status == 'Active' or user.status == 1 %}
+                        <span class="status-active">Actif</span>
+                    {% else %}
+                        <span class="status-inactive">Inactif</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align:center; padding:30px; color:#777;">
+                    Aucun utilisateur trouvé
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Agrismart © {{ "now"|date("Y") }} • Solution digitale pour une agriculture durable et connectée<br>
+        Généré le {{ "now"|date("d/m/Y à H:i") }}
+    </div>
+
+</body>
+</html>

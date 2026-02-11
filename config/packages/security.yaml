@@ -37,6 +37,4 @@ security:
             user_checker: App\Security\AccountStatusChecker
     access_control:
         - { path: ^/back/admin, roles: ROLE_ADMIN }
-        - { path: ^/semi-public/users/agriculteur, roles: ROLE_AGRICULTEUR }
-        - { path: ^/semi-public/users/employe, roles: ROLE_EMPLOYEE }
-        - { path: ^/semi-public/users/fournisseur, roles: ROLE_FOURNISSEUR }
+        - { path: ^/semi-public/users, roles: [ROLE_AGRICULTEUR, ROLE_EMPLOYEE, ROLE_FOURNISSEUR] }        

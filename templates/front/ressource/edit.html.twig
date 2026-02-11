@@ -1,0 +1,159 @@
+{# templates/front/ressource/edit.html.twig #}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --agri-primary: #27ae60;
+        --agri-gradient: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        --bg-light: #f4f7f6;
+        --text-dark: #2c3e50;
+    }
+
+    body { background-color: var(--bg-light); font-family: 'Poppins', sans-serif; }
+
+    /* Carte Principale */
+    .main-card {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        background: #fff;
+    }
+
+    /* En-tête avec dégradé */
+    .card-header-custom {
+        background: var(--agri-gradient);
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+    }
+
+    .header-icon {
+        background: rgba(255, 255, 255, 0.2);
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        font-size: 24px;
+    }
+
+    /* Formulaire */
+    .card-body-custom { padding: 40px; }
+
+    .form-label {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        color: #7f8c8d;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #edf2f2 !important;
+        border-radius: 12px !important;
+        padding: 12px 15px !important;
+        background-color: #f9fbfb !important;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--agri-primary) !important;
+        background-color: #fff !important;
+        box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1) !important;
+    }
+
+    /* Input Stock spécifique */
+    .stock-input {
+        font-size: 1.5rem !important;
+        color: var(--agri-primary) !important;
+        text-align: center;
+    }
+
+    /* Boutons */
+    .btn-agri-submit {
+        background: var(--agri-gradient);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        width: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+
+    .btn-agri-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        color: white;
+    }
+
+    .cancel-link {
+        color: #95a5a6;
+        transition: color 0.2s;
+    }
+
+    .cancel-link:hover { color: #e74c3c; }
+</style>
+{% endblock %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="main-card card">
+                
+                <div class="card-header-custom">
+                    <div class="header-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3 class="fw-bold m-0">Gestion de Stock</h3>
+                    <p class="opacity-75 small mb-0 mt-1">Édition : {{ ressource.nom }}</p>
+                </div>
+
+                <div class="card-body-custom">
+                    {{ form_start(form) }}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Nom de la ressource</label>
+                            {{ form_widget(form.nom) }}
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <label class="form-label">Type</label>
+                                {{ form_widget(form.type) }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Unité de mesure</label>
+                                {{ form_widget(form.unite) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label text-center d-block">Quantité en stock</label>
+                            <div class="position-relative">
+                                {{ form_widget(form.stock_restan, {
+                                    'attr': {'class': 'form-control stock-input'}
+                                }) }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-agri-submit shadow-sm">
+                            <i class="fas fa-save me-2"></i> ENREGISTRER LES MODIFS
+                        </button>
+
+                        <div class="text-center mt-4">
+                            <a href="{{ path('app_ressource_index') }}" class="cancel-link text-decoration-none small">
+                                <i class="fas fa-times me-1"></i> Annuler la modification
+                            </a>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

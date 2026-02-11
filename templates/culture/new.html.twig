@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Culture{% endblock %}
+
+{% block body %}
+    <h1>Create new Culture</h1>
+
+    {{ include('culture/_form.html.twig') }}
+
+    <a href="{{ path('app_culture_index') }}">back to list</a>
+{% endblock %}

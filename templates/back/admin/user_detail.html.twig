@@ -1,0 +1,266 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}User Details - {{ user.firstName }} {{ user.lastName }} - AgriSmart{% endblock %}
+
+{% block body %}
+<!-- Page content START -->
+
+    <!-- Page main content START -->
+    <div class="page-content-wrapper p-xxl-4">
+
+        <!-- Flash Messages -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <!-- Title and Back Button -->
+        <div class="row">
+            <div class="col-12 mb-4 mb-sm-5">
+                <div class="d-sm-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{{ path('admin_users') }}" class="btn btn-link text-secondary mb-0 p-0">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Users List
+                        </a>
+                        <h1 class="h3 mb-0 mt-2">User Details</h1>
+                    </div>
+                  				
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: User Profile Card -->
+            <div class="col-lg-4">
+                <!-- User Profile Card -->
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <!-- Avatar -->
+                        <div class="avatar avatar-xxl mb-3 mx-auto">
+                            {% if user.image %}
+                            <img class="avatar-img rounded-circle" src="{{ asset('uploads/images/' ~ user.image) }}" alt="avatar">
+                            {% else %}
+                            <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="font-size: 3rem;">
+                                {{ user.firstName|slice(0, 1)|upper }}{{ user.lastName|slice(0, 1)|upper }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Name -->
+                        <h4 class="mb-1">{{ user.firstName }} {{ user.lastName }}</h4>
+                        <p class="text-muted mb-3">{{ user.email }}</p>
+                        
+                        <!-- Status Badge -->
+                        <div class="mb-3">
+                            <span class="badge 
+                                {% if user.status == 'active' %}
+                                    bg-success bg-opacity-10 text-success
+                                {% elseif user.status == 'pending' %}
+                                    bg-warning bg-opacity-10 text-warning
+                                {% else %}
+                                    bg-danger bg-opacity-10 text-danger
+                                {% endif %} 
+                                px-3 py-2">
+                                <i class="bi 
+                                    {% if user.status == 'active' %}bi-check-circle
+                                    {% elseif user.status == 'pending' %}bi-clock
+                                    {% else %}bi-x-circle{% endif %} me-1"></i>
+                                {{ user.status|capitalize }}
+                            </span>
+                        </div>
+                        
+                        <!-- Role Badge -->
+                        <div class="mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                <i class="bi bi-person-badge me-1"></i>
+                                {{ user.role|capitalize }}
+                            </span>
+                        </div>
+
+                        <hr>
+
+                        <!-- Quick Actions -->
+                        <div class="d-grid gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle w-100" type="button" id="statusChangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-gear me-2"></i>Change Status
+                                </button>
+                                <ul class="dropdown-menu w-100" aria-labelledby="statusChangeDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'active'}) }}">
+                                            <i class="bi bi-check-circle text-success me-2"></i>Set as Active
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'pending'}) }}">
+                                            <i class="bi bi-clock text-warning me-2"></i>Set as Pending
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'disabled'}) }}">
+                                            <i class="bi bi-x-circle text-danger me-2"></i>Set as Disabled
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Card -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-transparent border-bottom">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Documents</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.documentFile %}
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">User Document</h6>
+                                <small class="text-muted">{{ user.documentFile }}</small>
+                            </div>
+                            <a href="{{ asset('uploads/documents/' ~ user.documentFile) }}" class="btn btn-sm btn-primary-soft" download>
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0 text-center">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                            No documents uploaded
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: User Information -->
+            <div class="col-lg-8">
+                <!-- Personal Information Card -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-transparent border-bottom">
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">First Name</label>
+                                <p class="mb-0">{{ user.firstName }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Last Name</label>
+                                <p class="mb-0">{{ user.lastName }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email Address</label>
+                                <p class="mb-0">
+                                    <i class="bi bi-envelope me-2"></i>{{ user.email }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <p class="mb-0">
+                                    {% if user.phone %}
+                                        <i class="bi bi-telephone me-2"></i>{{ user.phone }}
+                                    {% else %}
+                                        <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Address</label>
+                                <p class="mb-0">
+                                    {% if user.address %}
+                                        <i class="bi bi-geo-alt me-2"></i>{{ user.address }}
+                                    {% else %}
+                                        <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information Card -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-transparent border-bottom">
+                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Account Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">User ID</label>
+                                <p class="mb-0">#{{ user.id }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Role</label>
+                                <p class="mb-0 text-capitalize">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                        {{ user.role }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Account Status</label>
+                                <p class="mb-0">
+                                    <span class="badge 
+                                        {% if user.status == 'active' %}
+                                            bg-success bg-opacity-10 text-success
+                                        {% elseif user.status == 'pending' %}
+                                            bg-warning bg-opacity-10 text-warning
+                                        {% else %}
+                                            bg-danger bg-opacity-10 text-danger
+                                        {% endif %}">
+                                        {{ user.status|capitalize }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Registration Date</label>
+                                <p class="mb-0">
+                                    <i class="bi bi-calendar-event me-2"></i>{{ user.createdAt|date('F d, Y') }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Last Updated</label>
+                                <p class="mb-0">
+                                    <i class="bi bi-clock-history me-2"></i>{{ user.updatedAt|date('F d, Y H:i') }}
+                                </p>
+                            </div>
+                            {% if user.googleId %}
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Google Account</label>
+                                <p class="mb-0">
+                                    <i class="bi bi-google me-2 text-danger"></i>Connected
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+             
+            </div>
+        </div>
+
+    </div>
+    <!-- Page main content END -->
+</div>
+<!-- Page content END -->
+
+<style>
+.avatar-xxl {
+    width: 120px;
+    height: 120px;
+}
+
+.avatar-xxl .avatar-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+</style>
+
+{% endblock %}

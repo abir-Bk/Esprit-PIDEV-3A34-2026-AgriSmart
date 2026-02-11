@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+<title>Edit Consommation</title>
+
+{% block body %}
+    <h1>Edit Consommation</h1>
+
+    {{ include('consommation/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_consommation_index') }}">back to list</a>
+
+    {{ include('consommation/_delete_form.html.twig') }}
+{% endblock %}

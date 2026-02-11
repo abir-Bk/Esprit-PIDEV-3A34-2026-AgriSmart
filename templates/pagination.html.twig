@@ -1,0 +1,80 @@
+{# templates/pagination.html.twig #}
+{% if pageCount > 1 %}
+<ul class="{{ ul_class|default('pagination') }}">
+    
+    {# Previous link #}
+    {% if previous is defined %}
+    <li class="{{ li_class|default('page-item') }}">
+        <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): previous})) }}">
+            {{ prev_label|default('&laquo;')|raw }}
+        </a>
+    </li>
+    {% else %}
+    <li class="{{ li_class|default('page-item') }} disabled">
+        <span class="{{ a_class|default('page-link') }}" tabindex="-1">
+            {{ prev_label|default('&laquo;')|raw }}
+        </span>
+    </li>
+    {% endif %}
+
+    {# Page numbers #}
+    {% if startPage > 1 %}
+        <li class="{{ li_class|default('page-item') }}">
+            <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): 1})) }}">1</a>
+        </li>
+        {% if startPage == 3 %}
+            <li class="{{ li_class|default('page-item') }}">
+                <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): 2})) }}">2</a>
+            </li>
+        {% elseif startPage != 2 %}
+            <li class="{{ li_class|default('page-item') }} disabled">
+                <span class="{{ a_class|default('page-link') }}">..</span>
+            </li>
+        {% endif %}
+    {% endif %}
+
+    {% for page in pagesInRange %}
+        {% if page != current %}
+            <li class="{{ li_class|default('page-item') }}">
+                <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): page})) }}">{{ page }}</a>
+            </li>
+        {% else %}
+            <li class="{{ li_class|default('page-item') }} active">
+                <span class="{{ a_class|default('page-link') }}">{{ page }}</span>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+    {% if pageCount > endPage %}
+        {% if pageCount > (endPage + 1) %}
+            {% if pageCount > (endPage + 2) %}
+                <li class="{{ li_class|default('page-item') }} disabled">
+                    <span class="{{ a_class|default('page-link') }}">..</span>
+                </li>
+            {% else %}
+                <li class="{{ li_class|default('page-item') }}">
+                    <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): pageCount - 1})) }}">{{ pageCount - 1 }}</a>
+                </li>
+            {% endif %}
+        {% endif %}
+        <li class="{{ li_class|default('page-item') }}">
+            <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): pageCount})) }}">{{ pageCount }}</a>
+        </li>
+    {% endif %}
+
+    {# Next link #}
+    {% if next is defined %}
+    <li class="{{ li_class|default('page-item') }}">
+        <a class="{{ a_class|default('page-link') }}" href="{{ path(route, query|merge({(pageParameterName): next})) }}">
+            {{ next_label|default('&raquo;')|raw }}
+        </a>
+    </li>
+    {% else %}
+    <li class="{{ li_class|default('page-item') }} disabled">
+        <span class="{{ a_class|default('page-link') }}">
+            {{ next_label|default('&raquo;')|raw }}
+        </span>
+    </li>
+    {% endif %}
+</ul>
+{% endif %}

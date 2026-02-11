@@ -1,0 +1,58 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Delete Profile{% endblock %}
+
+{% block body %}
+<main>
+<section class="pt-4">
+<div class="container">
+<div class="row">
+{% include 'front/semi-public/users/side_bar.html.twig' %}
+
+<div class="col-lg-8 col-xl-9">
+
+<div class="card border">
+
+<div class="card-header border-bottom">
+<h4 class="card-header-title">Delete Account</h4>
+</div>
+
+<div class="card-body">
+
+<h6>Before you go...</h6>
+<ul>
+<li>Take a backup of your data</li>
+<li>If you delete your account, you will lose all your data.</li>
+</ul>
+
+<form method="post" action="{{ path('app_profile_delete') }}">
+
+<div class="form-check form-check-md my-4">
+<input class="form-check-input" type="checkbox" id="deleteaccountCheck" required>
+<label class="form-check-label" for="deleteaccountCheck">
+Yes, I'd like to delete my account
+</label>
+</div>
+
+<input type="hidden" name="_token" value="{{ csrf_token('delete_profile') }}">
+
+<a href="{{ path('app_profile_show') }}" class="btn btn-success-soft btn-sm">
+Keep my account
+</a>
+
+<button class="btn btn-danger btn-sm">
+Delete my account
+</button>
+
+</form>
+
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</section>
+</main>
+{% endblock %}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            color: #2c3e50; 
+            line-height: 1.5;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 30px;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-bottom: 3px solid #28a745; 
+            padding-bottom: 20px; 
+            position: relative;
+        }
+        .header:after {
+            content: "🌱";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 15px;
+            font-size: 20px;
+            color: #28a745;
+        }
+        .header h1 { 
+            color: #28a745; 
+            margin: 0; 
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .header h2 { 
+            color: #495057; 
+            margin: 10px 0 0;
+            font-size: 18px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 25px; 
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        th { 
+            background-color: #28a745; 
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            padding: 15px 12px;
+        }
+        th, td { 
+            border: none;
+            padding: 14px 12px; 
+            font-size: 14px; 
+        }
+        td {
+            background-color: white;
+            border-bottom: 1px solid #e9ecef;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover td {
+            background-color: #f8f9fa;
+        }
+        .footer { 
+            margin-top: 40px; 
+            font-size: 12px; 
+            text-align: center; 
+            color: #6c757d; 
+            padding-top: 20px;
+            border-top: 1px dashed #dee2e6;
+        }
+        .info-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-left: 5px solid #28a745;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.08);
+        }
+        .info-item {
+            flex: 1 1 200px;
+        }
+        .info-item strong {
+            display: block;
+            color: #28a745;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .info-item span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 13px;
+            background-color: #28a745;
+            color: white;
+        }
+        .small {
+            color: #6c757d;
+            font-size: 13px;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 20px; }
+            th { background-color: #28a745 !important; color: white !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AGRISMART</h1>
+            <h2>{% if demandes is defined %}📋 HISTORIQUE DES CANDIDATURES{% else %}👤 FICHE CANDIDAT{% endif %}</h2>
+        </div>
+
+        {% if demandes is defined %}
+            {# --- CAS 1 : EXPORT DE LA LISTE (Utilisateur) --- #}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Offre</th>
+                        <th>Date de postulation</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in demandes %}
+                        <tr>
+                            <td>
+                                <strong style="color: #28a745;">{{ d.offre.title }}</strong>
+                                <br><span class="small">📍 {{ d.offre.lieu }}</span>
+                            </td>
+                            <td>
+                                <span style="font-weight: 600;">{{ d.datePostulation|date('d/m/Y') }}</span>
+                                <br><span class="small">{{ d.datePostulation|date('H:i') }}</span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background-color: 
+                                    {% if d.statut|lower == 'acceptée' %}#28a745
+                                    {% elseif d.statut|lower == 'refusée' %}#dc3545
+                                    {% else %}#ffc107{% endif %};">
+                                    {{ d.statut }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            {# --- CAS 2 : EXPORT D'UNE SEULE DEMANDE (Détails Admin) --- #}
+            <div class="info-card">
+                <div class="info-item">
+                    <strong>👤 Candidat</strong>
+                    <span>{{ demande.nom }} {{ demande.prenom }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>📞 Téléphone</strong>
+                    <span>{{ demande.phoneNumber }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>📅 Postulé le</strong>
+                    <span>{{ demande.datePostulation|date('d/m/Y') }}</span>
+                    <span class="small">{{ demande.datePostulation|date('H:i') }}</span>
+                </div>
+            </div>
+
+            <table style="margin-top: 10px;">
+                <tr>
+                    <th style="width: 30%; background-color: #28a745;">Poste visé</th>
+                    <td><strong style="color: #28a745; font-size: 16px;">{{ demande.offre.title }}</strong></td>
+                </tr>
+                <tr>
+                    <th style="background-color: #28a745;">Lieu</th>
+                    <td>📍 {{ demande.offre.lieu }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #28a745;">Type de contrat</th>
+                    <td><span style="background: rgba(40,167,69,0.1); padding: 6px 16px; border-radius: 50px; color: #28a745; font-weight: 600;">{{ demande.offre.typeContrat }}</span></td>
+                </tr>
+                <tr>
+                    <th style="background-color: #28a745;">Statut actuel</th>
+                    <td>
+                        <span class="badge" style="background-color: 
+                            {% if demande.statut|lower == 'acceptée' %}#28a745
+                            {% elseif demande.statut|lower == 'refusée' %}#dc3545
+                            {% else %}#ffc107
+                            {% endif %};">
+                            {{ demande.statut }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        {% endif %}
+
+        <div class="footer">
+            <p>🌱 Document généré le {{ "now"|date('d/m/Y à H:i') }} - AgriSmart Recruitment Service</p>
+            <p style="margin-top: 5px; font-size: 11px;">Agriculture durable & emploi responsable</p>
+        </div>
+    </div>
+</body>
+</html>

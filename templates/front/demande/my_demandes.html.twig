@@ -1,0 +1,417 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Mes Candidatures - Tableau de Bord{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-xxl-10 col-xl-12 col-lg-12">
+            {# En-tête avec statistiques #}
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5">
+                <div>
+                    <h1 class="display-6 fw-bold text-dark mb-2">
+                        <i class="bi bi-briefcase me-3 text-primary"></i>Mes Candidatures
+                    </h1>
+                    <p class="text-muted mb-0">Suivez l'état de vos demandes d'emploi</p>
+                </div>
+                
+                <div class="mt-3 mt-md-0">
+                    <div class="d-flex align-items-center bg-light rounded-pill px-4 py-2">
+                        <i class="bi bi-folder-check text-primary fs-4 me-2"></i>
+                        <div>
+                            <div class="fw-bold fs-5">{{ demandes|length }}</div>
+                            <small class="text-muted">Candidatures</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Cartes de statistiques rapides #}
+            {% if demandes|length > 0 %}
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-25 rounded-circle p-3 me-3">
+                                    <i class="bi bi-check-circle text-success fs-3"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fw-bold text-dark mb-0">
+                                        {% set acceptees = demandes|filter(d => d.statut|lower in ['acceptée', 'accepte'])|length %}
+                                        {{ acceptees }}
+                                    </h3>
+                                    <p class="text-muted mb-0">Acceptées</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning bg-opacity-25 rounded-circle p-3 me-3">
+                                    <i class="bi bi-clock-history text-warning fs-3"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fw-bold text-dark mb-0">
+                                        {% set en_cours = demandes|filter(d => d.statut|lower in ['en attente', 'en cours', 'pending'])|length %}
+                                        {{ en_cours }}
+                                    </h3>
+                                    <p class="text-muted mb-0">En cours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-danger bg-opacity-10">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-danger bg-opacity-25 rounded-circle p-3 me-3">
+                                    <i class="bi bi-x-circle text-danger fs-3"></i>
+                                </div>
+                                <div>
+                                    <h3 class="fw-bold text-dark mb-0">
+                                        {% set refusees = demandes|filter(d => d.statut|lower in ['refusée', 'refuse', 'rejetée'])|length %}
+                                        {{ refusees }}
+                                    </h3>
+                                    <p class="text-muted mb-0">Refusées</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Tableau principal #}
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <div class="card-header bg-white py-4 border-bottom">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="mb-3 mb-md-0">
+                            <h2 class="h4 fw-bold text-dark mb-2">
+                                <i class="bi bi-list-check me-2 text-primary"></i>
+                                Historique des Candidatures
+                            </h2>
+                            <small class="text-muted">Toutes vos demandes en un coup d'œil</small>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                        <a href="{{ path('app_my_demandes_pdf') }}" class="btn btn-outline-success btn-sm d-flex align-items-center">
+                         <i class="bi bi-file-earmark-pdf me-2"></i> Analyse PDF</a>                                
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm d-flex align-items-center" id="exportBtn">
+                                <i class="bi bi-download me-2"></i> Exporter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="candidaturesTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 py-3 fw-semibold text-dark border-0">
+                                        <i class="bi bi-briefcase me-2"></i>Offre d'Emploi
+                                    </th>
+                                    <th class="py-3 fw-semibold text-dark border-0">
+                                        <i class="bi bi-calendar me-2"></i>Date
+                                    </th>
+                                    <th class="py-3 fw-semibold text-dark border-0">
+                                        <i class="bi bi-files me-2"></i>Documents
+                                    </th>
+                                    <th class="py-3 fw-semibold text-dark border-0">
+                                        <i class="bi bi-hourglass-split me-2"></i>Statut Candidature
+                                    </th>
+                                    <th class="py-3 fw-semibold text-dark border-0">
+                                        <i class="bi bi-building me-2"></i>Statut Offre
+                                    </th>
+                                    <th class="pe-4 py-3 fw-semibold text-dark border-0 text-end">
+                                        <i class="bi bi-gear me-2"></i>Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for demande in demandes %}
+                                    <tr class="border-bottom border-light hover-shadow">
+                                        <td class="ps-4 py-4">
+                                            <div class="d-flex">
+                                                <div class="flex-shrink-0">
+                                                    <div class="avatar bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                        <i class="bi bi-briefcase text-primary fs-5"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="fw-bold text-dark mb-1">{{ demande.offre.title }}</h6>
+                                                    <div class="d-flex align-items-center text-muted">
+                                                        <i class="bi bi-geo-alt me-1 fs-6"></i>
+                                                        <small>{{ demande.offre.lieu }}</small>
+                                                        <span class="mx-2">•</span>
+                                                        <i class="bi bi-cash-coin me-1 fs-6"></i>
+                                                        <small>{{ demande.offre.salaire }} DT</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="py-4">
+                                            <div class="text-dark fw-medium">{{ demande.datePostulation|date('d/m/Y') }}</div>
+                                            <small class="text-muted">{{ demande.datePostulation|date('H:i') }}</small>
+                                            {% if demande.phoneNumber %}
+                                                <div class="mt-2">
+                                                    <small class="text-muted d-flex align-items-center">
+                                                        <i class="bi bi-telephone me-1"></i>
+                                                        {{ demande.phoneNumber }}
+                                                    </small>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        
+                                        <td class="py-4">
+                                            <div class="d-flex flex-column gap-2">
+                                                {% if demande.cv %}
+                                                    <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-outline-primary d-flex align-items-center">
+                                                        <i class="bi bi-file-earmark-pdf me-2"></i>
+                                                        <span>CV</span>
+                                                    </a>
+                                                {% endif %}
+                                                
+                                                {% if demande.lettreMotivation %}
+                                                    <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-outline-secondary d-flex align-items-center">
+                                                        <i class="bi bi-file-earmark-text me-2"></i>
+                                                        <span>Lettre</span>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="py-4">
+                                            {% set dem_status = demande.statut|lower %}
+                                            {% if dem_status in ['acceptée', 'accepte'] %}
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 d-flex align-items-center">
+                                                        <i class="bi bi-check-circle me-2"></i>
+                                                        <span>Acceptée</span>
+                                                    </span>
+                                                </div>
+                                            {% elseif dem_status in ['refusée', 'refuse', 'rejetée'] %}
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 d-flex align-items-center">
+                                                        <i class="bi bi-x-circle me-2"></i>
+                                                        <span>Refusée</span>
+                                                    </span>
+                                                </div>
+                                            {% else %}
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2 d-flex align-items-center">
+                                                        <i class="bi bi-clock me-2"></i>
+                                                        <span>En cours</span>
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {# REMOVED updatedAt reference - using datePostulation instead #}
+                                            <small class="text-muted d-block mt-1">
+                                                Postulé le : {{ demande.datePostulation|date('d/m/Y') }}
+                                            </small>
+                                        </td>
+                                        
+                                        <td class="py-4">
+                                            {% set off_status = demande.offre.statut|lower %}
+                                            {% if off_status in ['ouvert', 'open'] %}
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 rounded-pill">
+                                                    <i class="bi bi-unlock me-1"></i>
+                                                    {{ demande.offre.statut }}
+                                                </span>
+                                            {% elseif off_status in ['clôturée', 'closed', 'fermée'] %}
+                                                <span class="badge bg-dark bg-opacity-10 text-dark border border-dark px-3 py-2 rounded-pill">
+                                                    <i class="bi bi-lock me-1"></i>
+                                                    {{ demande.offre.statut }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 rounded-pill">
+                                                    {{ demande.offre.statut }}
+                                                </span>
+                                            {% endif %}
+                                            
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    Type : {{ demande.offre.typeContrat }}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="pe-4 py-4 text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="{{ path('app_offre_show', {'id': demande.offre.id}) }}" 
+                                                   class="btn btn-sm btn-outline-primary d-flex align-items-center shadow-sm"
+                                                   data-bs-toggle="tooltip" 
+                                                   data-bs-placement="top" 
+                                                   title="Voir l'offre">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                
+                                                <a href="{{ path('app_demande_edit', {'id': demande.id}) }}" 
+                                                   class="btn btn-sm btn-warning d-flex align-items-center shadow-sm"
+                                                   data-bs-toggle="tooltip" 
+                                                   data-bs-placement="top" 
+                                                   title="Modifier">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                
+                                                <form method="post" 
+                                                      action="{{ path('app_demande_delete', {'id': demande.id}) }}" 
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette candidature ? Cette action est irréversible.');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ demande.id) }}">
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-danger d-flex align-items-center shadow-sm"
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="top" 
+                                                            title="Supprimer">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="my-5">
+                                                <div class="bg-light rounded-circle d-inline-flex p-4 mb-4">
+                                                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <h5 class="text-muted mb-3">Aucune candidature trouvée</h5>
+                                                <p class="text-muted mb-4">Vous n'avez pas encore postulé à des offres d'emploi.</p>
+                                                <a href="{{ path('app_offre_index_front') }}" class="btn btn-primary btn-lg">
+                                                    <i class="bi bi-search me-2"></i>Parcourir les offres
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                {# Pied de tableau avec pagination #}
+                {% if demandes|length > 0 %}
+                <div class="card-footer bg-white py-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Affichage de <strong>{{ demandes|length }}</strong> candidature{{ demandes|length > 1 ? 's' : '' }}
+                        </small>
+                        <div>
+                            <small class="text-muted me-3">Dernière mise à jour : {{ "now"|date('d/m/Y H:i') }}</small>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+
+
+<style>
+.avatar {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hover-shadow {
+    transition: all 0.2s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background-color: #f8f9fa;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.alert {
+    border-radius: 10px;
+}
+</style>
+
+<script>
+// Initialiser les tooltips Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Fonction d'export (simplifiée)
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        const table = document.getElementById('candidaturesTable');
+        const rows = table.querySelectorAll('tbody tr');
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // En-têtes
+        const headers = ['Offre', 'Lieu', 'Date', 'Statut', 'Statut Offre', 'Type Contrat'];
+        csvContent += headers.join(';') + "\n";
+        
+        // Données
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 5) {
+                const offre = cells[0].querySelector('.fw-bold')?.textContent.trim() || '';
+                const lieu = cells[0].querySelector('.text-muted')?.textContent.trim() || '';
+                const date = cells[1].querySelector('.fw-medium')?.textContent.trim() || '';
+                const statut = cells[3].querySelector('.badge span')?.textContent.trim() || '';
+                const statutOffre = cells[4].querySelector('.badge')?.textContent.trim() || '';
+                const typeContrat = cells[4].querySelector('.text-muted')?.textContent.trim().replace('Type : ', '') || '';
+                
+                const rowData = [offre, lieu, date, statut, statutOffre, typeContrat];
+                csvContent += rowData.join(';') + "\n";
+            }
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "mes_candidatures.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+});
+</script>
+{% endblock %}

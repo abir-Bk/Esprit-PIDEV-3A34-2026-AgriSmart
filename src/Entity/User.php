@@ -87,20 +87,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $googleId = null;
 
-    /** @var Collection<int, Commande> */
-    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Commande::class)]
-    private Collection $commandes;
-
-    /** @var Collection<int, Produit> */
-    #[ORM\OneToMany(mappedBy: 'vendeur', targetEntity: Produit::class)]
-    private Collection $produits;
+    /**
+     * @var Collection<int, Offre>
+     */
+    #[ORM\OneToMany(targetEntity: Offre::class, mappedBy: 'agriculteur')]
+    private Collection $offres;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
-        $this->commandes = new ArrayCollection();
-        $this->produits = new ArrayCollection();
+        $this->offres = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -219,15 +216,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /** @return Collection<int, Commande> */
-    public function getCommandes(): Collection
+    /**
+     * @return Collection<int, Offre>
+     */
+    public function getOffres(): Collection
     {
-        return $this->commandes;
+        return $this->offres;
     }
 
-    /** @return Collection<int, Produit> */
-    public function getProduits(): Collection
+    public function addOffre(Offre $offre): static
     {
-        return $this->produits;
+        if (!$this->offres->contains($offre)) {
+            $this->offres->add($offre);
+            $offre->setAgriculteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOffre(Offre $offre): static
+    {
+        if ($this->offres->removeElement($offre)) {
+            // set the owning side to null (unless already changed)
+            if ($offre->getAgriculteur() === $this) {
+                $offre->setAgriculteur(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -1,0 +1,74 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}
+    {{ demande.id|default(null) ? 'Modifier' : 'Postuler' }} - {{ offre.title }}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow border-0">
+                {% set is_edit = demande.id|default(null) %}
+                
+                <div class="card-header {{ is_edit ? 'bg-warning' : 'bg-success' }} text-white py-3">
+                    <h4 class="mb-0 text-center">
+                        {{ is_edit ? 'Modifier ma candidature' : 'Candidature : ' ~ offre.title }}
+                    </h4>
+                </div>
+
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">{{ form_row(form.nom) }}</div>
+                            <div class="col-md-6">{{ form_row(form.prenom) }}</div>
+                        </div>
+
+                        <div class="mb-4">{{ form_row(form.phoneNumber) }}</div>
+
+                        <hr class="text-muted">
+                        <h6 class="text-uppercase small fw-bold mb-3 text-secondary">Pièces jointes (PDF)</h6>
+
+                        {# CV Field #}
+                        <div class="mb-4">
+                            {{ form_row(form.cv) }}
+                            {% if demande.cv|default(null) %}
+                                <div class="mt-1 d-flex align-items-center">
+                                    <span class="badge rounded-pill bg-light text-dark border me-2">
+                                        {# Replaced |u.truncate with core |slice #}
+                                        <i class="bi bi-file-earmark-pdf text-danger"></i> 
+                                        {{ demande.cv|length > 20 ? demande.cv|slice(0, 20) ~ '...' : demande.cv }}
+                                    </span>
+                                    <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="small text-decoration-none">Consulter</a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Letter Field #}
+                        <div class="mb-4">
+                            {{ form_row(form.lettreMotivation) }}
+                            {% if demande.lettreMotivation|default(null) %}
+                                <div class="mt-1 d-flex align-items-center">
+                                    <span class="badge rounded-pill bg-light text-dark border me-2">
+                                        <i class="bi bi-file-earmark-text text-primary"></i> 
+                                        {{ demande.lettreMotivation|length > 20 ? demande.lettreMotivation|slice(0, 20) ~ '...' : demande.lettreMotivation }}
+                                    </span>
+                                    <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" target="_blank" class="small text-decoration-none">Consulter</a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn {{ is_edit ? 'btn-warning' : 'btn-success' }} btn-lg">
+                                {{ is_edit ? 'Mettre à jour ma demande' : 'Soumettre ma candidature' }}
+                            </button>
+                            <a href="{{ path('app_my_demandes') }}" class="btn btn-link text-muted text-decoration-none">Retour à la liste</a>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}  

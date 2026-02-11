@@ -79,12 +79,59 @@ final class CommandeController extends AbstractController
         $user = $this->getUser();
         $isClient = $user && $commande->getClient() === $user;
         $retourRoute = $isClient ? 'app_commande_mes_commandes' : 'app_commande_mes_ventes';
+        $canChangeStatus = $this->canChangeStatus($commande);
 
         return $this->render('front/semi-public/commande/show.html.twig', [
             'commande' => $commande,
             'items' => $commande->getItems(),
             'retour_route' => $retourRoute,
+            'can_change_status' => $canChangeStatus,
+            'statuts' => [
+                Commande::STATUT_EN_ATTENTE => 'En attente',
+                Commande::STATUT_PAYEE => 'Payée',
+                Commande::STATUT_LIVREE => 'Livrée',
+                Commande::STATUT_ANNULEE => 'Annulée',
+            ],
         ]);
+    }
+
+    #[Route('/{id}/changer-statut', name: 'app_commande_changer_statut', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function changerStatut(
+        Commande $commande,
+        Request $request,
+        EntityManagerInterface $em
+    ): Response {
+        $this->denyUnlessVendeurOrAdmin($commande);
+
+        if (!$this->isCsrfTokenValid('changer_statut_' . $commande->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        $statut = trim((string) $request->request->get('statut', ''));
+        $allowed = [
+            Commande::STATUT_EN_ATTENTE,
+            Commande::STATUT_PAYEE,
+            Commande::STATUT_LIVREE,
+            Commande::STATUT_ANNULEE,
+        ];
+        if (!in_array($statut, $allowed, true)) {
+            $this->addFlash('danger', 'Statut invalide.');
+            return $this->redirectToRoute('app_commande_show', ['id' => $commande->getId()]);
+        }
+
+        $ancienStatut = $commande->getStatut();
+
+        // Si passage en annulée et que la commande était déjà payée/livrée → remettre le stock
+        if ($statut === Commande::STATUT_ANNULEE && in_array($ancienStatut, [Commande::STATUT_PAYEE, Commande::STATUT_LIVREE], true)) {
+            $this->restoreStock($commande);
+            // TODO: si modePaiement === PAIEMENT_CARTE et paymentRef présent, appeler Stripe Refund API pour rembourser le client
+        }
+
+        $commande->setStatut($statut);
+        $em->flush();
+
+        $this->addFlash('success', 'Statut de la commande mis à jour : ' . $statut . '.');
+        return $this->redirectToRoute('app_commande_show', ['id' => $commande->getId()]);
     }
 
     #[Route('/{id}/annuler', name: 'app_commande_cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
@@ -145,6 +192,58 @@ final class CommandeController extends AbstractController
         $user = $this->getUser();
         if (!$user || $commande->getClient() !== $user) {
             throw $this->createAccessDeniedException();
+        }
+    }
+
+    private function denyUnlessVendeurOrAdmin(Commande $commande): void
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return;
+        }
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException();
+        }
+        foreach ($commande->getItems() as $item) {
+            $produit = $item->getProduit();
+            if ($produit && $produit->getVendeur() === $user) {
+                return;
+            }
+        }
+        throw $this->createAccessDeniedException();
+    }
+
+    private function canChangeStatus(Commande $commande): bool
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return true;
+        }
+        $user = $this->getUser();
+        if (!$user) {
+            return false;
+        }
+        foreach ($commande->getItems() as $item) {
+            $produit = $item->getProduit();
+            if ($produit && $produit->getVendeur() === $user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Remet le stock des produits lorsque une commande payée/livrée est annulée.
+     */
+    private function restoreStock(Commande $commande): void
+    {
+        foreach ($commande->getItems() as $item) {
+            $produit = $item->getProduit();
+            if (!$produit || !method_exists($produit, 'getQuantiteStock') || !method_exists($produit, 'setQuantiteStock')) {
+                continue;
+            }
+            $current = (int) $produit->getQuantiteStock();
+            $qty = (int) $item->getQuantite();
+            $produit->setQuantiteStock($current + $qty);
         }
     }
 }

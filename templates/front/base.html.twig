@@ -21,13 +21,32 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-	{# Inclusion du Header réduit #}
+    {{ include('_partials/_header.html.twig') }}
+
+    {# Messages flash globaux (dismissible) — affiché seulement s'il y a des messages #}
+    {% if app.flashes|length > 0 %}
+    <div class="container py-2 py-md-3" id="flash-container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-2 mb-md-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <main class="flex-grow-1">
         {% block body %}{% endblock %}
     </main>
 
-	{# Inclusion du Footer #}
+    {# Footer minimal #}
+    <footer class="bg-light border-top py-4 mt-auto">
+        <div class="container text-center text-muted small">
+            <span>© {{ 'now'|date('Y') }} AgriSmart · Marketplace agricole</span>
+        </div>
+    </footer>
 
     {% block javascripts %}
         <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>

@@ -64,12 +64,18 @@ final class ProduitController extends AbstractController
                 break;
         }
 
-        // ✅ PAGINATION
+        // ✅ PAGINATION (paramètres de tri personnalisés pour ne pas conflit avec notre "sort" = recent/price_asc/price_desc)
         $page = max(1, (int) $request->query->get('page', 1));
         $perPage = 9;
 
+        // Évite que KNP utilise le paramètre "sort" (recent/price_asc/price_desc) comme nom de champ
+        $paginatorOptions = [
+            'sortFieldParameterName' => 'tri',
+            'sortDirectionParameterName' => 'ordre',
+        ];
+
         // IMPORTANT: on passe le QueryBuilder au paginator (pas getResult())
-        $produits = $paginator->paginate($qb, $page, $perPage);
+        $produits = $paginator->paginate($qb, $page, $perPage, $paginatorOptions);
 
         // catégories dynamiques
         $catsRows = $repo->createQueryBuilder('p2')

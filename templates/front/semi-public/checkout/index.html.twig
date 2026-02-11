@@ -12,13 +12,6 @@
 
 <section class="py-5">
   <div class="container">
-
-    {% for label, messages in app.flashes %}
-      {% for message in messages %}
-        <div class="alert alert-{{ label }} rounded-4">{{ message }}</div>
-      {% endfor %}
-    {% endfor %}
-
     {% if items is empty %}
       <div class="alert alert-warning rounded-4">
         Votre panier est vide.
@@ -69,10 +62,11 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-dark rounded-pill px-4">
-                Confirmer la commande
+              <button type="submit" class="btn btn-dark rounded-pill px-4" id="checkout-submit">
+                <span class="btn-text">Confirmer la commande</span>
+                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
               </button>
-              <a href="{{ path('app_panier_index') }}" class="btn btn-outline-secondary rounded-pill ms-2">
+              <a href="{{ path('app_panier_index') }}" class="btn btn-outline-secondary rounded-pill ms-2" id="checkout-back">
                 Retour panier
               </a>
             </form>
@@ -204,9 +198,30 @@
         paymentElement.mount(paymentElementDiv);
       }
 
+      function setSubmitLoading(loading) {
+        const btn = document.getElementById('checkout-submit');
+        const back = document.getElementById('checkout-back');
+        if (!btn) return;
+        const text = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.spinner-border');
+        if (loading) {
+          btn.disabled = true;
+          if (text) text.textContent = 'Traitement en cours…';
+          if (spinner) spinner.classList.remove('d-none');
+          if (back) back.classList.add('disabled');
+        } else {
+          btn.disabled = false;
+          if (text) text.textContent = 'Confirmer la commande';
+          if (spinner) spinner.classList.add('d-none');
+          if (back) back.classList.remove('disabled');
+        }
+      }
+
       form.addEventListener('submit', async function (e) {
+        setSubmitLoading(true);
+
         if (!payCard || !payCard.checked) {
-          // Paiement à domicile → soumission classique
+          // Paiement à domicile → soumission classique (garder loading jusqu'au redirect)
           return;
         }
 
@@ -229,6 +244,7 @@
 
           if (result.error) {
             errorBox.textContent = result.error.message || 'Une erreur est survenue lors du paiement.';
+            setSubmitLoading(false);
             return;
           }
 
@@ -239,6 +255,7 @@
           }
         } catch (err) {
           errorBox.textContent = err.message || 'Impossible d\'initialiser le paiement.';
+          setSubmitLoading(false);
         }
       });
     });

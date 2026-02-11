@@ -111,12 +111,13 @@
                         </button>
                     </div>
 
-                    {# Flash messages #}
+                    {# Flash messages (dismissible) #}
                     <div class="ms-3 flex-grow-1">
                         {% for label, messages in app.flashes %}
                             {% for message in messages %}
-                                <div class="alert alert-{{ label }} py-2 mb-0 small">
+                                <div class="alert alert-{{ label }} alert-dismissible fade show py-2 mb-0 small" role="alert">
                                     {{ message }}
+                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Fermer"></button>
                                 </div>
                             {% endfor %}
                         {% endfor %}

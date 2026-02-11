@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\ProduitRepository;
 use App\Service\PanierService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,8 +25,24 @@ class PanierController extends AbstractController
     }
 
     #[Route('/add/{id}', name: 'app_panier_add', methods: ['GET', 'POST'])]
-    public function add(int $id, Request $request, PanierService $panier): Response
+    public function add(int $id, Request $request, PanierService $panier, ProduitRepository $produitRepo): Response
     {
+        $produit = $produitRepo->find($id);
+        if (!$produit) {
+            $this->addFlash('danger', 'Produit introuvable.');
+            return $this->redirectToRoute('app_produit_index');
+        }
+
+        $user = $this->getUser();
+        if ($user && $produit->getVendeur() && $produit->getVendeur() === $user) {
+            $this->addFlash('warning', 'Vous ne pouvez pas commander votre propre offre.');
+            $referer = $request->headers->get('Referer');
+            if ($referer) {
+                return $this->redirect($referer);
+            }
+            return $this->redirectToRoute('app_produit_show', ['id' => $id]);
+        }
+
         $qty = (int) $request->get('qty', 1);
         $panier->add($id, $qty);
 
@@ -51,9 +68,13 @@ class PanierController extends AbstractController
         return $this->redirectToRoute('app_panier_index');
     }
 
-    #[Route('/clear', name: 'app_panier_clear', methods: ['GET', 'POST'])]
-    public function clear(PanierService $panier): Response
+    #[Route('/clear', name: 'app_panier_clear', methods: ['POST'])]
+    public function clear(Request $request, PanierService $panier): Response
     {
+        if (!$this->isCsrfTokenValid('panier_clear', (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Lien expiré. Réessayez.');
+            return $this->redirectToRoute('app_panier_index');
+        }
         $panier->clear();
 
         $this->addFlash('info', 'Panier vidé.');

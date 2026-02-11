@@ -46,15 +46,10 @@
             <div class="d-flex align-items-center gap-3">
 
                 {# PANIER (badge dynamique) #}
-                <a href="{{ path('app_panier_index') }}" class="position-relative text-decoration-none">
-                    <i class="bi bi-cart3 fs-5 text-muted" style="cursor:pointer;"></i>
-
-                    {# Compteur session : on lit directement la session #}
-                    {% set panier = app.session.get('panier_items', {}) %}
-                    {% set panierCount = 0 %}
-                    {% for qty in panier %}
-                        {% set panierCount = panierCount + qty %}
-                    {% endfor %}
+                <a href="{{ path('app_panier_index') }}" class="position-relative text-decoration-none" title="Voir le panier">
+                    <i class="bi bi-cart3 fs-5 text-muted"></i>
+                    {% set panier = app.session.get('panier', {})|default({}) %}
+                    {% set panierCount = panier|reduce((carry, qty) => carry + qty, 0) %}
 
                     {% if panierCount > 0 %}
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">

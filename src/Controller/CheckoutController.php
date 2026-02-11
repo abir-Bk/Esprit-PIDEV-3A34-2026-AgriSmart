@@ -42,7 +42,23 @@ class CheckoutController extends AbstractController
     #[Route('/checkout', name: 'app_checkout_index', methods: ['GET'])]
     public function index(PanierService $panier): Response
     {
+        $user = $this->getUser();
         $details = $panier->getDetails();
+        $items = $details['items'];
+
+        // Retirer du panier les produits dont l'utilisateur est le vendeur
+        foreach ($items as $row) {
+            $produit = $row['produit'];
+            if ($user && $produit->getVendeur() && $produit->getVendeur() === $user) {
+                $panier->remove($produit->getId());
+            }
+        }
+        $details = $panier->getDetails();
+        $items = $details['items'];
+        if ($details['count'] <= 0) {
+            $this->addFlash('warning', 'Votre panier ne peut pas contenir vos propres offres. Panier mis à jour.');
+            return $this->redirectToRoute('app_panier_index');
+        }
 
         return $this->render('front/semi-public/checkout/index.html.twig', [
             'items' => $details['items'],
@@ -80,6 +96,13 @@ class CheckoutController extends AbstractController
 
         if (count($items) === 0) {
             return $this->json(['status' => 'error', 'message' => 'Votre panier est vide.'], 400);
+        }
+
+        foreach ($items as $row) {
+            $produit = $row['produit'];
+            if ($produit->getVendeur() && $produit->getVendeur() === $user) {
+                return $this->json(['status' => 'error', 'message' => 'Vous ne pouvez pas commander votre propre offre (' . $produit->getNom() . ').'], 400);
+            }
         }
 
         $adresseLivraison = trim((string) $request->request->get('customer_address', ''));
@@ -175,6 +198,15 @@ class CheckoutController extends AbstractController
         if (count($items) === 0) {
             $this->addFlash('warning', 'Votre panier est vide.');
             return $this->redirectToRoute('app_panier_index');
+        }
+
+        foreach ($items as $row) {
+            $produit = $row['produit'];
+            if ($produit->getVendeur() && $produit->getVendeur() === $user) {
+                $panier->remove($produit->getId());
+                $this->addFlash('warning', 'Vous ne pouvez pas commander votre propre offre. Les articles concernés ont été retirés du panier.');
+                return $this->redirectToRoute('app_checkout_index');
+            }
         }
 
         // Form

@@ -312,7 +312,14 @@
 
                 <div class="d-grid gap-2">
                   {% if produit.type == 'vente' %}
-                    {% if stock <= 0 %}
+                    {% if app.user and produit.vendeur and produit.vendeur.id == app.user.id %}
+                      <div class="alert alert-light border rounded-pill py-2 mb-0 text-center small">
+                        <i class="bi bi-person-badge me-1"></i> C'est votre offre — vous ne pouvez pas la commander.
+                      </div>
+                      <a href="{{ path('app_produit_edit', {id: produit.id}) }}" class="btn btn-outline-secondary rounded-pill py-2">
+                        <i class="bi bi-pencil me-1"></i> Modifier l'annonce
+                      </a>
+                    {% elseif stock <= 0 %}
                       <button class="btn btn-secondary rounded-pill py-2" type="button" disabled>
                         <i class="bi bi-x-circle me-1"></i> Indisponible
                       </button>

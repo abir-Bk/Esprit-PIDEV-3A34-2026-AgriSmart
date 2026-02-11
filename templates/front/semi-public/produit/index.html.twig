@@ -169,15 +169,15 @@
           </div>
 
           {# CATEGORIES CHIPS #}
-          {% set chipFilters = filters|merge({ page: 1 }) %}
+          {% set chipFilters = (filters|default({}))|merge({ page: 1 }) %}
           <div class="mt-4 d-flex flex-wrap gap-2">
-            <a class="ag-pill {{ not filters.categorie ? 'active' : '' }}"
-               href="{{ path('app_produit_index', chipFilters|merge({categorie: null}) ) }}">
+            <a class="ag-pill {{ not (filters.categorie|default('')) ? 'active' : '' }}"
+               href="{{ path('app_produit_index', chipFilters|merge({ categorie: '' }) ) }}">
               <i class="bi bi-grid-3x3-gap"></i> Toutes
             </a>
-            {% for cat in categories %}
-              <a class="ag-pill {{ filters.categorie == cat ? 'active' : '' }}"
-                 href="{{ path('app_produit_index', chipFilters|merge({categorie: cat}) ) }}">
+            {% for cat in categories|default([]) %}
+              <a class="ag-pill {{ (filters.categorie|default('')) == cat ? 'active' : '' }}"
+                 href="{{ path('app_produit_index', chipFilters|merge({ categorie: cat }) ) }}">
                 <i class="bi bi-tag"></i> {{ cat }}
               </a>
             {% endfor %}
@@ -199,12 +199,12 @@
         {# SIDEBAR FILTERS #}
         <aside class="col-lg-3">
           <div class="card ag-filter-card shadow-sm p-4 sticky-top" style="top: 18px;">
-            <form method="get" action="{{ path('app_produit_index') }}" class="vstack gap-3">
+            <form method="get" action="{{ path('app_produit_index') }}" class="vstack gap-3" id="filter-form">
 
               <div>
                 <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Recherche</div>
                 <div class="input-group">
-                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q }}">
+                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}">
                   <button class="btn btn-outline-secondary" type="submit" title="Rechercher">
                     <i class="bi bi-search"></i>
                   </button>
@@ -213,31 +213,32 @@
 
               <div>
                 <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Type</div>
-                <select name="type" class="form-select ag-input" onchange="this.form.submit()">
-                  <option value="" {{ filters.type == '' ? 'selected' }}>Tous</option>
-                  <option value="vente" {{ filters.type == 'vente' ? 'selected' }}>Vente</option>
-                  <option value="location" {{ filters.type == 'location' ? 'selected' }}>Location</option>
+                <select name="type" class="form-select ag-input" onchange="document.getElementById('filter-form').submit()">
+                  <option value="" {{ (filters.type|default('')) == '' ? 'selected' }}>Tous</option>
+                  <option value="vente" {{ (filters.type|default('')) == 'vente' ? 'selected' }}>Vente</option>
+                  <option value="location" {{ (filters.type|default('')) == 'location' ? 'selected' }}>Location</option>
                 </select>
               </div>
 
               <div>
                 <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Trier</div>
-                <select name="sort" class="form-select ag-input" onchange="this.form.submit()">
-                  <option value="recent" {{ filters.sort == 'recent' ? 'selected' }}>Nouveautés</option>
-                  <option value="price_asc" {{ filters.sort == 'price_asc' ? 'selected' }}>Prix croissant</option>
-                  <option value="price_desc" {{ filters.sort == 'price_desc' ? 'selected' }}>Prix décroissant</option>
+                <select name="sort" class="form-select ag-input" onchange="document.getElementById('filter-form').submit()">
+                  <option value="recent" {{ (filters.sort|default('recent')) == 'recent' ? 'selected' }}>Nouveautés</option>
+                  <option value="price_asc" {{ (filters.sort|default('')) == 'price_asc' ? 'selected' }}>Prix croissant</option>
+                  <option value="price_desc" {{ (filters.sort|default('')) == 'price_desc' ? 'selected' }}>Prix décroissant</option>
                 </select>
               </div>
 
               <div class="form-check form-switch mt-1">
                 <input class="form-check-input" type="checkbox" id="promoOnly" name="promo" value="1"
-                       {{ filters.promo == '1' ? 'checked' }} onchange="this.form.submit()">
+                       {{ (filters.promo|default('')) == '1' ? 'checked' }} onchange="document.getElementById('filter-form').submit()">
                 <label class="form-check-label fw-semibold" for="promoOnly">Promotions uniquement</label>
               </div>
 
-              {% if filters.categorie %}
+              {% if filters.categorie|default('') %}
                 <input type="hidden" name="categorie" value="{{ filters.categorie }}">
               {% endif %}
+              <input type="hidden" name="page" value="1">
 
               <div class="d-grid gap-2 pt-2">
                 <button type="submit" class="btn ag-btn-primary text-white rounded-pill">Appliquer</button>
@@ -250,6 +251,18 @@
 
         {# PRODUCTS GRID #}
         <div class="col-lg-9">
+          {# Résultats + pagination info #}
+          {% if produits is defined and produits.getTotalItemCount() > 0 %}
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <p class="text-muted small mb-0">
+                <strong>{{ produits.getTotalItemCount() }}</strong> résultat{{ produits.getTotalItemCount() > 1 ? 's' : '' }}
+                {% if filters.categorie|default('') %}
+                  · catégorie : <span class="badge bg-light text-dark border">{{ filters.categorie }}</span>
+                {% endif %}
+              </p>
+            </div>
+          {% endif %}
+
           <div class="row g-4">
 
             {% for produit in produits %}
@@ -259,12 +272,13 @@
                 <div class="ag-card">
 
                   <div class="position-relative">
-                    <a href="{{ path('app_produit_show', {id: produit.id}) }}" class="text-decoration-none">
+                    <a href="{{ path('app_produit_show', {id: produit.id}) }}" class="text-decoration-none d-block">
                       <img
                         src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
                         class="w-100"
                         style="height: 190px; object-fit: cover;"
                         alt="{{ produit.nom }}"
+                        loading="lazy"
                       >
                     </a>
 
@@ -322,24 +336,30 @@
                       </div>
                     </div>
 
-                    {# ACTIONS: DETAILS + ADD TO CART #}
+                    {# ACTIONS: DETAILS + ADD TO CART (masqué si c'est sa propre offre) #}
                     <div class="d-flex gap-2 mt-3">
                       <a href="{{ path('app_produit_show', {id: produit.id}) }}"
                          class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1">
                         <i class="bi bi-eye me-1"></i> Détails
                       </a>
 
-                      <form method="post"
-                            action="{{ path('app_panier_add', {id: produit.id}) }}"
-                            class="flex-grow-1">
-                        <input type="hidden" name="_token" value="{{ csrf_token('panier_add_' ~ produit.id) }}">
-                        <input type="hidden" name="qty" value="1">
-                        <button type="submit"
-                                class="btn btn-sm btn-success rounded-pill w-100"
-                                {% if stock <= 0 %}disabled{% endif %}>
-                          <i class="bi bi-cart-plus me-1"></i> Ajouter
-                        </button>
-                      </form>
+                      {% if app.user and produit.vendeur and produit.vendeur.id == app.user.id %}
+                        <span class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1 disabled" title="Vous ne pouvez pas commander votre propre offre">
+                          <i class="bi bi-person-badge me-1"></i> Votre offre
+                        </span>
+                      {% else %}
+                        <form method="post"
+                              action="{{ path('app_panier_add', {id: produit.id}) }}"
+                              class="flex-grow-1">
+                          <input type="hidden" name="_token" value="{{ csrf_token('panier_add_' ~ produit.id) }}">
+                          <input type="hidden" name="qty" value="1">
+                          <button type="submit"
+                                  class="btn btn-sm btn-success rounded-pill w-100"
+                                  {% if stock <= 0 %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus me-1"></i> Ajouter
+                          </button>
+                        </form>
+                      {% endif %}
                     </div>
 
                   </div>
@@ -361,11 +381,11 @@
 
           </div>
 
-          {# PAGINATION (KNP) - en dehors du for #}
-          {% if produits is defined %}
-            <div class="d-flex justify-content-center mt-4">
+          {# PAGINATION (KNP) #}
+          {% if produits is defined and produits.getTotalItemCount() > produits.getItemNumberPerPage() %}
+            <nav class="d-flex justify-content-center mt-4" aria-label="Pagination des produits">
               {{ knp_pagination_render(produits, null, { query: app.request.query.all }) }}
-            </div>
+            </nav>
           {% endif %}
 
         </div>

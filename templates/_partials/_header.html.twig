@@ -1,77 +1,81 @@
-{# templates/_partials/_header.html.twig #}
+{# Header Bootstrap 5 : toggler + collapse + dropdown profil #}
+{% set _route = app.request.attributes.get('_route') ?? '' %}
+{% set _is_marketplace = _route starts with 'app_produit_' or _route starts with 'app_panier_' or _route starts with 'app_checkout_' %}
+{% set _user_role = app.user ? app.user.role : null %}
+
 <header class="navbar-light header-sticky bg-white border-bottom py-1">
-    <nav class="navbar navbar-expand-xl py-1">
-        <div class="container">
+	<nav class="navbar navbar-expand-xl py-1">
+		<div class="container">
+			<a class="navbar-brand d-flex align-items-center py-0" href="{{ path('app_produit_index') }}">
+				<img src="{{ asset('assets/images/logo.svg') }}" alt="AgriSmart" style="height:30px;" onerror="this.style.display='none'">
+				<span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">Agri<span style="color: #28a745;">Smart</span></span>
+			</a>
 
-            <a class="navbar-brand d-flex align-items-center py-0" href="{{ path('app_produit_index') }}">
-                <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
-                <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">
-                    Agri<span style="color: #28a745;">Smart</span>
-                </span>
-            </a>
+			<button class="navbar-toggler p-2 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Ouvrir le menu">
+				<span class="navbar-toggler-icon"></span>
+			</button>
 
-            <button class="navbar-toggler p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
+			<div class="collapse navbar-collapse" id="navbarCollapse">
+				<ul class="navbar-nav mx-auto">
+					{% if _user_role == 'agriculteur' or _user_role == 'admin' %}
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'tasks_' ? 'active fw-semibold' }}" href="{{ path('tasks_dashboard') }}"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'app_parcelle_' ? 'active fw-semibold' }}" href="{{ path('app_parcelle_index') }}"><i class="bi bi-flower1 me-1"></i>Culture</a></li>
+						<li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
+					{% elseif _user_role == 'fournisseur' %}
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+					{% elseif _user_role == 'employee' %}
+						<li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'employee_tasks_' ? 'active fw-semibold' }}" href="{{ path('employee_tasks_index') }}"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
+					{% else %}
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+					{% endif %}
+				</ul>
 
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link small px-3" href="#">
-                            <i class="bi bi-list-check me-1"></i>Tâches
-                        </a>
-                    </li>
+				<ul class="navbar-nav align-items-center gap-2 gap-xl-3">
+					{% if _is_marketplace %}
+					<li class="nav-item">
+						<a href="{{ path('app_panier_index') }}" class="nav-link py-2 position-relative" title="Panier">
+							<i class="bi bi-cart3 fs-5 text-body"></i>
+							{% set panier = app.session.get('panier', {})|default({}) %}
+							{% set panierCount = panier|reduce((carry, qty) => carry + qty, 0) %}
+							{% if panierCount > 0 %}
+								<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style="font-size: 0.65rem;">{{ panierCount }}</span>
+							{% endif %}
+						</a>
+					</li>
+					{% endif %}
 
-                    <li class="nav-item">
-                        <a class="nav-link small px-3" href="{{ path('app_produit_index') }}">
-                            <i class="bi bi-shop me-1"></i>Marketplace
-                        </a>
-                    </li>
+					<li class="nav-item">
+						<a href="#" class="nav-link py-2" title="Notifications"><i class="bi bi-bell fs-5 text-body"></i></a>
+					</li>
 
-                    <li class="nav-item">
-                        <a class="nav-link small px-3" href="#">
-                            <i class="bi bi-flower1 me-1"></i>Culture
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link small px-3" href="#">
-                            <i class="bi bi-person-badge me-1"></i>Candidature
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            {# DROITE #}
-            <div class="d-flex align-items-center gap-3">
-
-                {# PANIER (badge dynamique) #}
-                <a href="{{ path('app_panier_index') }}" class="position-relative text-decoration-none" title="Voir le panier">
-                    <i class="bi bi-cart3 fs-5 text-muted"></i>
-                    {% set panier = app.session.get('panier', {})|default({}) %}
-                    {% set panierCount = panier|reduce((carry, qty) => carry + qty, 0) %}
-
-                    {% if panierCount > 0 %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
-                            {{ panierCount }}
-                            <span class="visually-hidden">articles dans le panier</span>
-                        </span>
-                    {% endif %}
-                </a>
-
-                <i class="bi bi-bell fs-5 text-muted" style="cursor:pointer;"></i>
-
-                <div class="avatar-static">
-                    <img
-                        src="https://ui-avatars.com/api/?name={{ app.user ? (app.user.email|url_encode) : 'DEV' }}&background=1a4331&color=fff"
-                        class="rounded-circle border"
-                        width="32" height="32"
-                        alt="user"
-                    >
-                </div>
-            </div>
-
-        </div>
-    </nav>
+					{% if app.user %}
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle d-flex align-items-center py-2" href="#" id="navbarProfileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="https://ui-avatars.com/api/?name={{ app.user.email|url_encode }}&background=1a4331&color=fff&size=64" class="rounded-circle border" width="32" height="32" alt="">
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 py-2" aria-labelledby="navbarProfileDropdown">
+							<li class="px-3 py-2 border-bottom">
+								<span class="fw-semibold">{{ app.user.firstName }} {{ app.user.lastName }}</span>
+								<br><small class="text-muted">{{ app.user.email }}</small>
+							</li>
+							<li><a class="dropdown-item py-2" href="{{ path('app_profile_show') }}"><i class="bi bi-person me-2"></i>Mon profil</a></li>
+							<li><a class="dropdown-item py-2" href="{{ path('app_produit_mes_offres') }}"><i class="bi bi-journals me-2"></i>Mes annonces</a></li>
+							<li><a class="dropdown-item py-2" href="{{ path('app_panier_index') }}"><i class="bi bi-cart3 me-2"></i>Panier</a></li>
+							<li><a class="dropdown-item py-2" href="{{ path('app_profile_edit') }}"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+							<li><hr class="dropdown-divider my-2"></li>
+							<li><a class="dropdown-item py-2 text-danger" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+						</ul>
+					</li>
+					{% else %}
+					<li class="nav-item">
+						<a class="btn btn-sm rounded-pill text-white px-3" href="{{ path('app_login') }}" style="background:#1a4331;">Connexion</a>
+					</li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+	</nav>
 </header>

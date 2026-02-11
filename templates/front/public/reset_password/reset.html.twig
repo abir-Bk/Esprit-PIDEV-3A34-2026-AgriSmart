@@ -1,0 +1,114 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Reset your password{% endblock %}
+
+{% block body %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <div class="card border shadow-sm">
+                <div class="card-header border-bottom">
+                    <h4 class="card-header-title mb-0">Reset your password</h4>
+                </div>
+
+                <div class="card-body">
+                    {{ form_start(resetForm, {
+                        'attr': {
+                            'class': 'needs-validation',
+                            'novalidate': ''
+                        }
+                    }) }}
+
+                    <!-- New password -->
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ resetForm.plainPassword.first.vars.id }}">
+                            {{ form_label(resetForm.plainPassword.first) }}
+                        </label>
+                        <div class="input-group has-validation">
+                            {{ form_widget(resetForm.plainPassword.first, {
+                                'attr': {
+                                    'class': 'form-control fakepassword',
+                                    'id': 'psw-input',
+                                    'placeholder': 'Enter new password',
+                                    'required': true,
+                                    'minlength': 8
+                                }
+                            }) }}
+                            <span class="input-group-text bg-transparent border-0 p-0">
+                                <i class="fakepasswordicon fas fa-eye-slash cursor-pointer px-3 py-2"></i>
+                            </span>
+                            <div class="invalid-feedback">
+                                {{ form_errors(resetForm.plainPassword.first) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirm password -->
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ resetForm.plainPassword.second.vars.id }}">
+                            {{ form_label(resetForm.plainPassword.second) }}
+                        </label>
+                        <div class="input-group has-validation">
+                            {{ form_widget(resetForm.plainPassword.second, {
+                                'attr': {
+                                    'class': 'form-control fakepassword',
+                                    'id': 'psw-confirm',
+                                    'placeholder': 'Confirm new password',
+                                    'required': true,
+                                    'minlength': 8
+                                }
+                            }) }}
+                            <span class="input-group-text bg-transparent border-0 p-0">
+                                <i class="fakepasswordicon fas fa-eye-slash cursor-pointer px-3 py-2"></i>
+                            </span>
+                            <div class="invalid-feedback">
+                                {{ form_errors(resetForm.plainPassword.second) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Reset password
+                        </button>
+                    </div>
+
+                    {{ form_end(resetForm) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.fakepasswordicon').forEach(icon => {
+                icon.addEventListener('click', function () {
+                    // Find the nearest input inside the same input-group
+                    const input = this.closest('.input-group')
+                                      .querySelector('.fakepassword');
+
+                    if (!input) return;
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    } else {
+                        input.type = 'password';
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

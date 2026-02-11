@@ -1,0 +1,208 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Inscription - AgriSmart{% endblock %}
+
+{% block body %}
+<main class="d-flex align-items-center py-4" style="background: #ffffff; min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-11 col-lg-10 col-xl-9">
+                <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                    <div class="row g-0">
+                        
+                        <!-- Left Side - Animation (Larger) -->
+                        <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center p-4" 
+                             style="background: linear-gradient(135deg, #1F3D2B 0%, #2a5438 100%);">
+                            <div class="text-center">
+                                <lottie-player 
+                                    src="{{ asset('assets/images/login.json') }}"
+                                    background="transparent" 
+                                    speed="1" 
+                                    style="width: 100%; max-width: 380px; height: auto;"
+                                    loop 
+                                    autoplay>
+                                </lottie-player>
+                            </div>
+                        </div>
+
+                        <!-- Right Side - Form (Compact) -->
+                        <div class="col-lg-6">
+                            <div class="p-4">
+                                
+                                <!-- Logo -->
+                                <div class="text-center text-lg-start mb-3">
+                                    <a href="{{ path('app_home') }}">
+                                        <img class="mb-2" src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height: 45px;">
+                                    </a>
+                                </div>
+
+                                <!-- Header -->
+                                <div class="mb-3">
+                                    <h1 class="mb-2" style="color: #1F3D2B; font-size: 26px; font-weight: 600;">Créer un compte</h1>
+                                    <p class="mb-0" style="color: #6c757d; font-size: 14px;">
+                                        Déjà inscrit ? 
+                                        <a href="{{ path('app_login') }}" style="color: #E6BF4A; text-decoration: none; font-weight: 500;">Se connecter</a>
+                                    </p>
+                                </div>
+
+                                <!-- Success Message -->
+                                {% for message in app.flashes('success') %}
+                                    <div class="alert alert-success border-0 shadow-sm mb-3" style="border-radius: 12px; padding: 12px 16px;">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+
+                                <!-- Registration Form -->
+                                {{ form_start(registrationForm, { attr: { class: 'mt-3', enctype:'multipart/form-data', novalidate:'novalidate' } }) }}
+
+                                {% for field in registrationForm %}
+                                    {% set isPassword = field.vars.block_prefixes|last == 'password' %}
+                                    {% set fieldName = field.vars.name %}
+                                    
+                                    <div class="mb-3">
+                                        {{ form_label(field, null, { label_attr: { class: 'form-label fw-semibold mb-2', style: 'color: #1F3D2B; font-size: 14px;' } }) }}
+                                        
+                                        {% if isPassword %}
+                                            <div class="position-relative">
+                                                {{ form_widget(field, { 
+                                                    attr: { 
+                                                        class: 'form-control password-input'~(field.vars.valid ? '' : ' is-invalid'), 
+                                                        style: 'border: 2px solid '~(field.vars.valid ? '#e9ecef' : '#dc3545')~'; border-radius: 12px; padding: 10px 16px; padding-right: 45px;',
+                                                        placeholder: 'Entrez votre mot de passe'
+                                                    } 
+                                                }) }}
+                                                <span class="password-toggle position-absolute end-0 top-50 translate-middle-y pe-3" style="cursor: pointer;">
+                                                    <i class="fas fa-eye-slash" style="color: #6c757d; font-size: 14px;"></i>
+                                                </span>
+                                            </div>
+                                        {% else %}
+                                            {{ form_widget(field, { 
+                                                attr: { 
+                                                    class: 'form-control'~(field.vars.valid ? '' : ' is-invalid'),
+                                                    style: 'border: 2px solid '~(field.vars.valid ? '#e9ecef' : '#dc3545')~'; border-radius: 12px; padding: 10px 16px;',
+                                                    placeholder: field.vars.label
+                                                } 
+                                            }) }}
+                                        {% endif %}
+                                        
+                                        {{ form_errors(field) }}
+                                    </div>
+                                {% endfor %}
+
+                                <!-- Submit Button -->
+                                <button 
+                                    type="submit" 
+                                    class="btn w-100 mb-3 text-white fw-semibold" 
+                                    style="background: linear-gradient(135deg, #1F3D2B 0%, #2a5438 100%); 
+                                           border: none; 
+                                           border-radius: 12px; 
+                                           padding: 12px; 
+                                           transition: all 0.3s ease;
+                                           font-size: 15px;">
+                                    Créer mon compte
+                                </button>
+
+                                {{ form_end(registrationForm) }}
+
+                                <!-- Divider -->
+                                <div class="position-relative my-3">
+                                    <hr style="border-color: #e9ecef;">
+                                    <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white" 
+                                          style="color: #6c757d; font-size: 13px;">
+                                        Ou s'inscrire avec
+                                    </span>
+                                </div>
+
+                             <!-- Social Buttons -->
+                              <div class="row g-2">
+                                  <div class="col-6">
+                                      <a href="{{ path('connect_google_start') }}" class="btn w-100 d-flex align-items-center justify-content-center" 
+                                        style="border: 2px solid #e9ecef; border-radius: 12px; padding: 10px; background: white; color: #1F3D2B; text-decoration: none;">
+                                          <i class="fab fa-google me-2" style="color: #DB4437;"></i>
+                                          <span class="fw-semibold" style="font-size: 14px;">Google</span>
+                                      </a>
+                                  </div>
+                              </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    /* Focus states */
+    .form-control:focus {
+        border-color: #E6BF4A !important;
+        box-shadow: 0 0 0 0.2rem rgba(230, 191, 74, 0.15) !important;
+    }
+
+    /* Button hover */
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(31, 61, 43, 0.3) !important;
+    }
+
+    /* Social button hover */
+    .btn[href="#"]:hover {
+        border-color: #E6BF4A !important;
+        background: #fffbf0 !important;
+    }
+
+    /* Link hover */
+    a:hover {
+        opacity: 0.8;
+    }
+
+    /* Card shadow */
+    .card {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Error styling */
+    .invalid-feedback {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 13px;
+        color: #dc3545;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 991px) {
+        .card {
+            margin: 20px;
+        }
+    }
+</style>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
+    <script>
+        // Password toggle for all password fields
+        document.querySelectorAll('.password-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const passwordInput = this.previousElementSibling;
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% endblock %}

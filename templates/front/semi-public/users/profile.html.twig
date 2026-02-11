@@ -1,0 +1,80 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}My Profile - AgriSmart{% endblock %}
+
+{% block body %}
+<main>
+<section class="pt-4">
+<div class="container">
+<div class="row">
+
+    <!-- Sidebar -->
+    {% include 'front/semi-public/users/side_bar.html.twig' %}
+
+    <!-- MAIN CONTENT -->
+    <div class="col-lg-8 col-xl-9">
+        <div class="vstack gap-4">
+
+            <!-- PERSONAL INFO -->
+            <div class="card border">
+                <div class="card-header border-bottom">
+                    <h4 class="card-header-title">Personal Information</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <!-- Avatar -->
+                        <div class="col-12 mb-3 text-center">
+                            {% if app.user.image %}
+                                <img src="{{ asset('uploads/images/' ~ app.user.image) }}" 
+                                     alt="Profile Image" class="img-thumbnail mb-2" width="150">
+                            {% else %}
+                                <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:150px; height:150px; font-size:2rem;">
+                                    {{ app.user.firstName|slice(0,1)|upper }}{{ app.user.lastName|slice(0,1)|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- First Name -->
+                        <div class="col-md-6">
+                            <label class="fw-bold">First Name</label>
+                            <p>{{ app.user.firstName }}</p>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-6">
+                            <label class="fw-bold">Last Name</label>
+                            <p>{{ app.user.lastName }}</p>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="fw-bold">Email</label>
+                            <p>{{ app.user.email }}</p>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-md-6">
+                            <label class="fw-bold">Phone</label>
+                            <p>{{ app.user.phone ?? 'Not provided' }}</p>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="col-12">
+                            <label class="fw-bold">Address</label>
+                            <p>{{ app.user.address ?? 'Not provided' }}</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</div>
+</section>
+</main>
+{% endblock %}

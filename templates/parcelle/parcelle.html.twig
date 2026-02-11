@@ -1,0 +1,624 @@
+{% extends 'front/base.html.twig' %}
+
+{% block body %}
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --agri-green: #10b981;
+        --agri-dark: #064e3b;
+        --bg-light: #f8fafc;
+        --glass: rgba(255, 255, 255, 0.9);
+        --weather-blue: #0ea5e9;
+    }
+   
+    body {
+        background-color: var(--bg-light);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #1e293b;
+    }
+    .rounded-4 { border-radius: 1.25rem !important; }
+   
+    .agri-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .agri-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .agri-card.active {
+        border-color: var(--agri-green);
+        background-color: #f0fdf4 !important;
+        box-shadow: inset 4px 0 0 0 var(--agri-green);
+    }
+    .culture-item {
+        background: white;
+        border: 1px solid #f1f5f9;
+        border-radius: 1rem;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .culture-item:hover {
+        border-color: var(--agri-green);
+        background: #fafafa;
+    }
+    .icon-circle {
+        width: 48px; height: 48px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        color: var(--agri-green);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+    }
+    #map { height: 320px; width: 100%; border-radius: 15px; }
+   
+    #map-preview {
+        height: 250px;
+        width: 100%;
+        border-radius: 15px;
+        border: 3px solid white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1;
+    }
+    .weather-widget {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 1rem;
+    }
+    .advice-card {
+        border-radius: 1rem;
+        border-left: 5px solid;
+        transition: all 0.3s ease;
+    }
+    .badge-soft-success { background: #dcfce7; color: #166534; }
+    .badge-soft-info { background: #e0f2fe; color: #075985; }
+    .main-header {
+        background: linear-gradient(to right, #ffffff, #f8fafc);
+        border-bottom: 1px solid #e2e8f0;
+    }
+</style>
+
+<main x-data="{
+    selectedTab: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
+    selectedParcelleId: {{ parcelles|length > 0 ? parcelles[0].id : 0 }},
+    weather: { temp: '--', desc: 'Chargement...', icon: 'fa-sun', wind: '--' },
+    advice: { text: 'Analyse en cours...', color: '#64748b', icon: 'fa-info-circle', bg: '#f1f5f9' },
+   
+    parcelles: [
+        {% for p in parcelles %}
+        {
+            id: {{ p.id }},
+            nom: '{{ p.nom|e('js') }}',
+            surface: '{{ p.surface }}',
+            typeSol: '{{ p.typeSol|e('js') }}',
+            latitude: {{ p.latitude|default(36.8) }},
+            longitude: {{ p.longitude|default(10.2) }},
+            csrfToken: '{{ csrf_token('delete' ~ p.id) }}',
+            cultures: [
+                {% for c in p.cultures %}
+                {
+                    id: {{ c.id }},
+                    typeCulture: '{{ c.typeCulture|e('js') }}',
+                    variete: '{{ c.variete|e('js') }}',
+                    statut: '{{ c.statut|e('js') }}',
+                    datePlantation: '{{ c.datePlantation|date('Y-m-d') }}',
+                    dateRecoltePrevue: '{{ c.dateRecoltePrevue|date('Y-m-d') }}',
+                    datePFr: '{{ c.datePlantation|date('d/m/Y') }}',
+                    dateRFr: '{{ c.dateRecoltePrevue|date('d/m/Y') }}',
+                    csrfDeleteToken: '{{ csrf_token('delete' ~ c.id) }}',
+                    consommations: [
+                        {% for conso in c.consommations %}
+                        {
+                            ressource: '{{ conso.ressource.nom|e('js') }}',
+                            quantite: '{{ conso.quantite }}',
+                            unite: '{{ conso.ressource.unite|e('js') }}'
+                        },
+                        {% endfor %}
+                    ]
+                },
+                {% endfor %}
+            ]
+        },
+        {% endfor %}
+    ],
+    async getWeather(lat, lng) {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+            const data = await res.json();
+            const w = data.current_weather;
+           
+            const codes = {
+                0: { desc: 'Ciel dégagé', icon: 'fa-sun text-warning' },
+                1: { desc: 'Principalement dégagé', icon: 'fa-cloud-sun text-warning' },
+                2: { desc: 'Partiellement nuageux', icon: 'fa-cloud-sun text-secondary' },
+                3: { desc: 'Nuageux', icon: 'fa-cloud text-secondary' },
+                45: { desc: 'Brouillard', icon: 'fa-smog text-muted' },
+                61: { desc: 'Pluie légère', icon: 'fa-cloud-rain text-primary' },
+                80: { desc: 'Averses', icon: 'fa-cloud-showers-heavy text-primary' },
+                95: { desc: 'Orage', icon: 'fa-bolt text-dark' }
+            };
+           
+            const config = codes[w.weathercode] || { desc: 'Variable', icon: 'fa-cloud' };
+            this.weather = {
+                temp: Math.round(w.temperature),
+                desc: config.desc,
+                icon: config.icon,
+                wind: w.windspeed
+            };
+            if (this.weather.temp > 30) {
+                this.advice = { text: 'Forte chaleur : Irriguer impérativement tôt le matin ou tard le soir.', color: '#ef4444', icon: 'fa-droplet', bg: '#fef2f2' };
+            } else if (this.weather.wind > 20) {
+                this.advice = { text: 'Vent fort : Reportez les traitements par pulvérisation (risque de dérive).', color: '#f59e0b', icon: 'fa-wind', bg: '#fffbe6' };
+            } else if (w.weathercode >= 61) {
+                this.advice = { text: 'Pluie prévue : Bonne période pour l\'apport d\'engrais solide.', color: '#3b82f6', icon: 'fa-cloud-showers-water', bg: '#eff6ff' };
+            } else if (this.weather.temp < 5) {
+                this.advice = { text: 'Risque de froid : Surveillez les jeunes plants sensibles au gel.', color: '#0ea5e9', icon: 'fa-snowflake', bg: '#f0f9ff' };
+            } else {
+                this.advice = { text: 'Conditions idéales pour l\'entretien et la plantation aujourd\'hui.', color: '#10b981', icon: 'fa-check-circle', bg: '#f0fdf4' };
+            }
+        } catch (e) { this.weather.desc = 'Indisponible'; }
+    },
+    updatePreviewMap(lat, lng) {
+        if (window.previewMap) {
+            const coords = [lat, lng];
+            window.previewMap.setView(coords, 14);
+            if (window.previewMarker) window.previewMarker.setLatLng(coords);
+            else window.previewMarker = L.marker(coords).addTo(window.previewMap);
+            setTimeout(() => window.previewMap.invalidateSize(), 200);
+        }
+    },
+    editParcelle(p) {
+        document.getElementById('parcelle_nom').value = p.nom;
+        document.getElementById('parcelle_surface').value = p.surface;
+        document.getElementById('parcelle_typeSol').value = p.typeSol;
+        document.getElementById('parcelle_latitude').value = p.latitude;
+        document.getElementById('parcelle_longitude').value = p.longitude;
+        document.getElementById('form-parcelle').action = '/parcelle/' + p.id + '/edit';
+        document.querySelector('#modalAjouterParcelle .modal-title').innerText = 'Modifier la Parcelle';
+        if (p.latitude && p.longitude) {
+            let coords = [p.latitude, p.longitude];
+            setTimeout(() => {
+                window.map.setView(coords, 13);
+                if (window.marker) window.marker.setLatLng(coords);
+                else window.marker = L.marker(coords).addTo(window.map);
+            }, 200);
+        }
+    },
+    editCulture(c) {
+        document.getElementById('edit_typeCulture').value = c.typeCulture;
+        document.getElementById('edit_variete').value = c.variete;
+        document.getElementById('edit_datePlantation').value = c.datePlantation;
+        document.getElementById('edit_dateRecoltePrevue').value = c.dateRecoltePrevue;
+        document.getElementById('edit_statut').value = c.statut;
+        document.getElementById('form-edit-culture').action = '/culture/' + c.id + '/edit';
+    },
+    resetForm() {
+        document.getElementById('form-parcelle').reset();
+        document.getElementById('form-parcelle').action = '/parcelle/';
+        document.querySelector('#modalAjouterParcelle .modal-title').innerText = 'Ajouter une Parcelle';
+        if (window.marker) window.map.removeLayer(window.marker);
+        window.marker = null;
+    }
+}" x-init="
+    $nextTick(() => {
+        if(parcelles.length > 0) {
+            window.previewMap = L.map('map-preview').setView([parcelles[0].latitude, parcelles[0].longitude], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.previewMap);
+            window.previewMarker = L.marker([parcelles[0].latitude, parcelles[0].longitude]).addTo(window.previewMap);
+            getWeather(parcelles[0].latitude, parcelles[0].longitude);
+        }
+    })
+">
+
+    <header class="main-header py-4 mb-3 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="h3 fw-bold mb-1 text-dark">Tableau de Bord</h2>
+                <p class="text-muted small mb-0"><i class="fa-solid fa-calendar-day me-2"></i>{{ "now"|date("d F Y") }}</p>
+            </div>
+
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <form method="GET" class="d-flex flex-wrap gap-2 align-items-center" style="max-width: 100%;">
+                    <input 
+                        type="search" 
+                        name="search" 
+                        class="form-control rounded-4" 
+                        placeholder="Rechercher une parcelle..." 
+                        value="{{ search|default('') }}"
+                        style="min-width: 220px; max-width: 260px;"
+                    >
+
+                    <select name="sort" class="form-select rounded-4" style="min-width: 190px;">
+                        <option value="nbCultures" {{ sort|default('nbCultures') == 'nbCultures' ? 'selected' : '' }}>
+                            Tri : Nombre de cultures
+                        </option>
+                        <option value="nom" {{ sort|default('nbCultures') == 'nom' ? 'selected' : '' }}>
+                            Tri : Nom de la parcelle
+                        </option>
+                        <option value="surface" {{ sort|default('nbCultures') == 'surface' ? 'selected' : '' }}>
+                            Tri : Surface
+                        </option>
+                    </select>
+
+                    <select name="direction" class="form-select rounded-4" style="min-width: 150px;">
+                        <option value="DESC" {{ direction|default('DESC') == 'DESC' ? 'selected' : '' }}>Décroissant</option>
+                        <option value="ASC" {{ direction|default('DESC') == 'ASC' ? 'selected' : '' }}>Croissant</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-outline-success rounded-4 px-4">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+
+                <button class="btn btn-success rounded-4 px-4 py-2 fw-bold shadow-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalAjouterParcelle" 
+                        @click="resetForm()">
+                    <i class="fa-solid fa-plus me-2"></i>Nouvelle Parcelle
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mb-4">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'danger' ? 'danger' : 'success' }} alert-dismissible fade show rounded-4 shadow-sm border-0" role="alert">
+                    <i class="fa-solid {{ label == 'danger' ? 'fa-triangle-exclamation' : 'fa-circle-check' }} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="d-flex align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Mes Parcelles</h5>
+                    <span class="ms-2 badge rounded-pill bg-dark" x-text="parcelles.length"></span>
+                </div>
+                <div class="vstack gap-3">
+                    <template x-for="parcelle in parcelles" :key="parcelle.id">
+                        <div class="agri-card p-3 bg-white rounded-4 shadow-sm"
+                             :class="selectedTab == parcelle.id ? 'active' : ''"
+                             @click="selectedTab = parcelle.id; selectedParcelleId = parcelle.id; updatePreviewMap(parcelle.latitude, parcelle.longitude); getWeather(parcelle.latitude, parcelle.longitude)">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="fw-bold text-dark mb-1" x-text="parcelle.nom"></div>
+                                    <div class="text-muted small">
+                                        <i class="fa-solid fa-vector-square me-1"></i> <span x-text="parcelle.surface"></span> Ha
+                                    </div>
+                                </div>
+                                <div class="icon-circle" style="width:32px; height:32px; font-size:0.9rem">
+                                    <i class="fa-solid fa-map-location-dot"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                                <span class="badge badge-soft-success px-2 py-1" x-text="parcelle.typeSol"></span>
+                                <span class="small text-muted" x-text="parcelle.cultures.length + ' cultures'"></span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="parcelles.length === 0">
+                        <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-dashed">
+                            <i class="fa-solid fa-seedling fa-3x text-muted opacity-50 mb-3"></i>
+                            <p class="text-muted mb-2">Aucune parcelle trouvée</p>
+                            {% if search is defined and search != '' %}
+                                <p class="small text-muted">Essayez avec un autre nom ou <a href="{{ path('app_parcelle_index') }}">effacez la recherche</a></p>
+                            {% endif %}
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
+                    <div class="row align-items-start">
+                        <div class="col-md-7">
+                            <template x-for="parcelle in parcelles" :key="parcelle.id">
+                                <div x-show="selectedTab == parcelle.id">
+                                    <h2 class="fw-bold text-dark mb-1" x-text="parcelle.nom"></h2>
+                                    <div class="d-flex gap-2 align-items-center mb-3">
+                                        <span class="badge bg-success px-3 py-2 rounded-pill" x-text="parcelle.typeSol"></span>
+                                        <span class="text-muted small"><i class="fa-solid fa-maximize me-1"></i> <span x-text="parcelle.surface"></span> Ha</span>
+                                    </div>
+                                    <div class="weather-widget p-3 mb-3 d-flex align-items-center">
+                                        <div class="me-4 fs-1">
+                                            <i :class="'fa-solid ' + weather.icon"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-baseline">
+                                                <h3 class="fw-bold mb-0 me-2" x-text="weather.temp + '°C'"></h3>
+                                                <span class="text-muted small fw-bold text-uppercase" x-text="weather.desc"></span>
+                                            </div>
+                                            <div class="text-muted small mt-1">
+                                                <i class="fa-solid fa-wind me-1"></i> Vent: <span x-text="weather.wind"></span> km/h
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="advice-card p-3 mb-4 d-flex align-items-center shadow-sm"
+                                         :style="'background-color:' + advice.bg + '; border-color:' + advice.color">
+                                        <div class="me-3 fs-4" :style="'color:' + advice.color">
+                                            <i :class="'fa-solid ' + advice.icon"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small text-uppercase opacity-75 mb-1" :style="'color:' + advice.color">Conseil Agricole</div>
+                                            <div class="text-dark fw-600 small" x-text="advice.text"></div>
+                                        </div>
+                                    </div>
+                                   
+                                    <p class="text-muted small mb-0">
+                                        <i class="fa-solid fa-location-dot me-1 text-danger"></i>
+                                        Coordonnées: <span x-text="parseFloat(parcelle.latitude).toFixed(4)"></span>, <span x-text="parseFloat(parcelle.longitude).toFixed(4)"></span>
+                                    </p>
+                                   
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill me-2" @click="editParcelle(parcelle)" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle">
+                                            <i class="fa-solid fa-pen me-1"></i> Modifier
+                                        </button>
+                                        <form :action="'/parcelle/delete/' + parcelle.id" method="post" class="d-inline" onsubmit="return confirm('Supprimer cette parcelle ?');">
+                                            <input type="hidden" name="_token" :value="parcelle.csrfToken">
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fa-solid fa-trash me-1"></i> Supprimer</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="col-md-5">
+                            <div id="map-preview"></div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <template x-for="parcelle in parcelles" :key="parcelle.id">
+                        <div x-show="selectedTab == parcelle.id">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0"><i class="fa-solid fa-seedling text-success me-2"></i>Suivi des Cultures</h5>
+                                <button class="btn btn-sm btn-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAjouterCulture" @click="selectedParcelleId = parcelle.id">
+                                    <i class="fa-solid fa-plus me-2"></i>Planter
+                                </button>
+                            </div>
+
+                            <div class="row g-3">
+                                <template x-for="c in parcelle.cultures" :key="c.id">
+                                    <div class="col-md-6">
+                                        <div class="culture-item">
+                                            <div class="d-flex justify-content-between mb-3">
+                                                <div class="icon-circle"><i class="fa-solid fa-leaf"></i></div>
+                                                <div class="d-flex gap-1">
+                                                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 me-1"
+                                                            data-bs-toggle="modal"
+                                                            :data-bs-target="'#modalConsommer' + c.id"
+                                                            style="font-size: 0.75rem;">
+                                                        <i class="fa-solid fa-flask"></i> Utiliser
+                                                    </button>
+                                                    <button class="btn btn-sm btn-white border shadow-sm rounded-circle" @click="editCulture(c)" data-bs-toggle="modal" data-bs-target="#modalEditCulture" style="width:32px;height:32px">
+                                                        <i class="fa-solid fa-pencil text-primary" style="font-size:0.8rem"></i>
+                                                    </button>
+                                                    <form :action="'/culture/' + c.id + '/delete'" method="post">
+                                                        <input type="hidden" name="_token" :value="c.csrfDeleteToken">
+                                                        <button class="btn btn-sm btn-white border shadow-sm rounded-circle" style="width:32px;height:32px" onclick="return confirm('Supprimer ?')">
+                                                            <i class="fa-solid fa-trash text-danger" style="font-size:0.8rem"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold mb-1" x-text="c.typeCulture"></h6>
+                                            <p class="text-muted small mb-3">Variété : <span class="text-dark fw-600" x-text="c.variete"></span></p>
+                                           
+                                            <div class="bg-light rounded-3 p-2 mb-3 d-flex justify-content-around text-center">
+                                                <div><span class="d-block small text-muted">Plantation</span><b class="small" x-text="c.datePFr"></b></div>
+                                                <div class="border-start"></div>
+                                                <div><span class="d-block small text-muted">Récolte</span><b class="small" x-text="c.dateRFr"></b></div>
+                                            </div>
+                                           
+                                            <span class="badge badge-soft-info w-100 py-2 rounded-3 mb-3" x-text="c.statut"></span>
+
+                                            <div class="mt-2 pt-2 border-top">
+                                                <p class="small fw-bold text-muted mb-2" style="font-size: 0.7rem;">RESSOURCES UTILISÉES</p>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <template x-for="conso in c.consommations">
+                                                        <span class="badge bg-light text-dark border rounded-pill py-1 px-2" style="font-size: 0.65rem;">
+                                                            <span x-text="conso.ressource"></span>: <b x-text="conso.quantite + ' ' + conso.unite"></b>
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="c.consommations.length === 0">
+                                                        <span class="text-muted small italic" style="font-size: 0.65rem;">Aucun intrant enregistré</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" :id="'modalConsommer' + c.id" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                                    <div class="modal-header border-0 p-4 pb-0">
+                                                        <h5 class="fw-bold">Utiliser une ressource pour <span x-text="c.typeCulture"></span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form :action="'/culture/' + c.id + '/consommer'" method="POST">
+                                                        <div class="modal-body p-4">
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-bold">Ressource disponible</label>
+                                                                <select name="ressource_id" class="form-select rounded-3" required>
+                                                                    <option value="">-- Choisir --</option>
+                                                                    {% for r in ressources %}
+                                                                        {% if r.user == app.user %}
+                                                                            <option value="{{ r.id }}">
+                                                                                {{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})
+                                                                            </option>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-bold">Quantité à utiliser</label>
+                                                                <input type="number" name="quantite" step="0.1" class="form-control rounded-3" placeholder="Quantité en kg ou L" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-0 p-4">
+                                                            <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold">Confirmer l'utilisation</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template x-if="parcelle.cultures.length === 0">
+                                <div class="text-center py-5 border rounded-4 bg-light border-dashed">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2312/2312411.png" width="60" class="opacity-25 mb-3">
+                                    <p class="text-muted">Aucune culture active sur cette parcelle.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajouter Culture -->
+    <div class="modal fade" id="modalAjouterCulture" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="modal-title fw-bold">Nouvelle Plantation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ path('app_culture_new') }}" method="POST">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="parcelle_id" :value="selectedParcelleId">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">NOM DE LA CULTURE</label>
+                                <input type="text" name="typeCulture" class="form-control rounded-3" placeholder="ex: Blé, Tomate" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">VARIÉTÉ</label>
+                                <input type="text" name="variete" class="form-control rounded-3" placeholder="ex: Spunta" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">DATE PLANTATION</label>
+                                <input type="date" name="datePlantation" class="form-control rounded-3" value="{{ 'now'|date('Y-m-d') }}" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">RÉCOLTE PRÉVUE</label>
+                                <input type="date" name="dateRecoltePrevue" class="form-control rounded-3" required>
+                            </div>
+                            <div class="col-12 text-end mt-4">
+                                <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold shadow">Confirmer la plantation</button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="statut" value="En croissance">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modifier Culture -->
+    <div class="modal fade" id="modalEditCulture" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="modal-title fw-bold">Modifier la Culture</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="form-edit-culture" method="POST">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Type de culture</label>
+                                <input type="text" name="typeCulture" id="edit_typeCulture" class="form-control bg-light border-0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Variété</label>
+                                <input type="text" name="variete" id="edit_variete" class="form-control bg-light border-0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Plantation</label>
+                                <input type="date" name="datePlantation" id="edit_datePlantation" class="form-control bg-light border-0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Récolte Prévue</label>
+                                <input type="date" name="dateRecoltePrevue" id="edit_dateRecoltePrevue" class="form-control bg-light border-0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Statut</label>
+                                <select name="statut" id="edit_statut" class="form-select bg-light border-0">
+                                    <option value="En croissance">En croissance</option>
+                                    <option value="Besoin d'eau">Besoin d'eau</option>
+                                    <option value="Mature">Mature</option>
+                                    <option value="Récolté">Récolté</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow">Mettre à jour</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+{{ include('parcelle/modalAjouterParcelle.twig') }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    window.map = L.map('map').setView([36.8, 10.2], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.map);
+    window.marker = null;
+
+    var modalEl = document.getElementById('modalAjouterParcelle');
+    if (modalEl) {
+        modalEl.addEventListener('shown.bs.modal', function () {
+            window.map.invalidateSize();
+        });
+    }
+
+    window.map.on('click', function(e) {
+        var lat = e.latlng.lat.toFixed(6);
+        var lng = e.latlng.lng.toFixed(6);
+       
+        if (window.marker) {
+            window.marker.setLatLng([lat, lng]);
+        } else {
+            window.marker = L.marker([lat, lng]).addTo(window.map);
+        }
+        document.getElementById('parcelle_latitude').value = lat;
+        document.getElementById('parcelle_longitude').value = lng;
+        document.getElementById('parcelle_nom').value = "Recherche du lieu...";
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.address) {
+                const a = data.address;
+                let name = a.neighbourhood || a.suburb || a.village || a.town || a.city || a.county || a.state || "Nouvelle Parcelle";
+                let detail = a.suburb || a.neighbourhood ? (a.suburb || a.neighbourhood) : "";
+                let city = a.village || a.town || a.city || "";
+                let finalName = detail && city && detail !== city ? `${detail}, ${city}` : (city || name);
+                document.getElementById('parcelle_nom').value = finalName;
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

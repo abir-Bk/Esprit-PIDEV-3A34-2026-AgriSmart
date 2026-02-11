@@ -1,0 +1,105 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block body %}
+<main>
+<section class="pt-4">
+<div class="container">
+<div class="row">
+
+    {% include 'front/semi-public/users/side_bar.html.twig' %}
+
+    <!-- MAIN CONTENT -->
+    <div class="col-lg-8 col-xl-9">
+        <div class="vstack gap-4">
+
+            <!-- PERSONAL INFO -->
+            <div class="card border">
+                <div class="card-header border-bottom">
+                    <h4 class="card-header-title">Personal Information</h4>
+                </div>
+
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class':'row g-3'}}) }}
+
+                    <!-- Avatar -->
+                    <div class="col-12 mb-3 text-center">
+                        {% if form.vars.data.image %}
+                            <img src="{{ asset('uploads/images/' ~ form.vars.data.image) }}" 
+                                 alt="Profile Image" class="img-thumbnail mb-2" width="150">
+                        {% else %}
+                            <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:150px; height:150px; font-size:2rem;">
+                                {{ form.vars.data.firstName|slice(0,1)|upper }}{{ form.vars.data.lastName|slice(0,1)|upper }}
+                            </div>
+                        {% endif %}
+                        {{ form_row(form.imageFile) }}
+                    </div>
+
+                    <!-- First Name -->
+                    <div class="col-md-6">
+                        {{ form_row(form.firstName, {'attr': {'class':'form-control'}}) }}
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="col-md-6">
+                        {{ form_row(form.lastName, {'attr': {'class':'form-control'}}) }}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        {{ form_row(form.email, {'attr': {'class':'form-control'}}) }}
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6">
+                        {{ form_row(form.phone, {'attr': {'class':'form-control'}}) }}
+                    </div>
+
+                    <!-- Address -->
+                    <div class="col-12">
+                        {{ form_row(form.address, {'attr': {'class':'form-control', 'rows':3}}) }}
+                    </div>
+
+                    <!-- Document File -->
+                    <div class="col-12">
+                        {{ form_row(form.documentFileFile) }}
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="col-12 text-end">
+                        <button class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            <!-- UPDATE PASSWORD -->
+            <div class="card border">
+                <div class="card-header border-bottom">
+                    <h4 class="card-header-title">Update Password</h4>
+                </div>
+
+                <div class="card-body">
+                    {{ form_start(passwordForm) }}
+
+                    {{ form_row(passwordForm.currentPassword, {'attr': {'class':'form-control'}}) }}
+                    {{ form_row(passwordForm.newPassword.first) }}
+{{ form_row(passwordForm.newPassword.second) }}
+                    <div class="text-end">
+                        <button class="btn btn-primary">Change Password</button>
+                    </div>
+
+                    {{ form_end(passwordForm) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</div>
+</section>
+</main>
+{% endblock %}

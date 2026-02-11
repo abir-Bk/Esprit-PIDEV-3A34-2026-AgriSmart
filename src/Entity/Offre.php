@@ -61,6 +61,9 @@ class Offre
     #[ORM\OneToMany(targetEntity: Demande::class, mappedBy: 'offre', cascade: ['remove'])]
     private Collection $demandes;
 
+    #[ORM\Column]
+    private ?bool $isActive = null;
+
     public function __construct()
     {
         $this->demandes = new ArrayCollection();
@@ -211,6 +214,18 @@ class Offre
                 $demande->setOffre(null);
             }
         }
+        return $this;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
         return $this;
     }
 }

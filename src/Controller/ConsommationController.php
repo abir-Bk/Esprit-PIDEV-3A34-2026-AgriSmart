@@ -17,7 +17,7 @@ final class ConsommationController extends AbstractController
     #[Route(name: 'app_consommation_index', methods: ['GET'])]
     public function index(ConsommationRepository $consommationRepository): Response
     {
-        return $this->render('consommation/index.html.twig', [
+        return $this->render('semi-public/consommation/index.html.twig', [
             'consommations' => $consommationRepository->findAll(),
         ]);
     }
@@ -36,7 +36,7 @@ final class ConsommationController extends AbstractController
             return $this->redirectToRoute('app_consommation_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('consommation/new.html.twig', [
+        return $this->render('semi-public/consommation/new.html.twig', [
             'consommation' => $consommation,
             'form' => $form,
         ]);
@@ -62,7 +62,7 @@ final class ConsommationController extends AbstractController
             return $this->redirectToRoute('app_consommation_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('consommation/edit.html.twig', [
+        return $this->render('semi-public/consommation/edit.html.twig', [
             'consommation' => $consommation,
             'form' => $form,
         ]);

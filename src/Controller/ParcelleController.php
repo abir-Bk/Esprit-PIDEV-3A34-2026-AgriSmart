@@ -23,7 +23,6 @@ class ParcelleController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
-
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
@@ -37,12 +36,12 @@ class ParcelleController extends AbstractController
         $qb = $parcelleRepository->createQueryBuilder('p')
             ->leftJoin('p.cultures', 'c')
             ->addSelect('p')
-            ->addSelect('COUNT(c.id) AS HIDDEN nbCultures') // HIDDEN pour ne pas l'ajouter dans l'entité
+            ->addSelect('COUNT(c.id) AS HIDDEN nbCultures')
             ->where('p.user = :user')
             ->setParameter('user', $user)
             ->groupBy('p.id');
 
-        // Gestion du tri sécurisé
+        // Tri sécurisé
         switch ($sort) {
             case 'nom':
                 $qb->orderBy('p.nom', $direction);
@@ -52,15 +51,13 @@ class ParcelleController extends AbstractController
                 break;
             case 'nbCultures':
             default:
-                $sort = 'nbCultures';
                 $qb->orderBy('nbCultures', $direction);
                 break;
         }
 
         if ($search !== '') {
-            $qb
-                ->andWhere('LOWER(p.nom) LIKE LOWER(:search)')
-                ->setParameter('search', '%' . $search . '%');
+            $qb->andWhere('LOWER(p.nom) LIKE LOWER(:search)')
+               ->setParameter('search', '%' . $search . '%');
         }
 
         $parcelles = $qb->getQuery()->getResult();
@@ -79,11 +76,11 @@ class ParcelleController extends AbstractController
             return $this->redirectToRoute('app_parcelle_index', ['search' => $search]);
         }
 
-        return $this->render('parcelle/parcelle.html.twig', [
+        return $this->render('front/semi-public/parcelle/parcelle.html.twig', [
             'parcelles'  => $parcelles,
             'ressources' => $ressourceRepository->findBy(['user' => $user]),
             'form'       => $form->createView(),
-            'search'     => $search,           // pour pré-remplir le champ recherche
+            'search'     => $search,
             'sort'       => $sort,
             'direction'  => $direction,
         ]);
@@ -108,7 +105,7 @@ class ParcelleController extends AbstractController
             return $this->redirectToRoute('app_parcelle_index');
         }
 
-        return $this->render('parcelle/edit.html.twig', [
+        return $this->render('front/semi-public/parcelle/edit.html.twig', [
             'parcelle' => $parcelle,
             'form'     => $form->createView(),
         ]);

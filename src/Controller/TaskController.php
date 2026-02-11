@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Repository\TaskRepository;
+use App\Repository\CultureRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +17,7 @@ class TaskController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly TaskRepository $taskRepository,
+        private readonly CultureRepository $cultureRepository,
     ) {
     }
 
@@ -127,7 +129,10 @@ class TaskController extends AbstractController
             $task->setParcelleId($data['parcelleId']);
         }
         if (isset($data['cultureId'])) {
-            $task->setCultureId($data['cultureId']);
+            $culture = $this->cultureRepository->find($data['cultureId']);
+            if ($culture) {
+                $task->setCulture($culture);
+            }
         }
         if (isset($data['createdBy'])) {
             $task->setCreatedBy($data['createdBy']);

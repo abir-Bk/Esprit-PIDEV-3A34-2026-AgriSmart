@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\Task;
 use App\Entity\User;
+use App\Entity\Parcelle;
+use App\Entity\Culture;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -117,24 +119,34 @@ class TaskType extends AbstractType
     ],
 ])
 
-            ->add('parcelleId', IntegerType::class, [
-    'label' => 'ID Parcelle',
+            ->add('parcelleId', EntityType::class, [
+    'class' => Parcelle::class,
+    'choice_label' => function (Parcelle $parcelle): string {
+        return sprintf(
+            'ID: %d - %s',
+            $parcelle->getId(),
+            $parcelle->getNom()
+        );
+    },
+    'label' => 'Parcelle',
+    'placeholder' => 'Sélectionner une parcelle',
     'required' => false,
-    'constraints' => [
-        new Assert\Type([
-            'type' => 'integer',
-            'message' => 'L’ID de la parcelle doit être un entier.',
-        ]),
-        new Assert\Positive([
-            'message' => 'L’ID de la parcelle doit être positif.',
-        ]),
-    ],
+    'mapped' => false, 
 ])
 
-            ->add('cultureId', IntegerType::class, [
-                'label' => 'ID Culture',
-                'required' => false,
-            ])
+            ->add('culture', EntityType::class, [
+    'class' => Culture::class,
+    'choice_label' => function (Culture $culture): string {
+        return sprintf(
+            'ID: %d - %s',
+            $culture->getId(),
+            $culture->getTypeCulture()
+        );
+    },
+    'label' => 'Culture',
+    'placeholder' => 'Sélectionner une culture',
+    'required' => false,
+])
             // Champ pour choisir un utilisateur existant, sans modifier l'entité Task (on stocke toujours l'id)
             ->add('createdByUser', EntityType::class, [
                 'class' => User::class,
@@ -147,7 +159,7 @@ class TaskType extends AbstractType
                 'mapped' => false,
             ])
         ;
-    }
+                 }           
 
     public function configureOptions(OptionsResolver $resolver): void
     {

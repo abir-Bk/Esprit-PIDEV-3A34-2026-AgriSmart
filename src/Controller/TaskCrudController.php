@@ -2,12 +2,19 @@
 
 namespace App\Controller;
 
+use App\Entity\Culture;
+use App\Entity\Parcelle;
 use App\Entity\Task;
+use App\Entity\User;
 use App\Form\TaskType;
-use App\Repository\TaskRepository;
+use App\Repository\CultureRepository;
+use App\Repository\ParcelleRepository;
 use App\Repository\TaskAssignmentRepository;
+use App\Repository\TaskRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -114,15 +121,19 @@ class TaskCrudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $selectedParcelle = $form->get('parcelleId')->getData();
+            $task->setParcelleId($selectedParcelle?->getId());
+
+            $selectedCulture = $form->get('culture')->getData();
+            $task->setCulture($selectedCulture);
+
             $selectedUser = $form->get('createdByUser')->getData();
-            if ($selectedUser !== null) {
-                $task->setCreatedBy($selectedUser->getId());
-            }
+            $task->setCreatedBy($selectedUser?->getId());
 
             $em->persist($task);
             $em->flush();
 
-            $this->addFlash('success', 'Tâche créée avec succès.');
+            $this->addFlash('success', 'Tache creee avec succes.');
 
             return $this->redirectToRoute('tasks_index');
         }
@@ -138,7 +149,7 @@ class TaskCrudController extends AbstractController
     {
         $task = $taskRepository->find($id);
         if (!$task) {
-            throw $this->createNotFoundException('Tâche introuvable.');
+            throw $this->createNotFoundException('Tache introuvable.');
         }
 
         return $this->render('front/task/show.html.twig', [
@@ -147,25 +158,37 @@ class TaskCrudController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $em): Response
-    {
+    public function edit(
+        int $id,
+        Request $request,
+        TaskRepository $taskRepository,
+        EntityManagerInterface $em,
+        ParcelleRepository $parcelleRepository,
+        CultureRepository $cultureRepository,
+        UserRepository $userRepository
+    ): Response {
         $task = $taskRepository->find($id);
         if (!$task) {
-            throw $this->createNotFoundException('Tâche introuvable.');
+            throw $this->createNotFoundException('Tache introuvable.');
         }
 
         $form = $this->createForm(TaskType::class, $task);
+        $this->hydrateUnmappedTaskFields($form, $task, $parcelleRepository, $cultureRepository, $userRepository);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $selectedParcelle = $form->get('parcelleId')->getData();
+            $task->setParcelleId($selectedParcelle?->getId());
+
+            $selectedCulture = $form->get('culture')->getData();
+            $task->setCulture($selectedCulture);
+
             $selectedUser = $form->get('createdByUser')->getData();
-            if ($selectedUser !== null) {
-                $task->setCreatedBy($selectedUser->getId());
-            }
+            $task->setCreatedBy($selectedUser?->getId());
 
             $em->flush();
 
-            $this->addFlash('success', 'Tâche mise à jour avec succès.');
+            $this->addFlash('success', 'Tache mise a jour avec succes.');
 
             return $this->redirectToRoute('tasks_index');
         }
@@ -181,16 +204,41 @@ class TaskCrudController extends AbstractController
     {
         $task = $taskRepository->find($id);
         if (!$task) {
-            throw $this->createNotFoundException('Tâche introuvable.');
+            throw $this->createNotFoundException('Tache introuvable.');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$task->getIdTask(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $task->getIdTask(), $request->request->get('_token'))) {
             $em->remove($task);
             $em->flush();
-            $this->addFlash('success', 'Tâche supprimée avec succès.');
+            $this->addFlash('success', 'Tache supprimee avec succes.');
         }
 
         return $this->redirectToRoute('tasks_index');
     }
-}
 
+    private function hydrateUnmappedTaskFields(
+        FormInterface $form,
+        Task $task,
+        ParcelleRepository $parcelleRepository,
+        CultureRepository $cultureRepository,
+        UserRepository $userRepository
+    ): void {
+        if ($task->getParcelleId() !== null) {
+            $parcelle = $parcelleRepository->find($task->getParcelleId());
+            if ($parcelle instanceof Parcelle) {
+                $form->get('parcelleId')->setData($parcelle);
+            }
+        }
+
+        if ($task->getCulture() !== null) {
+            $form->get('culture')->setData($task->getCulture());
+        }
+
+        if ($task->getCreatedBy() !== null) {
+            $user = $userRepository->find($task->getCreatedBy());
+            if ($user instanceof User) {
+                $form->get('createdByUser')->setData($user);
+            }
+        }
+    }
+}

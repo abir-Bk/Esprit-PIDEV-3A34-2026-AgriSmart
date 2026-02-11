@@ -59,10 +59,11 @@ class Task
     private ?int $parcelleId = null;
 
     /**
-     * Référence éventuelle à une culture (id technique)
+     * Référence éventuelle à une culture
      */
-    #[ORM\Column(name: 'culture_id', nullable: true)]
-    private ?int $cultureId = null;
+    #[ORM\ManyToOne(targetEntity: Culture::class)]
+    #[ORM\JoinColumn(name: 'culture_id', nullable: true)]
+    private ?Culture $culture = null;
 
     /**
      * Identifiant de l'utilisateur qui a créé la tâche.
@@ -192,15 +193,26 @@ class Task
         return $this;
     }
 
+    public function getCulture(): ?Culture
+    {
+        return $this->culture;
+    }
+
+    public function setCulture(?Culture $culture): self
+    {
+        $this->culture = $culture;
+
+        return $this;
+    }
+
     public function getCultureId(): ?int
     {
-        return $this->cultureId;
+        return $this->culture?->getId();
     }
 
     public function setCultureId(?int $cultureId): self
     {
-        $this->cultureId = $cultureId;
-
+        // Deprecated: use setCulture() instead
         return $this;
     }
 

@@ -35,17 +35,25 @@ class Commande
     #[ORM\Column(length: 30)]
     private string $modePaiement = self::PAIEMENT_DOMICILE;
 
-    // Adresse livraison (si domicile, et même utile pour carte)
+    // Adresse livraison
     #[ORM\Column(length: 255)]
     private string $adresseLivraison = '';
 
-    // Total calculé (snapshot)
+    // Total (snapshot)
     #[ORM\Column]
     private float $montantTotal = 0.0;
 
-    // Ref paiement (si carte) — tu la remplis après retour API
+    // Ref paiement (Stripe payment_intent ou session id)
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $paymentRef = null;
+
+    // ✅ Stripe confirmed paid time (idempotence + audit)
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $paidAt = null;
+
+    // ✅ Email sent time (idempotence)
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $emailSentAt = null;
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -82,6 +90,7 @@ class Commande
     {
         return $this->client;
     }
+
     public function setClient(User $client): static
     {
         $this->client = $client;
@@ -92,6 +101,7 @@ class Commande
     {
         return $this->statut;
     }
+
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
@@ -102,6 +112,7 @@ class Commande
     {
         return $this->modePaiement;
     }
+
     public function setModePaiement(string $modePaiement): static
     {
         $this->modePaiement = $modePaiement;
@@ -112,6 +123,7 @@ class Commande
     {
         return $this->adresseLivraison;
     }
+
     public function setAdresseLivraison(string $adresseLivraison): static
     {
         $this->adresseLivraison = $adresseLivraison;
@@ -122,6 +134,7 @@ class Commande
     {
         return $this->montantTotal;
     }
+
     public function setMontantTotal(float $montantTotal): static
     {
         $this->montantTotal = $montantTotal;
@@ -132,9 +145,32 @@ class Commande
     {
         return $this->paymentRef;
     }
+
     public function setPaymentRef(?string $paymentRef): static
     {
         $this->paymentRef = $paymentRef;
+        return $this;
+    }
+
+    public function getPaidAt(): ?\DateTimeImmutable
+    {
+        return $this->paidAt;
+    }
+
+    public function setPaidAt(?\DateTimeImmutable $paidAt): static
+    {
+        $this->paidAt = $paidAt;
+        return $this;
+    }
+
+    public function getEmailSentAt(): ?\DateTimeImmutable
+    {
+        return $this->emailSentAt;
+    }
+
+    public function setEmailSentAt(?\DateTimeImmutable $emailSentAt): static
+    {
+        $this->emailSentAt = $emailSentAt;
         return $this;
     }
 
@@ -142,6 +178,7 @@ class Commande
     {
         return $this->createdAt;
     }
+
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
@@ -165,7 +202,7 @@ class Commande
     public function removeItem(CommandeItem $item): static
     {
         if ($this->items->removeElement($item)) {
-            // orphanRemoval=true => supprime la ligne
+            // orphanRemoval=true => suppression auto
         }
         return $this;
     }

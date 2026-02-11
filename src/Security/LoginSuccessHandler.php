@@ -10,15 +10,15 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerI
 
 class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
-    private RouterInterface $router;
-
-    public function __construct(RouterInterface $router)
+    public function __construct(private RouterInterface $router)
     {
-        $this->router = $router;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): RedirectResponse
     {
-        return new RedirectResponse($this->router->generate('user_dashboard'));
+        // 🔹 redirection après login
+        return new RedirectResponse(
+            $this->router->generate('app_produit_index')
+        );
     }
 }

@@ -82,7 +82,7 @@ final class ProduitController extends AbstractController
 
         $categoriesList = array_values(array_map(static fn($r) => $r['categorie'], $catsRows));
 
-        return $this->render('front/produit/index.html.twig', [
+        return $this->render('front/semi-public/produit/index.html.twig', [
             'produits' => $produits, // ✅ maintenant c'est un objet pagination KNP
             'filters' => [
                 'q' => $q,
@@ -106,7 +106,7 @@ final class ProduitController extends AbstractController
 
         $mesProduits = $repo->findBy(['vendeur' => $user], ['createdAt' => 'DESC']);
 
-        return $this->render('front/produit/mes_offres.html.twig', [
+        return $this->render('front/semi-public/produit/mes_offres.html.twig', [
             'produits' => $mesProduits,
         ]);
     }
@@ -150,7 +150,7 @@ final class ProduitController extends AbstractController
             }
         }
 
-        return $this->render('front/produit/new.html.twig', [
+        return $this->render('front/semi-public/produit/new.html.twig', [
             'produit' => $produit,
             'form' => $form,
         ]);
@@ -159,7 +159,7 @@ final class ProduitController extends AbstractController
     #[Route('/{id}', name: 'app_produit_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Produit $produit): Response
     {
-        return $this->render('front/produit/show.html.twig', [
+        return $this->render('front/semi-public/produit/show.html.twig', [
             'produit' => $produit,
         ]);
     }
@@ -196,7 +196,7 @@ final class ProduitController extends AbstractController
             return $this->redirectToRoute('app_produit_mes_offres');
         }
 
-        return $this->render('front/produit/edit.html.twig', [
+        return $this->render('front/semi-public/produit/edit.html.twig', [
             'produit' => $produit,
             'form' => $form,
         ]);

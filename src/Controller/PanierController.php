@@ -16,7 +16,7 @@ class PanierController extends AbstractController
     {
         $details = $panier->getDetails();
 
-        return $this->render('front/panier/index.html.twig', [
+        return $this->render('front/semi-public/panier/index.html.twig', [
             'items' => $details['items'],
             'total' => $details['total'],
             'count' => $details['count'],

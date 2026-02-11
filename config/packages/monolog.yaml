@@ -8,8 +8,19 @@ when@dev:
             main:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
-                level: debug
+                # Less verbose in dev to avoid slowing down page loads
+                level: info
                 channels: ["!event"]
+            doctrine:
+                type: stream
+                path: "%kernel.logs_dir%/doctrine_dev.log"
+                level: warning
+                channels: ["doctrine"]
+            messenger:
+                type: stream
+                path: "%kernel.logs_dir%/messenger_dev.log"
+                level: warning
+                channels: ["messenger"]
             console:
                 type: console
                 process_psr_3_messages: false

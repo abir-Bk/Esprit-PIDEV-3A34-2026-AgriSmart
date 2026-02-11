@@ -1,13 +1,18 @@
-{% extends 'front/produit/base_dashboard.html.twig' %}
+{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
 
 {% block title %}Mes Commandes - AgriSmart{% endblock %}
 
 {% block body %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
         <h1 class="h3 mb-1">Mes commandes</h1>
         <p class="text-muted mb-0 small">Suivi de tes achats / locations.</p>
     </div>
+    {% if commandes is not empty %}
+        <a href="{{ path('app_commande_export_mes_commandes_excel') }}" class="btn btn-success btn-sm rounded-pill">
+            <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel
+        </a>
+    {% endif %}
 </div>
 
 <div class="card shadow-sm rounded-4 border-0">
@@ -27,15 +32,26 @@
                             <th>Produit</th>
                             <th>Total</th>
                             <th>Statut</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for c in commandes %}
+                        {% set firstItem = c.items|first %}
                         <tr>
                             <td class="text-muted">#{{ c.id }}</td>
                             <td>
-                                <div class="fw-bold">{{ c.produit.nom }}</div>
-                                <div class="text-muted small">{{ c.produit.categorie }} • {{ c.produit.type }}</div>
+                                {% if firstItem %}
+                                    <div class="fw-bold">{{ firstItem.produit.nom }}</div>
+                                    <div class="text-muted small">
+                                        {{ firstItem.produit.categorie }} • {{ firstItem.produit.type }}
+                                        {% if c.items|length > 1 %}
+                                            · + {{ c.items|length - 1 }} autre(s) article(s)
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small">Aucun article</span>
+                                {% endif %}
                             </td>
                             <td class="fw-bold">{{ c.montantTotal }} TND</td>
                             <td>
@@ -47,6 +63,12 @@
                                 {% else %}
                                     <span class="badge bg-warning text-dark">En attente</span>
                                 {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ path('app_commande_show', {id: c.id}) }}" class="btn btn-outline-secondary btn-sm rounded-pill me-1">Détails</a>
+                                <a href="{{ path('app_commande_facture_pdf', {id: c.id}) }}" class="btn btn-outline-danger btn-sm rounded-pill" target="_blank">
+                                    <i class="bi bi-file-pdf me-1"></i> PDF
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}

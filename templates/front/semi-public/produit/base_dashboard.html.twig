@@ -73,11 +73,17 @@
                         </a>
                     </li>
 
-                    {# ✅ Commandes désactivées (pas de route => pas de crash) #}
                     <li class="nav-item">
-                        <a href="#"
-                           class="nav-link disabled-soft">
-                            <i class="bi bi-bag-check me-2"></i>Mes commandes (bientôt)
+                        <a href="{{ path('app_commande_mes_commandes') }}"
+                           class="nav-link {{ route == 'app_commande_mes_commandes' ? 'active' : '' }}">
+                            <i class="bi bi-bag-check me-2"></i>Mes commandes (achats)
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ path('app_commande_mes_ventes') }}"
+                           class="nav-link {{ route == 'app_commande_mes_ventes' ? 'active' : '' }}">
+                            <i class="bi bi-receipt-cutoff me-2"></i>Commandes sur mes produits
                         </a>
                     </li>
                 </ul>

@@ -1,4 +1,5 @@
-{% extends 'front/produit/base_dashboard.html.twig' %}
+{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
+
 
 {% block title %}AgriSmart - Modifier l'annonce{% endblock %}
 
@@ -13,7 +14,7 @@
                 </h2>
                 
                 {# On réutilise le même formulaire partagé #}
-                {% include 'front/produit/_form.html.twig' %}
+                {% include 'front/semi-public/produit/_form.html.twig' %}
                 
                 <div class="mt-4">
                     <a href="{{ path('app_produit_index') }}" class="btn btn-light rounded-pill px-4">
@@ -34,7 +35,7 @@
                             <i class="bi bi-lightning-fill"></i> PROMO
                         </span>
                         {# Ici on affiche l'image actuelle par défaut #}
-                        <img id="p-img" src="{{ produit.image ? asset('uploads/produits/' ~ produit.image) : asset('assets/images/placeholder-product.png') }}" class="w-100" style="height:250px; object-fit:cover;">
+                        <img id="p-img" src="{{ produit.image ? asset(produit.image) : asset('assets/images/placeholder-product.png') }}" class="w-100" style="height:250px; object-fit:cover;">
                     </div>
                     
                     <div class="card-body p-4">

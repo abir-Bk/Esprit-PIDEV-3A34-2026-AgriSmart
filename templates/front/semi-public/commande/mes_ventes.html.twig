@@ -1,0 +1,96 @@
+{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
+
+{% block title %}Commandes sur mes produits - AgriSmart{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 mb-1">Commandes sur mes produits</h1>
+        <p class="text-muted mb-0 small">Vue des commandes passées sur tes annonces.</p>
+    </div>
+    {% if commandes is not empty %}
+        <a href="{{ path('app_commande_export_mes_ventes_excel') }}" class="btn btn-success btn-sm rounded-pill">
+            <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel
+        </a>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm rounded-4 border-0">
+    <div class="card-body">
+        {% if commandes is empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-receipt-cutoff display-5 text-muted"></i>
+                <h5 class="mt-3">Aucune commande sur tes produits</h5>
+                <p class="text-muted mb-0">Lorsque des clients commanderont tes annonces, elles apparaîtront ici.</p>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Client</th>
+                            <th>Produits</th>
+                            <th>Total</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in commandes %}
+                        {% set firstItem = c.items|first %}
+                        <tr>
+                            <td class="text-muted">#{{ c.id }}</td>
+                            <td>
+                                {% set u = c.client %}
+                                {% if u %}
+                                    <div class="fw-bold">
+                                        {{ u.firstName is defined and u.firstName ? u.firstName ~ ' ' ~ (u.lastName ?? '') : u.email ?? u.userIdentifier }}
+                                    </div>
+                                    <div class="text-muted small">{{ u.email ?? u.userIdentifier }}</div>
+                                {% else %}
+                                    <span class="text-muted small">Inconnu</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if firstItem %}
+                                    <div class="fw-bold">{{ firstItem.produit.nom }}</div>
+                                    <div class="text-muted small">
+                                        {{ firstItem.produit.categorie }} • {{ firstItem.produit.type }}
+                                        {% if c.items|length > 1 %}
+                                            · + {{ c.items|length - 1 }} autre(s) article(s)
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small">Aucun article</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold">{{ c.montantTotal }} TND</td>
+                            <td>
+                                {% set st = c.statut ?? 'en_attente' %}
+                                {% if st == 'payee' %}
+                                    <span class="badge bg-success">Payée</span>
+                                {% elseif st == 'annulee' %}
+                                    <span class="badge bg-danger">Annulée</span>
+                                {% elseif st == 'livree' %}
+                                    <span class="badge bg-primary">Livrée</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ path('app_commande_show', {id: c.id}) }}" class="btn btn-outline-secondary btn-sm rounded-pill me-1">Détails</a>
+                                <a href="{{ path('app_commande_facture_pdf', {id: c.id}) }}" class="btn btn-outline-danger btn-sm rounded-pill" target="_blank">
+                                    <i class="bi bi-file-pdf me-1"></i> PDF
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

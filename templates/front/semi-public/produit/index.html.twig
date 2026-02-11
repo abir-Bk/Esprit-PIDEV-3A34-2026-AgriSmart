@@ -169,14 +169,15 @@
           </div>
 
           {# CATEGORIES CHIPS #}
+          {% set chipFilters = filters|merge({ page: 1 }) %}
           <div class="mt-4 d-flex flex-wrap gap-2">
             <a class="ag-pill {{ not filters.categorie ? 'active' : '' }}"
-               href="{{ path('app_produit_index', filters|merge({categorie: null}) ) }}">
+               href="{{ path('app_produit_index', chipFilters|merge({categorie: null}) ) }}">
               <i class="bi bi-grid-3x3-gap"></i> Toutes
             </a>
             {% for cat in categories %}
               <a class="ag-pill {{ filters.categorie == cat ? 'active' : '' }}"
-                 href="{{ path('app_produit_index', filters|merge({categorie: cat}) ) }}">
+                 href="{{ path('app_produit_index', chipFilters|merge({categorie: cat}) ) }}">
                 <i class="bi bi-tag"></i> {{ cat }}
               </a>
             {% endfor %}
@@ -363,7 +364,7 @@
           {# PAGINATION (KNP) - en dehors du for #}
           {% if produits is defined %}
             <div class="d-flex justify-content-center mt-4">
-              {{ knp_pagination_render(produits) }}
+              {{ knp_pagination_render(produits, null, { query: app.request.query.all }) }}
             </div>
           {% endif %}
 

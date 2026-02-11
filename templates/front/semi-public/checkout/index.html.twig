@@ -1,0 +1,246 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Checkout | AgriSmart{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light border-bottom">
+  <div class="container">
+    <h1 class="display-6 fw-bold mb-1">🧾 Checkout</h1>
+    <div class="text-muted">Vérifiez votre commande et choisissez le mode de paiement.</div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+
+    {% for label, messages in app.flashes %}
+      {% for message in messages %}
+        <div class="alert alert-{{ label }} rounded-4">{{ message }}</div>
+      {% endfor %}
+    {% endfor %}
+
+    {% if items is empty %}
+      <div class="alert alert-warning rounded-4">
+        Votre panier est vide.
+      </div>
+      <a href="{{ path('app_produit_index') }}" class="btn btn-dark rounded-pill">Retour marketplace</a>
+    {% else %}
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Adresse & Paiement</h5>
+
+            <form method="post" action="{{ path('app_checkout_process') }}" id="checkout-form">
+              <input type="hidden" name="_token" value="{{ csrf_token('checkout_submit') }}"/>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Adresse de livraison</label>
+                <textarea name="customer_address" class="form-control" rows="3" required
+                          placeholder="Ex: Rue..., Ville..., Code postal..."></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Mode de paiement</label>
+
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="payment_method" id="pay_cod" value="domicile" checked>
+                  <label class="form-check-label" for="pay_cod">
+                    Paiement à domicile (COD)
+                  </label>
+                </div>
+
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="payment_method" id="pay_card" value="carte">
+                  <label class="form-check-label" for="pay_card">
+                    Carte bancaire (Stripe)
+                  </label>
+                </div>
+
+                {# Zone Stripe Payment Element (affichée seulement si carte est cochée) #}
+                <div id="card-payment-container" class="mt-3" style="display:none;">
+                  <label class="form-label fw-semibold">Paiement sécurisé par carte</label>
+                  <div id="payment-element" class="border rounded-3 p-3 bg-light"></div>
+                  <div id="card-errors" class="text-danger small mt-2"></div>
+                  <div class="form-text">
+                    Vos informations de paiement sont traitées de manière sécurisée par Stripe, sans quitter AgriSmart.
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-dark rounded-pill px-4">
+                Confirmer la commande
+              </button>
+              <a href="{{ path('app_panier_index') }}" class="btn btn-outline-secondary rounded-pill ms-2">
+                Retour panier
+              </a>
+            </form>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Récapitulatif</h5>
+
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="bg-light">
+                  <tr>
+                    <th>Produit</th>
+                    <th class="text-center">Qté</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in items %}
+                    <tr>
+                      <td>{{ row.produit.nom }}</td>
+                      <td class="text-center fw-semibold">{{ row.qty }}</td>
+                      <td class="text-end fw-semibold">
+                        {{ row.lineTotal|number_format(2, '.', ' ') }} TND
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <hr>
+            <div class="d-flex justify-content-between">
+              <span class="fw-bold">Total</span>
+              <span class="fw-bold">{{ total|number_format(2, '.', ' ') }} TND</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('checkout-form');
+      if (!form) return;
+
+      const payCod = document.getElementById('pay_cod');
+      const payCard = document.getElementById('pay_card');
+      const cardContainer = document.getElementById('card-payment-container');
+      const paymentElementDiv = document.getElementById('payment-element');
+      const errorBox = document.getElementById('card-errors');
+      const stripePublicKey = '{{ stripe_public_key|default(null)|e('js') }}';
+
+      let stripe = null;
+      let elements = null;
+      let paymentElement = null;
+      let clientSecret = null;
+      let commandeId = null;
+
+      async function onPayMethodChange() {
+        cardContainer.style.display = payCard && payCard.checked ? 'block' : 'none';
+
+        // Si l'utilisateur choisit la carte, on initialise Stripe et on monte
+        // le Payment Element tout de suite, pour avoir un champ carte interactif.
+        if (payCard && payCard.checked) {
+          errorBox.textContent = '';
+          try {
+            await initStripeIfNeeded();
+          } catch (err) {
+            errorBox.textContent = err.message || 'Impossible d\'initialiser le paiement.';
+          }
+        }
+      }
+
+      if (payCod) payCod.addEventListener('change', onPayMethodChange);
+      if (payCard) payCard.addEventListener('change', onPayMethodChange);
+      onPayMethodChange();
+
+      async function initStripeIfNeeded() {
+        if (stripe || !stripePublicKey) {
+          if (!stripePublicKey) {
+            throw new Error('Clé publique Stripe manquante.');
+          }
+          return;
+        }
+
+        const csrf = form.querySelector('input[name="_token"]').value;
+        const addressField = form.querySelector('textarea[name="customer_address"]');
+
+        const body = new URLSearchParams();
+        body.append('_token', csrf);
+        body.append('customer_address', addressField ? addressField.value : '');
+
+        const response = await fetch('{{ path('app_checkout_create_payment_intent') }}', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: body.toString()
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.status !== 'ok') {
+          throw new Error(data.message || 'Erreur lors de l\'initialisation du paiement.');
+        }
+
+        clientSecret = data.clientSecret;
+        commandeId = data.commandeId;
+
+        stripe = Stripe(stripePublicKey);
+        elements = stripe.elements({clientSecret: clientSecret});
+        paymentElement = elements.create('payment');
+        paymentElement.mount(paymentElementDiv);
+      }
+
+      form.addEventListener('submit', async function (e) {
+        if (!payCard || !payCard.checked) {
+          // Paiement à domicile → soumission classique
+          return;
+        }
+
+        e.preventDefault();
+        errorBox.textContent = '';
+
+        try {
+          await initStripeIfNeeded();
+
+          const returnUrlTemplate = '{{ url('app_checkout_confirm', {id: 'CMD_ID'}) }}';
+          const returnUrl = returnUrlTemplate.replace('CMD_ID', String(commandeId));
+
+          const result = await stripe.confirmPayment({
+            elements: elements,
+            confirmParams: {
+              return_url: returnUrl
+            },
+            redirect: 'if_required'
+          });
+
+          if (result.error) {
+            errorBox.textContent = result.error.message || 'Une erreur est survenue lors du paiement.';
+            return;
+          }
+
+          if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+            window.location.href = returnUrl + '?stripe=success';
+          } else {
+            window.location.href = returnUrl;
+          }
+        } catch (err) {
+          errorBox.textContent = err.message || 'Impossible d\'initialiser le paiement.';
+        }
+      });
+    });
+  </script>
+{% endblock %}

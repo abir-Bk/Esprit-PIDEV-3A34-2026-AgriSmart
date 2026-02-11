@@ -1,0 +1,313 @@
+{% extends 'front/base.html.twig' %}
+{% block title %}Commande confirmée | AgriSmart{% endblock %}
+
+{% block body %}
+<style>
+  .confirm-page {
+    --ag-primary: #1a4331;
+    --ag-primary-light: rgba(26, 67, 49, 0.08);
+    --ag-success: #0d6e42;
+    --ag-gold: #f4b400;
+    min-height: 80vh;
+    background: linear-gradient(165deg, #f8faf9 0%, #fff 45%, #f0f7f4 100%);
+  }
+
+  /* Lottie container */
+  .lottie-success-wrap {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1rem;
+    position: relative;
+    animation: fadeInScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .lottie-success-wrap lottie-player {
+    margin: 0 auto;
+  }
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .lottie-confetti-wrap {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 160px;
+    pointer-events: none;
+    animation: fadeIn 1s 0.3s both;
+  }
+  .lottie-confetti-wrap lottie-player {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Confetti dots (subtle fallback) */
+  .confetti-dots {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .confetti-dots span {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ag-primary);
+    opacity: 0;
+    animation: confettiPop 1.2s ease-out forwards;
+  }
+  .confetti-dots span:nth-child(1) { left: 15%; top: 20%; animation-delay: 0.1s; background: var(--ag-primary); }
+  .confetti-dots span:nth-child(2) { left: 85%; top: 25%; animation-delay: 0.25s; background: var(--ag-gold); }
+  .confetti-dots span:nth-child(3) { left: 50%; top: 10%; animation-delay: 0.15s; background: var(--ag-success); }
+  .confetti-dots span:nth-child(4) { left: 25%; top: 60%; animation-delay: 0.35s; background: var(--ag-gold); }
+  .confetti-dots span:nth-child(5) { left: 75%; top: 55%; animation-delay: 0.2s; background: var(--ag-primary); }
+  .confetti-dots span:nth-child(6) { left: 10%; top: 70%; animation-delay: 0.4s; background: var(--ag-success); }
+  .confetti-dots span:nth-child(7) { left: 90%; top: 75%; animation-delay: 0.3s; background: var(--ag-gold); }
+  @keyframes confettiPop {
+    0% { transform: scale(0) translateY(0); opacity: 0; }
+    50% { opacity: 0.9; }
+    100% { transform: scale(1) translateY(-12px); opacity: 0.4; }
+  }
+
+  .confirm-hero {
+    padding: 3rem 0 2rem;
+    text-align: center;
+    animation: fadeInDown 0.6s ease-out;
+  }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .confirm-hero h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    color: var(--ag-primary);
+    margin-bottom: 0.5rem;
+  }
+  .confirm-hero .lead {
+    color: #6b7280;
+    font-size: 1.05rem;
+  }
+  .confirm-hero .badge-stripe {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(135deg, #635bff 0%, #7c3aed 100%);
+    color: #fff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    animation: fadeIn 0.8s 0.5s both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .confirm-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(26, 67, 49, 0.08);
+    border: 1px solid rgba(26, 67, 49, 0.08);
+    overflow: hidden;
+    animation: fadeInUp 0.6s 0.2s both;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .confirm-card .card-header-custom {
+    background: linear-gradient(135deg, var(--ag-primary) 0%, #0d2818 100%);
+    color: #fff;
+    padding: 1.25rem 1.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .confirm-card .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+  }
+  .confirm-card .info-row:hover {
+    background: #fafafa;
+  }
+  .confirm-card .info-row:last-of-type {
+    border-bottom: none;
+  }
+  .confirm-card .info-row .label {
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  .confirm-card .info-row .value {
+    font-weight: 600;
+    color: #111827;
+  }
+  .confirm-card .total-row {
+    background: var(--ag-primary-light);
+    padding: 1rem 1.25rem;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ag-primary);
+  }
+  .confirm-card .table th {
+    background: #f8faf9;
+    color: var(--ag-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+  }
+  .confirm-card .table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+  }
+
+  .confirm-actions {
+    animation: fadeInUp 0.6s 0.4s both;
+  }
+  .confirm-actions .btn-primary-custom {
+    background: var(--ag-primary);
+    border: none;
+    color: #fff;
+    padding: 0.65rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .confirm-actions .btn-primary-custom:hover {
+    background: #163828;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(26, 67, 49, 0.25);
+  }
+  .confirm-actions .btn-outline-custom {
+    border: 2px solid var(--ag-primary);
+    color: var(--ag-primary);
+    padding: 0.65rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .confirm-actions .btn-outline-custom:hover {
+    background: var(--ag-primary-light);
+    color: var(--ag-primary);
+    border-color: var(--ag-primary);
+  }
+</style>
+
+<div class="confirm-page">
+  <section class="confirm-hero">
+    <div class="container position-relative">
+      <div class="confetti-dots" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="success-wrap">
+        <div class="success-circle">
+          <svg class="success-check" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 27 l8 8 16 -18" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <h1>Commande confirmée</h1>
+      <p class="lead">Merci pour votre confiance. Votre commande a bien été enregistrée.</p>
+      {% if stripe == 'success' %}
+        <span class="badge-stripe"><i class="bi bi-credit-card-2-front"></i> Paiement Stripe réussi</span>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="pb-5">
+    <div class="container">
+      <div class="row g-4 justify-content-center">
+        <div class="col-lg-5 col-md-6">
+          <div class="confirm-card">
+            <div class="card-header-custom">
+              <i class="bi bi-receipt me-2"></i> Récapitulatif
+            </div>
+            <div class="info-row">
+              <span class="label">N° commande</span>
+              <span class="value">#{{ commande.id }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Client</span>
+              <span class="value">{{ commande.client.email ?? commande.client.userIdentifier }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Paiement</span>
+              <span class="value">{{ commande.modePaiement == 'carte' ? 'Carte bancaire' : 'À domicile' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Statut</span>
+              <span class="value">
+                {% if commande.statut == 'payee' %}<span class="badge bg-success">Payée</span>
+                {% elseif commande.statut == 'annulee' %}<span class="badge bg-danger">Annulée</span>
+                {% else %}<span class="badge bg-warning text-dark">En attente</span>{% endif %}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="label">Adresse livraison</span>
+              <span class="value small">{{ commande.adresseLivraison }}</span>
+            </div>
+            <div class="total-row d-flex justify-content-between align-items-center">
+              <span>Total</span>
+              <span>{{ commande.montantTotal|number_format(2, ',', ' ') }} TND</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5 col-md-6">
+          <div class="confirm-card">
+            <div class="card-header-custom">
+              <i class="bi bi-basket2 me-2"></i> Détails
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th class="text-center">Qté</th>
+                    <th class="text-end">Prix</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in commande.items %}
+                    <tr>
+                      <td>{{ item.produit.nom }}</td>
+                      <td class="text-center fw-semibold">{{ item.quantite }}</td>
+                      <td class="text-end fw-semibold">{{ (item.prixUnitaire * item.quantite)|number_format(2, ',', ' ') }} TND</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="p-3 bg-light border-top">
+              <p class="mb-0 small text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Un email de confirmation vous a été envoyé si la configuration le permet.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirm-actions text-center mt-4">
+        <a href="{{ path('app_commande_show', {id: commande.id}) }}" class="btn btn-primary-custom me-2 mb-2">
+          <i class="bi bi-receipt-cutoff me-1"></i> Voir ma commande
+        </a>
+        <a href="{{ path('app_produit_index') }}" class="btn btn-outline-custom me-2 mb-2">
+          <i class="bi bi-shop me-1"></i> Retour marketplace
+        </a>
+        <a href="{{ path('app_commande_mes_commandes') }}" class="btn btn-outline-secondary rounded-pill mb-2">
+          <i class="bi bi-bag-check me-1"></i> Mes commandes
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

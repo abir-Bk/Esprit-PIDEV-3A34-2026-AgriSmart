@@ -40,3 +40,5 @@ security:
         - { path: ^/semi-public/users/agriculteur, roles: ROLE_AGRICULTEUR }
         - { path: ^/semi-public/users/employe, roles: ROLE_EMPLOYEE }
         - { path: ^/semi-public/users/fournisseur, roles: ROLE_FOURNISSEUR }
+        - { path: ^/semi-public/checkout, roles: ROLE_USER }
+        - { path: ^/semi-public/commande, roles: ROLE_USER }

@@ -120,7 +120,7 @@
                                     <li class="d-flex align-items-center py-2 border-bottom border-light">
                                         <div class="flex-shrink-0 me-2">
                                             {% if p.image %}
-                                                <img src="{{ asset('uploads/produits/' ~ p.image) }}" alt="" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                                <img src="{{ asset(p.image) }}" alt="{{ p.nom }}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
                                             {% else %}
                                                 <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fa-solid fa-image text-muted"></i></div>
                                             {% endif %}

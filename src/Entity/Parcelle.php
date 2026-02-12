@@ -18,39 +18,51 @@ class Parcelle
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le nom de la parcelle est obligatoire.')]
-    #[Assert\Length(min: 2, max: 255, minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\NotBlank(message: "Le nom de la parcelle est obligatoire.")]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
+    )]
     private ?string $nom = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La surface est obligatoire.')]
-    #[Assert\Positive(message: 'La surface doit être strictement positive (en hectares).')]
-    #[Assert\LessThanOrEqual(10000, message: 'La surface ne peut pas dépasser 10 000 hectares.')]
+    #[Assert\NotBlank(message: "La surface est obligatoire.")]
+    #[Assert\Positive(message: "La surface doit être un nombre positif.")]
+    #[Assert\LessThan(value: 10000, message: "La surface ne peut pas dépasser 10 000 hectares.")]
     private ?float $surface = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La latitude est obligatoire.')]
-    #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'La latitude doit être entre {{ min }} et {{ max }}.')]
+    #[Assert\NotBlank(message: "La latitude est obligatoire.")]
+    #[Assert\Range(
+        min: -90,
+        max: 90,
+        notInRangeMessage: "La latitude doit être comprise entre -90 et 90 degrés."
+    )]
     private ?float $latitude = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La longitude est obligatoire.')]
-    #[Assert\Range(min: -180, max: 180, notInRangeMessage: 'La longitude doit être entre {{ min }} et {{ max }}.')]
+    #[Assert\NotBlank(message: "La longitude est obligatoire.")]
+    #[Assert\Range(
+        min: -180,
+        max: 180,
+        notInRangeMessage: "La longitude doit être comprise entre -180 et 180 degrés."
+    )]
     private ?float $longitude = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le type de sol est obligatoire.')]
-    #[Assert\Length(min: 2, max: 255, minMessage: 'Le type de sol doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le type de sol ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\NotBlank(message: "Le type de sol est obligatoire.")]
+    #[Assert\Choice(
+        choices: ["Argileux", "Sableux", "Limoneux", "Calcaire", "Tourbeux", "Humifère"],
+        message: "Veuillez sélectionner un type de sol valide."
+    )]
     private ?string $typeSol = null;
 
-    // La nouvelle relation correcte vers l'utilisateur
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    /**
-     * @var Collection<int, Culture>
-     */
     #[ORM\OneToMany(targetEntity: Culture::class, mappedBy: 'parcelle')]
     private Collection $cultures;
 
@@ -69,7 +81,7 @@ class Parcelle
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(?string $nom): static
     {
         $this->nom = $nom;
         return $this;
@@ -80,7 +92,7 @@ class Parcelle
         return $this->surface;
     }
 
-    public function setSurface(float $surface): static
+    public function setSurface(?float $surface): static
     {
         $this->surface = $surface;
         return $this;
@@ -91,7 +103,7 @@ class Parcelle
         return $this->latitude;
     }
 
-    public function setLatitude(float $latitude): static
+    public function setLatitude(?float $latitude): static
     {
         $this->latitude = $latitude;
         return $this;
@@ -102,7 +114,7 @@ class Parcelle
         return $this->longitude;
     }
 
-    public function setLongitude(float $longitude): static
+    public function setLongitude(?float $longitude): static
     {
         $this->longitude = $longitude;
         return $this;
@@ -113,13 +125,12 @@ class Parcelle
         return $this->typeSol;
     }
 
-    public function setTypeSol(string $typeSol): static
+    public function setTypeSol(?string $typeSol): static
     {
         $this->typeSol = $typeSol;
         return $this;
     }
 
-    // Getters et Setters pour l'objet User
     public function getUser(): ?User
     {
         return $this->user;
@@ -131,9 +142,6 @@ class Parcelle
         return $this;
     }
 
-    /**
-     * @return Collection<int, Culture>
-     */
     public function getCultures(): Collection
     {
         return $this->cultures;

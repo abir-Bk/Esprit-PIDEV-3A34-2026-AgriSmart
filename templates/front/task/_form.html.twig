@@ -1,76 +1,64 @@
+{% set label_attr = {'class': 'form-label fw-bold small', 'style': 'color: var(--ag-muted);'} %}
 {{ form_start(form) }}
 <div class="row g-3">
-
     <div class="col-md-6">
-        {{ form_label(form.titre) }}
-        {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_label(form.titre, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.titre, {'attr': {'class': 'form-control ag-input'}}) }}
         {{ form_errors(form.titre) }}
     </div>
-
     <div class="col-md-6">
-        {{ form_label(form.type) }}
-        {{ form_widget(form.type, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_label(form.type, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.type, {'attr': {'class': 'form-select ag-input'}}) }}
         {{ form_errors(form.type) }}
     </div>
-
     <div class="col-md-12">
-        {{ form_label(form.description) }}
-        {{ form_widget(form.description, {'attr': {'class': 'form-control form-control-sm', 'rows': 3}}) }}
+        {{ form_label(form.description, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 3}}) }}
         {{ form_errors(form.description) }}
     </div>
-
     <div class="col-md-6">
-        {{ form_label(form.dateDebut) }}
-        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_label(form.dateDebut, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control ag-input'}}) }}
         {{ form_errors(form.dateDebut) }}
     </div>
-
     <div class="col-md-6">
-        {{ form_label(form.dateFin) }}
-        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_label(form.dateFin, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control ag-input'}}) }}
         {{ form_errors(form.dateFin) }}
     </div>
-
     <div class="col-md-4">
-        {{ form_label(form.priorite) }}
-        {{ form_widget(form.priorite, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_label(form.priorite, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.priorite, {'attr': {'class': 'form-select ag-input'}}) }}
         {{ form_errors(form.priorite) }}
     </div>
-
     <div class="col-md-4">
-        {{ form_label(form.statut) }}
-        {{ form_widget(form.statut, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_label(form.statut, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input'}}) }}
         {{ form_errors(form.statut) }}
     </div>
-
     <div class="col-md-4">
-        {{ form_label(form.localisation) }}
-        {{ form_widget(form.localisation, {'attr': {'class': 'form-control form-control-sm'}}) }}
+        {{ form_label(form.localisation, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.localisation, {'attr': {'class': 'form-control ag-input'}}) }}
         {{ form_errors(form.localisation) }}
     </div>
-
     <div class="col-md-4">
-        {{ form_label(form.parcelleId) }}
-        {{ form_widget(form.parcelleId, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_label(form.parcelleId, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.parcelleId, {'attr': {'class': 'form-select ag-input'}}) }}
         {{ form_errors(form.parcelleId) }}
     </div>
-
     <div class="col-md-4">
-        {{ form_label(form.culture) }}
-        {{ form_widget(form.culture, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_label(form.culture, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.culture, {'attr': {'class': 'form-select ag-input'}}) }}
         {{ form_errors(form.culture) }}
     </div>
-
     <div class="col-md-4">
-        {{ form_label(form.createdByUser) }}
-        {{ form_widget(form.createdByUser, {'attr': {'class': 'form-select form-select-sm'}}) }}
+        {{ form_label(form.createdByUser, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.createdByUser, {'attr': {'class': 'form-select ag-input'}}) }}
         {{ form_errors(form.createdByUser) }}
     </div>
-
 </div>
-
 <div class="mt-4 d-flex gap-2">
-    <button class="btn btn-primary btn-sm">{{ button_label|default('Enregistrer') }}</button>
-    <a href="{{ path('tasks_index') }}" class="btn btn-secondary btn-sm">Annuler</a>
+    <button class="btn ag-btn-primary text-white rounded-pill px-4">{{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('tasks_index') }}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
 </div>
 {{ form_end(form) }}

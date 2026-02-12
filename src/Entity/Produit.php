@@ -37,7 +37,7 @@ class Produit
     #[Assert\Length(max: 255)]
     private ?string $nom = null;
 
-    // ✅ Obligatoire (cohérent avec NotBlank)
+
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Veuillez décrire votre produit.')]
     #[Assert\Length(min: 10, minMessage: 'La description doit faire au moins 10 caractères.')]
@@ -63,7 +63,7 @@ class Produit
     #[Assert\PositiveOrZero(message: 'Le stock doit être ≥ 0.')]
     private ?int $quantiteStock = null;
 
-    // ✅ On stocke un chemin relatif (uploads/produits/xxx.webp)
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
@@ -74,7 +74,7 @@ class Produit
     #[Assert\PositiveOrZero(message: 'Le prix promo doit être ≥ 0.')]
     private ?float $promotionPrice = null;
 
-    // ✅ nullable DB ; obligatoire seulement si location (validation callback)
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $locationAddress = null;
 

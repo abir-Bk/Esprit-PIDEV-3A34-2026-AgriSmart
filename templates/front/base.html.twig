@@ -20,7 +20,9 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    {{ include('_partials/_header.html.twig') }}
+    {% block header %}
+        {{ include('_partials/_header.html.twig') }}
+    {% endblock %}
 
     {# Messages flash globaux (dismissible) — affiché seulement s'il y a des messages #}
     {% if app.flashes|length > 0 %}
@@ -40,12 +42,13 @@
         {% block body %}{% endblock %}
     </main>
 
-    {# Footer minimal #}
+    {% block footer %}
     <footer class="bg-light border-top py-4 mt-auto">
         <div class="container text-center text-muted small">
             <span>© {{ 'now'|date('Y') }} AgriSmart · Marketplace agricole</span>
         </div>
     </footer>
+    {% endblock %}
 
     {% block javascripts %}
         <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>

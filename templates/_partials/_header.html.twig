@@ -7,7 +7,7 @@
 	<nav class="navbar navbar-expand-xl py-1">
 		<div class="container">
 			<a class="navbar-brand d-flex align-items-center py-0" href="{{ path('app_produit_index') }}">
-				<img src="{{ asset('assets/images/logo.svg') }}" alt="AgriSmart" style="height:30px;" onerror="this.style.display='none'">
+				<img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" style="height:30px;" onerror="this.style.display='none'">
 				<span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">Agri<span style="color: #28a745;">Smart</span></span>
 			</a>
 
@@ -21,15 +21,18 @@
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'tasks_' ? 'active fw-semibold' }}" href="{{ path('tasks_dashboard') }}"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'app_parcelle_' ? 'active fw-semibold' }}" href="{{ path('app_parcelle_index') }}"><i class="bi bi-flower1 me-1"></i>Culture</a></li>
-						<li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'app_ressource_' ? 'active fw-semibold' }}" href="{{ path('app_ressource_index') }}"><i class="bi bi-box-seam me-1"></i>Ressources</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_offre_index_front' ? 'active fw-semibold' }}" href="{{ path('app_offre_index_front') }}"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
 					{% elseif _user_role == 'fournisseur' %}
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_offre_index_front' ? 'active fw-semibold' }}" href="{{ path('app_offre_index_front') }}"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
 					{% elseif _user_role == 'employee' %}
-						<li class="nav-item"><a class="nav-link small px-3" href="#"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_offre_index_front' ? 'active fw-semibold' }}" href="{{ path('app_offre_index_front') }}"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'employee_tasks_' ? 'active fw-semibold' }}" href="{{ path('employee_tasks_index') }}"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
 					{% else %}
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
+						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_offre_index_front' ? 'active fw-semibold' }}" href="{{ path('app_offre_index_front') }}"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
 					{% endif %}
 				</ul>
 
@@ -63,6 +66,10 @@
 							</li>
 							<li><a class="dropdown-item py-2" href="{{ path('app_profile_show') }}"><i class="bi bi-person me-2"></i>Mon profil</a></li>
 							<li><a class="dropdown-item py-2" href="{{ path('app_produit_mes_offres') }}"><i class="bi bi-journals me-2"></i>Mes annonces</a></li>
+							<li><a class="dropdown-item py-2" href="{{ path('app_my_demandes') }}"><i class="bi bi-person-badge me-2"></i>Mes candidatures</a></li>
+							{% if _user_role == 'agriculteur' or _user_role == 'admin' %}
+							<li><a class="dropdown-item py-2" href="{{ path('app_ressource_index') }}"><i class="bi bi-box-seam me-2"></i>Ressources</a></li>
+							{% endif %}
 							<li><a class="dropdown-item py-2" href="{{ path('app_panier_index') }}"><i class="bi bi-cart3 me-2"></i>Panier</a></li>
 							<li><a class="dropdown-item py-2" href="{{ path('app_profile_edit') }}"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
 							<li><hr class="dropdown-divider my-2"></li>

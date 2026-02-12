@@ -256,6 +256,7 @@
                     </button>
                 </form>
 
+              
                 <button class="btn btn-success rounded-4 px-4 py-2 fw-bold shadow-sm" 
                         data-bs-toggle="modal" 
                         data-bs-target="#modalAjouterParcelle" 
@@ -453,11 +454,9 @@
                                                                 <select name="ressource_id" class="form-select rounded-3" required>
                                                                     <option value="">-- Choisir --</option>
                                                                     {% for r in ressources %}
-                                                                        {% if r.user == app.user %}
-                                                                            <option value="{{ r.id }}">
-                                                                                {{ r.nom }} (Reste: {{ r.stockRestan }} {{ r.unite }})
-                                                                            </option>
-                                                                        {% endif %}
+                                                                        <option value="{{ r.id }}">
+                                                                            {{ r.nom }} (Reste: {{ r.stockRestant }} {{ r.unite }})
+                                                                        </option>
                                                                     {% endfor %}
                                                                 </select>
                                                             </div>
@@ -491,90 +490,157 @@
     </div>
 
     <!-- Modal Ajouter Culture -->
-    <div class="modal fade" id="modalAjouterCulture" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 p-4 pb-0">
-                    <h5 class="modal-title fw-bold">Nouvelle Plantation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{{ path('app_culture_new') }}" method="POST">
-                    <div class="modal-body p-4">
-                        <input type="hidden" name="parcelle_id" :value="selectedParcelleId">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label small fw-bold text-muted">NOM DE LA CULTURE</label>
-                                <input type="text" name="typeCulture" class="form-control rounded-3" placeholder="ex: Blé, Tomate" required>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small fw-bold text-muted">VARIÉTÉ</label>
-                                <input type="text" name="variete" class="form-control rounded-3" placeholder="ex: Spunta" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">DATE PLANTATION</label>
-                                <input type="date" name="datePlantation" class="form-control rounded-3" value="{{ 'now'|date('Y-m-d') }}" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">RÉCOLTE PRÉVUE</label>
-                                <input type="date" name="dateRecoltePrevue" class="form-control rounded-3" required>
-                            </div>
-                            <div class="col-12 text-end mt-4">
-                                <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold shadow">Confirmer la plantation</button>
-                            </div>
-                        </div>
-                        <input type="hidden" name="statut" value="En croissance">
-                    </div>
-                </form>
+<div class="modal fade" id="modalAjouterCulture" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-seedling me-2 text-success"></i>
+                    Nouvelle Plantation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal Modifier Culture -->
-    <div class="modal fade" id="modalEditCulture" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 p-4 pb-0">
-                    <h5 class="modal-title fw-bold">Modifier la Culture</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="form-edit-culture" method="POST">
-                    <div class="modal-body p-4">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Type de culture</label>
-                                <input type="text" name="typeCulture" id="edit_typeCulture" class="form-control bg-light border-0">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Variété</label>
-                                <input type="text" name="variete" id="edit_variete" class="form-control bg-light border-0">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Plantation</label>
-                                <input type="date" name="datePlantation" id="edit_datePlantation" class="form-control bg-light border-0">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Récolte Prévue</label>
-                                <input type="date" name="dateRecoltePrevue" id="edit_dateRecoltePrevue" class="form-control bg-light border-0">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Statut</label>
-                                <select name="statut" id="edit_statut" class="form-select bg-light border-0">
-                                    <option value="En croissance">En croissance</option>
-                                    <option value="Besoin d'eau">Besoin d'eau</option>
-                                    <option value="Mature">Mature</option>
-                                    <option value="Récolté">Récolté</option>
-                                </select>
-                            </div>
-                            <div class="col-12 mt-4">
-                                <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow">Mettre à jour</button>
-                            </div>
+            
+            {# SUPPRIMEZ l'attribut "required" de tous les champs #}
+            <form action="{{ path('app_culture_new') }}" method="POST" novalidate>
+                <div class="modal-body p-4">
+                    <input type="hidden" name="parcelle_id" :value="selectedParcelleId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">
+                            <i class="fa-solid fa-leaf text-success me-1"></i> Type de culture
+                        </label>
+                        <input type="text" 
+                               name="typeCulture" 
+                               class="form-control rounded-3" 
+                               placeholder="Ex: Blé, Tomate, Maïs...">
+                        {# SUPPRIMEZ "required" #}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">
+                            <i class="fa-solid fa-tag text-success me-1"></i> Variété
+                        </label>
+                        <input type="text" 
+                               name="variete" 
+                               class="form-control rounded-3" 
+                               placeholder="Ex: Spunta, Ambition...">
+                        {# SUPPRIMEZ "required" #}
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-regular fa-calendar text-success me-1"></i> Date plantation
+                            </label>
+                            <input type="date" 
+                                   name="datePlantation" 
+                                   class="form-control rounded-3" 
+                                   value="{{ 'now'|date('Y-m-d') }}">
+                            {# SUPPRIMEZ "required" #}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-regular fa-calendar-check text-success me-1"></i> Récolte prévue
+                            </label>
+                            <input type="date" 
+                                   name="dateRecoltePrevue" 
+                                   class="form-control rounded-3">
+                            {# SUPPRIMEZ "required" #}
                         </div>
                     </div>
-                </form>
-            </div>
+                    
+                    <input type="hidden" name="statut" value="En croissance">
+                </div>
+                
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow">
+                        <i class="fa-solid fa-check me-2"></i>Confirmer
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
+   <!-- Modal Modifier Culture -->
+<div class="modal fade" id="modalEditCulture" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>
+                    Modifier la Culture
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            {# AJOUT DE novalidate POUR DÉSACTIVER LA VALIDATION HTML5 #}
+            <form id="form-edit-culture" method="POST" novalidate>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Type de culture</label>
+                        <input type="text" 
+                               name="typeCulture" 
+                               id="edit_typeCulture" 
+                               class="form-control rounded-3">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Variété</label>
+                        <input type="text" 
+                               name="variete" 
+                               id="edit_variete" 
+                               class="form-control rounded-3">
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Date plantation</label>
+                            <input type="date" 
+                                   name="datePlantation" 
+                                   id="edit_datePlantation" 
+                                   class="form-control rounded-3">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Date récolte</label>
+                            <input type="date" 
+                                   name="dateRecoltePrevue" 
+                                   id="edit_dateRecoltePrevue" 
+                                   class="form-control rounded-3">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label fw-bold text-dark">Statut</label>
+                        <select name="statut" 
+                                id="edit_statut" 
+                                class="form-select rounded-3">
+                            <option value="En croissance">🌱 En croissance</option>
+                            <option value="Besoin d'eau">💧 Besoin d'eau</option>
+                            <option value="Mature">🌾 Mature</option>
+                            <option value="Récolté">📦 Récolté</option>
+                            <option value="Maladie">⚠️ Maladie</option>
+                            <option value="Traitement">🔬 Traitement</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow">
+                        <i class="fa-solid fa-save me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </main>
 
 {{ include('front/semi-public/parcelle/modalAjouterParcelle.twig') }}
@@ -589,6 +655,10 @@ document.addEventListener('DOMContentLoaded', function() {
         modalEl.addEventListener('shown.bs.modal', function () {
             window.map.invalidateSize();
         });
+        {% if showParcelleModal|default(false) %}
+        var bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        bsModal.show();
+        {% endif %}
     }
 
     window.map.on('click', function(e) {
@@ -612,10 +682,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 let name = a.neighbourhood || a.suburb || a.village || a.town || a.city || a.county || a.state || "Nouvelle Parcelle";
                 let detail = a.suburb || a.neighbourhood ? (a.suburb || a.neighbourhood) : "";
                 let city = a.village || a.town || a.city || "";
-                let finalName = detail && city && detail !== city ? `${detail}, ${city}` : (city || name);
+                let finalName = detail && city && detail !== city ? detail + ", " + city : (city || name);
                 document.getElementById('parcelle_nom').value = finalName;
             }
-        });
+        })
+        .catch(function() { document.getElementById('parcelle_nom').value = "Nouvelle Parcelle"; });
     });
 });
 </script>

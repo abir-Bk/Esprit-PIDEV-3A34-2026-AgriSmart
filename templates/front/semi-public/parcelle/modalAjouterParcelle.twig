@@ -1,53 +1,148 @@
-<div class="modal fade" id="modalAjouterParcelle" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-            <div class="modal-header bg-dark text-white">
-                <h6 class="modal-title w-100 text-center fw-bold">Ajouter une Parcelle</h6>
+<div class="modal fade" id="modalAjouterParcelle" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-success text-white border-0 p-4 rounded-top-4">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-map-location-dot me-2"></i>
+                    <span class="modal-title-text">Ajouter une Parcelle</span>
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            
+            {{ form_start(form, {'attr': {
+                'id': 'form-parcelle',
+                'action': path('app_parcelle_index'),
+                'method': 'POST',
+                'novalidate': 'novalidate'
+            }}) }}
+            
             <div class="modal-body p-4">
-                {{ form_start(form, {'attr': {'id': 'form-parcelle'}}) }}
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Nom (auto-complété par la carte)</label>
-                        {{ form_widget(form.nom, {'attr': {'class': 'form-control bg-light border-0', 'id': 'parcelle_nom'}}) }}
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Surface (Ha)</label>
-                            {{ form_widget(form.surface, {'attr': {'class': 'form-control bg-light border-0', 'id': 'parcelle_surface'}}) }}
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-solid fa-tag text-success me-1"></i> Nom de la parcelle
+                            </label>
+                            {{ form_widget(form.nom, {
+                                'attr': {
+                                    'class': 'form-control rounded-3 ' ~ (form.nom.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                    'placeholder': 'Ex: Parcelle Nord'
+                                }
+                            }) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.nom) }}
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Type de Sol</label>
-                            {{ form_widget(form.typeSol, {'attr': {'class': 'form-control bg-light border-0', 'id': 'parcelle_typeSol'}}) }}
+
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-solid fa-vector-square text-success me-1"></i> Surface (hectares)
+                            </label>
+                            {{ form_widget(form.surface, {
+                                'attr': {
+                                    'class': 'form-control rounded-3 ' ~ (form.surface.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                    'placeholder': 'Ex: 2.5',
+                                    'step': '0.01'
+                                }
+                            }) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.surface) }}
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-solid fa-mountain text-success me-1"></i> Type de sol
+                            </label>
+                            {{ form_widget(form.typeSol, {
+                                'attr': {
+                                    'class': 'form-select rounded-3 ' ~ (form.typeSol.vars.errors|length > 0 ? 'is-invalid' : '')
+                                }
+                            }) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.typeSol) }}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="small fw-bold text-muted">Latitude</label>
-                            {{ form_widget(form.latitude, {'attr': {'class': 'form-control bg-light border-0', 'readonly': 'readonly', 'id': 'parcelle_latitude'}}) }}
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-solid fa-location-dot text-success me-1"></i> Latitude
+                            </label>
+                            {{ form_widget(form.latitude, {
+                                'attr': {
+                                    'class': 'form-control rounded-3 ' ~ (form.latitude.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                    'placeholder': 'Cliquez sur la carte',
+                                    'readonly': true,
+                                    'id': 'parcelle_latitude'
+                                }
+                            }) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.latitude) }}
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="small fw-bold text-muted">Longitude</label>
-                            {{ form_widget(form.longitude, {'attr': {'class': 'form-control bg-light border-0', 'readonly': 'readonly', 'id': 'parcelle_longitude'}}) }}
-                        </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-success"><i class="fa-solid fa-map-pin"></i> Cliquez sur la carte</label>
-                        <div id="map" style="height: 250px; border-radius: 8px; border: 1px solid #ddd;"></div>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fa-solid fa-location-dot text-success me-1"></i> Longitude
+                            </label>
+                            {{ form_widget(form.longitude, {
+                                'attr': {
+                                    'class': 'form-control rounded-3 ' ~ (form.longitude.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                    'placeholder': 'Cliquez sur la carte',
+                                    'readonly': true,
+                                    'id': 'parcelle_longitude'
+                                }
+                            }) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.longitude) }}
+                            </div>
+                        </div>
 
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Enregistrer</button>
-                        </div>
-                        <div class="col-6">
-                            <button type="button" class="btn btn-light w-100 fw-bold py-2" data-bs-dismiss="modal">Annuler</button>
+                        <div class="mt-3">
+                            <div id="map" style="height: 250px; width: 100%; border-radius: 15px;"></div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fa-solid fa-info-circle"></i> Cliquez sur la carte pour définir la position
+                            </small>
                         </div>
                     </div>
-                {{ form_end(form) }}
+                </div>
             </div>
+
+            <div class="modal-footer border-0 p-4">
+                <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-times me-2"></i>Annuler
+                </button>
+                <button type="submit" class="btn btn-success rounded-3 px-5 py-2 fw-bold">
+                    <i class="fa-solid fa-check me-2"></i>Enregistrer
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
         </div>
     </div>
 </div>
+
+<style>
+.modal-header {
+    background: linear-gradient(135deg, #10b981 0%, #0a8c5e 100%);
+}
+.form-control:focus, .form-select:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.1);
+}
+.is-invalid {
+    border-color: #dc3545;
+}
+.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.1);
+}
+#map {
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+#map:hover {
+    border-color: #10b981;
+}
+</style>

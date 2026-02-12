@@ -1,66 +1,174 @@
 {% extends 'front/base.html.twig' %}
 
 {% block body %}
-<main>
-	<nav class="navbar sidebar navbar-expand-xl navbar-light">
-		<div class="d-flex align-items-center">
-			<a class="navbar-brand" href="#">
-				<img class="navbar-brand-item" src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:35px;">
-			</a>
-		</div>
+{% set _task_route = app.request.attributes.get('_route') ?? '' %}
+<style>
+/* =========================
+   Tâches : thème Marketplace AgriSmart (cohérent Ressources / Culture)
+   ========================= */
+.ag-marketplace.task-layout {
+  --ag-primary: #1A4331;
+  --ag-primary-2: #2E7D32;
+  --ag-accent: #F4B400;
+  --ag-cream: #FBF7EE;
+  --ag-bg: #F6F8F7;
+  --ag-text: #111827;
+  --ag-muted: #6B7280;
+  --ag-border: #E5E7EB;
+}
 
-		<div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" tabindex="-1" id="offcanvasSidebar">
-			<div class="offcanvas-body sidebar-content d-flex flex-column pt-4">
-				<ul class="navbar-nav flex-column" id="navbar-sidebar">
-					<li class="nav-item">
-						<a class="nav-link" href="{{ path('tasks_dashboard') }}">
-							<i class="bi bi-house fa-fw me-2"></i>Dashboard
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="{{ path('tasks_index') }}">
-							<i class="bi bi-list-check fa-fw me-2"></i>Gestion des tâches
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="{{ path('task_assignments_index') }}">
-							<i class="bi bi-person-check fa-fw me-2"></i>Affectations de tâches
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">
-							<i class="bi bi-people fa-fw me-2"></i>Utilisateurs
-						</a>
-					</li>
-				</ul>
-				<div class="mt-auto p-3 bg-light rounded">
-					<div class="d-flex align-items-center">
-						<div class="avatar avatar-sm me-2">
-							<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
-						</div>
-						<h6 class="mb-0">Admin PIDEV</h6>
-					</div>
-				</div>
-			</div>
-		</div>
-	</nav>
-	<div class="page-content">
-		<nav class="navbar top-bar navbar-light py-0 py-xl-3">
-			<div class="container-fluid p-0">
-				<div class="d-flex align-items-center w-100">
-					<div class="d-flex align-items-center d-xl-none">
-						<a class="navbar-brand" href="#">
-							<img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo.png') }}" alt="">
-						</a>
-					</div>
-					<h4 class="m-0 ms-3">Agriculteur</h4>
-				</div>
-			</div>
-		</nav>
-		<div class="page-content-wrapper p-xxl-4">
-			{% block task_content %}{% endblock %}
-		</div>
-	</div>
-</main>
+.ag-marketplace.task-layout .task-page-content { min-height: 100vh; background: var(--ag-bg); }
+
+/* Barre de navigation Tâches (style pills comme Ressources) */
+.ag-marketplace.task-layout .task-nav-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--ag-border);
+  padding: 0.6rem 0;
+}
+.ag-marketplace.task-layout .task-nav-bar .task-nav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.ag-marketplace.task-layout .task-nav-bar .task-nav-title {
+  color: var(--ag-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+  padding-right: 0.75rem;
+  border-right: 1px solid var(--ag-border);
+  margin-right: 0.25rem;
+}
+.ag-marketplace.task-layout .task-nav-bar .task-nav-links { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ag-marketplace.task-layout .task-nav-bar .task-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--ag-border);
+  background: #fff;
+  color: var(--ag-text) !important;
+  text-decoration: none !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: .15s;
+}
+.ag-marketplace.task-layout .task-nav-bar .task-nav-link:hover {
+  border-color: rgba(26,67,49,.35);
+  background: rgba(26,67,49,.06);
+  color: var(--ag-primary) !important;
+}
+.ag-marketplace.task-layout .task-nav-bar .task-nav-link.active {
+  border-color: var(--ag-primary);
+  background: var(--ag-primary);
+  color: #fff !important;
+}
+
+/* Titres / hero / contenu (aligné Marketplace) */
+.ag-marketplace.task-layout .ag-title {
+  font-size: clamp(2.0rem, 4vw, 3.0rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em;
+  color: var(--ag-text);
+  margin: 0;
+}
+.ag-marketplace.task-layout .ag-subtitle {
+  font-size: 1.05rem !important;
+  color: var(--ag-muted) !important;
+  margin: .75rem 0 0 0;
+}
+.ag-marketplace.task-layout .ag-hero {
+  background:
+    radial-gradient(900px 420px at 18% 25%, rgba(46,125,50,.16), transparent 60%),
+    radial-gradient(700px 320px at 85% 10%, rgba(244,180,0,.14), transparent 55%),
+    linear-gradient(180deg, var(--ag-cream), #ffffff);
+  border-bottom: 1px solid rgba(17,24,39,.06);
+  padding: 3rem 0 2rem;
+}
+.ag-marketplace.task-layout .ag-content { background: var(--ag-bg); padding: 2rem 0 3rem; }
+.ag-marketplace.task-layout .ag-btn-primary {
+  background: var(--ag-primary) !important;
+  border: none !important;
+  color: #fff !important;
+}
+.ag-marketplace.task-layout .ag-btn-primary:hover { background: #163828 !important; color: #fff !important; }
+.ag-marketplace.task-layout .ag-card {
+  border: 1px solid rgba(17,24,39,.06);
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  transition: .18s;
+}
+.ag-marketplace.task-layout .ag-card:hover { box-shadow: 0 .9rem 1.6rem rgba(0,0,0,.08); }
+.ag-marketplace.task-layout .ag-filter-card {
+  border: 1px solid rgba(17,24,39,.06) !important;
+  border-radius: 20px !important;
+}
+.ag-marketplace.task-layout .ag-input {
+  border-radius: 14px !important;
+  border: 1px solid var(--ag-border) !important;
+}
+.ag-marketplace.task-layout .ag-input:focus {
+  border-color: rgba(26,67,49,.45) !important;
+  box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
+}
+.ag-marketplace.task-layout .ag-hero-ornament {
+  width: min(420px, 100%);
+  height: 170px;
+  border-radius: 26px;
+  background:
+    radial-gradient(120px 120px at 25% 60%, rgba(46,125,50,.18), transparent 60%),
+    radial-gradient(140px 140px at 65% 35%, rgba(244,180,0,.18), transparent 60%),
+    linear-gradient(135deg, rgba(26,67,49,.10), rgba(46,125,50,.06));
+  border: 1px solid rgba(17,24,39,.06);
+}
+.ag-marketplace.task-layout .table thead th {
+  background: var(--ag-primary);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+}
+.ag-marketplace.task-layout .table thead th:first-child { border-radius: 12px 0 0 0; }
+.ag-marketplace.task-layout .table thead th:last-child { border-radius: 0 12px 0 0; }
+.ag-marketplace.task-layout .table tbody td { padding: 1rem 1.25rem; vertical-align: middle; }
+.ag-marketplace.task-layout .table tbody tr:hover { background: rgba(26,67,49,.04); }
+.ag-marketplace.task-layout .ag-meta { color: var(--ag-muted); font-size: .86rem; }
+
+@media (max-width: 575.98px) {
+  .ag-marketplace.task-layout .task-nav-bar .task-nav-title { border-right: none; margin-right: 0; padding-right: 0; }
+  .ag-marketplace.task-layout .task-nav-bar .task-nav-link { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+}
+</style>
+
+<div class="ag-marketplace task-layout">
+  <div class="task-page-content d-flex flex-column">
+    <div class="task-nav-bar">
+      <div class="container">
+        <div class="task-nav-inner">
+          <h1 class="task-nav-title">Tâches</h1>
+          <nav class="task-nav-links" aria-label="Navigation tâches">
+            <a class="task-nav-link {{ _task_route == 'tasks_dashboard' ? 'active' : '' }}" href="{{ path('tasks_dashboard') }}">
+              <i class="bi bi-house me-2"></i>Accueil tâches
+            </a>
+            <a class="task-nav-link {{ _task_route == 'tasks_index' ? 'active' : '' }}" href="{{ path('tasks_index') }}">
+              <i class="bi bi-list-check me-2"></i>Gestion des tâches
+            </a>
+            <a class="task-nav-link {{ _task_route == 'tasks_calendar' ? 'active' : '' }}" href="{{ path('tasks_calendar') }}">
+              <i class="bi bi-calendar3 me-2"></i>Calendrier
+            </a>
+            <a class="task-nav-link {{ _task_route starts with 'task_assignments_' ? 'active' : '' }}" href="{{ path('task_assignments_index') }}">
+              <i class="bi bi-person-check me-2"></i>Affectations
+            </a>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-3 py-md-4 flex-grow-1">
+      {% block task_content %}{% endblock %}
+    </div>
+  </div>
+</div>
 {% endblock %}
-

@@ -16,7 +16,13 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): RedirectResponse
     {
-        // 🔹 redirection après login
+        $user = $token->getUser();
+        if ($user && \in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return new RedirectResponse(
+                $this->router->generate('user_dashboard')
+            );
+        }
+
         return new RedirectResponse(
             $this->router->generate('app_produit_index')
         );

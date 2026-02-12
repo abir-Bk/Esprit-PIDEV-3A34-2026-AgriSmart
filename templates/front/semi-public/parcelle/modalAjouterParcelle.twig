@@ -1,148 +1,179 @@
-<div class="modal fade" id="modalAjouterParcelle" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-success text-white border-0 p-4 rounded-top-4">
-                <h5 class="modal-title fw-bold">
+{# Modal Parcelle – design aligné Marketplace AgriSmart (cohérence UI/UX) #}
+<div class="modal fade" id="modalAjouterParcelle" tabindex="-1" aria-labelledby="modalAjouterParcelleLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg parcelle-modal-content">
+            <div class="modal-header parcelle-modal-header">
+                <h5 class="modal-title fw-bold" id="modalAjouterParcelleLabel">
                     <i class="fa-solid fa-map-location-dot me-2"></i>
-                    <span class="modal-title-text">Ajouter une Parcelle</span>
+                    <span class="modal-title-text">Ajouter une parcelle</span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-            
+
             {{ form_start(form, {'attr': {
                 'id': 'form-parcelle',
                 'action': path('app_parcelle_index'),
                 'method': 'POST',
                 'novalidate': 'novalidate'
             }}) }}
-            
+
             <div class="modal-body p-4">
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label class="form-label fw-bold text-dark">
-                                <i class="fa-solid fa-tag text-success me-1"></i> Nom de la parcelle
+                        <div class="mb-3">
+                            <label class="form-label parcelle-modal-label" for="{{ form.nom.vars.id }}">
+                                <i class="fa-solid fa-tag me-1"></i> Nom de la parcelle
                             </label>
                             {{ form_widget(form.nom, {
                                 'attr': {
-                                    'class': 'form-control rounded-3 ' ~ (form.nom.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                    'class': 'form-control parcelle-modal-input ' ~ (form.nom.vars.errors|length > 0 ? 'is-invalid' : ''),
                                     'placeholder': 'Ex: Parcelle Nord'
                                 }
                             }) }}
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 {{ form_errors(form.nom) }}
                             </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label class="form-label fw-bold text-dark">
-                                <i class="fa-solid fa-vector-square text-success me-1"></i> Surface (hectares)
+                        <div class="mb-3">
+                            <label class="form-label parcelle-modal-label" for="{{ form.surface.vars.id }}">
+                                <i class="fa-solid fa-vector-square me-1"></i> Surface (hectares)
                             </label>
                             {{ form_widget(form.surface, {
                                 'attr': {
-                                    'class': 'form-control rounded-3 ' ~ (form.surface.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                    'class': 'form-control parcelle-modal-input ' ~ (form.surface.vars.errors|length > 0 ? 'is-invalid' : ''),
                                     'placeholder': 'Ex: 2.5',
                                     'step': '0.01'
                                 }
                             }) }}
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 {{ form_errors(form.surface) }}
                             </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label class="form-label fw-bold text-dark">
-                                <i class="fa-solid fa-mountain text-success me-1"></i> Type de sol
+                        <div class="mb-3">
+                            <label class="form-label parcelle-modal-label" for="{{ form.typeSol.vars.id }}">
+                                <i class="fa-solid fa-mountain me-1"></i> Type de sol
                             </label>
                             {{ form_widget(form.typeSol, {
                                 'attr': {
-                                    'class': 'form-select rounded-3 ' ~ (form.typeSol.vars.errors|length > 0 ? 'is-invalid' : '')
+                                    'class': 'form-select parcelle-modal-input ' ~ (form.typeSol.vars.errors|length > 0 ? 'is-invalid' : '')
                                 }
                             }) }}
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 {{ form_errors(form.typeSol) }}
                             </div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label class="form-label fw-bold text-dark">
-                                <i class="fa-solid fa-location-dot text-success me-1"></i> Latitude
-                            </label>
-                            {{ form_widget(form.latitude, {
-                                'attr': {
-                                    'class': 'form-control rounded-3 ' ~ (form.latitude.vars.errors|length > 0 ? 'is-invalid' : ''),
-                                    'placeholder': 'Cliquez sur la carte',
-                                    'readonly': true,
-                                    'id': 'parcelle_latitude'
-                                }
-                            }) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.latitude) }}
+                        <label class="form-label parcelle-modal-label d-block mb-2">
+                            <i class="fa-solid fa-map me-1"></i> Position sur la carte
+                        </label>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label parcelle-modal-label small mb-1" for="parcelle_latitude">Latitude</label>
+                                {{ form_widget(form.latitude, {
+                                    'attr': {
+                                        'class': 'form-control parcelle-modal-input ' ~ (form.latitude.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                        'placeholder': 'Cliquez sur la carte',
+                                        'readonly': true,
+                                        'id': 'parcelle_latitude'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.latitude) }}</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label parcelle-modal-label small mb-1" for="parcelle_longitude">Longitude</label>
+                                {{ form_widget(form.longitude, {
+                                    'attr': {
+                                        'class': 'form-control parcelle-modal-input ' ~ (form.longitude.vars.errors|length > 0 ? 'is-invalid' : ''),
+                                        'placeholder': 'Cliquez sur la carte',
+                                        'readonly': true,
+                                        'id': 'parcelle_longitude'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.longitude) }}</div>
                             </div>
                         </div>
-
-                        <div class="form-group mb-3">
-                            <label class="form-label fw-bold text-dark">
-                                <i class="fa-solid fa-location-dot text-success me-1"></i> Longitude
-                            </label>
-                            {{ form_widget(form.longitude, {
-                                'attr': {
-                                    'class': 'form-control rounded-3 ' ~ (form.longitude.vars.errors|length > 0 ? 'is-invalid' : ''),
-                                    'placeholder': 'Cliquez sur la carte',
-                                    'readonly': true,
-                                    'id': 'parcelle_longitude'
-                                }
-                            }) }}
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.longitude) }}
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <div id="map" style="height: 250px; width: 100%; border-radius: 15px;"></div>
-                            <small class="text-muted mt-2 d-block">
-                                <i class="fa-solid fa-info-circle"></i> Cliquez sur la carte pour définir la position
-                            </small>
-                        </div>
+                        <div id="map" class="parcelle-modal-map"></div>
+                        <p class="parcelle-modal-hint mt-2 mb-0">
+                            <i class="fa-solid fa-info-circle me-1"></i> Cliquez sur la carte pour définir l’emplacement de la parcelle.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div class="modal-footer border-0 p-4">
-                <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-times me-2"></i>Annuler
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-times me-2"></i> Annuler
                 </button>
-                <button type="submit" class="btn btn-success rounded-3 px-5 py-2 fw-bold">
-                    <i class="fa-solid fa-check me-2"></i>Enregistrer
+                <button type="submit" class="btn parcelle-modal-btn-primary rounded-pill px-5 py-2 fw-bold">
+                    <i class="fa-solid fa-check me-2"></i> Enregistrer
                 </button>
             </div>
-            
+
             {{ form_end(form) }}
         </div>
     </div>
 </div>
 
 <style>
-.modal-header {
-    background: linear-gradient(135deg, #10b981 0%, #0a8c5e 100%);
+/* Parcelle modal – thème Marketplace AgriSmart (cohérence avec Ressources / Culture) */
+#modalAjouterParcelle .parcelle-modal-content {
+    border-radius: 20px;
+    border: 1px solid rgba(17,24,39,.06);
 }
-.form-control:focus, .form-select:focus {
-    border-color: #10b981;
-    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.1);
+#modalAjouterParcelle .parcelle-modal-header {
+    background: linear-gradient(135deg, #1A4331 0%, #28a745 100%);
+    color: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 1rem 1.5rem;
+    border: 0;
 }
-.is-invalid {
+#modalAjouterParcelle .parcelle-modal-header .modal-title { color: #fff; }
+#modalAjouterParcelle .parcelle-modal-label {
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #6B7280;
+}
+#modalAjouterParcelle .parcelle-modal-input {
+    border-radius: 14px;
+    border: 1px solid #E5E7EB;
+}
+#modalAjouterParcelle .parcelle-modal-input:focus {
+    border-color: rgba(26,67,49,.45);
+    box-shadow: 0 0 0 .25rem rgba(26,67,49,.12);
+}
+#modalAjouterParcelle .parcelle-modal-input.is-invalid {
     border-color: #dc3545;
 }
-.is-invalid:focus {
-    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.1);
+#modalAjouterParcelle .parcelle-modal-input.is-invalid:focus {
+    box-shadow: 0 0 0 .25rem rgba(220,53,69,.15);
 }
-#map {
-    border: 2px solid #e2e8f0;
-    transition: all 0.3s ease;
+#modalAjouterParcelle .parcelle-modal-hint {
+    font-size: 0.8125rem;
+    color: #6B7280;
 }
-#map:hover {
-    border-color: #10b981;
+#modalAjouterParcelle .parcelle-modal-map {
+    height: 250px;
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid #E5E7EB;
+    transition: border-color .2s;
+}
+#modalAjouterParcelle .parcelle-modal-map:hover {
+    border-color: rgba(26,67,49,.35);
+}
+#modalAjouterParcelle .parcelle-modal-btn-primary {
+    background: #1A4331 !important;
+    border: none;
+    color: #fff !important;
+}
+#modalAjouterParcelle .parcelle-modal-btn-primary:hover {
+    background: #163828 !important;
+    color: #fff !important;
 }
 </style>

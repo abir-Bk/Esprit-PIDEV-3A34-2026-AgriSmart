@@ -1,0 +1,180 @@
+{% extends 'front/base.html.twig' %}
+
+{% block body %}
+{% set _offre_route = app.request.attributes.get('_route') ?? '' %}
+<style>
+/* =========================
+   Candidature / Offres d'emploi : même principe que Tâches (barre pills, pas de sidebar)
+   Thème Marketplace AgriSmart
+   ========================= */
+.ag-marketplace.candidature-layout {
+  --ag-primary: #1A4331;
+  --ag-primary-2: #2E7D32;
+  --ag-accent: #F4B400;
+  --ag-cream: #FBF7EE;
+  --ag-bg: #F6F8F7;
+  --ag-text: #111827;
+  --ag-muted: #6B7280;
+  --ag-border: #E5E7EB;
+}
+
+.ag-marketplace.candidature-layout .candidature-page-content { min-height: 100vh; background: var(--ag-bg); }
+
+/* Barre de navigation (style pills comme Tâches) */
+.ag-marketplace.candidature-layout .candidature-nav-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--ag-border);
+  padding: 0.6rem 0;
+}
+.ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-title {
+  color: var(--ag-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+  padding-right: 0.75rem;
+  border-right: 1px solid var(--ag-border);
+  margin-right: 0.25rem;
+}
+.ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-links { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--ag-border);
+  background: #fff;
+  color: var(--ag-text) !important;
+  text-decoration: none !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: .15s;
+}
+.ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-link:hover {
+  border-color: rgba(26,67,49,.35);
+  background: rgba(26,67,49,.06);
+  color: var(--ag-primary) !important;
+}
+.ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-link.active {
+  border-color: var(--ag-primary);
+  background: var(--ag-primary);
+  color: #fff !important;
+}
+
+/* Hero / contenu (aligné Tâches & Marketplace) */
+.ag-marketplace.candidature-layout .ag-title {
+  font-size: clamp(2.0rem, 4vw, 3.0rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em;
+  color: var(--ag-text);
+  margin: 0;
+}
+.ag-marketplace.candidature-layout .ag-subtitle {
+  font-size: 1.05rem !important;
+  color: var(--ag-muted) !important;
+  margin: .75rem 0 0 0;
+}
+.ag-marketplace.candidature-layout .ag-hero {
+  background:
+    radial-gradient(900px 420px at 18% 25%, rgba(46,125,50,.16), transparent 60%),
+    radial-gradient(700px 320px at 85% 10%, rgba(244,180,0,.14), transparent 55%),
+    linear-gradient(180deg, var(--ag-cream), #ffffff);
+  border-bottom: 1px solid rgba(17,24,39,.06);
+  padding: 3rem 0 2rem;
+}
+.ag-marketplace.candidature-layout .ag-content { background: var(--ag-bg); padding: 2rem 0 3rem; }
+.ag-marketplace.candidature-layout .ag-btn-primary {
+  background: var(--ag-primary) !important;
+  border: none !important;
+  color: #fff !important;
+}
+.ag-marketplace.candidature-layout .ag-btn-primary:hover { background: #163828 !important; color: #fff !important; }
+.ag-marketplace.candidature-layout .ag-card {
+  border: 1px solid rgba(17,24,39,.06);
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  transition: .18s;
+}
+.ag-marketplace.candidature-layout .ag-card:hover { box-shadow: 0 .9rem 1.6rem rgba(0,0,0,.08); }
+.ag-marketplace.candidature-layout .ag-filter-card {
+  border: 1px solid rgba(17,24,39,.06) !important;
+  border-radius: 20px !important;
+}
+.ag-marketplace.candidature-layout .ag-input {
+  border-radius: 14px !important;
+  border: 1px solid var(--ag-border) !important;
+}
+.ag-marketplace.candidature-layout .ag-input:focus {
+  border-color: rgba(26,67,49,.45) !important;
+  box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
+}
+.ag-marketplace.candidature-layout .table thead th {
+  background: var(--ag-primary);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+}
+.ag-marketplace.candidature-layout .table thead th:first-child { border-radius: 12px 0 0 0; }
+.ag-marketplace.candidature-layout .table thead th:last-child { border-radius: 0 12px 0 0; }
+.ag-marketplace.candidature-layout .table tbody td { padding: 1rem 1.25rem; vertical-align: middle; }
+.ag-marketplace.candidature-layout .table tbody tr { border-bottom: 1px solid var(--ag-border); }
+.ag-marketplace.candidature-layout .table tbody tr:hover { background: rgba(26,67,49,.04); }
+.ag-marketplace.candidature-layout .ag-meta { color: var(--ag-muted); font-size: .86rem; }
+.ag-marketplace.candidature-layout .ag-mini {
+  border: 1px solid var(--ag-border);
+  border-radius: 14px;
+  background: rgba(246,248,247,.6);
+  padding: 1rem 1.25rem;
+}
+.ag-marketplace.candidature-layout .avatar { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+.ag-marketplace.candidature-layout .form-control,
+.ag-marketplace.candidature-layout .form-select { border-radius: 14px !important; border: 1px solid var(--ag-border) !important; }
+.ag-marketplace.candidature-layout .form-control:focus,
+.ag-marketplace.candidature-layout .form-select:focus { border-color: rgba(26,67,49,.45) !important; box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important; }
+.ag-marketplace.candidature-layout .form-label { font-weight: 600; color: var(--ag-text); }
+
+@media (max-width: 575.98px) {
+  .ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-title { border-right: none; margin-right: 0; padding-right: 0; }
+  .ag-marketplace.candidature-layout .candidature-nav-bar .candidature-nav-link { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+}
+</style>
+
+<div class="ag-marketplace candidature-layout">
+  <div class="candidature-page-content d-flex flex-column">
+    <div class="candidature-nav-bar">
+      <div class="container">
+        <div class="candidature-nav-inner">
+          <h1 class="candidature-nav-title">Candidature</h1>
+          <nav class="candidature-nav-links" aria-label="Navigation offres d'emploi">
+            <a class="candidature-nav-link {{ _offre_route == 'app_offre_index_front' ? 'active' : '' }}" href="{{ path('app_offre_index_front') }}">
+              <i class="bi bi-briefcase me-2"></i>Offres d'emploi
+            </a>
+            <a class="candidature-nav-link {{ _offre_route == 'app_my_demandes' ? 'active' : '' }}" href="{{ path('app_my_demandes') }}">
+              <i class="bi bi-person-badge me-2"></i>Mes candidatures
+            </a>
+            {% if app.user and (app.user.role == 'agriculteur' or app.user.role == 'admin') %}
+            <a class="candidature-nav-link {{ _offre_route == 'app_admin_offres' ? 'active' : '' }}" href="{{ path('app_admin_offres') }}">
+              <i class="bi bi-list-ul me-2"></i>Mes offres
+            </a>
+            <a class="candidature-nav-link" href="{{ path('app_offre_new') }}">
+              <i class="bi bi-plus-circle me-2"></i>Publier une offre
+            </a>
+            {% endif %}
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-grow-1">
+      {% block candidature_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

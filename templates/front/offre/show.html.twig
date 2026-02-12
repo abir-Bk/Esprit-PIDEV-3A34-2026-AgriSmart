@@ -1,510 +1,104 @@
-{% extends 'front/base.html.twig' %}
+{% extends 'front/offre/layout.html.twig' %}
 
-{% block title %}Détails - {{ offre.title }}{% endblock %}
+{% block title %}{{ offre.title }} | Offres d'emploi AgriSmart{% endblock %}
 
-{% block body %}
-<style>
-    :root {
-        --agri-dark-green: #1a5941;
-        --agri-green: #27ae60;
-        --agri-light-green: #2ecc71;
-        --agri-red: #e74c3c;
-        --agri-dark-red: #c0392b;
-        --agri-forest: #2d6a4f;
-        --agri-earth: #d4a574;
-        --agri-sun: #ffb347;
-        --agri-sky: #3498db;
-    }
-    
-    .card-agri {
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid rgba(42, 157, 143, 0.1);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card-agri:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-    }
-    
-    .agri-header {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .header-open {
-        background: linear-gradient(135deg, var(--agri-dark-green), var(--agri-forest));
-    }
-    
-    .header-closed {
-        background: linear-gradient(135deg, var(--agri-dark-red), var(--agri-red));
-    }
-    
-    .agri-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-    }
-    
-    .header-open::before {
-        background: linear-gradient(90deg, var(--agri-light-green), var(--agri-sun));
-    }
-    
-    .header-closed::before {
-        background: linear-gradient(90deg, #ff7675, #fd79a8);
-    }
-    
-    .agri-leaf-pattern {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        opacity: 0.15;
-        font-size: 2.5rem;
-    }
-    
-    .btn-agri {
-        border: none;
-        border-radius: 10px;
-        padding: 12px 24px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-agri-open {
-        background: linear-gradient(135deg, var(--agri-green), var(--agri-light-green));
-        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.25);
-    }
-    
-    .btn-agri-closed {
-        background: linear-gradient(135deg, var(--agri-red), var(--agri-dark-red));
-        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.25);
-    }
-    
-    .btn-agri:hover {
-        transform: translateY(-2px);
-        color: white;
-    }
-    
-    .btn-agri-open:hover {
-        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.35);
-    }
-    
-    .btn-agri-closed:hover {
-        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.35);
-    }
-    
-    .btn-agri-disabled {
-        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-        cursor: not-allowed;
-        opacity: 0.8;
-    }
-    
-    .info-badge-agri {
-        background: linear-gradient(135deg, #f8fff9, #ffffff);
-        border-radius: 14px;
-        border: 2px solid rgba(46, 204, 113, 0.15);
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .info-badge-agri::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 5px;
-        height: 100%;
-        background: linear-gradient(180deg, var(--agri-green), var(--agri-light-green));
-    }
-    
-    .info-badge-agri.closed::before {
-        background: linear-gradient(180deg, var(--agri-red), var(--agri-dark-red));
-    }
-    
-    .agri-icon-circle {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), #ffffff);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--agri-green);
-        margin-right: 12px;
-    }
-    
-    .agri-icon-circle.closed {
-        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), #ffffff);
-        color: var(--agri-red);
-    }
-    
-    .agri-detail-item {
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-    
-    .agri-detail-item:hover {
-        background: rgba(46, 204, 113, 0.02);
-        border-radius: 6px;
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-    
-    .agri-date-badge {
-        background: linear-gradient(135deg, #e3f2fd, #ffffff);
-        border: 1px solid var(--agri-sky);
-        color: var(--agri-sky);
-        padding: 5px 12px;
-        border-radius: 18px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    
-    .agri-candidate-count {
-        background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), #ffffff);
-        border: 2px solid rgba(46, 204, 113, 0.15);
-        border-radius: 10px;
-        padding: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .agri-section-title {
-        position: relative;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-    }
-    
-    .agri-section-title::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 50px;
-        height: 3px;
-        background: linear-gradient(90deg, var(--agri-green), transparent);
-        border-radius: 3px;
-    }
-    
-    .agri-status-badge {
-        padding: 6px 16px;
-        border-radius: 18px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    }
-    
-    .status-open {
-        background: linear-gradient(135deg, var(--agri-green), var(--agri-light-green));
-        color: white;
-    }
-    
-    .status-closed {
-        background: linear-gradient(135deg, var(--agri-red), var(--agri-dark-red));
-        color: white;
-    }
-    
-    .agri-back-btn {
-        background: white;
-        border: 2px solid rgba(46, 204, 113, 0.2);
-        color: var(--agri-green);
-        border-radius: 8px;
-        padding: 8px 16px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.9rem;
-    }
-    
-    .agri-back-btn:hover {
-        background: rgba(46, 204, 113, 0.1);
-        transform: translateX(-3px);
-        color: var(--agri-green);
-    }
-    
-    .agri-footer {
-        background: linear-gradient(135deg, #f8fdf9, #ffffff);
-        border-top: 1px solid rgba(46, 204, 113, 0.1);
-        color: #7f8c8d;
-        font-size: 0.85rem;
-        padding: 15px 20px;
-    }
-    
-    .agri-description {
-        line-height: 1.7;
-        font-size: 1rem;
-        color: #2c3e50;
-    }
-    
-    .agri-description p {
-        margin-bottom: 1.2rem;
-    }
-    
-    /* Réduction globale de la taille */
-    .container {
-        max-width: 1200px;
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-    
-    .card-body {
-        padding: 25px;
-    }
-    
-    @media (min-width: 992px) {
-        .card-body {
-            padding: 30px;
-        }
-    }
-    
-    h1.h2 {
-        font-size: 1.75rem;
-    }
-    
-    h3.h4 {
-        font-size: 1.3rem;
-    }
-</style>
+{% block candidature_content %}
+<section class="ag-hero">
+  <div class="container">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+    <div>
+      <nav aria-label="breadcrumb" class="mb-2">
+        <ol class="breadcrumb mb-0 small">
+          <li class="breadcrumb-item"><a href="{{ path('app_offre_index_front') }}" class="text-decoration-none" style="color: var(--ag-primary);">Offres d'emploi</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Détails</li>
+        </ol>
+      </nav>
+      <h1 class="ag-title">{{ offre.title }}</h1>
+      <p class="ag-subtitle mb-0">
+        <span class="badge rounded-pill {{ offre.statut|lower == 'ouvert' ? 'bg-success' : 'bg-secondary' }} me-2">{{ offre.statut }}</span>
+        {{ offre.typeContrat }} · {{ offre.lieu }}
+      </p>
+    </div>
+    <a href="{{ path('app_offre_index_front') }}" class="btn btn-outline-dark rounded-pill">
+      <i class="bi bi-arrow-left me-1"></i>Retour aux offres
+    </a>
+  </div>
+  </div>
+</section>
 
-<div class="container py-4">
-    {# Bouton retour - plus petit #}
-    <div class="mb-4">
-        <a href="{{ path('app_offre_index_front') }}" class="agri-back-btn shadow-sm">
-            <i class="bi bi-arrow-left-circle-fill fs-6"></i>
-            <span>Retour aux offres</span>
-        </a>
+<section class="ag-content mt-0">
+  <div class="container">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="ag-card">
+        <div class="p-4 p-lg-5">
+          <h2 class="h5 fw-bold mb-3" style="color: var(--ag-primary);">Description du poste</h2>
+          <div class="mb-4" style="color: var(--ag-text); line-height: 1.7;">{{ offre.description|nl2br }}</div>
+
+          <h2 class="h5 fw-bold mb-3" style="color: var(--ag-primary);">Détails</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="ag-mini">
+                <div class="small ag-meta mb-1">Lieu</div>
+                <div class="fw-semibold"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ offre.lieu }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="ag-mini">
+                <div class="small ag-meta mb-1">Salaire</div>
+                <div class="fw-semibold"><i class="bi bi-cash-stack me-1 text-success"></i>{{ offre.salaire|number_format(0, ',', ' ') }} TND <small class="ag-meta">mensuel</small></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="ag-mini">
+                <div class="small ag-meta mb-1">Début</div>
+                <div class="fw-semibold"><i class="bi bi-calendar-event me-1"></i>{{ offre.dateDebut ? offre.dateDebut|date('d/m/Y') : '—' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="ag-mini">
+                <div class="small ag-meta mb-1">Fin / Limite</div>
+                <div class="fw-semibold"><i class="bi bi-calendar-check me-1"></i>{{ offre.dateFin ? offre.dateFin|date('d/m/Y') : '—' }}</div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="ag-mini">
+                <div class="small ag-meta mb-1">Type de poste</div>
+                <div class="fw-semibold">{{ offre.typePoste }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    {# Carte principale - taille réduite #}
-    <div class="card card-agri">
-        {# En-tête avec couleur selon statut #}
-        {% set isClosed = offre.statut|lower == 'clôturée' or offre.statut|lower == 'clôture' %}
-        <div class="card-header agri-header p-3 p-lg-4 text-white {{ isClosed ? 'header-closed' : 'header-open' }}">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="agri-icon-circle {{ isClosed ? 'closed' : '' }}">
-                            <i class="bi bi-briefcase-fill"></i>
-                        </div>
-                        <h1 class="h2 fw-bold mb-0 text-white">{{ offre.title }}</h1>
-                    </div>
-                    <div class="d-flex align-items-center flex-wrap gap-2">
-                        <span class="badge bg-white text-dark px-3 py-1 rounded-pill shadow-sm">
-                            <i class="bi bi-file-earmark-text me-1"></i>{{ offre.typeContrat }}
-                        </span>
-                        <span class="agri-status-badge {{ isClosed ? 'status-closed' : 'status-open' }}">
-                            {{ offre.statut|upper }}
-                        </span>
-                    </div>
-                </div>
-                <div class="text-md-end mt-2 mt-md-0">
-                    <div class="agri-date-badge shadow-sm">
-                        <i class="bi bi-calendar-check me-1"></i>
-                        Expire le {{ offre.dateFin|date('d/m/Y') }}
-                    </div>
-                </div>
-            </div>
-            <div class="agri-leaf-pattern">
-                <i class="fas fa-leaf"></i>
-            </div>
+    <div class="col-lg-5">
+      <div class="ag-card sticky-top" style="top: 1.25rem;">
+        <div class="p-4">
+          <h3 class="h6 fw-bold mb-3" style="color: var(--ag-text);">Résumé</h3>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="ag-meta small">Statut</span><span class="badge {{ offre.statut|lower == 'ouvert' ? 'bg-success' : 'bg-secondary' }}">{{ offre.statut }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="ag-meta small">Date limite</span><span class="fw-semibold">{{ offre.dateFin|date('d/m/Y') }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="ag-meta small">Candidatures</span><span class="fw-semibold">{{ offre.demandes|length }}</span></div>
+
+          {% set isClosed = offre.statut|lower == 'clôturée' or offre.statut|lower == 'clôture' %}
+          {% set isExpired = offre.dateFin < date("now") %}
+          {% set canApply = not isExpired and not isClosed %}
+
+          <div class="mt-4 pt-3">
+            {% if not canApply %}
+              <button class="btn btn-secondary rounded-pill w-100 py-2" disabled><i class="bi bi-slash-circle me-2"></i>Offre fermée</button>
+              <p class="text-center ag-meta small mt-2 mb-0">Cette offre n'accepte plus de candidatures.</p>
+            {% else %}
+              <a href="{{ path('app_demande_postuler', {id: offre.id}) }}" class="btn ag-btn-primary text-white rounded-pill w-100 py-2">
+                <i class="bi bi-send-fill me-2"></i>Postuler
+              </a>
+              <p class="text-center ag-meta small mt-2 mb-0">Clôture le {{ offre.dateFin|date('d/m/Y') }}</p>
+            {% endif %}
+          </div>
         </div>
-
-        {# Corps de la carte - taille réduite #}
-        <div class="card-body p-3 p-lg-4">
-            <div class="row g-4">
-                {# Colonne gauche : Description et détails #}
-                <div class="col-lg-7">
-                    {# Section description #}
-                    <div class="mb-4">
-                        <h3 class="h4 fw-bold mb-3 agri-section-title text-dark">
-                            <i class="bi bi-file-earmark-text-fill me-2 text-success"></i>
-                            Description du poste
-                        </h3>
-                        <div class="agri-description">
-                            {{ offre.description|nl2br }}
-                        </div>
-                    </div>
-
-                    {# Section détails logistiques #}
-                    <div class="mt-4 pt-3 border-top">
-                        <h3 class="h4 fw-bold mb-3 agri-section-title text-dark">
-                            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
-                            Détails logistiques
-                        </h3>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="agri-detail-item">
-                                    <div class="d-flex align-items-center">
-                                        <div class="agri-icon-circle" style="background: rgba(231, 76, 60, 0.08); color: #e74c3c;">
-                                            <i class="bi bi-geo-alt fs-6"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-1 text-muted small">Localisation</p>
-                                            <p class="fw-bold text-dark mb-0">{{ offre.lieu }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="agri-detail-item">
-                                    <div class="d-flex align-items-center">
-                                        <div class="agri-icon-circle" style="background: rgba(52, 152, 219, 0.08); color: #3498db;">
-                                            <i class="bi bi-cash-stack fs-6"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-1 text-muted small">Salaire proposé</p>
-                                            <p class="fw-bold text-dark mb-0">{{ offre.salaire }} TND</p>
-                                            <small class="text-muted">Mensuel</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="agri-detail-item">
-                                    <div class="d-flex align-items-center">
-                                        <div class="agri-icon-circle" style="background: rgba(155, 89, 182, 0.08); color: #9b59b6;">
-                                            <i class="bi bi-building fs-6"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-1 text-muted small">Département</p>
-                                            <p class="fw-bold text-dark mb-0">{{ offre.typePoste }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {# Colonne droite : Sidebar d'actions #}
-                <div class="col-lg-5">
-                    <div class="info-badge-agri shadow-sm mb-4 {{ isClosed ? 'closed' : '' }}">
-                        <h3 class="h4 fw-bold mb-3 text-dark">Résumé de l'offre</h3>
-                        
-                        <div class="agri-detail-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted small">
-                                    <i class="bi bi-info-circle me-1"></i>Statut
-                                </span>
-                                <span class="agri-status-badge {{ isClosed ? 'status-closed' : 'status-open' }}">
-                                    {{ offre.statut|upper }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="agri-detail-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted small">
-                                    <i class="bi bi-calendar-date me-1"></i>Date limite
-                                </span>
-                                <span class="text-dark fw-bold">{{ offre.dateFin|date('d/m/Y') }}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="agri-detail-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted small">
-                                    <i class="bi bi-calendar-plus me-1"></i>Date début
-                                </span>
-                                <span class="text-dark fw-bold">{{ offre.dateDebut ? offre.dateDebut|date('d/m/Y') : 'N/A' }}</span>
-                            </div>
-                        </div>
-
-                        {# Bouton de postulation #}
-                        <div class="mt-4 pt-2">
-                            {% set isExpired = offre.dateFin < date("now") %}
-                            {% set canApply = not isExpired and not isClosed %}
-
-                            {% if not canApply %}
-                                <button class="btn w-100 py-2 fw-bold btn-agri btn-agri-closed" disabled>
-                                    <i class="bi bi-slash-circle me-2"></i>Offre fermée
-                                </button>
-                                <p class="text-center text-muted small mt-2 mb-0">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Cette offre n'est plus disponible
-                                </p>
-                            {% else %}
-                                <a href="{{ path('app_demande_postuler', {'id': offre.id}) }}" class="btn w-100 py-2 fw-bold btn-agri btn-agri-open">
-                                    <i class="bi bi-send-fill me-2"></i>Postuler maintenant
-                                </a>
-                                <p class="text-center text-muted small mt-2 mb-0">
-                                    <i class="bi bi-clock me-1"></i>
-                                    Clôture le {{ offre.dateFin|date('d/m/Y') }}
-                                </p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    {# Compteur de candidats #}
-                    <div class="text-center">
-                        <div class="agri-candidate-count shadow-sm">
-                            <div class="agri-icon-circle" style="background: rgba(46, 204, 113, 0.15);">
-                                <i class="bi bi-people-fill text-success fs-6"></i>
-                            </div>
-                            <div class="text-start">
-                                <div class="fw-bold text-success h5 mb-0">{{ offre.demandes|length }}</div>
-                                <div class="text-muted small">Candidats ont postulé</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {# Pied de page - plus petit #}
-        <div class="card-footer agri-footer p-3">
-            <div class="row align-items-center">
-                <div class="col-md-6 text-md-start mb-2 mb-md-0">
-                    <small class="text-muted">
-                        <i class="bi bi-hash me-1"></i>ID #{{ offre.id }}
-                    </small>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <small class="text-muted">
-                        <i class="bi bi-check-circle me-1"></i>AgriSmart Tunisie
-                    </small>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation de la carte au chargement
-    const card = document.querySelector('.card-agri');
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(15px)';
-    
-    setTimeout(() => {
-        card.style.transition = 'all 0.5s ease-out';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0)';
-    }, 100);
-    
-    // Effet de survol sur les éléments de détail
-    const detailItems = document.querySelectorAll('.agri-detail-item');
-    detailItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(3px)';
-        });
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
-    });
-});
-</script>
+  </div>
+  </div>
+</section>
 {% endblock %}

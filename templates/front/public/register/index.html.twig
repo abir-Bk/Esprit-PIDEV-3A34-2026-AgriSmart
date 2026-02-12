@@ -3,131 +3,113 @@
 {% block title %}Inscription - AgriSmart{% endblock %}
 
 {% block body %}
-<main class="d-flex align-items-center py-4" style="background: #ffffff; min-height: 100vh;">
-    <div class="container">
+<main class="register-page d-flex align-items-center py-5" style="min-height: 100vh;">
+    <div class="container py-3">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-11 col-lg-10 col-xl-9">
-                <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="col-12 col-lg-10 col-xl-9">
+                <div class="register-card card border-0 shadow" style="border-radius: 24px; overflow: hidden;">
                     <div class="row g-0">
-                        
-                        <!-- Left Side - Animation (Larger) -->
-                        <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center p-4" 
-                             style="background: linear-gradient(135deg, #1F3D2B 0%, #2a5438 100%);">
+
+                        <!-- Gauche : illustration -->
+                        <div class="col-lg-5 d-none d-lg-flex align-items-center justify-content-center p-5 register-card__left">
                             <div class="text-center">
-                                <lottie-player 
+                                <lottie-player
                                     src="{{ asset('assets/images/login.json') }}"
-                                    background="transparent" 
-                                    speed="1" 
-                                    style="width: 100%; max-width: 380px; height: auto;"
-                                    loop 
+                                    background="transparent"
+                                    speed="1"
+                                    style="width: 100%; max-width: 320px; height: auto;"
+                                    loop
                                     autoplay>
                                 </lottie-player>
+                                <p class="mt-3 mb-0 text-white-50 small">Rejoignez la communauté AgriSmart</p>
                             </div>
                         </div>
 
-                        <!-- Right Side - Form (Compact) -->
-                        <div class="col-lg-6">
-                            <div class="p-4">
-                                
-                                <!-- Logo -->
-                                <div class="text-center text-lg-start mb-3">
-                                    <a href="{{ path('app_home') }}">
-                                        <img class="mb-2" src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height: 45px;">
+                        <!-- Droite : formulaire -->
+                        <div class="col-lg-7">
+                            <div class="p-4 p-lg-5 register-card__form">
+
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <a href="{{ path('app_home') }}" class="d-inline-block">
+                                        <img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" class="register-logo" style="height: 42px;">
                                     </a>
+                                    <a href="{{ path('app_login') }}" class="btn btn-link text-decoration-none fw-medium" style="color: #1F3D2B;">Se connecter</a>
                                 </div>
 
-                                <!-- Header -->
-                                <div class="mb-3">
-                                    <h1 class="mb-2" style="color: #1F3D2B; font-size: 26px; font-weight: 600;">Créer un compte</h1>
-                                    <p class="mb-0" style="color: #6c757d; font-size: 14px;">
-                                        Déjà inscrit ? 
-                                        <a href="{{ path('app_login') }}" style="color: #E6BF4A; text-decoration: none; font-weight: 500;">Se connecter</a>
-                                    </p>
-                                </div>
+                                <h1 class="register-title mb-1">Créer un compte</h1>
+                                <p class="register-subtitle text-muted mb-4">Remplissez le formulaire pour vous inscrire.</p>
 
-                                <!-- Success Message -->
                                 {% for message in app.flashes('success') %}
-                                    <div class="alert alert-success border-0 shadow-sm mb-3" style="border-radius: 12px; padding: 12px 16px;">
+                                    <div class="alert alert-success border-0 mb-4 d-flex align-items-center" style="border-radius: 14px;">
                                         <i class="fas fa-check-circle me-2"></i>
                                         {{ message }}
                                     </div>
                                 {% endfor %}
 
-                                <!-- Registration Form -->
-                                {{ form_start(registrationForm, { attr: { class: 'mt-3', enctype:'multipart/form-data', novalidate:'novalidate' } }) }}
+                                {{ form_start(registrationForm, { attr: { class: 'register-form', enctype: 'multipart/form-data', novalidate: 'novalidate' } }) }}
 
-                                {% for field in registrationForm %}
-                                    {% set isPassword = field.vars.block_prefixes|last == 'password' %}
-                                    {% set fieldName = field.vars.name %}
-                                    
-                                    <div class="mb-3">
-                                        {{ form_label(field, null, { label_attr: { class: 'form-label fw-semibold mb-2', style: 'color: #1F3D2B; font-size: 14px;' } }) }}
-                                        
-                                        {% if isPassword %}
-                                            <div class="position-relative">
-                                                {{ form_widget(field, { 
-                                                    attr: { 
-                                                        class: 'form-control password-input'~(field.vars.valid ? '' : ' is-invalid'), 
-                                                        style: 'border: 2px solid '~(field.vars.valid ? '#e9ecef' : '#dc3545')~'; border-radius: 12px; padding: 10px 16px; padding-right: 45px;',
-                                                        placeholder: 'Entrez votre mot de passe'
-                                                    } 
-                                                }) }}
-                                                <span class="password-toggle position-absolute end-0 top-50 translate-middle-y pe-3" style="cursor: pointer;">
-                                                    <i class="fas fa-eye-slash" style="color: #6c757d; font-size: 14px;"></i>
-                                                </span>
+                                <div class="row g-3">
+                                    {% for field in registrationForm %}
+                                        {% if field.vars.name != 'plainPassword' %}
+                                            <div class="mb-0 {% if field.vars.name == 'firstName' or field.vars.name == 'lastName' %}col-md-6{% else %}col-12{% endif %}">
+                                                {{ form_label(field, null, { label_attr: { class: 'form-label register-label' } }) }}
+                                                {% if field.vars.name == 'role' %}
+                                                    {{ form_widget(field, { attr: { class: 'form-select register-input register-select' } }) }}
+                                                {% elseif field.vars.name == 'documentFileFile' or field.vars.name == 'imageFile' %}
+                                                    <div class="register-file-wrap">
+                                                        {{ form_widget(field, { attr: { class: 'form-control register-input register-file' } }) }}
+                                                    </div>
+                                                {% else %}
+                                                    {{ form_widget(field, { attr: { class: 'form-control register-input', placeholder: field.vars.label } }) }}
+                                                {% endif %}
+                                                {{ form_errors(field) }}
                                             </div>
-                                        {% else %}
-                                            {{ form_widget(field, { 
-                                                attr: { 
-                                                    class: 'form-control'~(field.vars.valid ? '' : ' is-invalid'),
-                                                    style: 'border: 2px solid '~(field.vars.valid ? '#e9ecef' : '#dc3545')~'; border-radius: 12px; padding: 10px 16px;',
-                                                    placeholder: field.vars.label
-                                                } 
-                                            }) }}
                                         {% endif %}
-                                        
-                                        {{ form_errors(field) }}
-                                    </div>
-                                {% endfor %}
+                                    {% endfor %}
 
-                                <!-- Submit Button -->
-                                <button 
-                                    type="submit" 
-                                    class="btn w-100 mb-3 text-white fw-semibold" 
-                                    style="background: linear-gradient(135deg, #1F3D2B 0%, #2a5438 100%); 
-                                           border: none; 
-                                           border-radius: 12px; 
-                                           padding: 12px; 
-                                           transition: all 0.3s ease;
-                                           font-size: 15px;">
+                                    <!-- Mot de passe -->
+                                    <div class="col-12">
+                                        {{ form_label(registrationForm.plainPassword.first, null, { label_attr: { class: 'form-label register-label' } }) }}
+                                        <div class="register-password-wrap">
+                                            {{ form_widget(registrationForm.plainPassword.first, { attr: { class: 'form-control register-input register-password-input', placeholder: 'Mot de passe', 'data-toggle': 'password' } }) }}
+                                            <button type="button" class="register-password-btn btn btn-link p-0" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
+                                                <i class="fas fa-eye-slash register-password-icon"></i>
+                                            </button>
+                                        </div>
+                                        {{ form_errors(registrationForm.plainPassword.first) }}
+                                    </div>
+
+                                    <!-- Confirmer le mot de passe -->
+                                    <div class="col-12">
+                                        {{ form_label(registrationForm.plainPassword.second, null, { label_attr: { class: 'form-label register-label' } }) }}
+                                        <div class="register-password-wrap">
+                                            {{ form_widget(registrationForm.plainPassword.second, { attr: { class: 'form-control register-input register-password-input', placeholder: 'Confirmer le mot de passe', 'data-toggle': 'password' } }) }}
+                                            <button type="button" class="register-password-btn btn btn-link p-0" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
+                                                <i class="fas fa-eye-slash register-password-icon"></i>
+                                            </button>
+                                        </div>
+                                        {{ form_errors(registrationForm.plainPassword.second) }}
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mt-2 mb-0">Minimum 8 caractères, avec majuscule, minuscule, chiffre et caractère spécial.</p>
+
+                                <button type="submit" class="btn register-submit w-100 mt-4 mb-3">
                                     Créer mon compte
                                 </button>
 
-                                {{ form_end(registrationForm) }}
+                                {{ form_end(registrationForm, {'render_rest': false}) }}
 
-                                <!-- Divider -->
-                                <div class="position-relative my-3">
-                                    <hr style="border-color: #e9ecef;">
-                                    <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white" 
-                                          style="color: #6c757d; font-size: 13px;">
-                                        Ou s'inscrire avec
-                                    </span>
+                                <div class="register-divider my-4">
+                                    <span>Ou s'inscrire avec</span>
                                 </div>
 
-                             <!-- Social Buttons -->
-                              <div class="row g-2">
-                                  <div class="col-6">
-                                      <a href="{{ path('connect_google_start') }}" class="btn w-100 d-flex align-items-center justify-content-center" 
-                                        style="border: 2px solid #e9ecef; border-radius: 12px; padding: 10px; background: white; color: #1F3D2B; text-decoration: none;">
-                                          <i class="fab fa-google me-2" style="color: #DB4437;"></i>
-                                          <span class="fw-semibold" style="font-size: 14px;">Google</span>
-                                      </a>
-                                  </div>
-                              </div>
-
+                                <a href="{{ path('connect_google_start') }}" class="btn register-google d-flex align-items-center justify-content-center w-100">
+                                    <i class="fab fa-google me-2"></i>
+                                    <span>Google</span>
+                                </a>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -136,46 +118,173 @@
 </main>
 
 <style>
-    /* Focus states */
-    .form-control:focus {
-        border-color: #E6BF4A !important;
-        box-shadow: 0 0 0 0.2rem rgba(230, 191, 74, 0.15) !important;
+    .register-page {
+        background: linear-gradient(160deg, #f0f7f2 0%, #ffffff 50%, #f8faf9 100%);
     }
 
-    /* Button hover */
-    button[type="submit"]:hover {
+    .register-card {
+        box-shadow: 0 12px 48px rgba(31, 61, 43, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .register-card__left {
+        background: linear-gradient(145deg, #1F3D2B 0%, #2d5a3d 50%, #1F3D2B 100%);
+    }
+
+    .register-card__form {
+        background: #fff;
+    }
+
+    .register-title {
+        color: #1F3D2B;
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+
+    .register-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .register-label {
+        color: #1F3D2B;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    .register-input {
+        border: 2px solid #e2e8e6;
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .register-input:focus {
+        border-color: #E6BF4A;
+        box-shadow: 0 0 0 3px rgba(230, 191, 74, 0.2);
+        outline: 0;
+    }
+
+    .register-input.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .register-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%231F3D2B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.25rem;
+    }
+
+    .register-password-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .register-password-input {
+        padding-right: 3rem;
+        flex: 1;
+    }
+
+    .register-password-btn {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        line-height: 1;
+        transition: color 0.2s;
+    }
+
+    .register-password-btn:hover {
+        color: #1F3D2B;
+    }
+
+    .register-password-btn:focus {
+        outline: none;
+        color: #E6BF4A;
+    }
+
+    .register-file-wrap .register-file {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .register-submit {
+        background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .register-submit:hover {
+        color: #fff;
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(31, 61, 43, 0.3) !important;
+        box-shadow: 0 8px 24px rgba(31, 61, 43, 0.35);
     }
 
-    /* Social button hover */
-    .btn[href="#"]:hover {
-        border-color: #E6BF4A !important;
-        background: #fffbf0 !important;
+    .register-divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
-    /* Link hover */
-    a:hover {
-        opacity: 0.8;
+    .register-divider::before,
+    .register-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8e6;
     }
 
-    /* Card shadow */
-    .card {
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+    .register-divider span {
+        color: #6c757d;
+        font-size: 0.875rem;
     }
 
-    /* Error styling */
+    .register-google {
+        border: 2px solid #e2e8e6;
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        color: #1F3D2B;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: #fff;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .register-google:hover {
+        border-color: #E6BF4A;
+        background: #fefce8;
+        color: #1F3D2B;
+    }
+
+    .register-google .fab {
+        color: #DB4437;
+    }
+
     .invalid-feedback {
-        display: block;
-        margin-top: 0.5rem;
-        font-size: 13px;
-        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 0.35rem;
     }
 
-    /* Mobile responsive */
     @media (max-width: 991px) {
-        .card {
-            margin: 20px;
+        .register-card {
+            margin: 0 0.5rem;
+        }
+        .register-card__form {
+            padding: 1.5rem !important;
         }
     }
 </style>
@@ -183,26 +292,27 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    
     <script>
-        // Password toggle for all password fields
-        document.querySelectorAll('.password-toggle').forEach(function(toggle) {
-            toggle.addEventListener('click', function() {
-                const passwordInput = this.previousElementSibling;
-                const icon = this.querySelector('i');
-                
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
+        document.querySelectorAll('.register-password-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var wrap = this.closest('.register-password-wrap');
+                var input = wrap.querySelector('.register-password-input');
+                var icon = wrap.querySelector('.register-password-icon');
+                if (input.type === 'password') {
+                    input.type = 'text';
                     icon.classList.remove('fa-eye-slash');
                     icon.classList.add('fa-eye');
+                    btn.setAttribute('aria-label', 'Masquer le mot de passe');
+                    btn.setAttribute('title', 'Masquer le mot de passe');
                 } else {
-                    passwordInput.type = 'password';
+                    input.type = 'password';
                     icon.classList.remove('fa-eye');
                     icon.classList.add('fa-eye-slash');
+                    btn.setAttribute('aria-label', 'Afficher le mot de passe');
+                    btn.setAttribute('title', 'Afficher le mot de passe');
                 }
             });
         });
     </script>
 {% endblock %}
-
 {% endblock %}

@@ -1,7 +1,147 @@
 {% extends 'back/admin_base.html.twig' %}
 
-{% block title %}Dashboard - AgriSmart{% endblock %}
+{% block title %}Dashboard Marketplace - AgriSmart Admin{% endblock %}
 
 {% block body %}
+<div class="d-flex">
     {% include 'back/components/sidebar.html.twig' %}
+
+    <div class="flex-grow-1 ag-admin-content">
+        <div class="container-fluid px-4">
+
+            {# Hero style like Marketplace #}
+            <section class="py-4 pb-2">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="h2 fw-bold mb-1" style="color: var(--ag-text);">Marketplace AgriSmart</h1>
+                        <p class="text-muted mb-0">Tableau de bord admin · Produits et commandes.</p>
+                    </div>
+                    <div class="col-lg-4 d-none d-lg-flex justify-content-lg-end">
+                        <div style="width: 200px; height: 100px; border-radius: 20px; background: linear-gradient(135deg, rgba(26,67,49,.12), rgba(46,125,50,.08)); border: 1px solid rgba(17,24,39,.06);"></div>
+                    </div>
+                </div>
+            </section>
+
+            {# Stats cards #}
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-4">
+                    <a href="{{ path('admin_marketplace_produits') }}" class="text-decoration-none">
+                        <div class="ag-admin-card p-4 h-100">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-muted small text-uppercase fw-semibold">Produits</div>
+                                    <div class="h3 fw-bold mb-0" style="color: var(--ag-primary);">{{ stats.total_produits|default(0) }}</div>
+                                </div>
+                                <div class="rounded-circle bg-light p-3"><i class="fa-solid fa-box text-success fa-lg"></i></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-xl-4">
+                    <a href="{{ path('admin_marketplace_commandes') }}" class="text-decoration-none">
+                        <div class="ag-admin-card p-4 h-100">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-muted small text-uppercase fw-semibold">Commandes</div>
+                                    <div class="h3 fw-bold mb-0" style="color: var(--ag-primary);">{{ stats.total_commandes|default(0) }}</div>
+                                </div>
+                                <div class="rounded-circle bg-light p-3"><i class="fa-solid fa-cart-shopping text-success fa-lg"></i></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-xl-4">
+                    <div class="ag-admin-card p-4 h-100 border-warning">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small text-uppercase fw-semibold">Produits bannis</div>
+                                <div class="h3 fw-bold mb-0 text-warning">{{ stats.produits_bannis|default(0) }}</div>
+                            </div>
+                            <div class="rounded-circle bg-warning bg-opacity-25 p-3"><i class="fa-solid fa-ban text-warning fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Quick actions #}
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <a href="{{ path('admin_marketplace_produits') }}" class="btn ag-btn-admin-primary rounded-pill">
+                    <i class="fa-solid fa-box me-2"></i>Catalogue produits
+                </a>
+                <a href="{{ path('admin_marketplace_commandes') }}" class="btn btn-outline-success rounded-pill">
+                    <i class="fa-solid fa-cart-shopping me-2"></i>Commandes
+                </a>
+            </div>
+
+            {# Flash #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-check-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+
+            <div class="row g-4">
+                {# Recent commandes #}
+                <div class="col-lg-6">
+                    <div class="ag-admin-card p-4">
+                        <h2 class="h6 fw-bold mb-3" style="color: var(--ag-text);">Dernières commandes</h2>
+                        {% if recent_commandes|default([])|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead><tr><th>#</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead>
+                                    <tbody>
+                                        {% for c in recent_commandes %}
+                                            <tr>
+                                                <td>{{ c.id }}</td>
+                                                <td>{{ c.client ? (c.client.firstName ~ ' ' ~ c.client.lastName) : '-' }}</td>
+                                                <td>{{ c.montantTotal|number_format(2, ',', ' ') }} TND</td>
+                                                <td><span class="badge bg-secondary">{{ c.statut }}</span></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <a href="{{ path('admin_marketplace_commandes') }}" class="btn btn-sm btn-link text-success mt-2">Voir tout</a>
+                        {% else %}
+                            <p class="text-muted mb-0">Aucune commande.</p>
+                            <a href="{{ path('admin_marketplace_commandes') }}" class="btn btn-sm ag-btn-admin-primary text-white mt-2">Voir les commandes</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Recent produits #}
+                <div class="col-lg-6">
+                    <div class="ag-admin-card p-4">
+                        <h2 class="h6 fw-bold mb-3" style="color: var(--ag-text);">Derniers produits</h2>
+                        {% if recent_produits|default([])|length > 0 %}
+                            <ul class="list-unstyled mb-0">
+                                {% for p in recent_produits %}
+                                    <li class="d-flex align-items-center py-2 border-bottom border-light">
+                                        <div class="flex-shrink-0 me-2">
+                                            {% if p.image %}
+                                                <img src="{{ asset('uploads/produits/' ~ p.image) }}" alt="" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fa-solid fa-image text-muted"></i></div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1 min-width-0">
+                                            <span class="fw-medium text-truncate d-block" style="color: var(--ag-text);">{{ p.nom }}</span>
+                                            <small class="text-muted">{{ p.prix|number_format(2, ',', ' ') }} TND</small>
+                                        </div>
+                                        {% if p.banned %}<span class="badge bg-danger">Banni</span>{% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <a href="{{ path('admin_marketplace_produits') }}" class="btn btn-sm btn-link text-success mt-2">Voir tout</a>
+                        {% else %}
+                            <p class="text-muted mb-0">Aucun produit.</p>
+                            <a href="{{ path('admin_marketplace_produits') }}" class="btn btn-sm ag-btn-admin-primary text-white mt-2">Catalogue produits</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

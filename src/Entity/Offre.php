@@ -64,6 +64,10 @@ class Offre
     #[ORM\Column]
     private ?bool $isActive = null;
 
+    /** Statut de validation par l'admin : en_attente | approuvée | refusée */
+    #[ORM\Column(length: 20)]
+    private string $statutValidation = 'en_attente';
+
     #[ORM\ManyToOne(inversedBy: 'offres')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $agriculteur = null;
@@ -230,6 +234,17 @@ class Offre
     {
     $this->isActive = $isActive;
     return $this;
+    }
+
+    public function getStatutValidation(): string
+    {
+        return $this->statutValidation;
+    }
+
+    public function setStatutValidation(string $statutValidation): static
+    {
+        $this->statutValidation = $statutValidation;
+        return $this;
     }
 
     public function getAgriculteur(): ?User

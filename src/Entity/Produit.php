@@ -95,6 +95,10 @@ class Produit
     #[ORM\JoinColumn(nullable: true)]
     private ?User $vendeur = null;
 
+    /** Admin peut bannir un produit (masqué du marketplace). */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $banned = false;
+
     public function __construct()
     {
     }
@@ -305,6 +309,17 @@ class Produit
     public function setVendeur(?User $vendeur): static
     {
         $this->vendeur = $vendeur;
+        return $this;
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->banned;
+    }
+
+    public function setBanned(bool $banned): static
+    {
+        $this->banned = $banned;
         return $this;
     }
 }

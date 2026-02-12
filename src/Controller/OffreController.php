@@ -22,9 +22,10 @@ public function add(Request $request, EntityManagerInterface $em): Response
 
     if ($form->isSubmitted() && $form->isValid()) {
         // 1. On lie l'agriculteur (indispensable)
-        $offre->setAgriculteur($this->getUser()); 
+        $offre->setAgriculteur($this->getUser());
 
-        // 2. On définit is_active sur true par défaut (CORRIGE TON ERREUR)
+        // 2. Nouvelle offre : en attente de validation admin
+        $offre->setStatutValidation('en_attente');
         $offre->setIsActive(true);
 
         $em->persist($offre);
@@ -125,24 +126,52 @@ public function add(Request $request, EntityManagerInterface $em): Response
         ]);
     }
 
-    #[Route('/offres-emploi', name: 'app_offre_index_front')] 
+    #[Route('/offres-emploi', name: 'app_offre_index_front')]
     public function indexFront(Request $request, OffreRepository $repo): Response
     {
         $searchTerm = $request->query->get('search');
-        
+        $qb = $repo->createQueryBuilder('o')
+            ->where("o.statutValidation = 'approuvée'")
+            ->andWhere('o.isActive = :active')
+            ->setParameter('active', true);
+
         if ($searchTerm) {
-            $offres = $repo->createQueryBuilder('o')
-                ->where('o.title LIKE :term OR o.lieu LIKE :term')
-                ->setParameter('term', '%'.$searchTerm.'%')
-                ->getQuery()
-                ->getResult();
-        } else {
-            $offres = $repo->findBy(['isActive' => true]);    
+            $qb->andWhere('o.title LIKE :term OR o.lieu LIKE :term')
+                ->setParameter('term', '%'.$searchTerm.'%');
         }
+        $offres = $qb->getQuery()->getResult();
 
         return $this->render('front/offre/index.html.twig', [
             'offres' => $offres
         ]);
+    }
+
+    #[Route('/admin/offre/{id}/approuver', name: 'app_offre_approuver', methods: ['POST'])]
+    public function approuver(Offre $offre, Request $request, EntityManagerInterface $em): Response
+    {
+        if (!$this->isCsrfTokenValid('approuver'.$offre->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token invalide.');
+            return $this->redirect($request->headers->get('referer', $this->generateUrl('app_offre_admin_index')));
+        }
+        $offre->setStatutValidation('approuvée');
+        $offre->setIsActive(true);
+        $em->flush();
+        $this->addFlash('success', 'L\'offre a été approuvée et est visible sur le site.');
+        return $this->redirect($request->headers->get('referer', $this->generateUrl('app_offre_admin_index')));
+    }
+
+    #[Route('/admin/offre/{id}/refuser', name: 'app_offre_refuser', methods: ['POST'])]
+    public function refuser(Offre $offre, Request $request, EntityManagerInterface $em): Response
+    {
+        if (!$this->isCsrfTokenValid('refuser'.$offre->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token invalide.');
+            return $this->redirect($request->headers->get('referer', $this->generateUrl('app_offre_admin_index')));
+        }
+        $offre->setStatutValidation('refusée');
+        $offre->setIsActive(false);
+        $em->flush();
+        $this->addFlash('success', 'L\'offre a été refusée.');
+        return $this->redirect($request->headers->get('referer', $this->generateUrl('app_offre_admin_index')));
     }
 
 #[Route('/admin/offre/toggle/{id}', name: 'app_offre_toggle')]

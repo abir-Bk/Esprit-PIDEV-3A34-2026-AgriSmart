@@ -55,12 +55,11 @@ class RegisterType extends AbstractType
                     'Agriculteur'=>'agriculteur',
                     'Fournisseur'=>'fournisseur',
                     'Employé'=>'employee',
-                    'Administrateur'=>'admin'
                 ],
                 'constraints'=>[
                     new Assert\NotBlank(['message'=>'Choisissez un rôle']),
                     new Assert\Choice([
-                        'choices'=>['agriculteur','fournisseur','employee','admin'],
+                        'choices'=>['agriculteur','fournisseur','employee'],
                         'message'=>'Rôle invalide'
                     ])
                 ]

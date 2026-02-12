@@ -1,68 +1,68 @@
 {% extends 'back/admin_base.html.twig' %}
 
-{% block title %}Ajouter une Offre - AgriSmart{% endblock %}
+{% block title %}Nouvelle offre d'emploi - AgriSmart{% endblock %}
 
 {% block body %}
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-9"> {# J'ai élargi un peu pour plus de confort #}
-            
-            {# Flash Messages (Optionnel : souvent déjà inclus dans admin_base) #}
-            {% for label, messages in app.flashes %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm mb-4" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+    <div class="flex-grow-1 p-4 am-content">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show am-alert" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             {% endfor %}
+        {% endfor %}
 
-            <div class="card shadow border-0">
-                <div class="card-header bg-success text-white py-3">
-                    <h4 class="mb-0 text-center">Nouvelle Offre d'Emploi</h4>
+        <div class="mb-4">
+            <a href="{{ path('app_admin_offres') }}" class="btn am-btn-outline mb-2"><i class="fa-solid fa-arrow-left me-1"></i>Retour</a>
+            <h1 class="h3 am-title mb-1"><i class="fa-solid fa-plus me-2"></i>Nouvelle offre d'emploi</h1>
+            <p class="text-muted small mb-0">L'offre sera en attente de validation par l'administrateur.</p>
+        </div>
+
+        <div class="card border-0 am-card">
+            <div class="card-header am-card-header py-3 border-0">
+                <h4 class="mb-0 text-white"><i class="fa-solid fa-briefcase me-2"></i>Créer une offre</h4>
+            </div>
+            <div class="card-body p-4">
+                {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+                <div class="mb-3">{{ form_row(form.title, {label: "Titre de l'offre"}) }}</div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">{{ form_row(form.typePoste) }}</div>
+                    <div class="col-md-6">{{ form_row(form.typeContrat) }}</div>
                 </div>
-
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                        
-                        <div class="mb-3">
-                            {{ form_row(form.title, {'label': 'Titre de l\'offre'}) }}
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">{{ form_row(form.typePoste) }}</div>
-                            <div class="col-md-6">{{ form_row(form.typeContrat) }}</div>
-                        </div>
-
-                        <div class="mb-4">
-                            {{ form_row(form.description) }}
-                        </div>
-
-                        <hr class="text-muted">
-                        <h6 class="text-uppercase small fw-bold mb-3 text-secondary">Détails Logistiques</h6>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">{{ form_row(form.lieu) }}</div>
-                            <div class="col-md-6">{{ form_row(form.salaire) }}</div>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">{{ form_row(form.statut) }}</div>
-                            <div class="col-md-4">{{ form_row(form.dateDebut) }}</div>
-                            <div class="col-md-4">{{ form_row(form.dateFin) }}</div>
-                        </div>
-
-                        <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn btn-success btn-lg shadow-sm">
-                                <i class="bi bi-check-circle me-2"></i>Publier l'offre
-                            </button>
-                            
-                            <a href="{{ path('app_admin_offres') }}" class="btn btn-link text-muted text-decoration-none text-center">Annuler</a>
-                        </div>
-                    {{ form_end(form) }}
+                <div class="mb-4">{{ form_row(form.description) }}</div>
+                <hr class="text-muted">
+                <h6 class="text-uppercase small fw-bold mb-3 am-text-muted">Détails</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">{{ form_row(form.lieu) }}</div>
+                    <div class="col-md-6">{{ form_row(form.salaire) }}</div>
                 </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">{{ form_row(form.statut) }}</div>
+                    <div class="col-md-4">{{ form_row(form.dateDebut) }}</div>
+                    <div class="col-md-4">{{ form_row(form.dateFin) }}</div>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn am-btn-success btn-lg"><i class="fa-solid fa-check me-2"></i>Publier l'offre</button>
+                    <a href="{{ path('app_admin_offres') }}" class="btn btn-link text-muted text-decoration-none">Annuler</a>
+                </div>
+                {{ form_end(form) }}
             </div>
         </div>
     </div>
 </div>
+<style>
+.am-content { background: #f8f9fa; }
+.am-title, .am-text-muted { color: #1a4331; }
+.am-card { box-shadow: 0 2px 12px rgba(26, 67, 49, 0.06); border-radius: 12px; }
+.am-card-header { background: linear-gradient(135deg, #1a4331 0%, #2d5a3d 100%); color: #fff; border-radius: 12px 12px 0 0; }
+.am-btn-outline { border: 1px solid #1a4331; color: #1a4331; border-radius: 8px; }
+.am-btn-outline:hover { background: #1a4331; color: #fff; }
+.am-btn-success { background: #28a745; color: #fff; border: none; border-radius: 8px; }
+.am-btn-success:hover { background: #218838; color: #fff; }
+.am-alert { border-radius: 12px; }
+.form-control:focus, .form-select:focus { border-color: #E6BF4A; box-shadow: 0 0 0 0.2rem rgba(230, 191, 74, 0.2); }
+</style>
 {% endblock %}

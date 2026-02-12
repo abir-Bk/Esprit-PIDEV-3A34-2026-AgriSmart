@@ -44,19 +44,36 @@
 
                 <!-- Main Navigation -->
                 <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'user_dashboard' %}active{% endif %}" href="{{ path('user_dashboard') }}">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') in ['user_dashboard', 'admin_marketplace_dashboard'] %}active{% endif %}" href="{{ is_granted('ROLE_ADMIN') ? path('admin_marketplace_dashboard') : path('user_dashboard') }}">
                         <i class="fa-solid fa-house me-2"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
 
+                {% if is_granted('ROLE_ADMIN') %}
                 <li class="nav-item mb-1">
                     <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}" href="{{ path('admin_users') }}">
                         <i class="fa-solid fa-users me-2"></i>
                         <span>Utilisateurs</span>
                     </a>
                 </li>
+                {% endif %}
 
+                <li class="nav-item mb-1">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'app_offre_admin_index' %}active{% endif %}" href="{{ path('app_offre_admin_index') }}">
+                            <i class="fa-solid fa-briefcase me-2"></i>
+                            <span>Offres d'emploi</span>
+                        </a>
+                    {% else %}
+                        <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'app_admin_offres' %}active{% endif %}" href="{{ path('app_admin_offres') }}">
+                            <i class="fa-solid fa-briefcase me-2"></i>
+                            <span>Mes offres</span>
+                        </a>
+                    {% endif %}
+                </li>
+
+                {% if is_granted('ROLE_ADMIN') %}
                 <!-- Section MARKETPLACE -->
                 <li class="nav-item mt-4 mb-2">
                     <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Marketplace</span>
@@ -80,6 +97,7 @@
                         <span>Catalogue produits</span>
                     </a>
                 </li>
+                {% endif %}
 
             </ul>
             <!-- Sidebar menu end -->

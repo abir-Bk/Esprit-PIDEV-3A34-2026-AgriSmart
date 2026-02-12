@@ -1,511 +1,239 @@
-{% extends 'front/base.html.twig' %}
+{% extends 'back/admin_base.html.twig' %}
 
-{% block title %}Gestion des Offres - Admin{% endblock %}
+{% block title %}Offres d'emploi - Admin AgriSmart{% endblock %}
 
 {% block body %}
-<div class="container mt-5 py-5">
+<div class="d-flex back-offres-layout">
+    {% include 'back/components/sidebar.html.twig' %}
 
-    <div class="card rounded-3 border p-3 pb-2 shadow-sm mb-4">
-        <div class="d-sm-flex align-items-center">
-
-            <h4 class="mb-2 mb-sm-0 ms-sm-3">
-                <span class="fw-light text-success">🌱 </span> 
-                {% if app.user %}
-                    {{ app.user.prenom|default(app.user.nom|default('Administrateur')) }}
-                {% else %}
-                    Administrateur
-                {% endif %}
-            </h4>
-
-        </div>
-    </div>
-
-    {# =======================
-       TITRE + STATISTIQUES
-       ======================= #}
-    <div class="row align-items-center mb-4">
-        <div class="col-md-8">
-            <h1 class="fs-2 fw-bold text-success mb-1">
-                <i class="bi bi-grid-3x3-gap-fill me-2"></i>Gestion des offres
-            </h1>
-            <p class="text-muted">Validez et gérez les annonces de votre plateforme agricole.</p>
-        </div>
-        <div class="col-md-4">
-            <div class="d-flex justify-content-md-end gap-2">
-                <div class="bg-success-subtle px-3 py-2 rounded-3 d-flex align-items-center">
-                    <i class="bi bi-tree-fill text-success fs-5 me-2"></i>
-                    <div>
-                        <small class="text-muted d-block">En ligne</small>
-                        <span class="fw-bold text-success fs-5">
-                            {% set active_count = 0 %}
-                            {% for offre in offres %}
-                                {% if offre.isActive %}
-                                    {% set active_count = active_count + 1 %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ active_count }}
-                        </span>
-                    </div>
-                </div>
-                <div class="bg-warning-subtle px-3 py-2 rounded-3 d-flex align-items-center">
-                    <i class="bi bi-seedling-fill text-warning fs-5 me-2"></i>
-                    <div>
-                        <small class="text-muted d-block">En attente</small>
-                        <span class="fw-bold text-warning fs-5">
-                            {% set inactive_count = 0 %}
-                            {% for offre in offres %}
-                                {% if not offre.isActive %}
-                                    {% set inactive_count = inactive_count + 1 %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ inactive_count }}
-                        </span>
-                    </div>
-                </div>
+    <div class="flex-grow-1 p-4 am-content back-offres-content">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show am-alert" role="alert">
+                <i class="fa-solid fa-check-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
             </div>
-        </div>
-    </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show am-alert" role="alert">
+                <i class="fa-solid fa-exclamation-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
 
-    {# =======================
-       MESSAGES FLASH
-       ======================= #}
-    {% for message in app.flashes('success') %}
-    <div class="alert alert-success border-0 shadow-sm rounded-3 bg-success-subtle border-start border-success border-4 d-flex align-items-center mb-4">
-        <div class="bg-success rounded-circle p-2 me-3">
-            <i class="bi bi-check-lg text-white"></i>
-        </div>
-        <div>
-            <strong class="text-success">Succès !</strong><br>
-            <span>{{ message }}</span>
-        </div>
-    </div>
-    {% endfor %}
-
-    {# =======================
-       CARTE PRINCIPALE
-       ======================= #}
-    <div class="card border-0 rounded-4 shadow">
-        
-        {# --- EN-TÊTE CARTE --- #}
-        <div class="card-header bg-success text-white py-3 px-4 border-0 rounded-top-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-semibold d-flex align-items-center">
-                    <i class="bi bi-basket me-2"></i>
-                    Offres en culture
-                </h5>
-                <span class="badge bg-white text-success px-4 py-2 rounded-pill fw-semibold">
-                    <i class="bi bi-basket me-1"></i>{{ offres|length }} récolte{{ offres|length > 1 ? 's' : '' }}
-                </span>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3 mt-0">
+            <div>
+                <h1 class="h3 mb-1 am-title">
+                    <i class="fa-solid fa-briefcase me-2"></i>Offres d'emploi
+                </h1>
+                <p class="text-muted mb-0 small">Consulter, approuver ou refuser les offres.</p>
             </div>
         </div>
 
-        {# --- BARRE RECHERCHE/FILTRE --- #}
-        <div class="card-body p-4">
-            <div class="row g-3 mb-4">
-                <div class="col-md-8">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="bi bi-search text-success"></i>
-                        </span>
-                        <input 
-                            id="offreSearchInput" 
-                            class="form-control border-start-0 shadow-none" 
-                            type="search" 
-                            placeholder="Rechercher par titre ou lieu..."
-                            aria-label="Recherche">
-                        <button id="clearSearch" class="btn btn-outline-success d-none" type="button">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <select id="filterContract" class="form-select">
-                        <option value="">Tous les contrats</option>
-                        <option value="cdi">CDI</option>
-                        <option value="cdd">CDD</option>
-                        <option value="stage">Stage</option>
-                        <option value="freelance">Freelance</option>
-                    </select>
-                </div>
-            </div>
+        {% set count_attente = 0 %}
+        {% set count_approuvee = 0 %}
+        {% set count_refusee = 0 %}
+        {% for o in offres %}
+            {% if o.statutValidation|default('en_attente') == 'en_attente' %}{% set count_attente = count_attente + 1 %}{% endif %}
+            {% if o.statutValidation|default('en_attente') == 'approuvée' %}{% set count_approuvee = count_approuvee + 1 %}{% endif %}
+            {% if o.statutValidation|default('en_attente') == 'refusée' %}{% set count_refusee = count_refusee + 1 %}{% endif %}
+        {% endfor %}
 
-            {# --- TABLEAU DES OFFRES --- #}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-success-subtle">
-                        <tr>
-                            <th scope="col" class="ps-4 py-3 text-success border-0 rounded-start">#</th>
-                            <th scope="col" class="py-3 text-success border-0">Titre / Lieu</th>
-                            <th scope="col" class="py-3 text-success border-0">Type</th>
-                            <th scope="col" class="py-3 text-success border-0">Salaire</th>
-                            <th scope="col" class="py-3 text-success border-0">Statut</th>
-                            <th scope="col" class="py-3 text-success border-0 text-center rounded-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="offreList">
-                        {% for offre in offres %}
-                        <tr class="hover-lift border-bottom" 
-                            data-title="{{ offre.title|lower }}" 
-                            data-lieu="{{ offre.lieu|default('')|lower }}"
-                            data-contrat="{{ offre.typeContrat|default('')|lower }}">
-                            <td class="ps-4 py-3">
-                                <span class="fw-medium text-muted">{{ loop.index }}</span>
-                            </td>
-                            <td class="py-3">
-                                <div>
-                                    <strong class="text-dark">{{ offre.title }}</strong>
-                                    <div class="small text-muted">
-                                        <i class="bi bi-geo-alt me-1"></i>{{ offre.lieu|default('Non spécifié') }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3">
-                                <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill">
-                                    {{ offre.typeContrat|default('CDI') }}
-                                </span>
-                            </td>
-                            <td class="py-3 fw-medium">
-                                {% if offre.salaire %}
-                                    {{ offre.salaire|number_format(0, ',', ' ') }} DT
-                                {% else %}
-                                    <span class="text-muted fst-italic">Non indiqué</span>
-                                {% endif %}
-                            </td>
-                            <td class="py-3">
-                                {% if offre.isActive %}
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
-                                        <i class="bi bi-check-circle-fill me-1"></i>En ligne 🌿
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2 rounded-pill">
-                                        <i class="bi bi-clock-fill me-1"></i>En attente 🌱
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="py-3 text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <button type="button" 
-                                            class="btn btn-sm btn-outline-success px-3"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalOffre{{ offre.id }}">
-                                        <i class="bi bi-eye me-1"></i>Voir
-                                    </button>
-                                    <a href="{{ path('app_offre_toggle', {'id': offre.id}) }}" 
-                                       class="btn btn-sm {{ offre.isActive ? 'btn-danger' : 'btn-success' }} px-3 shadow-sm">
-                                        {% if offre.isActive %}
-                                            <i class="bi bi-x-circle me-1"></i>Suspendre
-                                        {% else %}
-                                            <i class="bi bi-check-circle me-1"></i>Valider
-                                        {% endif %}
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="py-4">
-                                    <i class="bi bi-tree text-success" style="font-size: 3rem;"></i>
-                                    <h5 class="text-muted mt-3 mb-2">Aucune offre en culture</h5>
-                                    <p class="text-muted mb-3">Les nouvelles offres apparaîtront ici dès leur création.</p>
-                                    <a href="{{ path('app_offre_new') }}" class="btn btn-success">
-                                        <i class="bi bi-plus-lg me-1"></i>Créer une offre
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            {# --- PAGINATION (si nécessaire) --- #}
-            {% if offres|length > 10 %}
-            <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
-                <p class="mb-0 text-muted small">Affichage de 1 à {{ offres|length }} offres</p>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link text-success" href="#" tabindex="-1">Précédent</a>
-                        </li>
-                        <li class="page-item active">
-                            <a class="page-link bg-success border-success" href="#">1</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link text-success" href="#">2</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link text-success" href="#">3</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link text-success" href="#">Suivant</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    {# =======================
-       FOOTER
-       ======================= #}
-    <div class="text-center mt-4 pt-3">
-        <small class="text-muted">
-            <i class="bi bi-droplet me-1 text-success"></i>AgriSmart - Gestion des offres en agriculture durable 
-            <span class="mx-2">•</span> 
-            <i class="bi bi-sun me-1 text-warning"></i>{{ "now"|date("d/m/Y") }}
-        </small>
-    </div>
-
-</div>
-
-{# =======================
-   MODALES DE DÉTAILS
-   ======================= #}
-{% for offre in offres %}
-<div class="modal fade" id="modalOffre{{ offre.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-success text-white border-0 rounded-top-4">
-                <h5 class="modal-title d-flex align-items-center">
-                    <span class="bg-white text-success rounded-circle p-2 me-2">
-                        <i class="bi bi-file-earmark-text"></i>
-                    </span>
-                    {{ offre.title }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="bg-light p-4 rounded-4 h-100">
-                            <h6 class="text-success fw-bold mb-3">
-                                <i class="bi bi-card-text me-2"></i>Description
-                            </h6>
-                            <div class="text-dark">
-                                {{ offre.description|default('Aucune description fournie.')|nl2br }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="bg-success-subtle p-4 rounded-4 h-100">
-                            <h6 class="text-success fw-bold mb-3">
-                                <i class="bi bi-info-circle me-2"></i>Informations
-                            </h6>
-                            <div class="d-flex flex-column gap-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-white p-2 rounded-3 me-3">
-                                        <i class="bi bi-cash-stack text-success"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block">Salaire</small>
-                                        <span class="fw-bold">{{ offre.salaire|default('À discuter') }} DT</span>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-white p-2 rounded-3 me-3">
-                                        <i class="bi bi-pin-map text-success"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block">Lieu</small>
-                                        <span class="fw-bold">{{ offre.lieu }}</span>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-white p-2 rounded-3 me-3">
-                                        <i class="bi bi-calendar-check text-success"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block">Date début</small>
-                                        <span class="fw-bold">{{ offre.dateDebut ? offre.dateDebut|date('d/m/Y') : 'Dès que possible' }}</span>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-white p-2 rounded-3 me-3">
-                                        <i class="bi bi-briefcase text-success"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block">Contrat</small>
-                                        <span class="fw-bold">{{ offre.typeContrat|default('Non spécifié') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="alert alert-success bg-success-subtle border-0 mt-4 mb-0 rounded-4">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success rounded-circle p-3 me-3">
-                            <i class="bi bi-tag text-white fs-5"></i>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 am-card h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="am-icon-wrap am-icon-warning me-3">
+                            <i class="fa-solid fa-clock"></i>
                         </div>
                         <div>
-                            <small class="text-success text-uppercase fw-bold">Référence</small>
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="fw-bold">Offre AgriSmart</span>
-                                <span class="badge bg-white text-success px-3 py-1 rounded-pill">
-                                    ID #{{ offre.id }}
-                                </span>
-                            </div>
+                            <span class="text-muted small d-block">En attente</span>
+                            <span class="fw-bold fs-4 am-text">{{ count_attente }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-0 rounded-bottom-4">
-                <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>Fermer
-                </button>
-                <a href="{{ path('app_offre_toggle', {'id': offre.id}) }}" 
-                   class="btn {{ offre.isActive ? 'btn-danger' : 'btn-success' }} px-4 rounded-pill">
-                    {% if offre.isActive %}
-                        <i class="bi bi-x-circle me-2"></i>Suspendre
-                    {% else %}
-                        <i class="bi bi-check-circle me-2"></i>Valider
-                    {% endif %}
-                </a>
+            <div class="col-md-4">
+                <div class="card border-0 am-card h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="am-icon-wrap am-icon-success me-3">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Approuvées</span>
+                            <span class="fw-bold fs-4 am-text-success">{{ count_approuvee }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 am-card h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="am-icon-wrap am-icon-danger me-3">
+                            <i class="fa-solid fa-times"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Refusées</span>
+                            <span class="fw-bold fs-4 text-danger">{{ count_refusee }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 am-card">
+            <div class="card-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <div class="input-group am-input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fa-solid fa-search am-text-muted"></i>
+                            </span>
+                            <input id="offreSearchInput" class="form-control border-start-0" type="search"
+                                   placeholder="Rechercher par titre ou lieu..." aria-label="Recherche">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="filterValidation" class="form-select am-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="en_attente">En attente</option>
+                            <option value="approuvée">Approuvées</option>
+                            <option value="refusée">Refusées</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 am-table">
+                        <thead>
+                            <tr>
+                                <th class="am-th">#</th>
+                                <th class="am-th">Titre / Lieu</th>
+                                <th class="am-th">Type</th>
+                                <th class="am-th">Salaire</th>
+                                <th class="am-th">Validation</th>
+                                <th class="am-th text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="offreList">
+                            {% for offre in offres %}
+                                {% set validation = offre.statutValidation|default('en_attente') %}
+                                <tr class="am-row"
+                                    data-title="{{ offre.title|lower }}"
+                                    data-lieu="{{ offre.lieu|default('')|lower }}"
+                                    data-validation="{{ validation }}">
+                                    <td class="py-3"><span class="text-muted fw-medium">{{ loop.index }}</span></td>
+                                    <td class="py-3">
+                                        <div>
+                                            <strong class="am-text">{{ offre.title }}</strong>
+                                            <div class="small text-muted"><i class="fa-solid fa-location-dot me-1"></i>{{ offre.lieu|default('—') }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge am-badge">{{ offre.typeContrat|default('CDI') }}</span>
+                                    </td>
+                                    <td class="py-3 fw-medium">
+                                        {{ offre.salaire ? (offre.salaire|number_format(0, ',', ' ') ~ ' DT') : '—' }}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if validation == 'approuvée' %}
+                                            <span class="badge am-badge-success"><i class="fa-solid fa-check me-1"></i>Approuvée</span>
+                                        {% elseif validation == 'refusée' %}
+                                            <span class="badge am-badge-danger"><i class="fa-solid fa-times me-1"></i>Refusée</span>
+                                        {% else %}
+                                            <span class="badge am-badge-warning"><i class="fa-solid fa-clock me-1"></i>En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 text-end am-actions-cell">
+                                        <div class="d-flex justify-content-end gap-2 flex-nowrap align-items-center">
+                                            <a href="{{ path('app_admin_offre_details', {id: offre.id}) }}" class="btn btn-sm am-btn-outline text-nowrap">
+                                                <i class="fa-solid fa-eye me-1"></i>Voir
+                                            </a>
+                                            {% if validation == 'en_attente' %}
+                                                <form method="post" action="{{ path('app_offre_approuver', {id: offre.id}) }}" class="d-inline">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('approuver' ~ offre.id) }}">
+                                                    <button type="submit" class="btn btn-sm am-btn-success text-nowrap"><i class="fa-solid fa-check me-1"></i>Approuver</button>
+                                                </form>
+                                                <form method="post" action="{{ path('app_offre_refuser', {id: offre.id}) }}" class="d-inline" onsubmit="return confirm('Refuser cette offre ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ offre.id) }}">
+                                                    <button type="submit" class="btn btn-sm am-btn-danger text-nowrap"><i class="fa-solid fa-times me-1"></i>Refuser</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="fa-solid fa-briefcase fa-2x mb-2 d-block"></i>
+                                        Aucune offre.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-{% endfor %}
 
 <style>
-/* STYLES STABLES - PAS DE CONFLITS */
-.hover-lift {
-    transition: all 0.2s ease;
-}
-.hover-lift:hover {
-    transform: translateY(-2px);
-    background-color: rgba(40, 167, 69, 0.04);
-}
-
-.bg-success-subtle {
-    background-color: rgba(40, 167, 69, 0.08) !important;
-}
-.bg-warning-subtle {
-    background-color: rgba(255, 193, 7, 0.08) !important;
-}
-
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-.btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-}
-.btn-outline-success {
-    color: #28a745;
-    border-color: #28a745;
-}
-.btn-outline-success:hover {
-    background-color: #28a745;
-    color: white;
-}
-
-.avatar-xl {
-    width: 56px;
-    height: 56px;
-}
-
-.badge {
-    font-weight: 500;
-}
-
-/* Pagination */
-.page-link {
-    color: #28a745;
-}
-.page-item.active .page-link {
-    background-color: #28a745;
-    border-color: #28a745;
-    color: white;
-}
-
-/* Modal */
-.modal-content {
-    border: none;
-}
-.rounded-4 {
-    border-radius: 1rem !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .d-flex.justify-content-center.gap-2 {
-        flex-direction: column;
-    }
-    .btn-sm {
-        width: 100%;
-    }
-}
+/* Palette identique à l'interface utilisateur (login, register) */
+.back-offres-layout { min-height: 100vh; }
+.back-offres-content { margin-top: 0; padding-top: 1.25rem; }
+.am-content { background: #f0f7f2; }
+.am-title { color: #1F3D2B; font-weight: 700; }
+.am-text { color: #1F3D2B; }
+.am-text-success { color: #28a745; }
+.am-text-muted { color: #5a6c5d; }
+.am-card { box-shadow: 0 2px 16px rgba(31, 61, 43, 0.08); border-radius: 14px; border: 1px solid rgba(31, 61, 43, 0.08); }
+.am-card .card-body { border-radius: 14px; }
+.am-icon-wrap { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.am-icon-success { background: rgba(40, 167, 69, 0.14); color: #28a745; }
+.am-icon-warning { background: rgba(230, 191, 74, 0.22); color: #b8860b; }
+.am-icon-danger { background: rgba(220, 53, 69, 0.12); color: #dc3545; }
+.am-input-group .form-control:focus { border-color: #E6BF4A; box-shadow: 0 0 0 0.2rem rgba(230, 191, 74, 0.22); }
+.am-select { border-radius: 10px; border: 1px solid #e2e8e6; }
+.am-select:focus { border-color: #E6BF4A; box-shadow: 0 0 0 0.2rem rgba(230, 191, 74, 0.2); }
+.am-th { color: #1F3D2B; font-weight: 600; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8e6; background: rgba(31, 61, 43, 0.04); }
+.am-table tbody tr { border-bottom: 1px solid #e8edea; }
+.am-table tbody tr:hover { background: rgba(31, 61, 43, 0.04); }
+.am-actions-cell { min-width: 200px; white-space: nowrap; }
+.am-badge { background: rgba(31, 61, 43, 0.12); color: #1F3D2B; padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 500; }
+.am-badge-success { background: rgba(40, 167, 69, 0.14); color: #28a745; padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 500; }
+.am-badge-warning { background: rgba(230, 191, 74, 0.22); color: #b8860b; padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 500; }
+.am-badge-danger { background: rgba(220, 53, 69, 0.12); color: #dc3545; padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 500; }
+.am-btn-outline { border: 1px solid #1F3D2B; color: #1F3D2B; border-radius: 8px; }
+.am-btn-outline:hover { background: #1F3D2B; color: #fff; }
+.am-btn-success { background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%); color: #fff; border: none; border-radius: 8px; }
+.am-btn-success:hover { background: linear-gradient(135deg, #1a4331 0%, #28a745 100%); color: #fff; }
+.am-btn-danger { background: #dc3545; color: #fff; border: none; border-radius: 8px; }
+.am-btn-danger:hover { background: #c82333; color: #fff; }
+.am-alert { border-radius: 12px; border-left: 4px solid #28a745; }
+.alert-success { background: rgba(40, 167, 69, 0.1); }
 </style>
 
 {% block javascripts %}
 {{ parent() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // RECHERCHE EN TEMPS RÉEL
-    const searchInput = document.getElementById('offreSearchInput');
-    const clearBtn = document.getElementById('clearSearch');
-    const filterContract = document.getElementById('filterContract');
-    const rows = document.querySelectorAll('#offreList tr[data-title]');
-
+    var searchInput = document.getElementById('offreSearchInput');
+    var filterValidation = document.getElementById('filterValidation');
+    var rows = document.querySelectorAll('#offreList tr.am-row');
     function filterTable() {
-        const searchTerm = searchInput?.value.toLowerCase().trim() || '';
-        const contractFilter = filterContract?.value.toLowerCase() || '';
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const title = row.dataset.title || '';
-            const lieu = row.dataset.lieu || '';
-            const contrat = row.dataset.contrat || '';
-            
-            const matchesSearch = !searchTerm || title.includes(searchTerm) || lieu.includes(searchTerm);
-            const matchesContract = !contractFilter || contrat.includes(contractFilter);
-            const isVisible = matchesSearch && matchesContract;
-
-            row.style.display = isVisible ? '' : 'none';
-            if (isVisible) visibleCount++;
-        });
-
-        // Afficher/masquer bouton clear
-        if (clearBtn) {
-            if (searchTerm) {
-                clearBtn.classList.remove('d-none');
-            } else {
-                clearBtn.classList.add('d-none');
-            }
-        }
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', filterTable);
-    }
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            if (searchInput) {
-                searchInput.value = '';
-                filterTable();
-                searchInput.focus();
-            }
+        var search = (searchInput && searchInput.value) ? searchInput.value.toLowerCase().trim() : '';
+        var validation = filterValidation ? filterValidation.value : '';
+        rows.forEach(function(row) {
+            var title = (row.dataset.title || '');
+            var lieu = (row.dataset.lieu || '');
+            var val = (row.dataset.validation || '');
+            var matchSearch = !search || title.indexOf(search) !== -1 || lieu.indexOf(search) !== -1;
+            var matchVal = !validation || val === validation;
+            row.style.display = (matchSearch && matchVal) ? '' : 'none';
         });
     }
-    if (filterContract) {
-        filterContract.addEventListener('change', filterTable);
-    }
-
-    // ANIMATION BADGES (optionnelle)
-    const badges = document.querySelectorAll('.badge');
-    badges.forEach(badge => {
-        badge.addEventListener('mouseenter', function() {
-            this.style.transition = 'transform 0.2s';
-            this.style.transform = 'scale(1.05)';
-        });
-        badge.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
+    if (searchInput) searchInput.addEventListener('input', filterTable);
+    if (filterValidation) filterValidation.addEventListener('change', filterTable);
 });
 </script>
 {% endblock %}

@@ -53,77 +53,31 @@
                 <li class="nav-item mb-1">
                     <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}" href="{{ path('admin_users') }}">
                         <i class="fa-solid fa-users me-2"></i>
-                        <span>Users</span>
+                        <span>Utilisateurs</span>
                     </a>
                 </li>
 
-                <!-- Section Divider -->
+                <!-- Section MARKETPLACE -->
                 <li class="nav-item mt-4 mb-2">
-                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Pages</span>
+                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Marketplace</span>
                 </li>
 
-                <!-- Collapsible Menu -->
                 <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link collapsed" data-bs-toggle="collapse" href="#collapseBookings" role="button" aria-expanded="false" aria-controls="collapseBookings">
-                        <i class="fa-solid fa-calendar-check me-2"></i>
-                        <span>Bookings</span>
-                        <i class="fa-solid fa-chevron-down ms-auto sidebar-arrow"></i>
-                    </a>
-                    <ul class="nav collapse flex-column submenu" id="collapseBookings" data-bs-parent="#navbar-sidebar">
-                        <li class="nav-item">
-                            <a class="nav-link sidebar-sublink" href="#">
-                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
-                                Booking List
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link sidebar-sublink" href="#">
-                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
-                                Booking Detail
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- Additional Menu Items (Examples) -->
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link collapsed" data-bs-toggle="collapse" href="#collapseReports" role="button" aria-expanded="false" aria-controls="collapseReports">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_dashboard' %}active{% endif %}" href="{{ path('admin_marketplace_dashboard') }}">
                         <i class="fa-solid fa-chart-line me-2"></i>
-                        <span>Reports</span>
-                        <i class="fa-solid fa-chevron-down ms-auto sidebar-arrow"></i>
-                    </a>
-                    <ul class="nav collapse flex-column submenu" id="collapseReports" data-bs-parent="#navbar-sidebar">
-                        <li class="nav-item">
-                            <a class="nav-link sidebar-sublink" href="#">
-                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
-                                Analytics
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link sidebar-sublink" href="#">
-                                <i class="fa-solid fa-circle fa-2xs me-2"></i>
-                                Statistics
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- Section Divider -->
-                <li class="nav-item mt-4 mb-2">
-                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Documentation</span>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link" href="#">
-                        <i class="fa-solid fa-book me-2"></i>
-                        <span>Documentation</span>
+                        <span>Statistiques</span>
                     </a>
                 </li>
-
                 <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link" href="#">
-                        <i class="fa-solid fa-circle-question me-2"></i>
-                        <span>Help & Support</span>
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_commandes' %}active{% endif %}" href="{{ path('admin_marketplace_commandes') }}">
+                        <i class="fa-solid fa-cart-shopping me-2"></i>
+                        <span>Commandes</span>
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_produits' %}active{% endif %}" href="{{ path('admin_marketplace_produits') }}">
+                        <i class="fa-solid fa-box me-2"></i>
+                        <span>Catalogue produits</span>
                     </a>
                 </li>
 

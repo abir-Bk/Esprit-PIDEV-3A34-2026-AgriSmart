@@ -1,0 +1,149 @@
+{# templates/front/produit/base_dashboard.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}AgriSmart - Dashboard{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {# ✅ Tes assets (stables) #}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/apexcharts/css/apexcharts.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+
+    {# ✅ Mini overrides AgriSmart #}
+    <style>
+        :root{
+            --ag-primary:#1a4331;
+            --ag-muted:#6b7280;
+        }
+        .sidebar .nav-link.active,
+        .sidebar .nav-link:hover{
+            color: var(--ag-primary) !important;
+        }
+        .badge-agri{
+            background: rgba(26,67,49,.12);
+            color: var(--ag-primary);
+            border: 1px solid rgba(26,67,49,.18);
+        }
+        .nav-link.disabled-soft{
+            opacity: .55;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+<main>
+
+    {# Sidebar #}
+    <nav class="navbar sidebar navbar-expand-xl navbar-light">
+        <div class="d-flex align-items-center mb-3">
+            <a class="navbar-brand" href="{{ path('app_produit_index') }}">
+                <h3 class="fw-bold m-0" style="color:var(--ag-primary);">AgriSmart</h3>
+            </a>
+        </div>
+
+        <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" tabindex="-1" id="offcanvasSidebar">
+            <div class="offcanvas-body sidebar-content d-flex flex-column pt-4">
+
+                {% set route = app.request.attributes.get('_route') %}
+
+                <ul class="navbar-nav flex-column" id="navbar-sidebar">
+                    <li class="nav-item ms-2 my-2 text-uppercase small fw-bold" style="color:var(--ag-muted);">
+                        MENU
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ path('app_produit_index') }}"
+                           class="nav-link {{ route starts with 'app_produit_' and route != 'app_produit_mes_offres' ? 'active' : '' }}">
+                            <i class="bi bi-shop me-2"></i>Marketplace
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ path('app_produit_mes_offres') }}"
+                           class="nav-link {{ route == 'app_produit_mes_offres' ? 'active' : '' }}">
+                            <i class="bi bi-grid-fill me-2"></i>Mes annonces
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ path('app_commande_mes_commandes') }}"
+                           class="nav-link {{ route == 'app_commande_mes_commandes' ? 'active' : '' }}">
+                            <i class="bi bi-bag-check me-2"></i>Mes commandes (achats)
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ path('app_commande_mes_ventes') }}"
+                           class="nav-link {{ route == 'app_commande_mes_ventes' ? 'active' : '' }}">
+                            <i class="bi bi-receipt-cutoff me-2"></i>Commandes sur mes produits
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center justify-content-between mt-auto p-3">
+                    <a class="h6 fw-light mb-0 text-body" href="{{ path('app_produit_index') }}">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Retour site
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    {# Page Content #}
+    <div class="page-content">
+        <nav class="navbar top-bar navbar-light py-0 py-xl-3">
+            <div class="container-fluid p-0">
+                <div class="d-flex align-items-center w-100">
+
+                    <div class="navbar-expand-xl sidebar-offcanvas-menu">
+                        <button class="navbar-toggler me-auto p-2" type="button"
+                                data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
+                            <i class="bi bi-list text-primary fa-fw"></i>
+                        </button>
+                    </div>
+
+                    {# Flash messages (dismissible) #}
+                    <div class="ms-3 flex-grow-1">
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label }} alert-dismissible fade show py-2 mb-0 small" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <span class="badge badge-agri rounded-pill px-3 py-2">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {% if app.user %} {{ app.user.email ?? 'Utilisateur' }} {% else %} DEV {% endif %}
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        </nav>
+
+        <div class="page-content-wrapper p-xxl-4">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+
+</main>
+
+{# ✅ JS (garde tes assets) #}
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

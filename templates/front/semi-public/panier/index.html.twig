@@ -1,0 +1,142 @@
+{% extends 'front/base.html.twig' %}
+{% block title %}Mon panier | AgriSmart{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light border-bottom">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="display-6 fw-bold mb-1">Mon panier</h1>
+        <div class="text-muted">Vérifiez vos articles avant de passer au paiement.</div>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
+          <i class="bi bi-arrow-left me-1"></i> Continuer les achats
+        </a>
+
+        {% if count > 0 %}
+          <form method="post" action="{{ path('app_panier_clear') }}" class="d-inline" onsubmit="return confirm('Vider tout le panier ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('panier_clear') }}">
+            <button class="btn btn-outline-danger rounded-pill" type="submit">
+              <i class="bi bi-trash me-1"></i> Vider le panier
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    {% if items|length == 0 %}
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden text-center py-5">
+        <div class="card-body py-5">
+          <div class="mb-3">
+            <i class="bi bi-cart-x display-4 text-muted"></i>
+          </div>
+          <h2 class="h4 fw-bold mb-2">Votre panier est vide</h2>
+          <p class="text-muted mb-4">Ajoutez des produits depuis la marketplace pour passer commande.</p>
+          <a href="{{ path('app_produit_index') }}" class="btn btn-success rounded-pill px-4">
+            <i class="bi bi-shop me-2"></i> Découvrir la marketplace
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-4">Produit</th>
+                      <th class="text-center">Qté</th>
+                      <th class="text-end">Prix unitaire</th>
+                      <th class="text-end">Total</th>
+                      <th class="text-end pe-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in items %}
+                      {% set p = row.produit %}
+                      <tr>
+                        <td class="ps-4">
+                          <div class="d-flex align-items-center gap-3">
+                            <img src="{{ asset(p.image ?: 'assets/images/placeholder-product.png') }}"
+                                 alt="{{ p.nom }}" style="width:64px;height:64px;object-fit:cover;border-radius:14px;">
+                            <div>
+                              <div class="fw-semibold">{{ p.nom }}</div>
+                              <div class="text-muted small">{{ p.categorie }}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td class="text-center" style="width:160px;">
+                          <form method="post" action="{{ path('app_panier_qty', {id: p.id}) }}" class="d-inline-flex gap-2 align-items-center">
+                            <input type="number" name="qty" min="1" value="{{ row.qty }}"
+                                   class="form-control form-control-sm text-center" style="width:80px;">
+                            <button class="btn btn-sm btn-outline-success rounded-pill" type="submit">
+                              OK
+                            </button>
+                          </form>
+                        </td>
+
+                        <td class="text-end">{{ row.unitPrice|number_format(2, '.', ' ') }} TND</td>
+                        <td class="text-end fw-semibold">{{ row.lineTotal|number_format(2, '.', ' ') }} TND</td>
+
+                        <td class="text-end pe-4">
+                          <a class="btn btn-sm btn-outline-danger rounded-pill"
+                             href="{{ path('app_panier_remove', {id: p.id}) }}">
+                            <i class="bi bi-trash"></i>
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="p-4 d-flex justify-content-between text-muted">
+                <span>Articles : {{ count }}</span>
+                <span class="fw-bold">Total : {{ total|number_format(2, '.', ' ') }} TND</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top:18px;">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-3">Récapitulatif</h5>
+
+              <div class="d-flex justify-content-between text-muted">
+                <span>Sous-total</span>
+                <span>{{ total|number_format(2, '.', ' ') }} TND</span>
+              </div>
+              <div class="d-flex justify-content-between text-muted mt-2">
+                <span>Livraison</span>
+                <span>—</span>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Total</span>
+                <span>{{ total|number_format(2, '.', ' ') }} TND</span>
+              </div>
+
+              <a href="{{ path('app_checkout_index') }}" class="btn btn-success rounded-pill w-100 mt-3 py-2">
+                <i class="bi bi-credit-card me-1"></i> Passer au paiement
+              </a>
+
+              <div class="small text-muted mt-3">
+                Paiement sécurisé (mode démo/Stripe selon choix).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

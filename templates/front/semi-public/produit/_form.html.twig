@@ -1,0 +1,316 @@
+{# templates/front/produit/_form.html.twig #}
+
+{{ form_start(form, {
+    attr: {
+        class: 'am-form',
+        id: 'produit-form',
+        novalidate: 'novalidate'
+    }
+}) }}
+
+{# Alert global si formulaire invalide #}
+{% if form is defined and form.vars is defined and (not form.vars.valid) %}
+    <div class="alert alert-danger rounded-4 mb-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Corrige les champs en rouge puis réessaie.
+    </div>
+{% endif %}
+
+{% macro field_row(field, label, requiredText, helpText) %}
+    {# Macro helper (optionnel) - non utilisé ici car on veut classes spécifiques #}
+{% endmacro %}
+
+<div class="row g-3">
+
+    {# NOM #}
+    <div class="col-12">
+        <label class="form-label fw-bold">
+            Nom de l'annonce {% if form.nom.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.nom, {
+            attr: {
+                class: (form.nom.vars.errors|length ? 'form-control am-input is-invalid js-sync-name' : 'form-control am-input js-sync-name'),
+                placeholder: "Ex: Tracteur, Panier de légumes..."
+            }
+        }) }}
+        {% if form.nom.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.nom) }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# CATEGORIE #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Catégorie {% if form.categorie.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.categorie, {
+            attr: {
+                class: (form.categorie.vars.errors|length ? 'form-select am-input is-invalid js-sync-cat' : 'form-select am-input js-sync-cat')
+            }
+        }) }}
+        {% if form.categorie.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.categorie) }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# TYPE #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Type d'offre {% if form.type.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.type, {
+            attr: {
+                class: (form.type.vars.errors|length ? 'form-select am-input is-invalid js-type-selector' : 'form-select am-input js-type-selector')
+            }
+        }) }}
+        {% if form.type.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.type) }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# PRIX #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Prix (TND) {% if form.prix.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.prix, {
+            attr: {
+                class: (form.prix.vars.errors|length ? 'form-control am-input is-invalid js-sync-price' : 'form-control am-input js-sync-price'),
+                placeholder: '0.00',
+                min: 0,
+                step: '0.01'
+            }
+        }) }}
+        {% if form.prix.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.prix) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Utilise un prix ≥ 0.</div>
+    </div>
+
+    {# STOCK #}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">
+            Stock disponible
+        </label>
+        {{ form_widget(form.quantiteStock, {
+            attr: {
+                class: (form.quantiteStock.vars.errors|length ? 'form-control am-input is-invalid js-sync-stock' : 'form-control am-input js-sync-stock'),
+                min: 0,
+                step: '1'
+            }
+        }) }}
+        {% if form.quantiteStock.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.quantiteStock) }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# VILLE / REGION (OBLIGATOIRE POUR VENTE + LOCATION) #}
+    <div class="col-12">
+        <label class="form-label fw-bold">
+            Ville / Région {% if form.locationAddress.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.locationAddress, {
+            attr: {
+                class: (form.locationAddress.vars.errors|length ? 'form-control am-input is-invalid js-sync-loc' : 'form-control am-input js-sync-loc'),
+                placeholder: 'Ex: Béja, Tunisie'
+            }
+        }) }}
+        {% if form.locationAddress.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.locationAddress) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Sert pour la livraison/retrait et les filtres.</div>
+    </div>
+
+    {# DESCRIPTION #}
+    <div class="col-12">
+        <label class="form-label fw-bold">
+            Description {% if form.description.vars.required %}<span class="text-danger">*</span>{% endif %}
+        </label>
+        {{ form_widget(form.description, {
+            attr: {
+                class: (form.description.vars.errors|length ? 'form-control am-input is-invalid js-sync-desc' : 'form-control am-input js-sync-desc'),
+                rows: 4,
+                placeholder: 'Décrivez votre produit...'
+            }
+        }) }}
+        {% if form.description.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.description) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Minimum 10 caractères.</div>
+    </div>
+
+    {# SECTION LOCATION: dates uniquement (actif seulement si type=location) #}
+    <div class="col-12">
+        <div id="section-location" class="p-4 rounded-4 border bg-light" style="display:none;">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-calendar-event text-success me-2"></i>
+                <h6 class="mb-0 fw-bold">Période de location</h6>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small">
+                        Disponible du <span class="text-danger">*</span>
+                    </label>
+                    {{ form_widget(form.locationStart, {
+                        attr: {
+                            class: (form.locationStart.vars.errors|length ? 'form-control am-input is-invalid js-loc-start' : 'form-control am-input js-loc-start')
+                        }
+                    }) }}
+                    {% if form.locationStart.vars.errors|length %}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.locationStart) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small">
+                        Au <span class="text-danger">*</span>
+                    </label>
+                    {{ form_widget(form.locationEnd, {
+                        attr: {
+                            class: (form.locationEnd.vars.errors|length ? 'form-control am-input is-invalid js-loc-end' : 'form-control am-input js-loc-end')
+                        }
+                    }) }}
+                    {% if form.locationEnd.vars.errors|length %}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.locationEnd) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <div class="alert alert-info py-2 small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Ces dates sont obligatoires uniquement si le type = <strong>Location</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# SECTION PROMO #}
+    <div class="col-12">
+        <div class="p-4 rounded-4 border" style="border-style:dashed;">
+            <div class="form-check form-switch">
+                {{ form_widget(form.isPromotion, {
+                    attr: {
+                        class: (form.isPromotion.vars.errors|length ? 'form-check-input is-invalid js-promo-switch' : 'form-check-input js-promo-switch')
+                    }
+                }) }}
+                <label class="form-check-label fw-bold">
+                    🚀 Activer un prix promotionnel
+                </label>
+            </div>
+
+            {% if form.isPromotion.vars.errors|length %}
+                <div class="invalid-feedback d-block">
+                    {{ form_errors(form.isPromotion) }}
+                </div>
+            {% endif %}
+
+            <div id="section-promo-price" class="mt-3" style="display:none;">
+                <label class="form-label fw-bold small text-warning">Prix réduit (TND)</label>
+                {{ form_widget(form.promotionPrice, {
+                    attr: {
+                        class: (form.promotionPrice.vars.errors|length ? 'form-control am-input is-invalid js-sync-promo-price' : 'form-control am-input js-sync-promo-price'),
+                        placeholder: '0.00',
+                        min: 0,
+                        step: '0.01'
+                    }
+                }) }}
+                {% if form.promotionPrice.vars.errors|length %}
+                    <div class="invalid-feedback d-block">
+                        {{ form_errors(form.promotionPrice) }}
+                    </div>
+                {% endif %}
+                <div class="form-text">Doit être ≤ prix normal.</div>
+            </div>
+        </div>
+    </div>
+
+    {# IMAGE #}
+    <div class="col-12">
+        <label class="form-label fw-bold">Image du produit</label>
+        {{ form_widget(form.imageFile, {
+            attr: {
+                class: (form.imageFile.vars.errors|length ? 'form-control am-input is-invalid js-image-file' : 'form-control am-input js-image-file'),
+                accept: 'image/*'
+            }
+        }) }}
+        {% if form.imageFile.vars.errors|length %}
+            <div class="invalid-feedback d-block">
+                {{ form_errors(form.imageFile) }}
+            </div>
+        {% endif %}
+        <div class="form-text">Formats acceptés: jpg / png / webp (max 3MB).</div>
+    </div>
+
+    <div class="col-12 mt-4 pb-2">
+        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold" style="background:#1a4331; border:none;">
+            {{ button_label|default("Publier l'annonce") }}
+        </button>
+    </div>
+
+</div>
+
+{{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('produit-form');
+    if (!form) return;
+
+    const typeSelector = form.querySelector('.js-type-selector');
+    const promoSwitch  = form.querySelector('.js-promo-switch');
+
+    const sectionLocation = document.getElementById('section-location');
+    const sectionPromoPrice = document.getElementById('section-promo-price');
+
+    const startInput = form.querySelector('.js-loc-start');
+    const endInput   = form.querySelector('.js-loc-end');
+
+    function toggleSections() {
+        const isLocation = typeSelector && typeSelector.value === 'location';
+
+        if (sectionLocation) {
+            sectionLocation.style.display = isLocation ? 'block' : 'none';
+        }
+
+        // Disable + clear dates when not location (évite incohérences + évite envoyer des valeurs)
+        if (startInput) {
+            startInput.disabled = !isLocation;
+            if (!isLocation) startInput.value = '';
+        }
+        if (endInput) {
+            endInput.disabled = !isLocation;
+            endInput.min = startInput && startInput.value ? startInput.value : '';
+            if (!isLocation) endInput.value = '';
+        }
+
+        // Promo price
+        if (promoSwitch && sectionPromoPrice) {
+            sectionPromoPrice.style.display = promoSwitch.checked ? 'block' : 'none';
+        }
+    }
+
+    toggleSections();
+    form.addEventListener('change', toggleSections);
+    form.addEventListener('input', toggleSections);
+});
+</script>

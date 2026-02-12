@@ -1,0 +1,28 @@
+{{ form_start(form) }}
+<div class="row g-3">
+    <div class="col-md-6">
+        {{ form_label(form.task, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
+        {{ form_widget(form.task, {'attr': {'class': 'form-select ag-input'}}) }}
+        {{ form_errors(form.task) }}
+    </div>
+    <div class="col-md-6">
+        {{ form_label(form.workerId, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
+        {{ form_widget(form.workerId, {'attr': {'class': 'form-control ag-input'}}) }}
+        {{ form_errors(form.workerId) }}
+    </div>
+    <div class="col-md-6">
+        {{ form_label(form.dateAssignment, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
+        {{ form_widget(form.dateAssignment, {'attr': {'class': 'form-control ag-input'}}) }}
+        {{ form_errors(form.dateAssignment) }}
+    </div>
+    <div class="col-md-6">
+        {{ form_label(form.statut, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
+        {{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input'}}) }}
+        {{ form_errors(form.statut) }}
+    </div>
+</div>
+<div class="mt-4 d-flex gap-2">
+    <button class="btn ag-btn-primary text-white rounded-pill px-4">{{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('task_assignments_index') }}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
+</div>
+{{ form_end(form) }}

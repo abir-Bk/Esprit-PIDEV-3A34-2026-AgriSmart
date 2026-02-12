@@ -1,0 +1,139 @@
+{# templates/front/semi-public/produit/mes_offres.html.twig #}
+{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
+
+{% block title %}Mes Annonces - AgriSmart{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-12 d-sm-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1">Mes Annonces</h1>
+            <p class="text-muted mb-0 small">Gérez vos produits (édition, suppression, suivi du stock).</p>
+        </div>
+
+        <a href="{{ path('app_front_produit_new') }}" class="btn btn-success rounded-pill">
+            <i class="bi bi-plus-circle me-2"></i>Ajouter une offre
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm rounded-4 border-0">
+    <div class="card-body">
+
+        {% if produits is empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-bag-plus display-5 text-muted"></i>
+                <h5 class="mt-3">Aucune annonce pour le moment</h5>
+                <p class="text-muted mb-4">Publiez votre première offre pour apparaître dans la marketplace.</p>
+                <a href="{{ path('app_front_produit_new') }}" class="btn btn-success rounded-pill">
+                    <i class="bi bi-plus-circle me-2"></i>Créer une annonce
+                </a>
+            </div>
+        {% else %}
+            <div class="table-responsive-lg">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produit</th>
+                            <th>Catégorie</th>
+                            <th>Type</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for produit in produits %}
+                        <tr>
+                            <td style="min-width: 260px;">
+                                <div class="d-flex align-items-center">
+                                    <img
+                                        src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
+                                        class="rounded-3 border"
+                                        style="width: 56px; height: 44px; object-fit: cover;"
+                                        alt="{{ produit.nom }}"
+                                    >
+                                    <div class="ms-3">
+                                        <div class="fw-bold d-flex align-items-center gap-2">
+                                            {{ produit.nom }}
+
+                                            {% if produit.isPromotion %}
+                                                <span class="badge bg-warning text-dark">PROMO</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-muted small text-truncate" style="max-width: 320px;">
+                                            {{ produit.description }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ produit.categorie }}</span>
+                            </td>
+
+                            <td>
+                                {% if produit.type == 'location' %}
+                                    <span class="badge bg-info text-white">Location</span>
+                                {% else %}
+                                    <span class="badge bg-success text-white">Vente</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="fw-bold">
+                                {% if produit.isPromotion and produit.promotionPrice is not null %}
+                                    <span class="text-danger">{{ produit.promotionPrice }} TND</span>
+                                    <small class="text-muted text-decoration-line-through ms-1">{{ produit.prix }} TND</small>
+                                {% else %}
+                                    {{ produit.prix }} TND
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% set stock = produit.quantiteStock ?? 0 %}
+                                {% if stock <= 0 %}
+                                    <span class="badge bg-danger">Rupture</span>
+                                {% elseif stock <= 3 %}
+                                    <span class="badge bg-warning text-dark">Faible ({{ stock }})</span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle text-dark border">OK ({{ stock }})</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+
+                                    <a href="{{ path('app_produit_show', {id: produit.id}) }}"
+                                       class="btn btn-sm btn-outline-secondary rounded-pill"
+                                       title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <a href="{{ path('app_produit_edit', {id: produit.id}) }}"
+                                       class="btn btn-sm btn-outline-primary rounded-pill"
+                                       title="Éditer">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <form method="post"
+                                          action="{{ path('app_produit_delete', {id: produit.id}) }}"
+                                          onsubmit="return confirm('Supprimer cette annonce définitivement ?');"
+                                          class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

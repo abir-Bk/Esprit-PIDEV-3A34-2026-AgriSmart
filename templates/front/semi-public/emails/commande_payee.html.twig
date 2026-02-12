@@ -1,0 +1,25 @@
+<h2>Paiement confirmé ✅ - Commande #{{ commande.id }}</h2>
+
+<p>Bonjour <strong>{{ user.email ?? user.userIdentifier }}</strong>,</p>
+
+<p>Votre paiement a été confirmé.</p>
+
+<ul>
+  <li><strong>Total :</strong> {{ commande.montantTotal|number_format(2, '.', ' ') }} TND</li>
+  <li><strong>Mode :</strong> {{ commande.modePaiement }}</li>
+  <li><strong>Statut :</strong> {{ commande.statut }}</li>
+  <li><strong>Adresse :</strong> {{ commande.adresseLivraison }}</li>
+</ul>
+
+<h3>Détails</h3>
+<ul>
+  {% for item in commande.items %}
+    <li>
+      {{ item.produit.nom }}
+      — Qté {{ item.quantite }}
+      — {{ (item.prixUnitaire * item.quantite)|number_format(2, '.', ' ') }} TND
+    </li>
+  {% endfor %}
+</ul>
+
+<p>📎 Votre facture est jointe en PDF.</p>

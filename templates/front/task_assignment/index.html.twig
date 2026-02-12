@@ -1,0 +1,53 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Affectations de tâches - AgriSmart{% endblock %}
+
+{% block task_content %}
+  <div class="ag-card p-0 overflow-hidden">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0 fw-bold" style="color: var(--ag-text);">Affectations de tâches</h5>
+      <a href="{{ path('task_assignments_new') }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">
+        <i class="bi bi-plus-circle me-1"></i> Nouvelle affectation
+      </a>
+    </div>
+    <div class="p-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tâche</th>
+              <th>Ouvrier (ID)</th>
+              <th>Date d'affectation</th>
+              <th>Statut</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for assignment in assignments %}
+              <tr>
+                <td>{{ assignment.idAssignment }}</td>
+                <td>{{ assignment.task ? assignment.task.titre : '' }}</td>
+                <td>{{ assignment.workerId }}</td>
+                <td>{{ assignment.dateAssignment ? assignment.dateAssignment|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ assignment.statut }}</td>
+                <td class="text-end">
+                  <a href="{{ path('task_assignments_show', {id: assignment.idAssignment}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Voir</a>
+                  <a href="{{ path('task_assignments_edit', {id: assignment.idAssignment}) }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">Modifier</a>
+                  <form method="post" action="{{ path('task_assignments_delete', {id: assignment.idAssignment}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette affectation ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assignment.idAssignment) }}">
+                    <button class="btn btn-sm btn-outline-danger rounded-pill">Supprimer</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center py-5 ag-meta">Aucune affectation enregistrée.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

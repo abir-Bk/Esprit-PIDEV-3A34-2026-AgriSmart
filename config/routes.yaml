@@ -4,6 +4,17 @@ controllers:
         namespace: App\Controller
     type: attribute
 
+# Export ressource routes (explicit so they are always registered)
+app_ressource_export_excel:
+    path: /ressource/export-excel
+    methods: GET
+    controller: App\Controller\RessourceController::exportExcel
+
+app_ressource_export_csv:
+    path: /ressource/export-csv
+    methods: GET
+    controller: App\Controller\RessourceController::exportCsv
+
 connect_google_start:
     path: /connect/google
     controller: App\Controller\GoogleController::connect

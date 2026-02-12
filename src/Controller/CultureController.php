@@ -11,23 +11,45 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/culture')]
 class CultureController extends AbstractController
 {
     #[Route('/new', name: 'app_culture_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ParcelleRepository $parcelleRepo): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ParcelleRepository $parcelleRepo, ValidatorInterface $validator): Response
     {
         $parcelle = $parcelleRepo->find($request->request->get('parcelle_id'));
-        if (!$parcelle) return $this->redirectToRoute('app_parcelle_index');
+        if (!$parcelle) {
+            $this->addFlash('danger', 'Parcelle introuvable.');
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
+        $datePlantationStr = $request->request->get('datePlantation');
+        $dateRecolteStr = $request->request->get('dateRecoltePrevue');
+        try {
+            $datePlantation = $datePlantationStr ? new \DateTime($datePlantationStr) : null;
+            $dateRecoltePrevue = $dateRecolteStr ? new \DateTime($dateRecolteStr) : (($datePlantation ? clone $datePlantation : null)?->modify('+90 days'));
+        } catch (\Exception $e) {
+            $datePlantation = null;
+            $dateRecoltePrevue = null;
+        }
 
         $culture = new Culture();
         $culture->setParcelle($parcelle);
-        $culture->setTypeCulture($request->request->get('typeCulture'));
-        $culture->setVariete($request->request->get('variete'));
-        $culture->setStatut($request->request->get('statut') ?? 'En croissance');
-        $culture->setDatePlantation(new \DateTime($request->request->get('datePlantation')));
-        $culture->setDateRecoltePrevue((new \DateTime($request->request->get('datePlantation')))->modify('+90 days'));
+        $culture->setTypeCulture((string) $request->request->get('typeCulture', ''));
+        $culture->setVariete((string) $request->request->get('variete', ''));
+        $culture->setStatut((string) ($request->request->get('statut') ?? 'En croissance'));
+        $culture->setDatePlantation($datePlantation ?? new \DateTime());
+        $culture->setDateRecoltePrevue($dateRecoltePrevue ?? (clone $culture->getDatePlantation())->modify('+90 days'));
+
+        $errors = $validator->validate($culture);
+        if ($errors->count() > 0) {
+            foreach ($errors as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+            return $this->redirectToRoute('app_parcelle_index');
+        }
 
         $entityManager->persist($culture);
         $entityManager->flush();
@@ -42,6 +64,11 @@ class CultureController extends AbstractController
         $ressourceId = $request->request->get('ressource_id');
         $quantiteUtilisee = (float) $request->request->get('quantite');
 
+        if ($quantiteUtilisee <= 0) {
+            $this->addFlash('danger', 'La quantité doit être un nombre strictement positif.');
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
         $ressource = $em->getRepository(Ressource::class)->find($ressourceId);
 
         if (!$ressource) {
@@ -49,13 +76,18 @@ class CultureController extends AbstractController
             return $this->redirectToRoute('app_parcelle_index');
         }
 
-        if ($ressource->getStockRestan() < $quantiteUtilisee) {
-            $this->addFlash('danger', "Stock insuffisant pour {$ressource->getNom()}");
+        if ($ressource->getUser() !== $this->getUser()) {
+            $this->addFlash('danger', 'Accès refusé à cette ressource.');
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
+        if ($ressource->getStockRestant() < $quantiteUtilisee) {
+            $this->addFlash('danger', "Stock insuffisant pour {$ressource->getNom()} (disponible : {$ressource->getStockRestant()}).");
             return $this->redirectToRoute('app_parcelle_index');
         }
 
         // Mise à jour du stock
-        $ressource->setStockRestan($ressource->getStockRestan() - $quantiteUtilisee);
+        $ressource->setStockRestant($ressource->getStockRestant() - $quantiteUtilisee);
 
         // Création de l'historique
         $consommation = new Consommation();
@@ -75,15 +107,36 @@ class CultureController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_culture_edit', methods: ['POST'])]
-    public function edit(Request $request, Culture $culture, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Culture $culture, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
-        $culture->setTypeCulture($request->request->get('typeCulture'));
-        $culture->setVariete($request->request->get('variete'));
-        $culture->setStatut($request->request->get('statut'));
-        $culture->setDatePlantation(new \DateTime($request->request->get('datePlantation')));
-        
+        $datePlantationStr = $request->request->get('datePlantation');
+        $dateRecolteStr = $request->request->get('dateRecoltePrevue');
+        try {
+            if ($datePlantationStr) {
+                $culture->setDatePlantation(new \DateTime($datePlantationStr));
+            }
+            if ($dateRecolteStr) {
+                $culture->setDateRecoltePrevue(new \DateTime($dateRecolteStr));
+            }
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Format de date invalide.');
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
+        $culture->setTypeCulture((string) $request->request->get('typeCulture', ''));
+        $culture->setVariete((string) $request->request->get('variete', ''));
+        $culture->setStatut((string) $request->request->get('statut', ''));
+
+        $errors = $validator->validate($culture);
+        if ($errors->count() > 0) {
+            foreach ($errors as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
         $entityManager->flush();
-        $this->addFlash('info', 'Culture mise à jour.');
+        $this->addFlash('success', 'Culture mise à jour.');
         return $this->redirectToRoute('app_parcelle_index');
     }
 

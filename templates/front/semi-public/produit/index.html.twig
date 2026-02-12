@@ -1,0 +1,397 @@
+{# templates/front/produit/index.html.twig #}
+{% extends 'front/base.html.twig' %}
+
+{% block title %}AgriSmart | Marketplace{% endblock %}
+
+{% block body %}
+
+<style>
+/* =========================
+   AgriSmart Marketplace (scoped)
+   ========================= */
+.ag-marketplace{
+  --ag-primary:#1A4331;     /* vert logo */
+  --ag-primary-2:#2E7D32;   /* vert clair */
+  --ag-accent:#F4B400;      /* jaune/or */
+  --ag-cream:#FBF7EE;       /* beige doux */
+  --ag-bg:#F6F8F7;
+  --ag-text:#111827;
+  --ag-muted:#6B7280;
+  --ag-border:#E5E7EB;
+}
+
+/* Fix titres imposés par style.css */
+.ag-marketplace .ag-title{
+  font-size: clamp(2.0rem, 4vw, 3.0rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.ag-marketplace .ag-subtitle{
+  font-size: 1.05rem !important;
+  color: var(--ag-muted) !important;
+  margin: .75rem 0 0 0;
+}
+
+/* Hero */
+.ag-marketplace .ag-hero{
+  background:
+    radial-gradient(900px 420px at 18% 25%, rgba(46,125,50,.16), transparent 60%),
+    radial-gradient(700px 320px at 85% 10%, rgba(244,180,0,.14), transparent 55%),
+    linear-gradient(180deg, var(--ag-cream), #ffffff);
+  border-bottom: 1px solid rgba(17,24,39,.06);
+  padding: 3.0rem 0 2.0rem;
+}
+
+/* Buttons */
+.ag-marketplace .ag-btn-primary{
+  background: var(--ag-primary) !important;
+  border: none !important;
+}
+.ag-marketplace .ag-btn-primary:hover{ background:#163828 !important; }
+
+/* Category chips */
+.ag-marketplace a.ag-pill,
+.ag-marketplace a.ag-pill:visited{
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border: 1px solid var(--ag-border);
+  background: #fff;
+  color: var(--ag-text) !important;
+  text-decoration: none !important;
+  border-radius: 999px;
+  padding: .5rem .9rem;
+  font-weight: 600;
+  font-size: .92rem;
+  transition: .15s;
+}
+.ag-marketplace a.ag-pill:hover{
+  border-color: rgba(26,67,49,.35);
+  box-shadow: 0 .4rem 1rem rgba(0,0,0,.06);
+  transform: translateY(-1px);
+}
+.ag-marketplace a.ag-pill.active,
+.ag-marketplace a.ag-pill.active:visited{
+  border-color: rgba(26,67,49,.35);
+  background: rgba(26,67,49,.08);
+  color: var(--ag-primary) !important;
+}
+
+/* Content background */
+.ag-marketplace .ag-content{
+  background: var(--ag-bg);
+  padding: 2.0rem 0 3.0rem;
+}
+
+/* Filter card */
+.ag-marketplace .ag-filter-card{
+  border: 1px solid rgba(17,24,39,.06) !important;
+  border-radius: 20px !important;
+}
+.ag-marketplace .ag-input{
+  border-radius: 14px !important;
+  border: 1px solid var(--ag-border) !important;
+}
+.ag-marketplace .ag-input:focus{
+  border-color: rgba(26,67,49,.45) !important;
+  box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
+}
+
+/* Product cards */
+.ag-marketplace .ag-card{
+  border: 1px solid rgba(17,24,39,.06);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  transition: .18s;
+  height: 100%;
+}
+.ag-marketplace .ag-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 .9rem 1.6rem rgba(0,0,0,.08);
+}
+.ag-marketplace .ag-badges{
+  position:absolute; top: 12px; left: 12px;
+  display:flex; flex-wrap:wrap; gap:.35rem;
+}
+.ag-marketplace .ag-badge{
+  border-radius: 999px;
+  padding: .35rem .55rem;
+  font-weight: 800;
+  font-size: .72rem;
+  letter-spacing: .06em;
+  backdrop-filter: blur(6px);
+}
+.ag-marketplace .ag-badge.type-vente{ background: rgba(26,67,49,.92); color:#fff; }
+.ag-marketplace .ag-badge.type-location{ background: rgba(30,136,229,.92); color:#fff; }
+.ag-marketplace .ag-badge.promo{ background: rgba(244,180,0,.95); color:#111827; }
+
+.ag-marketplace .ag-meta{
+  color: var(--ag-muted);
+  font-size: .86rem;
+}
+
+.ag-marketplace .ag-hero-ornament{
+  width: min(420px, 100%);
+  height: 170px;
+  border-radius: 26px;
+  background:
+    radial-gradient(120px 120px at 25% 60%, rgba(46,125,50,.18), transparent 60%),
+    radial-gradient(140px 140px at 65% 35%, rgba(244,180,0,.18), transparent 60%),
+    linear-gradient(135deg, rgba(26,67,49,.10), rgba(46,125,50,.06));
+  border: 1px solid rgba(17,24,39,.06);
+}
+</style>
+
+<div class="ag-marketplace">
+
+  {# HERO #}
+  <section class="ag-hero">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <h1 class="ag-title" style="color:var(--ag-text);">Marketplace AgriSmart</h1>
+          <p class="ag-subtitle">
+            Produits agricoles en <strong>vente</strong> ou en <strong>location</strong>.
+          </p>
+
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-outline-dark rounded-pill">
+              <i class="bi bi-person-circle me-2"></i>Espace vendeur
+            </a>
+            <a href="{{ path('app_front_produit_new') }}" class="btn ag-btn-primary text-white rounded-pill">
+              <i class="bi bi-plus-circle me-2"></i>Publier une annonce
+            </a>
+            <a href="{{ path('app_panier_index') }}" class="btn btn-outline-success rounded-pill">
+              <i class="bi bi-cart3 me-2"></i>Panier
+            </a>
+          </div>
+
+          {# CATEGORIES CHIPS #}
+          {% set chipFilters = (filters|default({}))|merge({ page: 1 }) %}
+          <div class="mt-4 d-flex flex-wrap gap-2">
+            <a class="ag-pill {{ not (filters.categorie|default('')) ? 'active' : '' }}"
+               href="{{ path('app_produit_index', chipFilters|merge({ categorie: '' }) ) }}">
+              <i class="bi bi-grid-3x3-gap"></i> Toutes
+            </a>
+            {% for cat in categories|default([]) %}
+              <a class="ag-pill {{ (filters.categorie|default('')) == cat ? 'active' : '' }}"
+                 href="{{ path('app_produit_index', chipFilters|merge({ categorie: cat }) ) }}">
+                <i class="bi bi-tag"></i> {{ cat }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="col-lg-5 d-flex justify-content-lg-end">
+          <div class="ag-hero-ornament w-100"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# CONTENT #}
+  <section class="ag-content">
+    <div class="container">
+      <div class="row g-4">
+
+        {# SIDEBAR FILTERS #}
+        <aside class="col-lg-3">
+          <div class="card ag-filter-card shadow-sm p-4 sticky-top" style="top: 18px;">
+            <form method="get" action="{{ path('app_produit_index') }}" class="vstack gap-3" id="filter-form">
+
+              <div>
+                <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Recherche</div>
+                <div class="input-group">
+                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}">
+                  <button class="btn btn-outline-secondary" type="submit" title="Rechercher">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Type</div>
+                <select name="type" class="form-select ag-input" onchange="document.getElementById('filter-form').submit()">
+                  <option value="" {{ (filters.type|default('')) == '' ? 'selected' }}>Tous</option>
+                  <option value="vente" {{ (filters.type|default('')) == 'vente' ? 'selected' }}>Vente</option>
+                  <option value="location" {{ (filters.type|default('')) == 'location' ? 'selected' }}>Location</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Trier</div>
+                <select name="sort" class="form-select ag-input" onchange="document.getElementById('filter-form').submit()">
+                  <option value="recent" {{ (filters.sort|default('recent')) == 'recent' ? 'selected' }}>Nouveautés</option>
+                  <option value="price_asc" {{ (filters.sort|default('')) == 'price_asc' ? 'selected' }}>Prix croissant</option>
+                  <option value="price_desc" {{ (filters.sort|default('')) == 'price_desc' ? 'selected' }}>Prix décroissant</option>
+                </select>
+              </div>
+
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox" id="promoOnly" name="promo" value="1"
+                       {{ (filters.promo|default('')) == '1' ? 'checked' }} onchange="document.getElementById('filter-form').submit()">
+                <label class="form-check-label fw-semibold" for="promoOnly">Promotions uniquement</label>
+              </div>
+
+              {% if filters.categorie|default('') %}
+                <input type="hidden" name="categorie" value="{{ filters.categorie }}">
+              {% endif %}
+              <input type="hidden" name="page" value="1">
+
+              <div class="d-grid gap-2 pt-2">
+                <button type="submit" class="btn ag-btn-primary text-white rounded-pill">Appliquer</button>
+                <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">Réinitialiser</a>
+              </div>
+
+            </form>
+          </div>
+        </aside>
+
+        {# PRODUCTS GRID #}
+        <div class="col-lg-9">
+          {# Résultats + pagination info #}
+          {% if produits is defined and produits.getTotalItemCount() > 0 %}
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <p class="text-muted small mb-0">
+                <strong>{{ produits.getTotalItemCount() }}</strong> résultat{{ produits.getTotalItemCount() > 1 ? 's' : '' }}
+                {% if filters.categorie|default('') %}
+                  · catégorie : <span class="badge bg-light text-dark border">{{ filters.categorie }}</span>
+                {% endif %}
+              </p>
+            </div>
+          {% endif %}
+
+          <div class="row g-4">
+
+            {% for produit in produits %}
+              {% set stock = produit.quantiteStock ?? 0 %}
+
+              <div class="col-sm-6 col-xl-4">
+                <div class="ag-card">
+
+                  <div class="position-relative">
+                    <a href="{{ path('app_produit_show', {id: produit.id}) }}" class="text-decoration-none d-block">
+                      <img
+                        src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
+                        class="w-100"
+                        style="height: 190px; object-fit: cover;"
+                        alt="{{ produit.nom }}"
+                        loading="lazy"
+                      >
+                    </a>
+
+                    <div class="ag-badges">
+                      <span class="ag-badge {{ produit.type == 'location' ? 'type-location' : 'type-vente' }}">
+                        {{ produit.type == 'location' ? 'LOCATION' : 'VENTE' }}
+                      </span>
+                      {% if produit.isPromotion %}
+                        <span class="ag-badge promo">PROMO</span>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                      <div>
+                        <div class="text-uppercase fw-bold small" style="color:var(--ag-muted);">
+                          {{ produit.categorie }}
+                        </div>
+                        <div class="fw-bold" style="color:var(--ag-text);">
+                          {{ produit.nom }}
+                        </div>
+                      </div>
+
+                      {% if stock <= 0 %}
+                        <span class="badge bg-danger">Rupture</span>
+                      {% elseif stock <= 3 %}
+                        <span class="badge text-dark" style="background: rgba(244,180,0,.35);">Faible</span>
+                      {% else %}
+                        <span class="badge bg-success-subtle text-dark border">OK</span>
+                      {% endif %}
+                    </div>
+
+                    <p class="small mb-3 mt-2" style="color:var(--ag-muted); min-height: 40px;">
+                      {{ produit.description|default('')|slice(0, 80) }}{% if produit.description and produit.description|length > 80 %}…{% endif %}
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                      <div>
+                        {% if produit.isPromotion and produit.promotionPrice is not null %}
+                          <div class="fw-bold text-danger">
+                            {{ produit.promotionPrice }} TND
+                            <small class="text-muted text-decoration-line-through ms-1">{{ produit.prix }} TND</small>
+                          </div>
+                        {% else %}
+                          <div class="fw-bold" style="color:var(--ag-text);">
+                            {{ produit.prix }} TND
+                          </div>
+                        {% endif %}
+
+                        <div class="ag-meta mt-1">
+                          <i class="bi bi-geo-alt me-1"></i>
+                          {{ produit.locationAddress ?: '—' }}
+                        </div>
+                      </div>
+                    </div>
+
+                    {# ACTIONS: DETAILS + ADD TO CART (masqué si c'est sa propre offre) #}
+                    <div class="d-flex gap-2 mt-3">
+                      <a href="{{ path('app_produit_show', {id: produit.id}) }}"
+                         class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1">
+                        <i class="bi bi-eye me-1"></i> Détails
+                      </a>
+
+                      {% if app.user and produit.vendeur and produit.vendeur.id == app.user.id %}
+                        <span class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1 disabled" title="Vous ne pouvez pas commander votre propre offre">
+                          <i class="bi bi-person-badge me-1"></i> Votre offre
+                        </span>
+                      {% else %}
+                        <form method="post"
+                              action="{{ path('app_panier_add', {id: produit.id}) }}"
+                              class="flex-grow-1">
+                          <input type="hidden" name="_token" value="{{ csrf_token('panier_add_' ~ produit.id) }}">
+                          <input type="hidden" name="qty" value="1">
+                          <button type="submit"
+                                  class="btn btn-sm btn-success rounded-pill w-100"
+                                  {% if stock <= 0 %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus me-1"></i> Ajouter
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            {% else %}
+              <div class="col-12">
+                <div class="text-center py-5 bg-white rounded-4 border shadow-sm">
+                  <i class="bi bi-search display-5 text-muted"></i>
+                  <h4 class="mt-3">Aucun produit trouvé</h4>
+                  <p class="text-muted mb-4">Essaie de modifier tes filtres ou réinitialiser la recherche.</p>
+                  <a href="{{ path('app_produit_index') }}" class="btn ag-btn-primary text-white rounded-pill">
+                    Voir tout
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+
+          </div>
+
+          {# PAGINATION (KNP) #}
+          {% if produits is defined and produits.getTotalItemCount() > produits.getItemNumberPerPage() %}
+            <nav class="d-flex justify-content-center mt-4" aria-label="Pagination des produits">
+              {{ knp_pagination_render(produits, null, { query: app.request.query.all }) }}
+            </nav>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

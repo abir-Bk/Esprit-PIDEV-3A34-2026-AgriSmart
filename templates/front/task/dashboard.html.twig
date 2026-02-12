@@ -1,0 +1,98 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Tâches | AgriSmart{% endblock %}
+
+{% block task_content %}
+  <section class="ag-hero">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <h1 class="ag-title">Tâches AgriSmart</h1>
+          <p class="ag-subtitle">
+            Planifiez et suivez vos <strong>tâches agricoles</strong>, affectations et calendrier.
+          </p>
+          <div class="d-flex flex-wrap gap-3 mt-4">
+            <a href="{{ path('tasks_index') }}" class="btn ag-btn-primary text-white rounded-pill px-4 py-2">
+              <i class="bi bi-list-check me-2"></i>Accéder à la gestion des tâches
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-5 d-flex justify-content-lg-end">
+          <div class="ag-hero-ornament w-100"></div>
+        </div>
+      </div>
+  </section>
+
+  <section class="ag-content">
+    <div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="ag-card p-4 h-100">
+            <div class="d-flex align-items-center">
+              <div class="rounded-3 p-3 me-3" style="background: rgba(26,67,49,.1);">
+                <i class="bi bi-list-task fs-2" style="color: var(--ag-primary);"></i>
+              </div>
+              <div>
+                <div class="small text-uppercase fw-bold" style="color: var(--ag-muted);">Total tâches</div>
+                <div class="h4 mb-0 fw-bold" style="color: var(--ag-text);">{{ totalTasks }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="ag-card p-4 h-100">
+            <div class="d-flex align-items-center">
+              <div class="rounded-3 p-3 me-3" style="background: rgba(59,130,246,.1);">
+                <i class="bi bi-circle fs-2 text-primary"></i>
+              </div>
+              <div>
+                <div class="small text-uppercase fw-bold" style="color: var(--ag-muted);">À faire</div>
+                <div class="h4 mb-0 fw-bold text-primary">{{ todoTasks }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="ag-card p-4 h-100">
+            <div class="d-flex align-items-center">
+              <div class="rounded-3 p-3 me-3" style="background: rgba(245,158,11,.15);">
+                <i class="bi bi-arrow-repeat fs-2 text-warning"></i>
+              </div>
+              <div>
+                <div class="small text-uppercase fw-bold" style="color: var(--ag-muted);">En cours</div>
+                <div class="h4 mb-0 fw-bold text-warning">{{ inProgressTasks }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="ag-card p-4 h-100">
+            <div class="d-flex align-items-center">
+              <div class="rounded-3 p-3 me-3" style="background: rgba(26,67,49,.12);">
+                <i class="bi bi-check-circle fs-2" style="color: var(--ag-primary);"></i>
+              </div>
+              <div>
+                <div class="small text-uppercase fw-bold" style="color: var(--ag-muted);">Terminées</div>
+                <div class="h4 mb-0 fw-bold" style="color: var(--ag-primary);">{{ doneTasks }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-2">
+        <div class="col-12">
+          <div class="ag-card p-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <div>
+                <h5 class="fw-bold mb-1" style="color: var(--ag-text);">Résumé</h5>
+                <p class="ag-meta mb-0">{{ totalAssignments }} affectation(s) · Tâches du jour : {{ todayTasks|length }}</p>
+              </div>
+              <a href="{{ path('tasks_index') }}" class="btn ag-btn-primary text-white rounded-pill">
+                <i class="bi bi-gear me-1"></i> Gestion des tâches
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+  </section>
+{% endblock %}

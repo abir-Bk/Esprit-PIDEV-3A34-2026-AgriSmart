@@ -1,0 +1,93 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Liste des tâches - AgriSmart{% endblock %}
+
+{% block task_content %}
+  <div class="ag-card p-0 overflow-hidden">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0 fw-bold" style="color: var(--ag-text);">Tâches agricoles</h5>
+      <div class="d-flex gap-2">
+        <a href="{{ path('tasks_calendar') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+          <i class="bi bi-calendar3 me-1"></i> Calendrier
+        </a>
+        <a href="{{ path('tasks_new') }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">
+          <i class="bi bi-plus-circle me-1"></i> Nouvelle tâche
+        </a>
+      </div>
+    </div>
+    <div class="p-4">
+      <form method="get" action="{{ path('tasks_index') }}" class="card ag-filter-card shadow-sm p-3 mb-4">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label small fw-bold mb-1" style="color: var(--ag-muted);">Recherche</label>
+            <input type="text" name="q" class="form-control ag-input" placeholder="Rechercher par titre, type, statut..." value="{{ q|default('') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold mb-1" style="color: var(--ag-muted);">Tri</label>
+            <select name="sort" class="form-select ag-input">
+              <option value="dateDebut" {{ (sort|default('dateDebut')) == 'dateDebut' ? 'selected' : '' }}>Date début</option>
+              <option value="dateFin" {{ (sort|default('dateDebut')) == 'dateFin' ? 'selected' : '' }}>Date fin</option>
+              <option value="titre" {{ (sort|default('dateDebut')) == 'titre' ? 'selected' : '' }}>Titre</option>
+              <option value="type" {{ (sort|default('dateDebut')) == 'type' ? 'selected' : '' }}>Type</option>
+              <option value="priorite" {{ (sort|default('dateDebut')) == 'priorite' ? 'selected' : '' }}>Priorité</option>
+              <option value="statut" {{ (sort|default('dateDebut')) == 'statut' ? 'selected' : '' }}>Statut</option>
+              <option value="id" {{ (sort|default('dateDebut')) == 'id' ? 'selected' : '' }}>ID</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-bold mb-1" style="color: var(--ag-muted);">Ordre</label>
+            <select name="direction" class="form-select ag-input">
+              <option value="DESC" {{ (direction|default('DESC')) == 'DESC' ? 'selected' : '' }}>Décroissant</option>
+              <option value="ASC" {{ (direction|default('DESC')) == 'ASC' ? 'selected' : '' }}>Croissant</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn ag-btn-primary text-white w-100 rounded-pill">Appliquer</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titre</th>
+              <th>Type</th>
+              <th>Priorité</th>
+              <th>Statut</th>
+              <th>Date début</th>
+              <th>Date fin</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for task in tasks %}
+              <tr>
+                <td>{{ task.idTask }}</td>
+                <td>{{ task.titre }}</td>
+                <td>{{ task.type }}</td>
+                <td>{{ task.priorite }}</td>
+                <td>{{ task.statut }}</td>
+                <td>{{ task.dateDebut ? task.dateDebut|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ task.dateFin ? task.dateFin|date('d/m/Y H:i') : '' }}</td>
+                <td class="text-end">
+                  <a href="{{ path('tasks_show', {id: task.idTask}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Voir</a>
+                  <a href="{{ path('tasks_edit', {id: task.idTask}) }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">Modifier</a>
+                  <form method="post" action="{{ path('tasks_delete', {id: task.idTask}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette tâche ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.idTask) }}">
+                    <button class="btn btn-sm btn-outline-danger rounded-pill">Supprimer</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center py-5 ag-meta">Aucune tâche enregistrée.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

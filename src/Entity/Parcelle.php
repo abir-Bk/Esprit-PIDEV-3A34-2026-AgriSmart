@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\ParcelleRepository;
-use App\Entity\User; // Import de l'entité User
+use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ParcelleRepository::class)]
 class Parcelle
@@ -17,18 +18,29 @@ class Parcelle
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom de la parcelle est obligatoire.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $nom = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La surface est obligatoire.')]
+    #[Assert\Positive(message: 'La surface doit être strictement positive (en hectares).')]
+    #[Assert\LessThanOrEqual(10000, message: 'La surface ne peut pas dépasser 10 000 hectares.')]
     private ?float $surface = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La latitude est obligatoire.')]
+    #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'La latitude doit être entre {{ min }} et {{ max }}.')]
     private ?float $latitude = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La longitude est obligatoire.')]
+    #[Assert\Range(min: -180, max: 180, notInRangeMessage: 'La longitude doit être entre {{ min }} et {{ max }}.')]
     private ?float $longitude = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le type de sol est obligatoire.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Le type de sol doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le type de sol ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $typeSol = null;
 
     // La nouvelle relation correcte vers l'utilisateur

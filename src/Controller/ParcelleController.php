@@ -67,22 +67,38 @@ class ParcelleController extends AbstractController
         $form = $this->createForm(ParcelleType::class, $parcelle);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $parcelle->setUser($user);
-            $entityManager->persist($parcelle);
-            $entityManager->flush();
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                try {
+                    $parcelle->setUser($user);
+                    $entityManager->persist($parcelle);
+                    $entityManager->flush();
 
-            $this->addFlash('success', 'Parcelle créée avec succès !');
-            return $this->redirectToRoute('app_parcelle_index', ['search' => $search]);
+                    $this->addFlash('success', '✅ Parcelle créée avec succès !');
+                    // Redirection sans filtre de recherche pour que la nouvelle parcelle soit visible
+                    return $this->redirectToRoute('app_parcelle_index');
+                } catch (\Exception $e) {
+                    $this->addFlash('danger', '❌ Erreur lors de la création de la parcelle.');
+                }
+            } else {
+                // Erreurs de validation : on garde le formulaire ouvert dans le modal (voir showParcelleModal)
+                $errors = $form->getErrors(true);
+                foreach ($errors as $error) {
+                    $this->addFlash('danger', '❌ ' . $error->getMessage());
+                }
+            }
         }
 
+        $showParcelleModal = $form->isSubmitted() && !$form->isValid();
+
         return $this->render('front/semi-public/parcelle/parcelle.html.twig', [
-            'parcelles'  => $parcelles,
-            'ressources' => $ressourceRepository->findBy(['user' => $user]),
-            'form'       => $form->createView(),
-            'search'     => $search,
-            'sort'       => $sort,
-            'direction'  => $direction,
+            'parcelles'         => $parcelles,
+            'ressources'        => $ressourceRepository->findBy(['user' => $user]),
+            'form'              => $form->createView(),
+            'search'            => $search,
+            'sort'              => $sort,
+            'direction'         => $direction,
+            'showParcelleModal' => $showParcelleModal,
         ]);
     }
 
@@ -99,10 +115,21 @@ class ParcelleController extends AbstractController
         $form = $this->createForm(ParcelleType::class, $parcelle);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-            $this->addFlash('success', 'Parcelle modifiée.');
-            return $this->redirectToRoute('app_parcelle_index');
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                try {
+                    $entityManager->flush();
+                    $this->addFlash('success', '✅ Parcelle modifiée avec succès.');
+                    return $this->redirectToRoute('app_parcelle_index');
+                } catch (\Exception $e) {
+                    $this->addFlash('danger', '❌ Erreur lors de la modification.');
+                }
+            } else {
+                $errors = $form->getErrors(true);
+                foreach ($errors as $error) {
+                    $this->addFlash('danger', '❌ ' . $error->getMessage());
+                }
+            }
         }
 
         return $this->render('front/semi-public/parcelle/edit.html.twig', [
@@ -122,9 +149,13 @@ class ParcelleController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete' . $parcelle->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($parcelle);
-            $entityManager->flush();
-            $this->addFlash('success', 'Parcelle supprimée.');
+            try {
+                $entityManager->remove($parcelle);
+                $entityManager->flush();
+                $this->addFlash('success', '✅ Parcelle supprimée.');
+            } catch (\Exception $e) {
+                $this->addFlash('danger', '❌ Impossible de supprimer cette parcelle.');
+            }
         }
 
         return $this->redirectToRoute('app_parcelle_index');

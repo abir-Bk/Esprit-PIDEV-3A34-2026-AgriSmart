@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Facture #{{ commande.id }} - AgriSmart</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; margin: 0; padding: 20px; }
+        .header { border-bottom: 3px solid #1a4331; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; color: #1a4331; margin: 0 0 5px 0; }
+        .header .sub { font-size: 10px; color: #6b7280; }
+        .info-block { margin-bottom: 20px; }
+        .info-block strong { display: inline-block; width: 140px; color: #1a4331; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+        th { background: #1a4331; color: white; font-weight: bold; }
+        .right { text-align: right; }
+        .total-row { font-size: 14px; font-weight: bold; background: #f6f8f7; }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #6b7280; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>AgriSmart</h1>
+    <p class="sub">Facture · Commande #{{ commande.id }}</p>
+</div>
+
+<div class="info-block">
+    <p><strong>Client :</strong> {{ user.email ?? user.userIdentifier }}</p>
+    <p><strong>Adresse livraison :</strong> {{ commande.adresseLivraison }}</p>
+    <p><strong>Date de commande :</strong> {{ commande.createdAt|date('d/m/Y à H:i') }}</p>
+    <p><strong>Statut :</strong> {{ commande.statut }}</p>
+    <p><strong>Mode de paiement :</strong> {{ commande.modePaiement == 'carte' ? 'Carte bancaire' : 'À domicile' }}</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th class="right">Qté</th>
+            <th class="right">Prix unitaire (TND)</th>
+            <th class="right">Sous-total (TND)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in commande.items %}
+            <tr>
+                <td>{{ item.produit.nom }}</td>
+                <td class="right">{{ item.quantite }}</td>
+                <td class="right">{{ item.prixUnitaire|number_format(2, ',', ' ') }}</td>
+                <td class="right">{{ (item.prixUnitaire * item.quantite)|number_format(2, ',', ' ') }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p class="right total-row" style="margin-top: 15px;">
+    Total : {{ commande.montantTotal|number_format(2, ',', ' ') }} TND
+</p>
+
+<div class="footer">
+    Document généré par AgriSmart · Facture commande #{{ commande.id }} · {{ "now"|date("d/m/Y H:i") }}
+</div>
+
+</body>
+</html>

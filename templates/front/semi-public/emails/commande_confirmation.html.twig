@@ -1,0 +1,20 @@
+<h2>Merci pour votre commande #{{ commande.id }} ✅</h2>
+
+<p>Bonjour <strong>{{ user.email ?? user.userIdentifier }}</strong>,</p>
+
+<ul>
+  <li><strong>Total :</strong> {{ commande.montantTotal|number_format(2, '.', ' ') }} TND</li>
+  <li><strong>Mode paiement :</strong> {{ commande.modePaiement }}</li>
+  <li><strong>Statut :</strong> {{ commande.statut }}</li>
+</ul>
+
+<p><strong>Adresse :</strong> {{ commande.adresseLivraison }}</p>
+
+<h3>Détails</h3>
+<ul>
+  {% for item in commande.items %}
+    <li>{{ item.produit.nom }} — Qté {{ item.quantite }} — {{ (item.prixUnitaire * item.quantite)|number_format(2, '.', ' ') }} TND</li>
+  {% endfor %}
+</ul>
+
+<p>— AgriSmart</p>

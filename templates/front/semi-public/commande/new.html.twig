@@ -1,0 +1,77 @@
+{% extends 'front/produit/base_dashboard.html.twig' %}
+
+{% block title %}Commander - AgriSmart{% endblock %}
+
+{% block body %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm rounded-4 border-0">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="fw-bold mb-1">Commander</h2>
+                <p class="text-muted mb-4">Finalise ta commande en quelques secondes.</p>
+
+                <div class="alert alert-light border rounded-4">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fw-bold">{{ produit.nom }}</div>
+                            <div class="text-muted small">{{ produit.categorie }} • {{ produit.type }}</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">{{ prixUnitaire }} TND</div>
+                            <div class="text-muted small">Prix unitaire</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_start(form) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.quantite) }}
+                    {{ form_widget(form.quantite, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.quantite) }}
+                </div>
+
+                <div class="mb-4">
+                    {{ form_label(form.modePaiement) }}
+                    {{ form_widget(form.modePaiement, { attr: { class: 'form-select' } }) }}
+                    {{ form_errors(form.modePaiement) }}
+                </div>
+
+                <button class="btn btn-success w-100 py-3 rounded-pill fw-bold" style="background:#1a4331;border:none;">
+                    Confirmer la commande
+                </button>
+
+                {{ form_end(form) }}
+
+                <div class="text-center mt-3">
+                    <a class="text-muted" href="{{ path('app_produit_show', {id: produit.id}) }}">Retour produit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow-sm rounded-4 border-0">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Récapitulatif</h5>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Produit</span>
+                    <span class="fw-semibold">{{ produit.nom }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Prix unitaire</span>
+                    <span class="fw-semibold">{{ prixUnitaire }} TND</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Statut</span>
+                    <span class="badge bg-warning text-dark">En attente</span>
+                </div>
+                <hr>
+                <p class="small text-muted mb-0">
+                    Stock décrémenté uniquement après paiement validé (à implémenter quand l’API paiement sera prête).
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

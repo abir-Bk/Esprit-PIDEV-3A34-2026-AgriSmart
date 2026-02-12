@@ -1,0 +1,130 @@
+{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
+
+
+{% block title %}AgriSmart - Modifier l'annonce{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row g-4">
+        {# Colonne Formulaire #}
+        <div class="col-lg-7">
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                <h2 class="fw-bold mb-4" style="color: #1a4331;">
+                    <i class="bi bi-pencil-square me-2"></i>Modifier l'Annonce
+                </h2>
+                
+                {# On réutilise le même formulaire partagé #}
+                {% include 'front/semi-public/produit/_form.html.twig' %}
+                
+                <div class="mt-4">
+                    <a href="{{ path('app_produit_index') }}" class="btn btn-light rounded-pill px-4">
+                        <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Colonne Preview (Identique à New) #}
+        <div class="col-lg-5">
+            <div class="sticky-top" style="top: 20px;">
+                <p class="text-muted fw-bold text-uppercase small mb-3">Aperçu en temps réel</p>
+                
+                <div id="live-card" class="card border-0 shadow rounded-4 overflow-hidden" style="transition: 0.3s;">
+                    <div class="position-relative">
+                        <span id="p-badge" class="badge bg-warning text-dark position-absolute m-3 fw-bold" style="display:none; z-index:10;">
+                            <i class="bi bi-lightning-fill"></i> PROMO
+                        </span>
+                        {# Ici on affiche l'image actuelle par défaut #}
+                        <img id="p-img" src="{{ produit.image ? asset(produit.image) : asset('assets/images/placeholder-product.png') }}" class="w-100" style="height:250px; object-fit:cover;">
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <small id="p-sub" class="text-success fw-bold text-uppercase" style="font-size: 0.75rem;">{{ produit.categorie }} • {{ produit.type }}</small>
+                        <h4 id="p-name" class="fw-bold my-2 text-dark">{{ produit.nom }}</h4>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h3 class="text-dark fw-bold mb-0"><span id="p-price">{{ produit.prix }}</span> <small class="fs-6">TND</small></h3>
+                            <span id="p-stock" class="badge bg-light text-muted border">Stock: {{ produit.stock ?? 0 }}</span>
+                        </div>
+
+                        <div id="p-loc-box" class="mt-3 p-2 bg-light rounded-3 {{ produit.type == 'location' ? '' : 'd-none' }}">
+                            <i class="bi bi-geo-alt-fill text-danger"></i>
+                            <small id="p-loc-text" class="text-muted fw-medium">{{ produit.adresse ?? 'Adresse non définie' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form'); // Sélectionne le formulaire généré par _form.html.twig
+    
+    function syncPreview() {
+        const nameVal = form.querySelector('.js-sync-name').value;
+        const priceVal = form.querySelector('.js-sync-price').value;
+        const promoPriceVal = form.querySelector('.js-sync-promo-price')?.value;
+        const stockVal = form.querySelector('.js-sync-stock').value;
+        const typeSelector = form.querySelector('.js-type-selector');
+        const promoSwitch = form.querySelector('.js-promo-switch');
+        const isPromo = promoSwitch ? promoSwitch.checked : false;
+        const locVal = form.querySelector('.js-sync-loc')?.value;
+
+        // Affichage dynamique sections
+        const sectionLoc = document.getElementById('section-location');
+        if(sectionLoc) sectionLoc.style.display = (typeSelector.value === 'location') ? 'block' : 'none';
+        
+        const sectionPromo = document.getElementById('section-promo-price');
+        if(sectionPromo) sectionPromo.style.display = isPromo ? 'block' : 'none';
+
+        // Update Textes
+        document.getElementById('p-name').innerText = nameVal || "Nom de l'annonce";
+        document.getElementById('p-stock').innerText = "Stock: " + (stockVal || "0");
+        document.getElementById('p-sub').innerText = "Catégorie • " + typeSelector.options[typeSelector.selectedIndex].text;
+
+        // Logique Prix & Badge Promo
+        let finalPrice = priceVal || "0";
+        if (isPromo && promoPriceVal) {
+            finalPrice = promoPriceVal;
+            document.getElementById('p-badge').style.display = 'block';
+            document.getElementById('live-card').style.border = "2px solid #f8b400";
+        } else {
+            document.getElementById('p-badge').style.display = 'none';
+            document.getElementById('live-card').style.border = "none";
+        }
+        document.getElementById('p-price').innerText = finalPrice;
+
+        // Zone Adresse
+        const pLocBox = document.getElementById('p-loc-box');
+        if (typeSelector.value === 'location') {
+            pLocBox.classList.remove('d-none');
+            document.getElementById('p-loc-text').innerText = locVal || "Adresse non définie";
+        } else {
+            pLocBox.classList.add('d-none');
+        }
+    }
+
+    // Lancer la synchro au chargement pour afficher les données existantes
+    syncPreview();
+
+    // Ecouter les changements
+    form.addEventListener('input', syncPreview);
+    
+    // Preview Image
+    const imgInput = form.querySelector('.js-image-file');
+    if(imgInput) {
+        imgInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                let reader = new FileReader();
+                reader.onload = e => document.getElementById('p-img').src = e.target.result;
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

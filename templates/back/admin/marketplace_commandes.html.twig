@@ -1,0 +1,65 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Commandes - Marketplace Admin - AgriSmart{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+    <div class="flex-grow-1 ag-admin-content">
+        <div class="container-fluid px-4">
+
+            <section class="py-4 pb-2">
+                <h1 class="h2 fw-bold mb-1" style="color: var(--ag-text);">Commandes marketplace</h1>
+                <p class="text-muted mb-0">Liste des commandes passées sur le marketplace.</p>
+            </section>
+
+            <div class="ag-admin-card p-4">
+                <p class="ag-meta mb-3"><strong>{{ commandes|length }}</strong> commande(s)</p>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                                <th>Paiement</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in commandes %}
+                                <tr>
+                                    <td class="fw-medium">{{ c.id }}</td>
+                                    <td>
+                                        {% if c.client %}
+                                            {{ c.client.firstName }} {{ c.client.lastName }}
+                                            <br><small class="text-muted">{{ c.client.email }}</small>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ c.montantTotal|number_format(2, ',', ' ') }} TND</td>
+                                    <td>
+                                        {% set statutClass = {
+                                            'payee': 'bg-success',
+                                            'en_attente': 'bg-warning text-dark',
+                                            'annulee': 'bg-danger',
+                                            'livree': 'bg-info'
+                                        } %}
+                                        <span class="badge {{ statutClass[c.statut]|default('bg-secondary') }}">{{ c.statut }}</span>
+                                    </td>
+                                    <td>{{ c.modePaiement }}</td>
+                                    <td>{{ c.createdAt|date('d/m/Y H:i') }}</td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="6" class="text-center text-muted py-4">Aucune commande.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

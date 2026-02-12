@@ -29,8 +29,9 @@ class userController extends AbstractController
 
         // Render dashboard based on role
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            return $this->render('back/admin/admin_dashboard.html.twig');
-        } else{return $this->render('front/semi-public/users/profile.html.twig');}
+            return $this->redirectToRoute('admin_marketplace_dashboard');
+        }
+        return $this->render('front/semi-public/users/profile.html.twig');
 
         // Default fallback
         return $this->redirectToRoute('app_login');

@@ -33,7 +33,8 @@ final class ProduitController extends AbstractController
         $promo = (string) $request->query->get('promo', '');
         $sort = (string) $request->query->get('sort', 'recent');
 
-        $qb = $repo->createQueryBuilder('p');
+        $qb = $repo->createQueryBuilder('p')
+            ->andWhere('p.banned = false');
 
         if ($q !== '') {
             $qb->andWhere('LOWER(p.nom) LIKE :q OR LOWER(p.description) LIKE :q')

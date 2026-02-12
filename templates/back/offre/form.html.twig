@@ -1,78 +1,65 @@
 {% extends 'back/admin_base.html.twig' %}
 
-{% block title %}{{ editMode ? 'Modifier' : 'Créer' }} - Offre d'emploi{% endblock %}
+{% block title %}{{ editMode ? 'Modifier' : 'Créer' }} offre - AgriSmart{% endblock %}
 
 {% block body %}
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-9">
-            <div class="card shadow border-0">
-                
-                {# En-tête dynamique : Vert si création, Orange si modification #}
-                <div class="card-header {{ editMode ? 'bg-warning' : 'bg-success' }} text-white py-3">
-                    <h4 class="mb-0 text-center text-white">
-                        <i class="bi {{ editMode ? 'bi-pencil-square' : 'bi-plus-circle' }} me-2"></i>
-                        {{ editMode ? 'Modifier l\'offre d\'emploi' : 'Nouvelle Offre d\'Emploi' }}
-                    </h4>
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+    <div class="flex-grow-1 p-4 am-content">
+        <div class="mb-4">
+            <a href="{{ path('app_admin_offres') }}" class="btn am-btn-outline mb-2"><i class="fa-solid fa-arrow-left me-1"></i>Retour</a>
+            <h1 class="h3 am-title mb-1">
+                <i class="fa-solid {{ editMode ? 'fa-pencil' : 'fa-plus' }} me-2"></i>
+                {{ editMode ? 'Modifier l\'offre' : 'Nouvelle offre' }}
+            </h1>
+        </div>
+
+        <div class="card border-0 am-card">
+            <div class="card-header am-card-header py-3 border-0">
+                <h4 class="mb-0 text-white"><i class="fa-solid fa-briefcase me-2"></i>{{ editMode ? 'Modifier' : 'Créer' }} l'offre</h4>
+            </div>
+            <div class="card-body p-4">
+                {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+                <div class="mb-3">{{ form_row(form.title, {label: 'Titre du poste'}) }}</div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">{{ form_row(form.typePoste, {label: 'Département'}) }}</div>
+                    <div class="col-md-6">{{ form_row(form.typeContrat) }}</div>
                 </div>
-
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                        
-                        {# Titre de l'offre #}
-                        <div class="mb-3">
-                            {{ form_row(form.title, {'label': 'Titre du poste', 'attr': {'placeholder': 'Ex: Ingénieur Agronome'}}) }}
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                {{ form_row(form.typePoste, {'label': 'Département'}) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form_row(form.typeContrat, {'label': 'Type de Contrat'}) }}
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            {{ form_row(form.description, {'label': 'Description détaillée', 'attr': {'rows': '6'}}) }}
-                        </div>
-
-                        <hr class="text-muted">
-                        <h6 class="text-uppercase small fw-bold mb-3 text-secondary">Logistique et Conditions</h6>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                {{ form_row(form.lieu, {'label': 'Localisation', 'attr': {'placeholder': 'Ex: Tunis, Remote...'}}) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form_row(form.salaire, {'label': 'Salaire (DT)'}) }}
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                {{ form_row(form.statut, {'label': 'Statut'}) }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form_row(form.dateDebut, {'label': 'Date de Début'}) }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form_row(form.dateFin, {'label': 'Date d\'Expiration'}) }}
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn {{ editMode ? 'btn-warning' : 'btn-success' }} btn-lg shadow-sm text-white">
-                                {{ editMode ? 'Enregistrer les modifications' : 'Publier cette offre' }}
-                            </button>
-                            <a href="{{ path('app_admin_offres') }}" class="btn btn-link text-muted text-decoration-none text-center">
-                                <i class="bi bi-arrow-left me-1"></i> Annuler et retourner à la liste
-                            </a>
-                        </div>
-                    {{ form_end(form) }}
+                <div class="mb-4">{{ form_row(form.description, {label: 'Description', attr: {rows: 6}}) }}</div>
+                <hr class="text-muted">
+                <h6 class="text-uppercase small fw-bold mb-3 am-text-muted">Logistique</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">{{ form_row(form.lieu, {label: 'Localisation'}) }}</div>
+                    <div class="col-md-6">{{ form_row(form.salaire, {label: 'Salaire (DT)'}) }}</div>
                 </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">{{ form_row(form.statut) }}</div>
+                    <div class="col-md-4">{{ form_row(form.dateDebut) }}</div>
+                    <div class="col-md-4">{{ form_row(form.dateFin) }}</div>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn {{ editMode ? 'am-btn-warning' : 'am-btn-success' }} btn-lg text-white">
+                        {{ editMode ? 'Enregistrer' : 'Publier' }}
+                    </button>
+                    <a href="{{ path('app_admin_offres') }}" class="btn btn-link text-muted text-decoration-none">Annuler</a>
+                </div>
+                {{ form_end(form) }}
             </div>
         </div>
     </div>
 </div>
+<style>
+.am-content { background: #f8f9fa; }
+.am-title { color: #1a4331; }
+.am-text-muted { color: #6c757d; }
+.am-card { box-shadow: 0 2px 12px rgba(26, 67, 49, 0.06); border-radius: 12px; }
+.am-card-header { background: linear-gradient(135deg, #1a4331 0%, #2d5a3d 100%); color: #fff; border-radius: 12px 12px 0 0; }
+.am-btn-outline { border: 1px solid #1a4331; color: #1a4331; border-radius: 8px; }
+.am-btn-outline:hover { background: #1a4331; color: #fff; }
+.am-btn-success { background: #28a745; color: #fff; border: none; border-radius: 8px; }
+.am-btn-success:hover { background: #218838; color: #fff; }
+.am-btn-warning { background: #E6BF4A; color: #1a4331; border: none; border-radius: 8px; }
+.am-btn-warning:hover { background: #d4ab3d; color: #1a4331; }
+.form-control:focus, .form-select:focus { border-color: #E6BF4A; box-shadow: 0 0 0 0.2rem rgba(230, 191, 74, 0.2); }
+</style>
 {% endblock %}

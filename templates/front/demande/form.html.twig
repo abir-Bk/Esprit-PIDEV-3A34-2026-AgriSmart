@@ -1,74 +1,100 @@
-{% extends 'front/base.html.twig' %}
+{% extends 'front/offre/layout.html.twig' %}
 
-{% block title %}
-    {{ demande.id|default(null) ? 'Modifier' : 'Postuler' }} - {{ offre.title }}
-{% endblock %}
+{% block title %}{{ demande.id|default(null) ? 'Modifier' : 'Postuler' }} - {{ offre.title }} | AgriSmart{% endblock %}
 
-{% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card shadow border-0">
-                {% set is_edit = demande.id|default(null) %}
-                
-                <div class="card-header {{ is_edit ? 'bg-warning' : 'bg-success' }} text-white py-3">
-                    <h4 class="mb-0 text-center">
-                        {{ is_edit ? 'Modifier ma candidature' : 'Candidature : ' ~ offre.title }}
-                    </h4>
-                </div>
+{% block candidature_content %}
+{% set is_edit = demande.id|default(null) %}
 
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                        
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">{{ form_row(form.nom) }}</div>
-                            <div class="col-md-6">{{ form_row(form.prenom) }}</div>
-                        </div>
-
-                        <div class="mb-4">{{ form_row(form.phoneNumber) }}</div>
-
-                        <hr class="text-muted">
-                        <h6 class="text-uppercase small fw-bold mb-3 text-secondary">Pièces jointes (PDF)</h6>
-
-                        {# CV Field #}
-                        <div class="mb-4">
-                            {{ form_row(form.cv) }}
-                            {% if demande.cv|default(null) %}
-                                <div class="mt-1 d-flex align-items-center">
-                                    <span class="badge rounded-pill bg-light text-dark border me-2">
-                                        {# Replaced |u.truncate with core |slice #}
-                                        <i class="bi bi-file-earmark-pdf text-danger"></i> 
-                                        {{ demande.cv|length > 20 ? demande.cv|slice(0, 20) ~ '...' : demande.cv }}
-                                    </span>
-                                    <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="small text-decoration-none">Consulter</a>
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        {# Letter Field #}
-                        <div class="mb-4">
-                            {{ form_row(form.lettreMotivation) }}
-                            {% if demande.lettreMotivation|default(null) %}
-                                <div class="mt-1 d-flex align-items-center">
-                                    <span class="badge rounded-pill bg-light text-dark border me-2">
-                                        <i class="bi bi-file-earmark-text text-primary"></i> 
-                                        {{ demande.lettreMotivation|length > 20 ? demande.lettreMotivation|slice(0, 20) ~ '...' : demande.lettreMotivation }}
-                                    </span>
-                                    <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" target="_blank" class="small text-decoration-none">Consulter</a>
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn {{ is_edit ? 'btn-warning' : 'btn-success' }} btn-lg">
-                                {{ is_edit ? 'Mettre à jour ma demande' : 'Soumettre ma candidature' }}
-                            </button>
-                            <a href="{{ path('app_my_demandes') }}" class="btn btn-link text-muted text-decoration-none">Retour à la liste</a>
-                        </div>
-                    {{ form_end(form) }}
-                </div>
-            </div>
-        </div>
+<section class="ag-hero">
+  <div class="container">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+    <div>
+      <nav aria-label="breadcrumb" class="mb-2">
+        <ol class="breadcrumb mb-0 small">
+          <li class="breadcrumb-item"><a href="{{ path('app_offre_index_front') }}" class="text-decoration-none" style="color: var(--ag-primary);">Offres d'emploi</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-decoration-none" style="color: var(--ag-primary);">{{ offre.title }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ is_edit ? 'Modifier' : 'Postuler' }}</li>
+        </ol>
+      </nav>
+      <h1 class="ag-title">{{ is_edit ? 'Modifier ma candidature' : 'Candidature : ' ~ offre.title }}</h1>
+      <p class="ag-subtitle mb-0">{{ is_edit ? 'Mettez à jour vos informations et pièces jointes.' : 'Remplissez le formulaire pour postuler à cette offre.' }}</p>
     </div>
-</div>
-{% endblock %}  
+    <a href="{{ path('app_my_demandes') }}" class="btn btn-outline-dark rounded-pill"><i class="bi bi-arrow-left me-1"></i>Retour à la liste</a>
+  </div>
+  </div>
+</section>
+
+<section class="ag-content mt-0">
+  <div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+      <div class="ag-card">
+        <div class="p-4 p-lg-5">
+          {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              {{ form_label(form.nom) }}
+              {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input'}}) }}
+              {{ form_errors(form.nom) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_label(form.prenom) }}
+              {{ form_widget(form.prenom, {'attr': {'class': 'form-control ag-input'}}) }}
+              {{ form_errors(form.prenom) }}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            {{ form_label(form.phoneNumber) }}
+            {{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control ag-input'}}) }}
+            {{ form_errors(form.phoneNumber) }}
+          </div>
+
+          <hr class="my-4" style="border-color: var(--ag-border);">
+          <h6 class="text-uppercase small fw-bold mb-3 ag-meta">Pièces jointes (PDF)</h6>
+
+          <div class="mb-4">
+            {{ form_label(form.cv) }}
+            {{ form_widget(form.cv, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.cv) }}
+            {% if demande.cv|default(null) %}
+            <div class="mt-2 d-flex align-items-center gap-2">
+              <span class="badge rounded-pill px-3 py-2" style="background: rgba(26,67,49,.08); color: var(--ag-text);">
+                <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                {{ demande.cv|length > 25 ? demande.cv|slice(0, 25) ~ '...' : demande.cv }}
+              </span>
+              <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="small" style="color: var(--ag-primary);">Consulter</a>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            {{ form_label(form.lettreMotivation) }}
+            {{ form_widget(form.lettreMotivation, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.lettreMotivation) }}
+            {% if demande.lettreMotivation|default(null) %}
+            <div class="mt-2 d-flex align-items-center gap-2">
+              <span class="badge rounded-pill px-3 py-2" style="background: rgba(26,67,49,.08); color: var(--ag-text);">
+                <i class="bi bi-file-earmark-text me-1" style="color: var(--ag-primary);"></i>
+                {{ demande.lettreMotivation|length > 25 ? demande.lettreMotivation|slice(0, 25) ~ '...' : demande.lettreMotivation }}
+              </span>
+              <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" target="_blank" class="small" style="color: var(--ag-primary);">Consulter</a>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="d-grid gap-2 mt-5 pt-2">
+            <button type="submit" class="btn ag-btn-primary text-white rounded-pill btn-lg py-2">
+              {{ is_edit ? 'Mettre à jour ma demande' : 'Soumettre ma candidature' }}
+            </button>
+            <a href="{{ path('app_my_demandes') }}" class="btn btn-link ag-meta text-decoration-none">Retour à la liste</a>
+          </div>
+          {{ form_end(form) }}
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+{% endblock %}

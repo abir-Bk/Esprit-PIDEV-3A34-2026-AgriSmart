@@ -2,6 +2,17 @@
 {% set _route = app.request.attributes.get('_route') ?? '' %}
 {% set _is_marketplace = _route starts with 'app_produit_' or _route starts with 'app_panier_' or _route starts with 'app_checkout_' %}
 {% set _user_role = app.user ? app.user.role : null %}
+{% set _is_auth_page = _route == 'app_login' or _route == 'app_register' %}
+<style>
+/* Nav : couleur vert AgriSmart, lien actif mis en évidence */
+header.header-sticky .navbar-nav .nav-link { color: #374151 !important; border-radius: 999px; }
+header.header-sticky .navbar-nav .nav-link:hover { color: #1a4331 !important; background: rgba(26,67,49,.06) !important; }
+header.header-sticky .navbar-nav .nav-link.active {
+  color: #1a4331 !important;
+  background: rgba(26,67,49,.12) !important;
+  font-weight: 600 !important;
+}
+</style>
 
 <header class="navbar-light header-sticky bg-white border-bottom py-1">
 	<nav class="navbar navbar-expand-xl py-1">
@@ -17,7 +28,9 @@
 
 			<div class="collapse navbar-collapse" id="navbarCollapse">
 				<ul class="navbar-nav mx-auto">
-					{% if _user_role == 'agriculteur' or _user_role == 'admin' %}
+					{% if _is_auth_page %}
+						{# Login / Sign up : pas de liens Marketplace ni Candidature #}
+					{% elseif _user_role == 'agriculteur' or _user_role == 'admin' %}
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'tasks_' ? 'active fw-semibold' }}" href="{{ path('tasks_dashboard') }}"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'app_parcelle_' ? 'active fw-semibold' }}" href="{{ path('app_parcelle_index') }}"><i class="bi bi-flower1 me-1"></i>Culture</a></li>

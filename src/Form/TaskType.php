@@ -120,33 +120,41 @@ class TaskType extends AbstractType
 ])
 
             ->add('parcelleId', EntityType::class, [
-    'class' => Parcelle::class,
-    'choice_label' => function (Parcelle $parcelle): string {
-        return sprintf(
-            'ID: %d - %s',
-            $parcelle->getId(),
-            $parcelle->getNom()
-        );
-    },
-    'label' => 'Parcelle',
-    'placeholder' => 'Sélectionner une parcelle',
-    'required' => false,
-    'mapped' => false, 
-])
+                'class' => Parcelle::class,
+                'choice_label' => function (Parcelle $parcelle): string {
+                    return $parcelle->getNom() . ' (' . $parcelle->getSurface() . ' ha)';
+                },
+                'label' => 'Parcelle',
+                'placeholder' => 'Sélectionner une parcelle',
+                'required' => false,
+                'mapped' => false,
+                'query_builder' => isset($options['user']) ? function (\Doctrine\ORM\EntityRepository $er) use ($options) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.user = :user')
+                        ->setParameter('user', $options['user'])
+                        ->orderBy('p.nom', 'ASC');
+                } : null,
+            ])
 
             ->add('culture', EntityType::class, [
-    'class' => Culture::class,
-    'choice_label' => function (Culture $culture): string {
-        return sprintf(
-            'ID: %d - %s',
-            $culture->getId(),
-            $culture->getTypeCulture()
-        );
-    },
-    'label' => 'Culture',
-    'placeholder' => 'Sélectionner une culture',
-    'required' => false,
-])
+                'class' => Culture::class,
+                'choice_label' => function (Culture $culture): string {
+                    $parcelle = $culture->getParcelle();
+                    $parcelleNom = $parcelle ? $parcelle->getNom() : '';
+                    return $culture->getTypeCulture() . ' – ' . $culture->getVariete() . ($parcelleNom ? ' (' . $parcelleNom . ')' : '');
+                },
+                'label' => 'Culture',
+                'placeholder' => 'Sélectionner une culture',
+                'required' => false,
+                'query_builder' => isset($options['user']) ? function (\Doctrine\ORM\EntityRepository $er) use ($options) {
+                    return $er->createQueryBuilder('c')
+                        ->innerJoin('c.parcelle', 'p')
+                        ->where('p.user = :user')
+                        ->setParameter('user', $options['user'])
+                        ->orderBy('c.typeCulture', 'ASC')
+                        ->addOrderBy('c.variete', 'ASC');
+                } : null,
+            ])
             // Champ pour choisir un utilisateur existant, sans modifier l'entité Task (on stocke toujours l'id)
             ->add('createdByUser', EntityType::class, [
                 'class' => User::class,
@@ -165,7 +173,9 @@ class TaskType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Task::class,
+            'user' => null,
         ]);
+        $resolver->setAllowedTypes('user', ['null', \App\Entity\User::class]);
     }
 }
 

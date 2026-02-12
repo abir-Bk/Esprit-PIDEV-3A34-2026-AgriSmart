@@ -3,7 +3,9 @@
 <head>
     {# Ligne unique pour le titre #}
     <title>{% block title %}AgriSmart Admin{% endblock %}</title>
-    
+
+    <link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/png">
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -19,9 +21,26 @@
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/overlay-scrollbar/css/overlayscrollbars.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
         <style>
-            :root { --am-green: #1a4331; }
-            body { background-color: #f8f9fa; }
-            .search-focus:focus { box-shadow: none !important; background-color: #fff !important; }
+            :root {
+                --am-green: #1a4331;
+                --am-green-dark: #1F3D2B;
+                --am-green-light: #2d5a3d;
+                --am-success: #28a745;
+                --am-gold: #E6BF4A;
+                --ag-primary: #1A4331;
+                --ag-cream: #FBF7EE;
+                --ag-bg: #F6F8F7;
+                --ag-text: #111827;
+                --ag-muted: #6B7280;
+                --ag-border: #E5E7EB;
+            }
+            .back-admin-body { background: var(--ag-bg); margin: 0; }
+            .back-admin-main { min-height: 100vh; }
+            .ag-admin-content { background: var(--ag-bg); padding: 2rem 0 3rem; min-height: 100vh; }
+            .ag-admin-card { border: 1px solid rgba(17,24,39,.06); border-radius: 20px; background: #fff; transition: .18s; }
+            .ag-admin-card:hover { box-shadow: 0 .5rem 1.2rem rgba(0,0,0,.06); }
+            .ag-btn-admin-primary { background: var(--ag-primary); border: none; color: #fff; }
+            .ag-btn-admin-primary:hover { background: #163828; color: #fff; }
         </style>
     {% endblock %}
 
@@ -35,83 +54,9 @@
     </script>
 </head>
 
-<body>
-<main>
-    {# Sidebar de gauche #}
-    <nav class="navbar sidebar navbar-expand-xl navbar-light">
-        <div class="d-flex align-items-center">
-            <a class="navbar-brand" href="#">
-                <img class="navbar-brand-item" src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:35px;">
-            </a>
-        </div>
-
-        <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" tabindex="-1" id="offcanvasSidebar">
-            <div class="offcanvas-body sidebar-content d-flex flex-column pt-4">
-                <ul class="navbar-nav flex-column" id="navbar-sidebar">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-house fa-fw me-2"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <i class="bi bi-briefcase fa-fw me-2"></i>Gestion des Offres
-                        </a>
-                    </li> 
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-people fa-fw me-2"></i>Utilisateurs
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="mt-auto p-3 bg-light rounded">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar-sm me-2">
-                            <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar" style="width: 35px;">
-                        </div>
-                        <h6 class="mb-0">Admin PIDEV</h6>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    {# Contenu de la page #}
-    <div class="page-content">
-        <nav class="navbar top-bar navbar-light py-0 py-xl-3">
-            <div class="container-fluid p-0">
-                <div class="d-flex align-items-center w-100 px-3">
-                    <h4 class="m-0 d-none d-md-block">Administration</h4>
-
-                    {# --- BARRE DE RECHERCHE FONCTIONNELLE --- #}
-                    <form action="{{ app.request.pathinfo }}" method="get" class="ms-auto d-flex align-items-center bg-light rounded-pill border px-3 py-1 shadow-sm">
-                        <i class="bi bi-search text-muted me-2"></i>
-                        <input 
-                            type="text" 
-                            name="search" 
-                            class="form-control border-0 bg-transparent search-focus" 
-                            placeholder="Rechercher une offre, un lieu..." 
-                            value="{{ app.request.query.get('search') }}"
-                            style="width: 250px;"
-                        >
-                        <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">OK</button>
-                        
-                        {# Croix pour réinitialiser la recherche #}
-                        {% if app.request.query.get('search') %}
-                            <a href="{{ app.request.pathinfo }}" class="ms-2 text-danger" title="Effacer la recherche">
-                                <i class="bi bi-x-circle-fill"></i>
-                            </a>
-                        {% endif %}
-                    </form>
-                </div>
-            </div>
-        </nav>
-
-        <div class="page-content-wrapper p-xxl-4">
-            {% block body %}{% endblock %}
-        </div>
-    </div>
+<body class="back-admin-body">
+<main class="back-admin-main">
+    {% block body %}{% endblock %}
 </main>
 
 {# Javascripts #}

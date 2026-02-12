@@ -117,7 +117,7 @@ class TaskCrudController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+        $form = $this->createForm(TaskType::class, $task, ['user' => $this->getUser()]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -172,7 +172,7 @@ class TaskCrudController extends AbstractController
             throw $this->createNotFoundException('Tache introuvable.');
         }
 
-        $form = $this->createForm(TaskType::class, $task);
+        $form = $this->createForm(TaskType::class, $task, ['user' => $this->getUser()]);
         $this->hydrateUnmappedTaskFields($form, $task, $parcelleRepository, $cultureRepository, $userRepository);
         $form->handleRequest($request);
 

@@ -3,11 +3,13 @@
 {% block title %}Modifier l'affectation - AgriSmart{% endblock %}
 
 {% block task_content %}
+  <div class="container py-3 py-md-4">
   <div class="ag-card p-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <h5 class="mb-0 fw-bold" style="color: var(--ag-text);">Modifier l'affectation</h5>
       <a href="{{ path('task_assignments_index') }}" class="btn btn-sm btn-outline-secondary rounded-pill">Retour à la liste</a>
     </div>
     {% include 'front/task_assignment/_form.html.twig' with {form: form, button_label: 'Mettre à jour'} %}
+  </div>
   </div>
 {% endblock %}

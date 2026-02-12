@@ -1,0 +1,144 @@
+{# Layout Marketplace / Produit : même principe que Tâches (barre d’options en pills, pas de sidebar) #}
+{% extends 'front/base.html.twig' %}
+
+{% block body %}
+{% set _route = app.request.attributes.get('_route') ?? '' %}
+<style>
+/* =========================
+   Marketplace / Produit – cohérent avec index et Tâches
+   ========================= */
+.ag-marketplace.prod-layout {
+  --ag-primary: #1A4331;
+  --ag-primary-2: #2E7D32;
+  --ag-accent: #F4B400;
+  --ag-cream: #FBF7EE;
+  --ag-bg: #F6F8F7;
+  --ag-text: #111827;
+  --ag-muted: #6B7280;
+  --ag-border: #E5E7EB;
+}
+
+.ag-marketplace.prod-layout .prod-page-content { min-height: 100vh; background: var(--ag-bg); }
+
+/* Barre d’options (style pills comme Tâches) */
+.ag-marketplace.prod-layout .prod-nav-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--ag-border);
+  padding: 0.6rem 0;
+}
+.ag-marketplace.prod-layout .prod-nav-bar .prod-nav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.ag-marketplace.prod-layout .prod-nav-bar .prod-nav-title {
+  color: var(--ag-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+  padding-right: 0.75rem;
+  border-right: 1px solid var(--ag-border);
+  margin-right: 0.25rem;
+}
+.ag-marketplace.prod-layout .prod-nav-bar .prod-nav-links { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ag-marketplace.prod-layout .prod-nav-bar .prod-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--ag-border);
+  background: #fff;
+  color: var(--ag-text) !important;
+  text-decoration: none !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: .15s;
+}
+.ag-marketplace.prod-layout .prod-nav-bar .prod-nav-link:hover {
+  border-color: rgba(26,67,49,.35);
+  background: rgba(26,67,49,.06);
+  color: var(--ag-primary) !important;
+}
+.ag-marketplace.prod-layout .prod-nav-bar .prod-nav-link.active {
+  border-color: var(--ag-primary);
+  background: var(--ag-primary);
+  color: #fff !important;
+}
+
+.ag-marketplace.prod-layout .ag-card {
+  border: 1px solid rgba(17,24,39,.06);
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  transition: .18s;
+}
+.ag-marketplace.prod-layout .ag-card:hover { box-shadow: 0 .9rem 1.6rem rgba(0,0,0,.08); }
+.ag-marketplace.prod-layout .ag-btn-primary {
+  background: var(--ag-primary) !important;
+  border: none !important;
+  color: #fff !important;
+}
+.ag-marketplace.prod-layout .ag-btn-primary:hover { background: #163828 !important; color: #fff !important; }
+.ag-marketplace.prod-layout .table thead th {
+  background: var(--ag-primary);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+}
+.ag-marketplace.prod-layout .table thead th:first-child { border-radius: 12px 0 0 0; }
+.ag-marketplace.prod-layout .table thead th:last-child { border-radius: 0 12px 0 0; }
+.ag-marketplace.prod-layout .table tbody td { padding: 1rem 1.25rem; vertical-align: middle; }
+.ag-marketplace.prod-layout .table tbody tr:hover { background: rgba(26,67,49,.04); }
+
+@media (max-width: 575.98px) {
+  .ag-marketplace.prod-layout .prod-nav-bar .prod-nav-title { border-right: none; margin-right: 0; padding-right: 0; }
+  .ag-marketplace.prod-layout .prod-nav-bar .prod-nav-link { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+}
+</style>
+
+<div class="ag-marketplace prod-layout">
+  <div class="prod-page-content d-flex flex-column">
+    <div class="prod-nav-bar">
+      <div class="container">
+        <div class="prod-nav-inner">
+          <h1 class="prod-nav-title">Marketplace</h1>
+          <nav class="prod-nav-links" aria-label="Navigation marketplace">
+            <a class="prod-nav-link {{ _route == 'app_produit_index' ? 'active' : '' }}" href="{{ path('app_produit_index') }}">
+              <i class="bi bi-shop me-2"></i>Catalogue
+            </a>
+            <a class="prod-nav-link {{ _route == 'app_produit_mes_offres' or _route == 'app_produit_edit' ? 'active' : '' }}" href="{{ path('app_produit_mes_offres') }}">
+              <i class="bi bi-grid-fill me-2"></i>Mes annonces
+            </a>
+            <a class="prod-nav-link {{ _route == 'app_front_produit_new' ? 'active' : '' }}" href="{{ path('app_front_produit_new') }}">
+              <i class="bi bi-plus-circle me-2"></i>Publier
+            </a>
+            <a class="prod-nav-link {{ _route == 'app_commande_mes_commandes' ? 'active' : '' }}" href="{{ path('app_commande_mes_commandes') }}">
+              <i class="bi bi-bag-check me-2"></i>Mes commandes
+            </a>
+            <a class="prod-nav-link {{ _route == 'app_commande_mes_ventes' ? 'active' : '' }}" href="{{ path('app_commande_mes_ventes') }}">
+              <i class="bi bi-receipt-cutoff me-2"></i>Mes ventes
+            </a>
+            <a class="prod-nav-link {{ _route == 'app_panier_index' ? 'active' : '' }}" href="{{ path('app_panier_index') }}">
+              <i class="bi bi-cart3 me-2"></i>Panier
+            </a>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-3 py-md-4 flex-grow-1">
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="alert alert-{{ label }} alert-dismissible fade show mb-3" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+          </div>
+        {% endfor %}
+      {% endfor %}
+      {% block produit_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

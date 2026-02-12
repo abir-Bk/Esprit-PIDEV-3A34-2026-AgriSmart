@@ -1,10 +1,10 @@
 {# templates/front/semi-public/produit/new.html.twig #}
-{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
+{% extends 'front/semi-public/produit/layout.html.twig' %}
 
 {% block title %}AgriSmart - Nouvelle annonce{% endblock %}
 
-{% block body %}
-<div class="container-fluid">
+{% block produit_content %}
+<div class="container-fluid px-0">
     <div class="row g-4">
 
         <div class="col-lg-7">
@@ -100,6 +100,7 @@
 {% endblock %}
 
 {% block javascripts %}
+{{ parent() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('produit-form');

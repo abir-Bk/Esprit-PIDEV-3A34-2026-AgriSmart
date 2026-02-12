@@ -1,8 +1,8 @@
-{% extends 'front/semi-public/produit/base_dashboard.html.twig' %}
+{% extends 'front/semi-public/produit/layout.html.twig' %}
 
 {% block title %}Commandes sur mes produits - AgriSmart{% endblock %}
 
-{% block body %}
+{% block produit_content %}
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
         <h1 class="h3 mb-1">Commandes sur mes produits</h1>
@@ -15,7 +15,7 @@
     {% endif %}
 </div>
 
-<div class="card shadow-sm rounded-4 border-0">
+<div class="card ag-card shadow-sm rounded-4 border-0">
     <div class="card-body">
         {% if commandes is empty %}
             <div class="text-center py-5">
@@ -26,7 +26,7 @@
         {% else %}
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th>#</th>
                             <th>Client</th>

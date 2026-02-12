@@ -48,12 +48,19 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
 
                 // 1. Existing user by googleId
                 if ($user = $userRepo->findOneBy(['googleId' => $googleId])) {
+                    if ($user->getStatus() === 'pending') {
+                        $user->setStatus('active');
+                        $this->entityManager->flush();
+                    }
                     return $user;
                 }
 
-                // 2. Existing user by email → link account
+                // 2. Existing user by email → link account and allow login
                 if ($user = $userRepo->findOneBy(['email' => $email])) {
                     $user->setGoogleId($googleId);
+                    if ($user->getStatus() === 'pending') {
+                        $user->setStatus('active');
+                    }
                     $this->entityManager->flush();
                     return $user;
                 }
@@ -64,9 +71,10 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 $user->setGoogleId($googleId);
                 $user->setRole('agriculteur'); // single role string
                 $user->setPassword(''); // no password for social login
+                $user->setStatus('active'); // so they can log in with Google immediately (AccountStatusChecker allows only active)
 
                 // Optionally set firstName / lastName from Google profile
-                $user->setFirstName($googleUser->getFirstName() ?? ''); 
+                $user->setFirstName($googleUser->getFirstName() ?? '');
                 $user->setLastName($googleUser->getLastName() ?? '');
 
                 $this->entityManager->persist($user);
@@ -79,7 +87,11 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return new RedirectResponse($this->router->generate('app_login'));
+        $user = $token->getUser();
+        if ($user && \in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return new RedirectResponse($this->router->generate('user_dashboard'));
+        }
+        return new RedirectResponse($this->router->generate('app_produit_index'));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

@@ -163,12 +163,6 @@ public function updateStatus(
                             <p style=\"text-align: center; color: #2c3e50;\">
                                 La candidature " . $messageStatus . ".
                             </p>
-
-                            <div style=\"text-align: center; margin-top: 30px;\">
-                                <a href=\"" . $urlDetails . "\" style=\"background: #1a4331; color: white; text-decoration: none; padding: 14px 30px; border-radius: 12px; font-weight: 600; display: inline-block;\">
-                                    Consulter le dossier complet
-                                </a>
-                            </div>
                         </div>
 
                         <div style=\"background: #f4f4f4; padding: 20px; text-align: center; color: #6c757d; font-size: 12px;\">

@@ -84,7 +84,10 @@
                             <div class="row g-2">
                                 {% for candi in demandes|slice(0, 5) %}
                                     <div class="col-md-4 col-lg-2">
-                                        <div class="p-2 text-center rounded bg-white shadow-sm border border-success-subtle">
+                                        {# Ajout du lien cliquable ici #}
+                                        <div class="p-2 text-center rounded bg-white shadow-sm border border-success-subtle elite-card" 
+                                            onclick="window.location.href='{{ path('app_admin_demande_details', {id: candi.id}) }}'"
+                                            style="cursor: pointer;">
                                             <div class="fw-bold text-success" style="font-size: 1.1rem;">{{ candi.score }}%</div>
                                             <div class="small text-truncate fw-semibold">{{ candi.nom }}</div>
                                             <div class="badge bg-success-subtle text-success mt-1" style="font-size: 0.6rem;">RANG #{{ loop.index }}</div>

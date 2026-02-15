@@ -36,6 +36,7 @@ security:
             entry_point: App\Security\GoogleAuthenticator
             user_checker: App\Security\AccountStatusChecker
     access_control:
+        - { path: ^/admin/demande, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }
         - { path: ^/admin/offre, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }
         - { path: ^/admin/offres$, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }
         - { path: ^/admin/liste-offres, roles: ROLE_ADMIN }

@@ -18,123 +18,266 @@
 
 <section class="ag-content mt-0">
   <div class="container">
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card ag-filter-card shadow-sm p-4">
-        <form method="get" action="{{ path('app_offre_index_front') }}" class="row g-3 align-items-end" id="formOffres">
-          <div class="col-md-5">
-            <label class="form-label fw-bold small text-uppercase" style="color: var(--ag-muted);">Recherche</label>
-            <input type="text" id="searchInput" name="search" class="form-control ag-input" placeholder="Titre, lieu..." value="{{ app.request.query.get('search') }}">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label fw-bold small text-uppercase" style="color: var(--ag-muted);">Statut</label>
-            <select id="statusFilter" name="status" class="form-select ag-input">
-              <option value="">Toutes les offres</option>
-              <option value="ouvert" {{ app.request.query.get('status') == 'ouvert' ? 'selected' : '' }}>Offres ouvertes</option>
-              <option value="clôturée" {{ app.request.query.get('status') == 'clôturée' ? 'selected' : '' }}>Offres clôturées</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <button type="submit" class="btn ag-btn-primary text-white rounded-pill w-100">
-              <i class="bi bi-search me-1"></i>Rechercher
-            </button>
-          </div>
-        </form>
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card ag-filter-card shadow-sm p-4">
+          <form method="get" action="{{ path('app_offre_index_front') }}" class="row g-3 align-items-end" id="formOffres">
+            <div class="col-md-5">
+              <label class="form-label fw-bold small text-uppercase" style="color: var(--ag-muted);">Recherche</label>
+              <input type="text" id="searchInput" name="search" class="form-control ag-input" placeholder="Titre, lieu..." value="{{ app.request.query.get('search') }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small text-uppercase" style="color: var(--ag-muted);">Statut</label>
+              <select id="statusFilter" name="status" class="form-select ag-input">
+                <option value="">Toutes les offres</option>
+                <option value="ouvert" {{ app.request.query.get('status') == 'ouvert' ? 'selected' : '' }}>Offres ouvertes</option>
+                <option value="clôturée" {{ app.request.query.get('status') == 'clôturée' ? 'selected' : '' }}>Offres clôturées</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn ag-btn-primary text-white rounded-pill w-100">
+                <i class="bi bi-search me-1"></i>Rechercher
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
 
-  {% set ouvertCount = 0 %}
-  {% for o in offres %}
-    {% if o.statut is defined and o.statut|lower == 'ouvert' %}{% set ouvertCount = ouvertCount + 1 %}{% endif %}
-  {% endfor %}
-  <p class="ag-meta mb-3">
-    <strong>{{ offres|length }}</strong> offre(s) · <strong>{{ ouvertCount }}</strong> ouverte(s)
-  </p>
+    {% set ouvertCount = 0 %}
+    {% for o in offres %}
+      {% if o.statut is defined and o.statut|lower == 'ouvert' %}{% set ouvertCount = ouvertCount + 1 %}{% endif %}
+    {% endfor %}
+    <p class="ag-meta mb-3">
+      <strong>{{ offres|length }}</strong> offre(s) · <strong>{{ ouvertCount }}</strong> ouverte(s)
+    </p>
 
-  <div class="row g-4" id="offresGrid">
-    {% for offre in offres %}
-      {% set totalCand = offre.demandes|length %}
-      <div class="col-sm-6 col-xl-4 offre-item"
-           data-statut="{{ offre.statut|lower }}"
-           data-titre="{{ offre.title|lower }}"
-           data-lieu="{{ offre.lieu|lower }}">
-        <div class="ag-card">
-          <div class="p-4">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <span class="badge rounded-pill {{ offre.statut|lower == 'ouvert' ? 'bg-success' : 'bg-secondary' }}">
-                {{ offre.statut }}
-              </span>
-              <div class="text-end">
-                <div class="fw-bold" style="color: var(--ag-primary);">
-                  {{ offre.salaire ? offre.salaire|number_format(0, ',', ' ') ~ ' TND' : 'À négocier' }}
+    <div class="row g-4" id="offresGrid">
+      {% for offre in offres %}
+        {% set totalCand = offre.demandes|length %}
+        <div class="col-sm-6 col-xl-4 offre-item"
+             data-statut="{{ offre.statut|lower }}"
+             data-titre="{{ offre.title|lower }}"
+             data-lieu="{{ offre.lieu|lower }}">
+          <div class="ag-card">
+            <div class="p-4">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <span class="badge rounded-pill {{ offre.statut|lower == 'ouvert' ? 'bg-success' : 'bg-secondary' }}">
+                  {{ offre.statut }}
+                </span>
+                <div class="text-end">
+                  <div class="fw-bold" style="color: var(--ag-primary);">
+                    {{ offre.salaire ? offre.salaire|number_format(0, ',', ' ') ~ ' TND' : 'À négocier' }}
+                  </div>
+                  <small class="text-muted">mensuel</small>
                 </div>
-                <small class="text-muted">mensuel</small>
               </div>
-            </div>
-            <h3 class="h6 fw-bold mb-2" style="color: var(--ag-text);">{{ offre.title }}</h3>
-            <p class="small mb-3 ag-meta">
-              <i class="bi bi-geo-alt me-1"></i>{{ offre.lieu }}
-            </p>
-            <div class="row g-2 small mb-3">
-              <div class="col-6">
-                <span class="ag-meta d-block">Début</span>
-                <span style="color: var(--ag-text);">{{ offre.dateDebut ? offre.dateDebut|date('d/m/Y') : '—' }}</span>
+              <h3 class="h6 fw-bold mb-2" style="color: var(--ag-text);">{{ offre.title }}</h3>
+              <p class="small mb-3 ag-meta">
+                <i class="bi bi-geo-alt me-1"></i>{{ offre.lieu }}
+              </p>
+              <div class="row g-2 small mb-3">
+                <div class="col-6">
+                  <span class="ag-meta d-block">Début</span>
+                  <span style="color: var(--ag-text);">{{ offre.dateDebut ? offre.dateDebut|date('d/m/Y') : '—' }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="ag-meta d-block">Fin</span>
+                  <span style="color: var(--ag-text);">{{ offre.dateFin ? offre.dateFin|date('d/m/Y') : '—' }}</span>
+                </div>
               </div>
-              <div class="col-6">
-                <span class="ag-meta d-block">Fin</span>
-                <span style="color: var(--ag-text);">{{ offre.dateFin ? offre.dateFin|date('d/m/Y') : '—' }}</span>
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                <span class="small ag-meta">
+                  <i class="bi bi-people me-1"></i>{{ totalCand }} candidature(s)
+                </span>
+                <a href="{{ path('app_offre_show', {'id': offre.id}) }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">
+                  <i class="bi bi-eye me-1"></i>Voir
+                </a>
               </div>
-            </div>
-            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-              <span class="small ag-meta">
-                <i class="bi bi-people me-1"></i>{{ totalCand }} candidature(s)
-              </span>
-              <a href="{{ path('app_offre_show', {'id': offre.id}) }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">
-                <i class="bi bi-eye me-1"></i>Voir
-              </a>
             </div>
           </div>
         </div>
-      </div>
-    {% else %}
-      <div class="col-12">
-        <div class="text-center py-5 ag-card p-5">
-          <i class="bi bi-briefcase display-5 ag-meta"></i>
-          <h4 class="mt-3" style="color: var(--ag-text);">Aucune offre d'emploi</h4>
-          <p class="ag-meta mb-4">Aucune offre disponible pour le moment.</p>
-          {% if app.user and (app.user.role == 'agriculteur' or app.user.role == 'admin') %}
-            <a href="{{ path('app_offre_new') }}" class="btn ag-btn-primary text-white rounded-pill">
-              <i class="bi bi-plus-circle me-1"></i>Publier une offre
-            </a>
-          {% endif %}
+      {% else %}
+        <div class="col-12">
+          <div class="text-center py-5 ag-card p-5">
+            <i class="bi bi-briefcase display-5 ag-meta"></i>
+            <h4 class="mt-3" style="color: var(--ag-text);">Aucune offre d'emploi</h4>
+            <p class="ag-meta mb-4">Aucune offre disponible pour le moment.</p>
+          </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
+    </div>
   </div>
 </section>
 
+{# --- CHATBOT SECTION --- #}
+<style>
+  .ag-chat-bubble {
+    position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+    background: #28a745; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer; z-index: 9999; transition: transform 0.2s ease;
+  }
+  .ag-chat-box {
+    position: fixed; bottom: 100px; right: 30px; width: 320px; height: 450px;
+    background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    display: none; flex-direction: column; overflow: hidden; z-index: 9999;
+  }
+  .ag-chat-box.active { display: flex; }
+  .chat-header { background: #28a745; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+  #chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+  
+  .msg { 
+    max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.5; 
+    white-space: pre-wrap; 
+    word-wrap: break-word;
+  }
+  .ai-msg { background: white; border: 1px solid #eee; align-self: flex-start; color: #333; }
+  .ai-msg strong { color: #155724; font-weight: bold; }
+  .user-msg { background: #28a745; color: white; align-self: flex-end; }
+  
+  /* Style pour le fichier sélectionné */
+  .file-badge { font-size: 11px; background: #e9ecef; padding: 2px 8px; border-radius: 10px; display: none; margin-bottom: 5px; }
+</style>
+
+<div class="ag-chat-bubble" id="chatBubble">
+  <i class="bi bi-robot text-white" style="font-size: 28px;"></i>
+</div>
+
+<div class="ag-chat-box" id="chatBox">
+  <div class="chat-header">
+    <span class="small fw-bold"><i class="bi bi-stars me-1"></i>Assistant AgriSmart</span>
+    <i class="bi bi-x-lg" id="closeChat" style="cursor:pointer"></i>
+  </div>
+  <div id="chat-messages">
+    <div class="msg ai-msg">Bonjour ! 🌱 Je peux analyser votre **CV** pour vous aider à postuler. Cliquez sur le trombone pour m'envoyer votre fichier !</div>
+  </div>
+  <div class="p-2 border-top">
+    <div id="fileInfo" class="file-badge text-truncate"></div>
+    <div class="input-group input-group-sm">
+      <label class="btn btn-light border" for="cvUpload" title="Joindre un CV (PDF ou Texte)">
+        <i class="bi bi-paperclip"></i>
+      </label>
+      <input type="file" id="cvUpload" hidden accept=".pdf,.txt">
+      
+      <input type="text" id="chatInput" class="form-control border-0 bg-light" placeholder="Posez votre question...">
+      <button class="btn btn-success" id="sendBtn"><i class="bi bi-send"></i></button>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // --- FILTRAGE DES OFFRES (EXISTANT) ---
   var searchInput = document.getElementById('searchInput');
   var statusFilter = document.getElementById('statusFilter');
   var items = document.querySelectorAll('.offre-item');
-  if (!searchInput || !items.length) return;
+  
   function filter() {
     var query = (searchInput.value || '').toLowerCase().trim();
     var status = (statusFilter ? statusFilter.value || '' : '').toLowerCase();
     items.forEach(function(item) {
-      var title = (item.dataset.titre || '');
-      var location = (item.dataset.lieu || '');
-      var itemStatus = (item.dataset.statut || '');
-      var matchSearch = !query || title.indexOf(query) !== -1 || location.indexOf(query) !== -1;
-      var matchStatus = !status || itemStatus === status;
+      var matchSearch = !query || item.dataset.titre.includes(query) || item.dataset.lieu.includes(query);
+      var matchStatus = !status || item.dataset.statut === status;
       item.style.display = (matchSearch && matchStatus) ? 'block' : 'none';
     });
   }
-  searchInput.addEventListener('input', filter);
+  if (searchInput) searchInput.addEventListener('input', filter);
   if (statusFilter) statusFilter.addEventListener('change', filter);
+
+  // --- LOGIQUE DU CHATBOT ---
+  const bubble = document.getElementById('chatBubble');
+  const box = document.getElementById('chatBox');
+  const close = document.getElementById('closeChat');
+  const input = document.getElementById('chatInput');
+  const send = document.getElementById('sendBtn');
+  const messages = document.getElementById('chat-messages');
+  const cvUpload = document.getElementById('cvUpload');
+  const fileInfo = document.getElementById('fileInfo');
+
+  let extractedCvText = ""; // Stockage du texte du CV
+
+  bubble.onclick = () => { box.classList.toggle('active'); if(box.classList.contains('active')) input.focus(); };
+  close.onclick = () => box.classList.remove('active');
+
+  // Lecture du fichier lors de la sélection
+  cvUpload.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    fileInfo.style.display = "block";
+    fileInfo.innerHTML = `<i class="bi bi-file-earmark-check me-1"></i>${file.name}`;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        // Note: Pour les PDF complexes, l'extraction de texte brute via FileReader est limitée.
+        // On récupère le texte si c'est un .txt, sinon on marque qu'un fichier est joint.
+        extractedCvText = event.target.result.substring(0, 3000); // On limite la taille
+        messages.innerHTML += `<div class="msg user-msg small">Fichier joint : ${file.name}</div>`;
+        messages.scrollTop = messages.scrollHeight;
+    };
+    reader.readAsText(file);
+  };
+
+  async function handleChat() {
+    const text = input.value.trim();
+    if (!text && !extractedCvText) return;
+
+    if (text) messages.innerHTML += `<div class="msg user-msg">${text}</div>`;
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+
+    const loadingId = 'ai-load-' + Date.now();
+    messages.innerHTML += `<div class="msg ai-msg" id="${loadingId}">...</div>`;
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+      const response = await fetch('/assistant/offre/conseil', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            message: text,
+            cvContent: extractedCvText // On envoie le texte du CV au controller
+        })
+      });
+      const data = await response.json();
+      const loadingMsg = document.getElementById(loadingId);
+      
+      let cleanText = data.reply
+        .replace(/[#\-]{3,}/g, '') 
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      loadingMsg.innerHTML = ""; 
+      let i = 0;
+      const speed = 15;
+
+      function typeWriter() {
+        if (i < cleanText.length) {
+          if (cleanText.charAt(i) === '<') {
+            let tagEnd = cleanText.indexOf('>', i);
+            loadingMsg.innerHTML += cleanText.substring(i, tagEnd + 1);
+            i = tagEnd + 1;
+          } else {
+            loadingMsg.innerHTML += cleanText.charAt(i);
+            i++;
+          }
+          messages.scrollTop = messages.scrollHeight;
+          setTimeout(typeWriter, speed);
+        }
+      }
+      typeWriter();
+
+      // Réinitialiser le fichier après envoi si nécessaire
+      // extractedCvText = ""; 
+      // fileInfo.style.display = "none";
+
+    } catch (e) {
+      document.getElementById(loadingId).innerHTML = "Erreur de connexion...";
+    }
+  }
+
+  send.onclick = handleChat;
+  input.onkeypress = (e) => { if (e.key === 'Enter') handleChat(); };
 });
 </script>
 {% endblock %}

@@ -17,6 +17,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use App\Entity\User;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class DemandeController extends AbstractController
 {
@@ -109,41 +110,89 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/demande/{id}/update-status', name: 'app_admin_demande_update_status', methods: ['POST'])]
-    public function updateStatus(
-        Demande $demande, 
-        Request $request, 
-        EntityManagerInterface $em, 
-        MailerInterface $mailer
-    ): Response {
-        $newStatus = $request->request->get('statut');
-        
-        if ($newStatus) {
-            $demande->setStatut($newStatus);
-            $demande->setDateModification(new \DateTime());
-            $em->flush();
+        #[Route('/admin/demande/{id}/update-status', name: 'app_admin_demande_update_status', methods: ['POST'])]
+public function updateStatus(
+    Demande $demande, 
+    Request $request, 
+    EntityManagerInterface $em, 
+    MailerInterface $mailer
+): Response {
+    $newStatus = $request->request->get('statut');
+    
+    if ($newStatus) {
+        $demande->setStatut($newStatus);
+        $demande->setDateModification(new \DateTime());
+        $em->flush();
 
-            if ($newStatus === 'Acceptée' || $newStatus === 'Refusée') {
-                $subject = ($newStatus === 'Acceptée') ? 'Candidature Acceptée - AgriSmart' : 'Réponse à votre candidature - AgriSmart';
-                $votreEmailTest = 'akrem.zaied@etudiant-fsegt.utm.tn'; 
+        if ($newStatus === 'Acceptée' || $newStatus === 'Refusée') {
+            // Configuration dynamique du message
+            $messageStatus = ($newStatus === 'Acceptée') ? 'a été acceptée' : 'a malheureusement été refusée';
+            $statusIcon = ($newStatus === 'Acceptée') ? '✅' : '❌';
+            $gradientColor = ($newStatus === 'Acceptée') ? 'linear-gradient(135deg, #1a4331, #2d6a4f)' : 'linear-gradient(135deg, #a12a2a, #d13a3a)';
+            
+            // Génération de l'URL absolue pour le bouton
+            $urlDetails = $this->generateUrl('app_admin_demande_details', ['id' => $demande->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
-                $email = (new Email())
-             ->from('akrem.zaied@etudiant-fsegt.utm.tn')
-             ->to('akrem.zaied@etudiant-fsegt.utm.tn') // C'est ici que tu recevras le mail
-             ->subject('Candidature ' . $newStatus)
-             ->html("...");
+            $email = (new Email())
+                ->from('akrem.zaied@etudiant-fsegt.utm.tn')
+                ->to('akrem.zaied@etudiant-fsegt.utm.tn') // Ton email de test
+                ->subject('Mise à jour candidature AgriSmart : ' . $newStatus)
+                ->html("
+                    <div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #eee;\">
+                        <div style=\"background: linear-gradient(135deg, #1a4331 0%, #2d6a4f 100%); padding: 35px 30px; text-align: center;\">
+                            <h1 style=\"color: white; margin: 0; font-size: 28px; font-weight: 700;\">Mise à jour AgriSmart</h1>
+                        </div>
 
-                try {
-                    $mailer->send($email);
-                    $this->addFlash('success', 'Statut mis à jour et email envoyé.');
-                } catch (\Exception $e) {
-                    $this->addFlash('warning', 'Erreur email : ' . $e->getMessage());
-                }
+                        <div style=\"padding: 30px;\">
+                            <h2 style=\"color: #1a4331;\">Bonjour,</h2>
+                            <p style=\"color: #2c3e50; font-size: 16px; line-height: 1.6;\">Une mise à jour vient d'être effectuée sur la plateforme concernant la candidature suivante :</p>
+
+                            <div style=\"background: #f8fffb; border-radius: 20px; padding: 20px; border-left: 5px solid #1a4331; margin: 20px 0;\">
+                                <p style=\"margin: 5px 0;\"><strong>Candidat :</strong> " . $demande->getPrenom() . " " . $demande->getNom() . "</p>
+                                <p style=\"margin: 5px 0;\"><strong>Poste :</strong> " . $demande->getOffre()->getTitle() . "</p>
+                                <p style=\"margin: 5px 0;\"><strong>Lieu :</strong> " . $demande->getOffre()->getLieu() . "</p>
+                            </div>
+
+                            <div style=\"text-align: center; margin: 30px 0;\">
+                                <span style=\"color: #6c757d; font-size: 14px; display: block; margin-bottom: 10px;\">NOUVEAU STATUT</span>
+                                <div style=\"background: " . $gradientColor . "; color: white; padding: 12px 30px; border-radius: 50px; font-size: 22px; font-weight: 700; display: inline-block;\">
+                                    " . $statusIcon . " " . $newStatus . "
+                                </div>
+                            </div>
+
+                            <p style=\"text-align: center; color: #2c3e50;\">
+                                La candidature " . $messageStatus . ".
+                            </p>
+
+                            <div style=\"text-align: center; margin-top: 30px;\">
+                                <a href=\"" . $urlDetails . "\" style=\"background: #1a4331; color: white; text-decoration: none; padding: 14px 30px; border-radius: 12px; font-weight: 600; display: inline-block;\">
+                                    Consulter le dossier complet
+                                </a>
+                            </div>
+                        </div>
+
+                        <div style=\"background: #f4f4f4; padding: 20px; text-align: center; color: #6c757d; font-size: 12px;\">
+                            © " . date('Y') . " AgriSmart - Système de Recrutement Automatisé<br>
+                            Ceci est un email de test interne.
+                        </div>
+                    </div>
+                ");
+
+            try {
+                $mailer->send($email);
+                $this->addFlash('success', 'Statut mis à jour et email envoyé.');
+            } catch (\Exception $e) {
+                $this->addFlash('warning', 'Statut mis à jour, mais erreur d\'envoi email : ' . $e->getMessage());
             }
+        } else {
+            // Si le statut est "En cours", on ne fait que mettre à jour la base de données
+            $this->addFlash('success', 'Statut mis à jour (aucun email envoyé pour "En cours").');
         }
-
-        return $this->redirectToRoute('app_admin_demande_details', ['id' => $demande->getId()]);
     }
+
+    return $this->redirectToRoute('app_admin_demande_details', ['id' => $demande->getId()]);
+}
+
 
     #[Route('/admin/demande/{id}/details', name: 'app_admin_demande_details')]
     public function demandeDetails(Demande $demande): Response

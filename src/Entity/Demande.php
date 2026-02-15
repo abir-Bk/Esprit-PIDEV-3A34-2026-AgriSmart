@@ -75,6 +75,9 @@ class Demande
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $score = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -198,6 +201,18 @@ class Demande
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): static
+    {
+        $this->score = $score;
 
         return $this;
     }

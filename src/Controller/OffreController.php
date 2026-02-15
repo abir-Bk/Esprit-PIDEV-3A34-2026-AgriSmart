@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Psr\Log\LoggerInterface;
+use App\Service\MatchingService;
 
 
 final class OffreController extends AbstractController
@@ -187,18 +188,37 @@ final class OffreController extends AbstractController
         return $this->render('back/offre/index.html.twig', ['offres' => $offres]);
     }
 
-    #[Route('/admin/offre/{id}/details', name: 'app_admin_offre_details')]
-public function details(Offre $offre): Response
-{
-    // On récupère les candidatures pour les afficher dans le tableau de droite
+#[Route('/admin/offre/{id}/details', name: 'app_admin_offre_details')]
+public function details(
+    Offre $offre, 
+    MatchingService $matching, 
+    EntityManagerInterface $em
+): Response {
+    // 1. On récupère les candidatures liées à cette offre
     $demandes = $offre->getDemandes();
 
+    // 2. L'IA scanne chaque CV et remplit la colonne 'score'
+    foreach ($demandes as $demande) {
+        // On calcule le score dynamiquement selon le CV et l'offre
+        $score = $matching->calculateScore($demande);
+        
+        // CORRECTION : On utilise bien setScore (avec un 't')
+        $demande->setScore($score);
+    }
+
+    // 3. On sauvegarde les scores dans la base de données (pour enlever le NULL)
+    $em->flush();
+
+    // 4. On transforme en tableau pour trier : les meilleurs scores en premier
+    $candidaturesTriees = $demandes->toArray();
+    usort($candidaturesTriees, fn($a, $b) => $b->getScore() <=> $a->getScore());
+
+    // 5. On envoie les données triées au fichier Twig
     return $this->render('back/offre/details.html.twig', [
         'offre' => $offre,
-        'demandes' => $demandes,
+        'demandes' => $candidaturesTriees, // Important : on passe la liste triée
     ]);
 }
-
     #[Route('/offre/{id}', name: 'app_offre_show', requirements: ['id' => '\d+'])]
     public function show(int $id, EntityManagerInterface $entityManager): Response
     {

@@ -16,14 +16,9 @@ security:
             pattern: ^/api
             stateless: true
             jwt: ~
-
         main:
             lazy: true
             provider: app_user_provider
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                success_handler: App\Security\LoginSuccessHandler
             logout:
                 path: app_logout
                 target: /login
@@ -32,8 +27,9 @@ security:
                 lifetime: 604800
                 path: /
             custom_authenticators:
-                - App\Security\GoogleAuthenticator
-            entry_point: App\Security\GoogleAuthenticator
+                - App\Security\LoginFormAuthenticator
+                #- App\Security\GoogleAuthenticator
+            entry_point: App\Security\LoginFormAuthenticator   # <-- This tells Symfony to redirect to the login form
             user_checker: App\Security\AccountStatusChecker
     access_control:
         - { path: ^/admin/offre, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }

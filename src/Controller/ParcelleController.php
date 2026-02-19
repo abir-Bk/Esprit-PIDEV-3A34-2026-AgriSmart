@@ -160,4 +160,22 @@ class ParcelleController extends AbstractController
 
         return $this->redirectToRoute('app_parcelle_index');
     }
+    #[Route('/admin/toutes-les-parcelles', name: 'admin_parcelles_index', methods: ['GET'])]
+    public function adminIndex(ParcelleRepository $parcelleRepository): Response
+    {
+        // Sécurité : Uniquement accessible par l'Admin
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // On récupère tout avec les jointures pour la performance
+        $allParcelles = $parcelleRepository->createQueryBuilder('p')
+            ->leftJoin('p.cultures', 'c')
+            ->leftJoin('p.user', 'u')
+            ->addSelect('c', 'u')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('back/Allparcelle/all_parcelles.html.twig', [
+            'parcelles' => $allParcelles,
+        ]);
+    }
 }

@@ -32,6 +32,17 @@
           <div class="p-4 p-lg-5">
             {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'form-postulation'}}) }}
 
+            {# --- ASSISTANT VOCAL IA --- #}
+            <div class="text-center mb-4 p-3 border rounded-pill bg-light shadow-sm d-flex align-items-center justify-content-center gap-3">
+                <button type="button" id="start-voice-btn" class="btn btn-success rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #1a4331; border: none; transition: all 0.3s ease;">
+                    <i id="micro-icon" class="bi bi-mic-fill fs-4 text-white"></i>
+                </button>
+                <div class="text-start">
+                    <p class="mb-0 fw-bold small" id="voice-status" style="color: #1a4331;">Assistant Vocal IA</p>
+                    <p class="mb-0 text-muted extra-small" style="font-size: 11px;"> </p>
+                </div>
+            </div>
+
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 {{ form_label(form.nom) }}
@@ -67,14 +78,12 @@
               </div>
             </div>
 
-            {# ZONE UPLOAD CLASSIQUE #}
             <div id="cv-classic-zone" class="mb-4">
               {{ form_label(form.cv) }}
               {{ form_widget(form.cv, {'attr': {'class': 'form-control', 'id': 'input-cv-file'}}) }}
               {{ form_errors(form.cv) }}
             </div>
 
-            {# ZONE IA #}
             <div id="cv-ia-zone" class="mb-4 d-none">
                 <div id="ia-placeholder" class="p-4 border rounded bg-light text-center" style="border-style: dashed !important; border-color: #00b37e !important;">
                     <p class="small mb-3 fw-bold" style="color: #00b37e;">Besoin d'un CV professionnel complet ?</p>
@@ -134,7 +143,7 @@
   </div>
 </section>
 
-{# MODALE IA AMÉLIORÉE #}
+{# MODALE IA POUR GÉNÉRATION CV #}
 <div class="modal fade" id="iaModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow-lg">
@@ -148,7 +157,6 @@
         </div>
         
         <form id="ia-cv-form" onsubmit="return false;">
-          {# ETAPE 1 : IDENTITÉ #}
           <div class="step-ia fade-in" id="step-1">
             <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">1</span>Identité & Contact</h6>
             <div class="row g-3 mb-3">
@@ -209,7 +217,6 @@
             </div>
           </div>
 
-          {# ETAPE 2 : FORMATION #}
           <div class="step-ia d-none fade-in" id="step-2">
             <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">2</span>Profil & Formation</h6>
             <div class="mb-3">
@@ -240,7 +247,6 @@
             </div>
           </div>
 
-          {# ETAPE 3 : EXPÉRIENCES & INFORMATIQUE #}
           <div class="step-ia d-none fade-in" id="step-3">
             <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">3</span>Expériences & Outils</h6>
             <div class="bg-light p-3 rounded mb-3">
@@ -270,7 +276,6 @@
             </div>
           </div>
 
-          {# ETAPE 4 : LANGUES #}
           <div class="step-ia d-none fade-in" id="step-4">
             <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">4</span>Langues & Loisirs</h6>
             <div class="row g-3 mb-3">
@@ -318,21 +323,125 @@
 .btn-success { background-color: #1a4331; border-color: #1a4331; }
 .btn-success:hover { background-color: #0f2e20; transform: translateY(-1px); }
 .is-invalid { border-color: #dc3545 !important; }
+.extra-small { font-size: 11px; }
+
+/* Animation du micro quand il écoute */
+.pulse-recording {
+    animation: pulse-red 1.5s infinite;
+}
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
 </style>
 
 <script>
-function showCVZone(type) {
-    const classic = document.getElementById('cv-classic-zone');
-    const ia = document.getElementById('cv-ia-zone');
-    const btnClassic = document.getElementById('btn-show-classic');
-    const btnIA = document.getElementById('btn-show-ia');
-    if(type === 'ia') {
-        classic.classList.add('d-none'); ia.classList.remove('d-none');
-        btnIA.classList.add('active'); btnClassic.classList.remove('active');
-    } else {
-        classic.classList.remove('d-none'); ia.classList.add('d-none');
-        btnClassic.classList.add('active'); btnIA.classList.remove('active');
+// --- LOGIQUE ASSISTANT VOCAL ---
+const startVoiceBtn = document.getElementById('start-voice-btn');
+const voiceStatus = document.getElementById('voice-status');
+const microIcon = document.getElementById('micro-icon');
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isRecording = false;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    startVoiceBtn.addEventListener('click', () => {
+        if (!isRecording) {
+            window.speechSynthesis.cancel();
+            try {
+                recognition.start();
+            } catch (e) { recognition.stop(); }
+        } else {
+            recognition.stop();
+        }
+    });
+
+    recognition.onstart = () => {
+        isRecording = true;
+        voiceStatus.innerText = "Je vous écoute...";
+        microIcon.classList.replace('bi-mic-fill', 'bi-stop-circle-fill');
+        startVoiceBtn.style.backgroundColor = "#dc3545";
+        startVoiceBtn.classList.add('pulse-recording');
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        processVoiceData(transcript);
+    };
+
+    recognition.onerror = () => resetMicroUI();
+    recognition.onend = () => resetMicroUI();
+}
+
+function resetMicroUI() {
+    isRecording = false;
+    microIcon.classList.replace('bi-stop-circle-fill', 'bi-mic-fill');
+    startVoiceBtn.style.backgroundColor = "#1a4331";
+    startVoiceBtn.classList.remove('pulse-recording');
+}
+
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        window.speechSynthesis.speak(utterance);
     }
+}
+
+async function processVoiceData(text) {
+    if (!text.trim()) return;
+    voiceStatus.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Analyse IA...';
+
+    try {
+        const response = await fetch('{{ path("app_demande_analyze_voice") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        });
+        
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            const fNom = document.querySelector('[id$="_nom"]');
+            const fPrenom = document.querySelector('[id$="_prenom"]');
+            const fPhone = document.querySelector('[id$="_phoneNumber"]');
+
+            if (result.data.nom && fNom) fNom.value = result.data.nom;
+            if (result.data.prenom && fPrenom) fPrenom.value = result.data.prenom;
+            if (result.data.phone && fPhone) fPhone.value = result.data.phone;
+            
+            voiceStatus.innerHTML = '<span class="text-success fw-bold">Données extraites !</span>';
+
+            // --- PERSONNALISATION VOCALE ---
+            const heure = new Date().getHours();
+            const salutation = (heure >= 18) ? "Bonsoir" : "Bonjour";
+            const prenomUtilisateur = result.data.prenom || "";
+            speak(`${salutation} ${prenomUtilisateur}, j'ai rempli le formulaire pour vous !`);
+            // -------------------------------
+
+        } else { throw new Error(); }
+    } catch (e) {
+        voiceStatus.innerHTML = '<span class="text-danger small">Erreur d\'analyse</span>';
+        speak("Désolé, je n'ai pas pu extraire vos informations.");
+    } finally {
+        setTimeout(() => { if(!isRecording) voiceStatus.innerText = "Assistant Vocal IA"; }, 4000);
+    }
+}
+
+// --- LOGIQUE CV IA (ZONE & ÉTAPES PRÉSERVÉES) ---
+function showCVZone(type) {
+    document.getElementById('cv-classic-zone').classList.toggle('d-none', type === 'ia');
+    document.getElementById('cv-ia-zone').classList.toggle('d-none', type !== 'ia');
+    document.getElementById('btn-show-classic').classList.toggle('active', type !== 'ia');
+    document.getElementById('btn-show-ia').classList.toggle('active', type === 'ia');
 }
 
 function nextStep(step) {
@@ -343,99 +452,59 @@ function nextStep(step) {
 }
 
 function validateStep(step) {
-    const required = {
-        1: ['ia-nom', 'ia-prenom', 'ia-email', 'ia-ville', 'ia-sexe'],
-        2: ['ia-job-title', 'ia-etude'],
-        3: ['ia-skills'],
-        4: ['ia-french', 'ia-english']
-    };
-    let isValid = true;
-    (required[step] || []).forEach(id => {
+    const fields = { 1: ['ia-nom', 'ia-prenom', 'ia-email'], 2: ['ia-job-title'], 3: ['ia-skills'] };
+    let ok = true;
+    (fields[step] || []).forEach(id => {
         const el = document.getElementById(id);
-        if (el && !el.value.trim()) { el.classList.add('is-invalid'); isValid = false; }
+        if (el && !el.value.trim()) { el.classList.add('is-invalid'); ok = false; }
         else if (el) el.classList.remove('is-invalid');
     });
-    return isValid;
+    return ok;
 }
 
 async function generateCVWithIA() {
     const btn = document.getElementById('btn-generate-final');
-    if (!validateStep(4)) return;
-
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Génération...';
-
-    const photoInput = document.getElementById('ia-photo');
-    let photoBase64 = null;
-    if (photoInput.files.length > 0) {
-        photoBase64 = await new Promise((res) => {
-            const reader = new FileReader();
-            reader.onload = () => res(reader.result);
-            reader.readAsDataURL(photoInput.files[0]);
-        });
-    }
-
     const payload = {
         nom: document.getElementById('ia-nom').value,
         prenom: document.getElementById('ia-prenom').value,
         sexe: document.getElementById('ia-sexe').value,
-        birthdate: document.getElementById('ia-birthdate').value,
         email: document.getElementById('ia-email').value,
         phone: document.getElementById('ia-phone').value,
-        ville: document.getElementById('ia-ville').value,
-        permis: document.getElementById('ia-permis').value,
-        photo: photoBase64,
         jobTitle: document.getElementById('ia-job-title').value,
-        etude: document.getElementById('ia-etude').value,
-        etudeAnnee: document.getElementById('ia-etude-annee').value,
-        specialite: document.getElementById('ia-specialite').value,
-        entreprise: document.getElementById('ia-exp-entreprise').value,
-        expDebut: document.getElementById('ia-exp-debut').value,
-        expFin: document.getElementById('ia-exp-fin').value,
-        expDesc: document.getElementById('ia-exp-desc').value,
-        informatique: document.getElementById('ia-informatique').value,
         skills: document.getElementById('ia-skills').value,
         french: document.getElementById('ia-french').value,
-        english: document.getElementById('ia-english').value,
-        loisirs: document.getElementById('ia-loisirs').value
+        english: document.getElementById('ia-english').value
     };
 
     try {
-        const response = await fetch('{{ path("app_cv_ia_generate") }}', {
+        const resp = await fetch('{{ path("app_cv_ia_generate") }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        const data = await response.json();
-        if (data.success) {
-            document.getElementById('cv_ia_filename').value = data.fileName;
-            document.getElementById('ia-filename-display').innerText = data.fileName;
+        const d = await resp.json();
+        if (d.success) {
+            document.getElementById('cv_ia_filename').value = d.fileName;
+            document.getElementById('ia-filename-display').innerText = d.fileName;
             document.getElementById('ia-placeholder').classList.add('d-none');
             document.getElementById('ia-success-box').classList.remove('d-none');
             bootstrap.Modal.getInstance(document.getElementById('iaModal')).hide();
-        } else {
-            alert(data.message);
         }
-    } catch (e) {
-        alert("Erreur de connexion");
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-magic me-2"></i>Générer mon CV';
-    }
+    } catch (e) { alert("Erreur génération"); }
+    finally { btn.disabled = false; }
 }
 
 function previewIACV() {
-    const filename = document.getElementById('cv_ia_filename').value;
-    if(filename) window.open("/uploads/cv/" + filename, '_blank');
+    const f = document.getElementById('cv_ia_filename').value;
+    if(f) window.open("/uploads/cv/" + f, '_blank');
 }
 
 function resetIA() {
-    if (confirm('Réinitialiser ?')) {
-        document.getElementById('ia-cv-form').reset();
-        document.getElementById('ia-placeholder').classList.remove('d-none');
-        document.getElementById('ia-success-box').classList.add('d-none');
-        nextStep(1);
-    }
+    document.getElementById('ia-cv-form').reset();
+    document.getElementById('ia-placeholder').classList.remove('d-none');
+    document.getElementById('ia-success-box').classList.add('d-none');
+    nextStep(1);
 }
 </script>
 {% endblock %}

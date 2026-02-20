@@ -314,4 +314,55 @@ public function generateCvIa(Request $request): JsonResponse
 
     return new JsonResponse(['success' => true, 'fileName' => $fileName]);
 }
+   #[Route('/demande/analyze-voice', name: 'app_demande_analyze_voice', methods: ['POST'])]
+public function analyzeVoice(Request $request): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    $text = $data['text'] ?? '';
+
+    if (empty($text)) {
+        return new JsonResponse(['success' => false, 'message' => 'Texte vide']);
+    }
+
+    $extractedData = [
+        'nom' => '',
+        'prenom' => '',
+        'phone' => ''
+    ];
+
+    // 1. Extraction intelligente du numéro de téléphone (Tunisie : 8 chiffres)
+    // Cherche une suite de 8 chiffres, même s'il y a des espaces entre eux
+    if (preg_match('/(\d[\s]*){8}/', $text, $matches)) {
+        $extractedData['phone'] = str_replace(' ', '', $matches[0]);
+    }
+
+    // 2. Nettoyage pour trouver le Nom et Prénom
+    // On retire les mots inutiles pour isoler les noms propres
+    $ignoreWords = ['bonjour', 'je', 'suis', 'appelle', 'présente', 'monsieur', 'mon', 'numéro', 'est', 'téléphone'];
+    $cleanText = str_ireplace($ignoreWords, '', $text);
+    
+    // On enlève les chiffres du texte pour ne pas les confondre avec un nom
+    $cleanText = preg_replace('/[0-9]+/', '', $cleanText);
+    $words = array_values(array_filter(explode(' ', trim($cleanText)), function($w) {
+        return strlen($w) > 2; // On garde les mots de plus de 2 lettres
+    }));
+
+    // On remplit le Prénom et le Nom si on a trouvé au moins deux mots
+    if (count($words) >= 2) {
+        $extractedData['prenom'] = ucfirst(mb_strtolower($words[0]));
+        $extractedData['nom'] = ucfirst(mb_strtolower($words[1]));
+    } elseif (count($words) === 1) {
+        $extractedData['prenom'] = ucfirst(mb_strtolower($words[0]));
+    }
+
+    // On considère l'extraction réussie si on a trouvé au moins le nom OU le téléphone
+    $success = !empty($extractedData['prenom']) || !empty($extractedData['phone']);
+
+    return new JsonResponse([
+        'success' => $success,
+        'data' => $extractedData
+    ]);
+}
+
+
 }

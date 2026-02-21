@@ -1,6 +1,6 @@
 {% extends 'front/base.html.twig' %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Modifier mon profil - AgriSmart{% endblock %}
 
 {% block body %}
 <main>
@@ -13,76 +13,90 @@
     <div class="col-lg-8 col-xl-9">
         <div class="vstack gap-4">
 
-            <!-- PERSONAL INFO -->
-            <div class="card border">
-                <div class="card-header border-bottom">
-                    <h4 class="card-header-title">Personal Information</h4>
+            <!-- INFORMATIONS PERSONNELLES -->
+            <div class="ag-edit-card card border-0">
+                <div class="ag-card-header">
+                    <i class="bi bi-person-gear me-2"></i>
+                    Informations personnelles
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-4">
                     {{ form_start(form, {'attr': {'class':'row g-3'}}) }}
 
                     <!-- Avatar -->
-                    <div class="col-12 mb-3 text-center">
+                    <div class="col-12 text-center mb-2">
                         {% if app.user.image %}
                             <img src="{{ asset('uploads/images/' ~ app.user.image) }}"
-                                 class="img-thumbnail mb-2" width="150">
+                                 class="ag-avatar-img mb-3" alt="Photo de profil">
                         {% else %}
-                            <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                 style="width:150px; height:150px; font-size:2rem;">
+                            <div class="ag-avatar-initials mx-auto mb-3">
                                 {{ app.user.firstName|slice(0,1)|upper }}{{ app.user.lastName|slice(0,1)|upper }}
                             </div>
                         {% endif %}
+                        <div class="ag-upload-hint">
+                            <i class="bi bi-camera me-1"></i> Changer la photo de profil
+                        </div>
                         {{ form_row(form.imageFile) }}
                     </div>
 
                     <div class="col-md-6">
-                        {{ form_row(form.firstName, {'attr': {'class':'form-control'}}) }}
+                        {{ form_row(form.firstName, {'attr': {'class': 'ag-input form-control'}}) }}
                     </div>
 
                     <div class="col-md-6">
-                        {{ form_row(form.lastName, {'attr': {'class':'form-control'}}) }}
+                        {{ form_row(form.lastName, {'attr': {'class': 'ag-input form-control'}}) }}
                     </div>
 
                     <div class="col-md-6">
-                        {{ form_row(form.email, {'attr': {'class':'form-control'}}) }}
+                        {{ form_row(form.email, {'attr': {'class': 'ag-input form-control'}}) }}
                     </div>
 
                     <div class="col-md-6">
-                        {{ form_row(form.phone, {'attr': {'class':'form-control'}}) }}
+                        {{ form_row(form.phone, {'attr': {'class': 'ag-input form-control'}}) }}
                     </div>
 
                     <div class="col-12">
-                        {{ form_row(form.address, {'attr': {'class':'form-control','rows':3}}) }}
+                        {{ form_row(form.address, {'attr': {'class': 'ag-input form-control', 'rows': 3}}) }}
                     </div>
 
                     <div class="col-12">
-                        {{ form_row(form.documentFileFile) }}
+                        <div class="ag-document-wrap">
+                            <div class="ag-document-label">
+                                <i class="bi bi-file-earmark-arrow-up me-2"></i>Document justificatif
+                            </div>
+                            {{ form_row(form.documentFileFile) }}
+                        </div>
                     </div>
 
-                    <div class="col-12 text-end">
-                        <button class="btn btn-primary">Save Changes</button>
+                    <div class="col-12 text-end mt-2">
+                        <a href="{{ path('app_profile_show') }}" class="ag-btn-cancel me-2">Annuler</a>
+                        <button type="submit" class="ag-btn-save">
+                            <i class="bi bi-check-lg me-1"></i> Enregistrer les modifications
+                        </button>
                     </div>
 
                     {{ form_end(form) }}
                 </div>
             </div>
 
-            <!-- PASSWORD -->
-            <div class="card border">
-                <div class="card-header border-bottom">
-                    <h4 class="card-header-title">Update Password</h4>
+            <!-- MOT DE PASSE -->
+            <div class="ag-edit-card card border-0">
+                <div class="ag-card-header">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    Modifier le mot de passe
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-4">
                     {{ form_start(passwordForm) }}
 
-                    {{ form_row(passwordForm.currentPassword, {'attr': {'class':'form-control'}}) }}
+                    {{ form_row(passwordForm.currentPassword, {'attr': {'class': 'ag-input form-control'}}) }}
                     {{ form_row(passwordForm.newPassword.first) }}
                     {{ form_row(passwordForm.newPassword.second) }}
 
-                    <div class="text-end">
-                        <button class="btn btn-primary">Change Password</button>
+                    <div class="text-end mt-2">
+                        <button type="submit" class="ag-btn-save">
+                            <i class="bi bi-key me-1"></i> Changer le mot de passe
+                        </button>
                     </div>
 
                     {{ form_end(passwordForm) }}
@@ -96,4 +110,131 @@
 </div>
 </section>
 </main>
+
+<style>
+/* ── Card ── */
+.ag-edit-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(31, 61, 43, 0.08);
+    background: #fff;
+}
+
+/* ── En-tête ── */
+.ag-card-header {
+    background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+/* ── Avatar ── */
+.ag-avatar-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 16px rgba(31, 61, 43, 0.2);
+}
+
+.ag-avatar-initials {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1F3D2B, #2d9c5a);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 16px rgba(31, 61, 43, 0.2);
+}
+
+.ag-upload-hint {
+    font-size: 0.78rem;
+    color: #6c8c78;
+    margin-bottom: 0.5rem;
+}
+
+/* ── Inputs ── */
+.ag-input {
+    border: 1.5px solid #d4e6da !important;
+    border-radius: 10px !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.9rem !important;
+    background: #f9fcfa !important;
+    color: #1F3D2B !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.ag-input:focus {
+    border-color: #2d9c5a !important;
+    box-shadow: 0 0 0 3px rgba(45, 156, 90, 0.12) !important;
+    background: #fff !important;
+    outline: none !important;
+}
+
+/* ── Document upload ── */
+.ag-document-wrap {
+    background: #f4f8f5;
+    border: 1.5px dashed #a8ccb6;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+}
+
+.ag-document-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #3d5c48;
+    margin-bottom: 0.5rem;
+}
+
+/* ── Boutons ── */
+.ag-btn-save {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ag-btn-save:hover {
+    color: #E6BF4A;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(31, 61, 43, 0.3);
+}
+
+.ag-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    background: #f4f8f5;
+    color: #3d5c48;
+    border: 1.5px solid #d4e6da;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.ag-btn-cancel:hover {
+    background: #e0ebe4;
+    border-color: #a8ccb6;
+    color: #1F3D2B;
+}
+</style>
+
 {% endblock %}

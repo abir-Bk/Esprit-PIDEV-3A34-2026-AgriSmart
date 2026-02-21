@@ -1,6 +1,6 @@
 {% extends 'front/base.html.twig' %}
 
-{% block title %}Delete Profile{% endblock %}
+{% block title %}Supprimer mon compte - AgriSmart{% endblock %}
 
 {% block body %}
 <main>
@@ -14,37 +14,37 @@
 <div class="card border">
 
 <div class="card-header border-bottom">
-<h4 class="card-header-title">Delete Account</h4>
+    <h4 class="card-header-title">Supprimer mon compte</h4>
 </div>
 
 <div class="card-body">
 
-<h6>Before you go...</h6>
-<ul>
-<li>Take a backup of your data</li>
-<li>If you delete your account, you will lose all your data.</li>
-</ul>
+    <h6>Avant de partir...</h6>
+    <ul>
+        <li>Pensez à sauvegarder vos données.</li>
+        <li>La suppression de votre compte entraînera la perte définitive de toutes vos données.</li>
+    </ul>
 
-<form method="post" action="{{ path('app_profile_delete') }}">
+    <form method="post" action="{{ path('app_profile_delete') }}">
 
-<div class="form-check form-check-md my-4">
-<input class="form-check-input" type="checkbox" id="deleteaccountCheck" required>
-<label class="form-check-label" for="deleteaccountCheck">
-Yes, I'd like to delete my account
-</label>
-</div>
+        <div class="form-check form-check-md my-4">
+            <input class="form-check-input" type="checkbox" id="deleteaccountCheck" required>
+            <label class="form-check-label" for="deleteaccountCheck">
+                Oui, je souhaite supprimer mon compte
+            </label>
+        </div>
 
-<input type="hidden" name="_token" value="{{ csrf_token('delete_profile') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_profile') }}">
 
-<a href="{{ path('app_profile_show') }}" class="btn btn-success-soft btn-sm">
-Keep my account
-</a>
+        <a href="{{ path('app_profile_show') }}" class="btn btn-success-soft btn-sm">
+            Conserver mon compte
+        </a>
 
-<button class="btn btn-danger btn-sm">
-Delete my account
-</button>
+        <button class="btn btn-danger btn-sm">
+            Supprimer mon compte
+        </button>
 
-</form>
+    </form>
 
 </div>
 </div>

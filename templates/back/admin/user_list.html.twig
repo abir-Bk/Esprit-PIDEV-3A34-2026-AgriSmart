@@ -1,92 +1,87 @@
 {% extends 'back/admin_base.html.twig' %}
 
-{% block title %}User List - AgriSmart{% endblock %}
+{% block title %}Liste des utilisateurs - AgriSmart{% endblock %}
 
 {% block body %}
-<!-- Page content START -->
+<!-- Contenu de la page START -->
    <div class="d-flex">
     {% include 'back/components/sidebar.html.twig' %}
     
     <div class="flex-grow-1 p-3">
 
-                         
-
-    <!-- Page main content START -->
-
-        <!-- Flash Messages -->
+        <!-- Messages flash -->
         {% for message in app.flashes('success') %}
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle me-2"></i>{{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
             </div>
         {% endfor %}
         
         {% for message in app.flashes('error') %}
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle me-2"></i>{{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
             </div>
         {% endfor %}
 
-        <!-- Title -->
-        
-        
-<div class="row">
-    <div class="col-12 mb-4 mb-sm-5">
-        <div class="d-sm-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0">User List</h1>
+        <!-- Titre -->
+        <div class="row">
+            <div class="col-12 mb-4 mb-sm-5">
+                <div class="d-sm-flex justify-content-between align-items-center">
+                    <h1 class="h3 mb-0">Liste des utilisateurs</h1>
 
-            <div class="d-flex gap-2">
-                <!-- PDF -->
-                <a href="{{ path('admin_users_pdf') }}"
-                   class="btn btn-sm btn-danger"
-                   title="Export PDF">
-                    <i class="bi bi-file-earmark-pdf"></i>
-                </a>
+                    <div class="d-flex gap-2">
+                        <!-- PDF -->
+                        <a href="{{ path('admin_users_pdf') }}"
+                           class="btn btn-sm btn-danger"
+                           title="Exporter en PDF">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </a>
 
-                <!-- Excel -->
-                <a href="{{ path('admin_users_excel') }}"
-                   class="btn btn-sm btn-success"
-                   title="Export Excel">
-                    <i class="bi bi-file-earmark-excel"></i>
-                </a>
+                        <!-- Excel -->
+                        <a href="{{ path('admin_users_excel') }}"
+                           class="btn btn-sm btn-success"
+                           title="Exporter en Excel">
+                            <i class="bi bi-file-earmark-excel"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-        <!-- Filters START -->
+
+        <!-- Filtres START -->
         <div class="row g-4 align-items-center">
-            <!-- Tabs -->
+            <!-- Onglets -->
             <div class="col-lg-6">
                 <ul class="nav nav-pills-shadow nav-responsive">
                     <li class="nav-item"> 
                         <a class="nav-link mb-0 {% if currentStatus is not defined or currentStatus is null %}active{% endif %}" 
                            href="{{ path('admin_users', {search: currentSearch, role: currentRole}) }}">
-                            All Users
+                            Tous
                         </a> 
                     </li>
                     <li class="nav-item">
                         <a class="nav-link mb-0 {% if currentStatus == 'active' %}active{% endif %}" 
                            href="{{ path('admin_users', {status: 'active', search: currentSearch, role: currentRole}) }}">
-                            Active
+                            Actifs
                         </a>
                     </li>
                     <li class="nav-item"> 
                         <a class="nav-link mb-0 {% if currentStatus == 'pending' %}active{% endif %}" 
                            href="{{ path('admin_users', {status: 'pending', search: currentSearch, role: currentRole}) }}">
-                            Pending
+                            En attente
                         </a> 
                     </li>
                     <li class="nav-item"> 
                         <a class="nav-link mb-0 {% if currentStatus == 'disabled' %}active{% endif %}" 
                            href="{{ path('admin_users', {status: 'disabled', search: currentSearch, role: currentRole}) }}">
-                            Disabled
+                            Désactivés
                         </a> 
                     </li>
                 </ul>
             </div>
 
-            <!-- Search -->
+            <!-- Recherche -->
             <div class="col-md-6 col-lg-3">
                 <form class="rounded position-relative" method="get" action="{{ path('admin_users') }}">
                     {% if currentStatus %}
@@ -96,7 +91,7 @@
                         <input type="hidden" name="role" value="{{ currentRole }}">
                     {% endif %}
                     <input class="form-control bg-transparent" type="search" name="search" 
-                           placeholder="Search users" aria-label="Search" 
+                           placeholder="Rechercher un utilisateur" aria-label="Recherche" 
                            value="{{ currentSearch ?? '' }}">
                     <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
                         <i class="fas fa-search fs-6"></i>
@@ -104,7 +99,7 @@
                 </form>
             </div>
 
-            <!-- Select -->
+            <!-- Filtre par rôle -->
             <div class="col-md-6 col-lg-3">
                 <form method="get" action="{{ path('admin_users') }}" id="roleFilterForm">
                     {% if currentStatus %}
@@ -113,42 +108,39 @@
                     {% if currentSearch %}
                         <input type="hidden" name="search" value="{{ currentSearch }}">
                     {% endif %}
-                    <select class="form-select" name="role" aria-label="Filter by role" onchange="this.form.submit()">
-                        <option value="">Sort by role</option>
-                        <option value="admin" {% if currentRole == 'admin' %}selected{% endif %}>Admin</option>
-                        <option value="employee" {% if currentRole == 'employee' %}selected{% endif %}>Employee</option>
+                    <select class="form-select" name="role" aria-label="Filtrer par rôle" onchange="this.form.submit()">
+                        <option value="">Trier par rôle</option>
+                        <option value="admin" {% if currentRole == 'admin' %}selected{% endif %}>Administrateur</option>
+                        <option value="employee" {% if currentRole == 'employee' %}selected{% endif %}>Employé</option>
                         <option value="agriculteur" {% if currentRole == 'agriculteur' %}selected{% endif %}>Agriculteur</option>
                         <option value="fournisseur" {% if currentRole == 'fournisseur' %}selected{% endif %}>Fournisseur</option>
                     </select>
                 </form>
             </div>
         </div>
-        <!-- Filters END -->
+        <!-- Filtres END -->
 
-        <!-- User list START -->
+        <!-- Liste des utilisateurs START -->
         <div class="card shadow mt-5">
-            <!-- Card body START -->
             <div class="card-body">
-                <!-- Table head -->
+                <!-- En-tête du tableau -->
                 <div class="bg-light rounded p-3 d-none d-lg-block">
                     <div class="row row-cols-6 g-4">
-                        <div class="col"><h6 class="mb-0">User</h6></div>
+                        <div class="col"><h6 class="mb-0">Utilisateur</h6></div>
                         <div class="col"><h6 class="mb-0">Email</h6></div>
-                        <div class="col"><h6 class="mb-0">Role</h6></div>
-                        <div class="col"><h6 class="mb-0">Registration Date</h6></div>
-                        <div class="col"><h6 class="mb-0">Status</h6></div>
+                        <div class="col"><h6 class="mb-0">Rôle</h6></div>
+                        <div class="col"><h6 class="mb-0">Date d'inscription</h6></div>
+                        <div class="col"><h6 class="mb-0">Statut</h6></div>
                         <div class="col"><h6 class="mb-0">Action</h6></div>
                     </div>
                 </div>
 
                 {% for user in users %}
-                <!-- Table data -->
                 <div class="row row-cols-xl-6 align-items-lg-center border-bottom g-4 px-2 py-4">
-                    <!-- Data item - User -->
+                    <!-- Utilisateur -->
                     <div class="col">
-                        <small class="d-block d-lg-none">User:</small>
+                        <small class="d-block d-lg-none">Utilisateur :</small>
                         <div class="d-flex align-items-center">
-                            <!-- Avatar -->
                             <div class="avatar avatar-xs flex-shrink-0">
                                 {% if user.image %}
                                 <img class="avatar-img rounded-circle" src="{{ asset('uploads/images/' ~ user.image) }}" alt="avatar">
@@ -158,34 +150,40 @@
                                 </div>
                                 {% endif %}
                             </div>
-                            <!-- Info -->
                             <div class="ms-2">
                                 <h6 class="mb-0 fw-light">{{ user.firstName }} {{ user.lastName }}</h6>
                             </div>
                         </div>
-                    </div>	
+                    </div>
 
-                    <!-- Data item - Email -->
+                    <!-- Email -->
                     <div class="col">
-                        <small class="d-block d-lg-none">Email:</small>
+                        <small class="d-block d-lg-none">Email :</small>
                         <h6 class="mb-0 fw-normal">{{ user.email }}</h6>
                     </div>
 
-                    <!-- Data item - Role -->
+                    <!-- Rôle -->
                     <div class="col">
-                        <small class="d-block d-lg-none">Role:</small>
-                        <h6 class="mb-0 fw-normal text-capitalize">{{ user.role }}</h6>
+                        <small class="d-block d-lg-none">Rôle :</small>
+                        <h6 class="mb-0 fw-normal text-capitalize">
+                            {% if user.role == 'admin' %}Administrateur
+                            {% elseif user.role == 'employee' %}Employé
+                            {% elseif user.role == 'agriculteur' %}Agriculteur
+                            {% elseif user.role == 'fournisseur' %}Fournisseur
+                            {% else %}{{ user.role }}
+                            {% endif %}
+                        </h6>
                     </div>
 
-                    <!-- Data item - Registration Date -->
+                    <!-- Date d'inscription -->
                     <div class="col">
-                        <small class="d-block d-lg-none">Registration Date:</small>
-                        <h6 class="mb-0 fw-normal">{{ user.createdAt|date('d M Y') }}</h6>
+                        <small class="d-block d-lg-none">Date d'inscription :</small>
+                        <h6 class="mb-0 fw-normal">{{ user.createdAt|date('d/m/Y') }}</h6>
                     </div>
 
-                    <!-- Data item - Status with Dropdown -->
+                    <!-- Statut avec menu déroulant -->
                     <div class="col">
-                        <small class="d-block d-lg-none">Status:</small>
+                        <small class="d-block d-lg-none">Statut :</small>
                         <div class="dropdown">
                             <button class="btn btn-sm 
                                 {% if user.status == 'active' %}
@@ -196,48 +194,45 @@
                                     bg-danger bg-opacity-10 text-danger
                                 {% endif %} 
                                 dropdown-toggle" type="button" id="statusDropdown{{ user.id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if user.status == 'active' %}
-                                    Active
-                                {% elseif user.status == 'pending' %}
-                                    Pending
-                                {% else %}
-                                    Disabled
+                                {% if user.status == 'active' %}Actif
+                                {% elseif user.status == 'pending' %}En attente
+                                {% else %}Désactivé
                                 {% endif %}
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="statusDropdown{{ user.id }}">
                                 <li>
                                     <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'active'}) }}">
-                                        <i class="bi bi-check-circle text-success me-2"></i>Active
+                                        <i class="bi bi-check-circle text-success me-2"></i>Actif
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'pending'}) }}">
-                                        <i class="bi bi-clock text-warning me-2"></i>Pending
+                                        <i class="bi bi-clock text-warning me-2"></i>En attente
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'disabled'}) }}">
-                                        <i class="bi bi-x-circle text-danger me-2"></i>Disabled
+                                        <i class="bi bi-x-circle text-danger me-2"></i>Désactivé
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                    <!-- Data item - Action -->
+                    <!-- Action -->
                     <div class="col">
                         <a href="{{ path('admin_user_detail', {'id': user.id}) }}" class="btn btn-sm btn-light mb-0">
-                            <i class="bi bi-eye me-1"></i>View
+                            <i class="bi bi-eye me-1"></i>Voir
                         </a>
                     </div>
                 </div>
                 {% else %}
-                <!-- Empty state -->
+                <!-- Aucun résultat -->
                 <div class="row">
                     <div class="col-12 text-center py-5">
                         <i class="bi bi-person-x fs-1 text-muted"></i>
-                        <h5 class="mt-3">No users found</h5>
-                        <p class="text-muted">There are no users to display at the moment.</p>
+                        <h5 class="mt-3">Aucun utilisateur trouvé</h5>
+                        <p class="text-muted">Il n'y a aucun utilisateur à afficher pour le moment.</p>
                     </div>
                 </div>
                 {% endfor %}
@@ -245,21 +240,20 @@
             </div>
             <!-- Card body END -->
 
-            <!-- Card footer START -->
+            <!-- Pied de page de la carte -->
             <div class="card-footer pt-0">
-                <!-- Pagination and content -->
                 <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
-                    <!-- Content -->
                     <p class="mb-sm-0 text-center text-sm-start">
-                        Showing {{ users.currentPageNumber == 1 ? 1 : ((users.currentPageNumber - 1) * users.itemNumberPerPage) + 1 }} 
-                        to {{ users.currentPageNumber * users.itemNumberPerPage > users.totalItemCount ? users.totalItemCount : users.currentPageNumber * users.itemNumberPerPage }} 
-                        of {{ users.totalItemCount }} entries
+                        Affichage de 
+                        {{ users.currentPageNumber == 1 ? 1 : ((users.currentPageNumber - 1) * users.itemNumberPerPage) + 1 }} 
+                        à 
+                        {{ users.currentPageNumber * users.itemNumberPerPage > users.totalItemCount ? users.totalItemCount : users.currentPageNumber * users.itemNumberPerPage }} 
+                        sur {{ users.totalItemCount }} entrées
                     </p>
-                    <!-- Pagination -->
-                    <nav class="mb-sm-0 d-flex justify-content-center" aria-label="navigation">
+                    <nav class="mb-sm-0 d-flex justify-content-center" aria-label="Pagination">
                         {{ knp_pagination_render(users, 'pagination.html.twig', {}, {
-                            'prev_label': 'Prev',
-                            'next_label': 'Next',
+                            'prev_label': 'Précédent',
+                            'next_label': 'Suivant',
                             'ul_class': 'pagination pagination-sm pagination-primary-soft mb-0',
                             'li_class': 'page-item',
                             'a_class': 'page-link'
@@ -267,19 +261,14 @@
                     </nav>
                 </div>
             </div>
-            <!-- Card footer END -->
         </div>
-        <!-- User list END -->
+        <!-- Liste des utilisateurs END -->
     </div>
-    <!-- Page main content END -->
 </div>
-<!-- Page content END -->
+<!-- Contenu de la page END -->
 
-<!-- Additional CSS for status dropdown styling -->
 <style>
-.dropdown-toggle::after {
-    margin-left: 0.5em;
-}
+.dropdown-toggle::after { margin-left: 0.5em; }
 
 .avatar-img {
     width: 40px;
@@ -287,57 +276,39 @@
     object-fit: cover;
 }
 
-.bg-orange {
-    background-color: #fd7e14;
-}
+.bg-orange { background-color: #fd7e14; }
+.text-orange { color: #fd7e14; }
 
-.text-orange {
-    color: #fd7e14;
-}
-
-/* Status badge button styling */
 .dropdown .btn-sm {
     padding: 0.375rem 0.75rem;
     border: none;
     font-size: 0.875rem;
-    min-width: 90px;
+    min-width: 100px;
 }
 
-/* Dropdown menu styling */
-.dropdown-menu {
-    min-width: 140px;
-}
+.dropdown-menu { min-width: 150px; }
 
 .dropdown-item {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
 }
 
-.dropdown-item:hover {
-    background-color: #f8f9fa;
-}
+.dropdown-item:hover { background-color: #f8f9fa; }
 
-/* Responsive table adjustments */
 @media (max-width: 992px) {
-    .row-cols-xl-6 > .col {
-        margin-bottom: 0.5rem;
-    }
+    .row-cols-xl-6 > .col { margin-bottom: 0.5rem; }
 }
 </style>
 
-<!-- JavaScript for status change confirmation -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add confirmation for status changes
-    const statusLinks = document.querySelectorAll('[href*="admin_user_status"]');
-    
-    statusLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+document.addEventListener('DOMContentLoaded', function () {
+    // Confirmation avant changement de statut
+    document.querySelectorAll('[href*="admin_user_status"]').forEach(link => {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             const href = this.getAttribute('href');
             const statusText = this.textContent.trim();
-            
-            if (confirm(`Are you sure you want to change the user status to ${statusText}?`)) {
+            if (confirm(`Êtes-vous sûr de vouloir changer le statut de cet utilisateur en « ${statusText} » ?`)) {
                 window.location.href = href;
             }
         });

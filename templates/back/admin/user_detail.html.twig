@@ -1,41 +1,39 @@
 {% extends 'back/admin_base.html.twig' %}
 
-{% block title %}User Details - {{ user.firstName }} {{ user.lastName }} - AgriSmart{% endblock %}
+{% block title %}Détails utilisateur - {{ user.firstName }} {{ user.lastName }} - AgriSmart{% endblock %}
 
 {% block body %}
-<!-- Page content START -->
+<!-- Contenu de la page START -->
     {% include 'back/components/sidebar.html.twig' %}
 
-    <!-- Page main content START -->
+    <!-- Contenu principal START -->
     <div class="page-content-wrapper p-xxl-4">
 
-        <!-- Flash Messages -->
+        <!-- Messages flash -->
         {% for message in app.flashes('success') %}
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle me-2"></i>{{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
             </div>
         {% endfor %}
 
-        <!-- Title and Back Button -->
+        <!-- Titre et bouton retour -->
         <div class="row">
             <div class="col-12 mb-4 mb-sm-5">
                 <div class="d-sm-flex justify-content-between align-items-center">
                     <div>
                         <a href="{{ path('admin_users') }}" class="btn btn-link text-secondary mb-0 p-0">
-                            <i class="bi bi-arrow-left me-2"></i>Back to Users List
+                            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
                         </a>
-                        <h1 class="h3 mb-0 mt-2">User Details</h1>
+                        <h1 class="h3 mb-0 mt-2">Détails de l'utilisateur</h1>
                     </div>
-                  				
                 </div>
             </div>
         </div>
 
         <div class="row g-4">
-            <!-- Left Column: User Profile Card -->
+            <!-- Colonne gauche : carte profil -->
             <div class="col-lg-4">
-                <!-- User Profile Card -->
                 <div class="card shadow">
                     <div class="card-body text-center">
                         <!-- Avatar -->
@@ -48,12 +46,12 @@
                             </div>
                             {% endif %}
                         </div>
-                        
-                        <!-- Name -->
+
+                        <!-- Nom -->
                         <h4 class="mb-1">{{ user.firstName }} {{ user.lastName }}</h4>
                         <p class="text-muted mb-3">{{ user.email }}</p>
-                        
-                        <!-- Status Badge -->
+
+                        <!-- Badge statut -->
                         <div class="mb-3">
                             <span class="badge 
                                 {% if user.status == 'active' %}
@@ -68,40 +66,46 @@
                                     {% if user.status == 'active' %}bi-check-circle
                                     {% elseif user.status == 'pending' %}bi-clock
                                     {% else %}bi-x-circle{% endif %} me-1"></i>
-                                {{ user.status|capitalize }}
+                                {% if user.status == 'active' %}Actif
+                                {% elseif user.status == 'pending' %}En attente
+                                {% else %}Désactivé{% endif %}
                             </span>
                         </div>
-                        
-                        <!-- Role Badge -->
+
+                        <!-- Badge rôle -->
                         <div class="mb-3">
                             <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
                                 <i class="bi bi-person-badge me-1"></i>
-                                {{ user.role|capitalize }}
+                                {% if user.role == 'admin' %}Administrateur
+                                {% elseif user.role == 'employee' %}Employé
+                                {% elseif user.role == 'agriculteur' %}Agriculteur
+                                {% elseif user.role == 'fournisseur' %}Fournisseur
+                                {% else %}{{ user.role|capitalize }}{% endif %}
                             </span>
                         </div>
 
                         <hr>
 
-                        <!-- Quick Actions -->
+                        <!-- Actions rapides -->
                         <div class="d-grid gap-2">
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-light dropdown-toggle w-100" type="button" id="statusChangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-gear me-2"></i>Change Status
+                                    <i class="bi bi-gear me-2"></i>Changer le statut
                                 </button>
                                 <ul class="dropdown-menu w-100" aria-labelledby="statusChangeDropdown">
                                     <li>
                                         <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'active'}) }}">
-                                            <i class="bi bi-check-circle text-success me-2"></i>Set as Active
+                                            <i class="bi bi-check-circle text-success me-2"></i>Définir comme Actif
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'pending'}) }}">
-                                            <i class="bi bi-clock text-warning me-2"></i>Set as Pending
+                                            <i class="bi bi-clock text-warning me-2"></i>Définir comme En attente
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="{{ path('admin_user_status', {'id': user.id, 'status': 'disabled'}) }}">
-                                            <i class="bi bi-x-circle text-danger me-2"></i>Set as Disabled
+                                            <i class="bi bi-x-circle text-danger me-2"></i>Définir comme Désactivé
                                         </a>
                                     </li>
                                 </ul>
@@ -110,7 +114,7 @@
                     </div>
                 </div>
 
-                <!-- Documents Card -->
+                <!-- Carte documents -->
                 <div class="card shadow mt-4">
                     <div class="card-header bg-transparent border-bottom">
                         <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Documents</h5>
@@ -120,7 +124,7 @@
                         <div class="d-flex align-items-center p-3 bg-light rounded">
                             <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
                             <div class="flex-grow-1">
-                                <h6 class="mb-0">User Document</h6>
+                                <h6 class="mb-0">Document justificatif</h6>
                                 <small class="text-muted">{{ user.documentFile }}</small>
                             </div>
                             <a href="{{ asset('uploads/documents/' ~ user.documentFile) }}" class="btn btn-sm btn-primary-soft" download>
@@ -130,53 +134,53 @@
                         {% else %}
                         <p class="text-muted mb-0 text-center">
                             <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                            No documents uploaded
+                            Aucun document téléversé
                         </p>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: User Information -->
+            <!-- Colonne droite : informations -->
             <div class="col-lg-8">
-                <!-- Personal Information Card -->
+                <!-- Informations personnelles -->
                 <div class="card shadow mb-4">
                     <div class="card-header bg-transparent border-bottom">
-                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Personal Information</h5>
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Informations personnelles</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">First Name</label>
+                                <label class="form-label fw-bold">Prénom</label>
                                 <p class="mb-0">{{ user.firstName }}</p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Last Name</label>
+                                <label class="form-label fw-bold">Nom</label>
                                 <p class="mb-0">{{ user.lastName }}</p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Email Address</label>
+                                <label class="form-label fw-bold">Adresse e-mail</label>
                                 <p class="mb-0">
                                     <i class="bi bi-envelope me-2"></i>{{ user.email }}
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Phone Number</label>
+                                <label class="form-label fw-bold">Numéro de téléphone</label>
                                 <p class="mb-0">
                                     {% if user.phone %}
                                         <i class="bi bi-telephone me-2"></i>{{ user.phone }}
                                     {% else %}
-                                        <span class="text-muted">Not provided</span>
+                                        <span class="text-muted">Non renseigné</span>
                                     {% endif %}
                                 </p>
                             </div>
                             <div class="col-12">
-                                <label class="form-label fw-bold">Address</label>
+                                <label class="form-label fw-bold">Adresse</label>
                                 <p class="mb-0">
                                     {% if user.address %}
                                         <i class="bi bi-geo-alt me-2"></i>{{ user.address }}
                                     {% else %}
-                                        <span class="text-muted">Not provided</span>
+                                        <span class="text-muted">Non renseignée</span>
                                     {% endif %}
                                 </p>
                             </div>
@@ -184,27 +188,31 @@
                     </div>
                 </div>
 
-                <!-- Account Information Card -->
+                <!-- Informations du compte -->
                 <div class="card shadow mb-4">
                     <div class="card-header bg-transparent border-bottom">
-                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Account Information</h5>
+                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Informations du compte</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">User ID</label>
+                                <label class="form-label fw-bold">ID utilisateur</label>
                                 <p class="mb-0">#{{ user.id }}</p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Role</label>
-                                <p class="mb-0 text-capitalize">
+                                <label class="form-label fw-bold">Rôle</label>
+                                <p class="mb-0">
                                     <span class="badge bg-primary bg-opacity-10 text-primary">
-                                        {{ user.role }}
+                                        {% if user.role == 'admin' %}Administrateur
+                                        {% elseif user.role == 'employee' %}Employé
+                                        {% elseif user.role == 'agriculteur' %}Agriculteur
+                                        {% elseif user.role == 'fournisseur' %}Fournisseur
+                                        {% else %}{{ user.role|capitalize }}{% endif %}
                                     </span>
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Account Status</label>
+                                <label class="form-label fw-bold">Statut du compte</label>
                                 <p class="mb-0">
                                     <span class="badge 
                                         {% if user.status == 'active' %}
@@ -214,27 +222,29 @@
                                         {% else %}
                                             bg-danger bg-opacity-10 text-danger
                                         {% endif %}">
-                                        {{ user.status|capitalize }}
+                                        {% if user.status == 'active' %}Actif
+                                        {% elseif user.status == 'pending' %}En attente
+                                        {% else %}Désactivé{% endif %}
                                     </span>
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Registration Date</label>
+                                <label class="form-label fw-bold">Date d'inscription</label>
                                 <p class="mb-0">
-                                    <i class="bi bi-calendar-event me-2"></i>{{ user.createdAt|date('F d, Y') }}
+                                    <i class="bi bi-calendar-event me-2"></i>{{ user.createdAt|date('d/m/Y') }}
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Last Updated</label>
+                                <label class="form-label fw-bold">Dernière mise à jour</label>
                                 <p class="mb-0">
-                                    <i class="bi bi-clock-history me-2"></i>{{ user.updatedAt|date('F d, Y H:i') }}
+                                    <i class="bi bi-clock-history me-2"></i>{{ user.updatedAt|date('d/m/Y H:i') }}
                                 </p>
                             </div>
                             {% if user.googleId %}
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Google Account</label>
+                                <label class="form-label fw-bold">Compte Google</label>
                                 <p class="mb-0">
-                                    <i class="bi bi-google me-2 text-danger"></i>Connected
+                                    <i class="bi bi-google me-2 text-danger"></i>Connecté
                                 </p>
                             </div>
                             {% endif %}
@@ -242,14 +252,13 @@
                     </div>
                 </div>
 
-             
             </div>
         </div>
 
     </div>
-    <!-- Page main content END -->
+    <!-- Contenu principal END -->
 </div>
-<!-- Page content END -->
+<!-- Contenu de la page END -->
 
 <style>
 .avatar-xxl {

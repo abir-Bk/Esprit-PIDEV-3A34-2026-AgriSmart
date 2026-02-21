@@ -44,9 +44,7 @@ header.header-sticky .navbar-nav .nav-link.active {
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
 						<li class="nav-item"><a class="nav-link small px-3 {{ _route starts with 'employee_tasks_' ? 'active fw-semibold' }}" href="{{ path('employee_tasks_index') }}"><i class="bi bi-list-check me-1"></i>Tâches</a></li>
 					{% else %}
-						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_produit_index' ? 'active fw-semibold' }}" href="{{ path('app_produit_index') }}"><i class="bi bi-shop me-1"></i>Marketplace</a></li>
-						<li class="nav-item"><a class="nav-link small px-3 {{ _route == 'app_offre_index_front' ? 'active fw-semibold' }}" href="{{ path('app_offre_index_front') }}"><i class="bi bi-person-badge me-1"></i>Candidature</a></li>
-					{% endif %}
+						{% endif %}
 				</ul>
 
 				<ul class="navbar-nav align-items-center gap-2 gap-xl-3">

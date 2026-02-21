@@ -20,6 +20,21 @@
   <div class="container">
     <div class="row mb-4">
       <div class="col-12">
+      <div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-4 text-white" style="background: linear-gradient(90deg, #126d46 0%, #17884a 100%); border-radius: 15px;">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
+                <div>
+                    <h4 class="fw-bold mb-1"><i class="bi bi-cpu-fill me-2"></i>Entraînement Vocal IA</h4>
+                    <p class="mb-0 opacity-75">Améliorez votre score en pratiquant un entretien réel.</p>
+                </div>
+                <button class="btn btn-light rounded-pill px-4 fw-bold text-success mt-3 mt-md-0 shadow-sm" data-bs-toggle="modal" data-bs-target="#interviewModal">
+                    <i class="bi bi-mic-fill me-2"></i>Lancer le test
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
         <div class="card ag-filter-card shadow-sm p-4">
           <form method="get" action="{{ path('app_offre_index_front') }}" class="row g-3 align-items-end" id="formOffres">
             <div class="col-md-5">
@@ -109,7 +124,46 @@
     </div>
   </div>
 </section>
+<div class="modal fade" id="interviewModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopInterview()"></button>
+            </div>
+            <div class="modal-body p-5 text-center">
+                <div id="ai-avatar-box" class="mb-3 mx-auto" style="width: 80px; height: 80px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #28a745;">
+                    <i class="bi bi-robot fs-2 text-success"></i>
+                </div>                
+                <h4 id="ai-question-text" class="fw-bold text-dark">Simulateur d'Entretien</h4>
+                <p id="ai-status" class="text-muted small mb-4">Entraînement général pour tous les métiers agricoles.</p>
+                
+                <div id="ai-result-area" class="d-none mt-3 p-4 bg-light rounded-4 text-start border shadow-sm">
+                    <div class="text-center mb-3">
+                        <h2 class="fw-bold" id="final-score">0%</h2>
+                    </div>
+                    <div class="small">
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-success small text-uppercase">Points Forts</h6>
+                            <div id="final-pos" class="ps-3 border-start border-success text-dark"></div>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-danger small text-uppercase">Conseils d'amélioration</h6>
+                            <div id="final-neg" class="ps-3 border-start border-danger text-dark"></div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="mt-4">
+                    <button id="start-btn-ia" class="btn btn-success btn-lg rounded-pill px-5 shadow" onclick="runInterviewStep()">Lancer l'entraînement</button>
+                    <div id="ai-wave" class="d-none text-danger fw-bold">
+                         <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                         IA en écoute...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {# --- CHATBOT SECTION --- #}
 <style>
   .ag-chat-bubble {
@@ -279,5 +333,123 @@ document.addEventListener('DOMContentLoaded', function() {
   send.onclick = handleChat;
   input.onkeypress = (e) => { if (e.key === 'Enter') handleChat(); };
 });
+</script>
+<script>
+// RÉSERVOIR DE QUESTIONS GÉNÉRALISTES
+const pool = [
+    "Quelles sont vos principales forces pour travailler dans le secteur agricole ?",
+    "Comment gérez-vous le travail physique ou les horaires décalés ?",
+    "Si vous avez un désaccord avec un collègue sur une tâche, comment réagissez-vous ?",
+    "Quelle importance accordez-vous aux consignes de sécurité sur une exploitation ?",
+    "Comment vous adaptez-vous si les conditions météo changent vos plans de travail ?",
+    "Parlez-moi d'une machine ou d'un outil que vous maîtrisez bien.",
+    "Que feriez-vous si vous remarquiez une anomalie ou un danger sur le terrain ?",
+    "Qu'est-ce qui vous motive le plus dans les métiers de la terre ?",
+    "Comment gérez-vous le stress lors des périodes de grosse activité ?",
+    "Selon vous, qu'est-ce qu'un bon employé agricole aujourd'hui ?",
+    "Avez-vous une préférence pour le travail en équipe ou en autonomie ?",
+    "Comment entretenez-vous vos connaissances sur les nouvelles techniques agricoles ?"
+];
+
+let stepIA = 0;
+let transcriptIA = "";
+let selectedQuestions = [];
+
+window.speak = function(text, callback) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'fr-FR';
+    utter.onend = callback;
+    window.speechSynthesis.speak(utter);
+};
+
+window.runInterviewStep = function() {
+    if (stepIA === 0) {
+        transcriptIA = "";
+        
+        // Introduction fixe
+        selectedQuestions = ["Bonjour, je suis l'assistant AgriSmart. Ceci est un entretien de réflexion pour vous préparer à postuler sur notre plateforme. Pour commencer, présentez-vous et parlez-moi de votre parcours."];
+        
+        // NOMBRE ALÉATOIRE : L'IA choisit entre 4 et 7 questions supplémentaires
+        let nbQuestions = Math.floor(Math.random() * (7 - 4 + 1)) + 4; 
+        let shuffled = pool.sort(() => 0.5 - Math.random()).slice(0, nbQuestions);
+        
+        selectedQuestions.push(...shuffled);
+        selectedQuestions.push("L'entretien touche à sa fin. Merci pour vos réponses, je lance l'analyse de votre performance.");
+    }
+
+    document.getElementById('start-btn-ia').classList.add('d-none');
+    document.getElementById('ai-result-area').classList.add('d-none');
+
+    if (stepIA < selectedQuestions.length - 1) {
+        const currentQ = selectedQuestions[stepIA];
+        document.getElementById('ai-question-text').innerText = currentQ;
+        // Le compteur est supprimé ici
+        speak(currentQ, () => { listenIA(); });
+    } else {
+        showFinalResult();
+    }
+};
+
+function listenIA() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recIA = new SpeechRec();
+    recIA.lang = 'fr-FR';
+    recIA.onstart = () => {
+        document.getElementById('ai-wave').classList.remove('d-none');
+        document.getElementById('ai-status').innerText = "L'IA vous écoute...";
+    };
+    recIA.onresult = (e) => {
+        transcriptIA += " " + e.results[0][0].transcript;
+        document.getElementById('ai-wave').classList.add('d-none');
+        stepIA++;
+        setTimeout(window.runInterviewStep, 800);
+    };
+    recIA.onerror = () => {
+        document.getElementById('ai-wave').classList.add('d-none');
+        stepIA++;
+        setTimeout(window.runInterviewStep, 500);
+    };
+    recIA.start();
+}
+
+function showFinalResult() {
+    let finalScore = 0;
+    const text = transcriptIA.toLowerCase();
+    const p = []; const n = [];
+
+    // Analyse basée sur le volume de réponse global
+    if (text.length > 400) { finalScore += 55; p.push("Excellente argumentation, très riche."); }
+    else if (text.length > 200) { finalScore += 35; p.push("Réponses bien développées."); }
+    else { finalScore += 10; n.push("Réponses un peu trop courtes pour un entretien."); }
+
+    // Mots-clés
+    const keywords = ["sécurité", "équipe", "motivation", "terrain", "responsable", "organisation"];
+    let found = keywords.filter(w => text.includes(w));
+    finalScore += (found.length * 8);
+
+    if (finalScore > 98) finalScore = 98;
+
+    document.getElementById('ai-question-text').innerText = "Bilan de préparation";
+    document.getElementById('ai-status').innerText = "Analyse terminée.";
+    
+    const scoreBox = document.getElementById('final-score');
+    scoreBox.innerText = finalScore + "%";
+    scoreBox.className = "fw-bold " + (finalScore < 50 ? "text-danger" : "text-success");
+    
+    document.getElementById('final-pos').innerHTML = p.join('<br>') || "Points positifs détectés.";
+    document.getElementById('final-neg').innerHTML = n.join('<br>') || "Conseils pour la suite.";
+    document.getElementById('ai-result-area').classList.remove('d-none');
+    
+    speak("Entraînement terminé. Votre score est de " + finalScore + " pourcent. Continuez ainsi !");
+    stepIA = 0;
+    document.getElementById('start-btn-ia').classList.remove('d-none');
+    document.getElementById('start-btn-ia').innerText = "Relancer un test";
+}
+
+window.stopInterview = function() {
+    window.speechSynthesis.cancel();
+    stepIA = 0;
+};
 </script>
 {% endblock %}

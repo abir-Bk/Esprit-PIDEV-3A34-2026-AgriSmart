@@ -32,14 +32,14 @@
           <div class="p-4 p-lg-5">
             {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'form-postulation'}}) }}
 
-            {# --- ASSISTANT VOCAL IA --- #}
+            {# --- ASSISTANT VOCAL IA (FORMULAIRE PRINCIPAL) --- #}
             <div class="text-center mb-4 p-3 border rounded-pill bg-light shadow-sm d-flex align-items-center justify-content-center gap-3">
                 <button type="button" id="start-voice-btn" class="btn btn-success rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #1a4331; border: none; transition: all 0.3s ease;">
                     <i id="micro-icon" class="bi bi-mic-fill fs-4 text-white"></i>
                 </button>
                 <div class="text-start">
                     <p class="mb-0 fw-bold small" id="voice-status" style="color: #1a4331;">Assistant Vocal IA</p>
-                    <p class="mb-0 text-muted extra-small" style="font-size: 11px;"> </p>
+                    <p id="voice-subtext" class="mb-0 text-muted extra-small" style="font-size: 11px;">Cliquez pour parler librement</p>
                 </div>
             </div>
 
@@ -152,6 +152,16 @@
         <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4">
+
+        {# --- NOUVEAU : BOUTON VOCAL DANS LA MODALE --- #}
+        <div class="text-center mb-4 p-3 border rounded bg-light shadow-sm">
+            <button type="button" id="start-guided-voice" class="btn btn-success rounded-pill px-4 py-2 fw-bold">
+                <i id="guided-micro-icon" class="bi bi-mic-fill me-2"></i>
+                <span id="guided-voice-text">Démarrer l'assistant vocal guidé</span>
+            </button>
+            <p id="guided-status" class="mt-2 mb-0 small text-muted">Je vais vous poser des questions pour remplir votre CV.</p>
+        </div>
+
         <div class="progress mb-4" style="height: 6px; border-radius: 10px;">
           <div id="ia-progress" class="progress-bar bg-success rounded-pill" style="width: 25%; transition: width 0.4s ease;"></div>
         </div>
@@ -162,11 +172,11 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="small fw-bold text-secondary">Nom <span class="text-danger">*</span></label>
-                <input type="text" id="ia-nom" class="form-control ag-input" placeholder="Benayed" required>
+                <input type="text" id="ia-nom" class="form-control ag-input" required>
               </div>
               <div class="col-md-6">
                 <label class="small fw-bold text-secondary">Prénom <span class="text-danger">*</span></label>
-                <input type="text" id="ia-prenom" class="form-control ag-input" placeholder="Ahmed" required>
+                <input type="text" id="ia-prenom" class="form-control ag-input" required>
               </div>
             </div>
             <div class="row g-3 mb-3">
@@ -185,7 +195,7 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="small fw-bold text-secondary">Ville / Adresse <span class="text-danger">*</span></label>
-                    <input type="text" id="ia-ville" class="form-control ag-input" placeholder="Tunis, Ariana..." required>
+                    <input type="text" id="ia-ville" class="form-control ag-input" required>
                 </div>
                 <div class="col-md-6">
                     <label class="small fw-bold text-secondary">Permis de conduire</label>
@@ -199,16 +209,12 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="small fw-bold text-secondary">Email <span class="text-danger">*</span></label>
-                <input type="email" id="ia-email" class="form-control ag-input" placeholder="ahmed@mail.com" required>
+                <input type="email" id="ia-email" class="form-control ag-input" required>
               </div>
               <div class="col-md-6">
                 <label class="small fw-bold text-secondary">Téléphone</label>
-                <input type="tel" id="ia-phone" class="form-control ag-input" placeholder="+216 XX XXX XXX">
+                <input type="tel" id="ia-phone" class="form-control ag-input">
               </div>
-            </div>
-            <div class="mb-3">
-                <label class="small fw-bold text-secondary">Photo de profil</label>
-                <input type="file" id="ia-photo" class="form-control ag-input" accept="image/*">
             </div>
             <div class="d-flex justify-content-end mt-4">
               <button type="button" class="btn btn-success rounded-pill px-4 py-2" onclick="nextStep(2)">
@@ -221,21 +227,21 @@
             <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">2</span>Profil & Formation</h6>
             <div class="mb-3">
               <label class="small fw-bold text-secondary">Titre du poste souhaité <span class="text-danger">*</span></label>
-              <input type="text" id="ia-job-title" class="form-control ag-input" placeholder="Ex: Chef de Culture" required>
+              <input type="text" id="ia-job-title" class="form-control ag-input" required>
             </div>
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="small fw-bold text-secondary">Dernier Diplôme <span class="text-danger">*</span></label>
-                <input type="text" id="ia-etude" class="form-control ag-input" placeholder="Ex: Licence en Agronomie" required>
+                <input type="text" id="ia-etude" class="form-control ag-input" required>
               </div>
               <div class="col-md-6">
                 <label class="small fw-bold text-secondary">Année d'obtention (Facultatif)</label>
-                <input type="number" id="ia-etude-annee" class="form-control ag-input" placeholder="Ex: 2023">
+                <input type="number" id="ia-etude-annee" class="form-control ag-input">
               </div>
             </div>
             <div class="mb-3">
               <label class="small fw-bold text-secondary">Établissement & Spécialité</label>
-              <input type="text" id="ia-specialite" class="form-control ag-input" placeholder="Ex: INAT Tunis">
+              <input type="text" id="ia-specialite" class="form-control ag-input">
             </div>
             <div class="d-flex justify-content-between mt-4">
               <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="nextStep(1)">
@@ -251,20 +257,16 @@
             <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">3</span>Expériences & Outils</h6>
             <div class="bg-light p-3 rounded mb-3">
                 <label class="small fw-bold text-secondary">Dernière Entreprise / Ferme</label>
-                <input type="text" id="ia-exp-entreprise" class="form-control ag-input mb-2" placeholder="Ferme El Hana">
-                <div class="row g-2 mb-2">
-                    <div class="col-6"><input type="month" id="ia-exp-debut" class="form-control ag-input"></div>
-                    <div class="col-6"><input type="month" id="ia-exp-fin" class="form-control ag-input"></div>
-                </div>
-                <textarea id="ia-exp-desc" class="form-control ag-input" rows="2" placeholder="Décrivez vos missions principales..."></textarea>
+                <input type="text" id="ia-exp-entreprise" class="form-control ag-input mb-2">
+                <textarea id="ia-exp-desc" class="form-control ag-input" rows="2" placeholder="Décrivez vos missions..."></textarea>
             </div>
             <div class="mb-3">
               <label class="small fw-bold text-secondary">Outils Informatiques</label>
-              <input type="text" id="ia-informatique" class="form-control ag-input" placeholder="Excel, Word, Logiciel de gestion agricole...">
+              <input type="text" id="ia-informatique" class="form-control ag-input">
             </div>
             <div class="mb-3">
               <label class="small fw-bold text-secondary">Compétences techniques <span class="text-danger">*</span></label>
-              <input type="text" id="ia-skills" class="form-control ag-input" placeholder="Irrigation, Taille, Phyto..." required>
+              <input type="text" id="ia-skills" class="form-control ag-input" required>
             </div>
             <div class="d-flex justify-content-between mt-4">
               <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="nextStep(2)">
@@ -284,7 +286,6 @@
                 <select id="ia-french" class="form-select ag-input" required>
                   <option value="Intermédiaire" selected>Intermédiaire</option>
                   <option value="Courant">Courant</option>
-                  <option value="Langue maternelle">Langue maternelle</option>
                 </select>
               </div>
               <div class="col-md-6">
@@ -293,13 +294,12 @@
                   <option value="Aucun">Aucun</option>
                   <option value="Débutant">Débutant</option>
                   <option value="Intermédiaire">Intermédiaire</option>
-                  <option value="Courant">Courant</option>
                 </select>
               </div>
             </div>
             <div class="mb-3">
                 <label class="small fw-bold text-secondary">Loisirs</label>
-                <input type="text" id="ia-loisirs" class="form-control ag-input" placeholder="Sport, Voyages...">
+                <input type="text" id="ia-loisirs" class="form-control ag-input">
             </div>
             <div class="d-flex justify-content-between mt-4">
               <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="nextStep(3)">
@@ -325,7 +325,6 @@
 .is-invalid { border-color: #dc3545 !important; }
 .extra-small { font-size: 11px; }
 
-/* Animation du micro quand il écoute */
 .pulse-recording {
     animation: pulse-red 1.5s infinite;
 }
@@ -337,47 +336,93 @@
 </style>
 
 <script>
-// --- LOGIQUE ASSISTANT VOCAL ---
-const startVoiceBtn = document.getElementById('start-voice-btn');
-const voiceStatus = document.getElementById('voice-status');
-const microIcon = document.getElementById('micro-icon');
-
+// --- CONFIGURATION GLOBALE ---
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
-let isRecording = false;
+let silenceTimer = null; // Timer pour éviter la coupure brusque
+const SILENCE_DURATION = 2000; // Attend 2 secondes de silence avant de couper
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
     recognition.lang = 'fr-FR';
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true; // Permet de ne pas couper à la moindre pause
+    recognition.interimResults = true; // Permet de voir l'analyse en cours
+}
 
+// --- LOGIQUE ASSISTANT VOCAL (PRINCIPAL) ---
+const startVoiceBtn = document.getElementById('start-voice-btn');
+const voiceStatus = document.getElementById('voice-status');
+const voiceSubtext = document.getElementById('voice-subtext');
+const microIcon = document.getElementById('micro-icon');
+
+let isRecording = false;
+let finalTranscript = "";
+
+if (recognition) {
     startVoiceBtn.addEventListener('click', () => {
         if (!isRecording) {
-            window.speechSynthesis.cancel();
-            try {
-                recognition.start();
-            } catch (e) { recognition.stop(); }
+            startListening();
         } else {
-            recognition.stop();
+            stopListening();
         }
     });
 
     recognition.onstart = () => {
         isRecording = true;
+        finalTranscript = "";
         voiceStatus.innerText = "Je vous écoute...";
+        voiceSubtext.innerText = "Parlez sans vous presser...";
         microIcon.classList.replace('bi-mic-fill', 'bi-stop-circle-fill');
         startVoiceBtn.style.backgroundColor = "#dc3545";
         startVoiceBtn.classList.add('pulse-recording');
     };
 
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        processVoiceData(transcript);
+        // Reset le timer de silence à chaque mot détecté
+        clearTimeout(silenceTimer);
+        
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+
+        // Si l'utilisateur s'arrête de parler, on déclenche le timer
+        silenceTimer = setTimeout(() => {
+            if (finalTranscript || interimTranscript) {
+                recognition.stop();
+            }
+        }, SILENCE_DURATION);
     };
 
-    recognition.onerror = () => resetMicroUI();
-    recognition.onend = () => resetMicroUI();
+    recognition.onend = () => {
+        resetMicroUI();
+        if (finalTranscript.trim() !== "") {
+            processVoiceData(finalTranscript);
+        }
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Erreur reconnaissance:", event.error);
+        resetMicroUI();
+    };
+}
+
+function startListening() {
+    window.speechSynthesis.cancel();
+    try {
+        recognition.start();
+    } catch (e) { 
+        recognition.stop(); 
+    }
+}
+
+function stopListening() {
+    recognition.stop();
+    clearTimeout(silenceTimer);
 }
 
 function resetMicroUI() {
@@ -385,21 +430,22 @@ function resetMicroUI() {
     microIcon.classList.replace('bi-stop-circle-fill', 'bi-mic-fill');
     startVoiceBtn.style.backgroundColor = "#1a4331";
     startVoiceBtn.classList.remove('pulse-recording');
+    voiceSubtext.innerText = "Cliquez pour parler librement";
 }
 
-function speak(text) {
+function speak(text, callback) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'fr-FR';
+        utterance.rate = 0.9; // Parle un peu plus lentement pour être clair
+        if (callback) utterance.onend = callback;
         window.speechSynthesis.speak(utterance);
     }
 }
 
 async function processVoiceData(text) {
-    if (!text.trim()) return;
     voiceStatus.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Analyse IA...';
-
     try {
         const response = await fetch('{{ path("app_demande_analyze_voice") }}', {
             method: 'POST',
@@ -414,29 +460,128 @@ async function processVoiceData(text) {
             const fPrenom = document.querySelector('[id$="_prenom"]');
             const fPhone = document.querySelector('[id$="_phoneNumber"]');
 
-            if (result.data.nom && fNom) fNom.value = result.data.nom;
-            if (result.data.prenom && fPrenom) fPrenom.value = result.data.prenom;
-            if (result.data.phone && fPhone) fPhone.value = result.data.phone;
+            if (result.data.nom) fNom.value = result.data.nom;
+            if (result.data.prenom) fPrenom.value = result.data.prenom;
+            if (result.data.phone) fPhone.value = result.data.phone;
             
             voiceStatus.innerHTML = '<span class="text-success fw-bold">Données extraites !</span>';
-
-            // --- PERSONNALISATION VOCALE ---
-            const heure = new Date().getHours();
-            const salutation = (heure >= 18) ? "Bonsoir" : "Bonjour";
-            const prenomUtilisateur = result.data.prenom || "";
-            speak(`${salutation} ${prenomUtilisateur}, j'ai rempli le formulaire pour vous !`);
-            // -------------------------------
-
-        } else { throw new Error(); }
+            speak("C'est fait, j'ai rempli vos informations de contact.");
+        } else {
+            throw new Error();
+        }
     } catch (e) {
         voiceStatus.innerHTML = '<span class="text-danger small">Erreur d\'analyse</span>';
-        speak("Désolé, je n'ai pas pu extraire vos informations.");
+        speak("Je n'ai pas pu bien comprendre vos informations. Pouvez-vous répéter ?");
     } finally {
         setTimeout(() => { if(!isRecording) voiceStatus.innerText = "Assistant Vocal IA"; }, 4000);
     }
 }
 
-// --- LOGIQUE CV IA (ZONE & ÉTAPES PRÉSERVÉES) ---
+// --- LOGIQUE : ASSISTANT GUIDÉ DANS LA MODALE ---
+let currentGuidedStep = 1;
+const guidedBtn = document.getElementById('start-guided-voice');
+const guidedStatus = document.getElementById('guided-status');
+const guidedIcon = document.getElementById('guided-micro-icon');
+const guidedVoiceText = document.getElementById('guided-voice-text');
+
+const questions = {
+    1: "Commençons par votre identité. Donnez-moi votre nom, prénom, ville, email et téléphone.",
+    2: "Parfait. Maintenant, quel est le titre du poste souhaité, votre dernier diplôme et votre établissement ?",
+    3: "Très bien. Quelle est votre dernière entreprise et quelles sont vos compétences techniques principales ?",
+    4: "Enfin, quel est votre niveau en français et anglais, et vos loisirs ?"
+};
+
+guidedBtn.addEventListener('click', () => {
+    startGuidedConversation();
+});
+
+function startGuidedConversation() {
+    speak(questions[currentGuidedStep], () => {
+        // On attend 500ms après la question avant d'ouvrir le micro
+        setTimeout(listenToUser, 500);
+    });
+}
+
+function listenToUser() {
+    if (!recognition) return;
+    
+    // On utilise la même instance ou une nouvelle configurée de la même manière
+    recognition.onstart = () => {
+        guidedStatus.innerText = "Je vous écoute (prenez votre temps)...";
+        guidedBtn.classList.replace('btn-success', 'btn-danger');
+        guidedIcon.classList.replace('bi-mic-fill', 'bi-stop-circle');
+    };
+
+    recognition.onresult = (event) => {
+        clearTimeout(silenceTimer);
+        let interimText = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            interimText += event.results[i][0].transcript;
+        }
+        finalTranscript = interimText;
+
+        silenceTimer = setTimeout(() => {
+            recognition.stop();
+        }, SILENCE_DURATION);
+    };
+
+    recognition.onend = () => {
+        guidedBtn.classList.replace('btn-danger', 'btn-success');
+        guidedIcon.classList.replace('bi-stop-circle', 'bi-mic-fill');
+        if (finalTranscript.trim() !== "") {
+            processGuidedStep(finalTranscript);
+        }
+    };
+
+    recognition.start();
+}
+
+async function processGuidedStep(text) {
+    guidedStatus.innerHTML = '<i class="bi bi-hourglass-split"></i> J\'enregistre vos réponses...';
+    try {
+        const response = await fetch('{{ path("app_demande_analyze_voice") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, step: currentGuidedStep })
+        });
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            fillModalFields(result.data);
+            
+            if (currentGuidedStep < 4) {
+                speak("Bien reçu. Passons à la suite.");
+                setTimeout(() => {
+                    currentGuidedStep++;
+                    nextStep(currentGuidedStep);
+                    startGuidedConversation();
+                }, 1500);
+            } else {
+                speak("Merci beaucoup ! Votre formulaire est prêt. Vous pouvez cliquer sur le bouton de génération.");
+                guidedVoiceText.innerText = "Assistant Terminé";
+                guidedStatus.innerText = "Tout est prêt !";
+            }
+        }
+    } catch (e) {
+        speak("Une erreur est survenue, mais vous pouvez continuer manuellement ou réessayer.");
+        guidedStatus.innerText = "Erreur de connexion.";
+    }
+}
+
+function fillModalFields(data) {
+    if(data.nom) document.getElementById('ia-nom').value = data.nom;
+    if(data.prenom) document.getElementById('ia-prenom').value = data.prenom;
+    if(data.ville) document.getElementById('ia-ville').value = data.ville;
+    if(data.email) document.getElementById('ia-email').value = data.email;
+    if(data.phone) document.getElementById('ia-phone').value = data.phone;
+    if(data.jobTitle) document.getElementById('ia-job-title').value = data.jobTitle;
+    if(data.etude) document.getElementById('ia-etude').value = data.etude;
+    if(data.specialite) document.getElementById('ia-specialite').value = data.specialite;
+    if(data.skills) document.getElementById('ia-skills').value = data.skills;
+    if(data.loisirs) document.getElementById('ia-loisirs').value = data.loisirs;
+}
+
+// --- FONCTIONS INTERFACE CLASSIQUES ---
 function showCVZone(type) {
     document.getElementById('cv-classic-zone').classList.toggle('d-none', type === 'ia');
     document.getElementById('cv-ia-zone').classList.toggle('d-none', type !== 'ia');
@@ -445,26 +590,17 @@ function showCVZone(type) {
 }
 
 function nextStep(step) {
-    if (step > 1 && !validateStep(step - 1)) return;
     document.querySelectorAll('.step-ia').forEach(el => el.classList.add('d-none'));
-    document.getElementById('step-' + step).classList.remove('d-none');
+    const target = document.getElementById('step-' + step);
+    if(target) target.classList.remove('d-none');
     document.getElementById('ia-progress').style.width = (step / 4 * 100) + '%';
-}
-
-function validateStep(step) {
-    const fields = { 1: ['ia-nom', 'ia-prenom', 'ia-email'], 2: ['ia-job-title'], 3: ['ia-skills'] };
-    let ok = true;
-    (fields[step] || []).forEach(id => {
-        const el = document.getElementById(id);
-        if (el && !el.value.trim()) { el.classList.add('is-invalid'); ok = false; }
-        else if (el) el.classList.remove('is-invalid');
-    });
-    return ok;
 }
 
 async function generateCVWithIA() {
     const btn = document.getElementById('btn-generate-final');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Génération...';
     btn.disabled = true;
+
     const payload = {
         nom: document.getElementById('ia-nom').value,
         prenom: document.getElementById('ia-prenom').value,
@@ -491,8 +627,12 @@ async function generateCVWithIA() {
             document.getElementById('ia-success-box').classList.remove('d-none');
             bootstrap.Modal.getInstance(document.getElementById('iaModal')).hide();
         }
-    } catch (e) { alert("Erreur génération"); }
-    finally { btn.disabled = false; }
+    } catch (e) { 
+        alert("Erreur de génération du PDF."); 
+    } finally { 
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="bi bi-magic me-2"></i>Générer mon CV';
+    }
 }
 
 function previewIACV() {
@@ -504,7 +644,9 @@ function resetIA() {
     document.getElementById('ia-cv-form').reset();
     document.getElementById('ia-placeholder').classList.remove('d-none');
     document.getElementById('ia-success-box').classList.add('d-none');
+    currentGuidedStep = 1;
     nextStep(1);
 }
+
 </script>
 {% endblock %}

@@ -181,6 +181,66 @@
  .ag-marketplace .ag-actions{
   margin-top: .8rem;
  }
+
+ .ag-marketplace .ag-wishlist-btn{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,24,39,.14);
+  background: rgba(255,255,255,.94);
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+ }
+
+ .ag-marketplace .ag-wishlist-btn:hover{
+  border-color: rgba(244,180,0,.6);
+  color: #b45309;
+  background: #fffdf6;
+ }
+
+ .ag-marketplace .ag-wishlist-btn.is-active{
+  color: #b91c1c;
+  border-color: rgba(185,28,28,.3);
+  background: #fff5f5;
+ }
+
+ .ag-marketplace .ag-pagination .pagination{
+  margin-bottom: 0;
+  gap: .25rem;
+ }
+
+ .ag-marketplace .ag-pagination .page-item .page-link{
+  border-radius: 12px;
+  border: 1px solid rgba(17,24,39,.14);
+  color: var(--ag-primary);
+  background: #fff;
+  font-weight: 700;
+  min-width: 42px;
+  text-align: center;
+ }
+
+ .ag-marketplace .ag-pagination .page-item .page-link:hover{
+  background: rgba(244,180,0,.16);
+  border-color: rgba(244,180,0,.55);
+  color: #111827;
+ }
+
+ .ag-marketplace .ag-pagination .page-item.active .page-link{
+  background: var(--ag-primary);
+  border-color: var(--ag-primary);
+  color: #fff;
+ }
+
+ .ag-marketplace .ag-pagination .page-item.disabled .page-link{
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: rgba(17,24,39,.10);
+ }
 </style>
 
 <div class="ag-marketplace">
@@ -333,6 +393,27 @@
                         <span class="ag-badge promo">PROMO</span>
                       {% endif %}
                     </div>
+
+                    {% if app.user %}
+                      {% set isWishlisted = produit.id in (wishlistProductIds|default([])) %}
+                      <form
+                        method="post"
+                        action="{{ path('app_wishlist_toggle', {id: produit.id}) }}"
+                        class="position-absolute"
+                        style="top:0;right:0;"
+                        data-wishlist-form
+                        data-toggle-url="{{ path('app_wishlist_toggle_json', {id: produit.id}) }}"
+                      >
+                        <input type="hidden" name="_token" value="{{ csrf_token('wishlist_toggle_' ~ produit.id) }}">
+                        <button type="submit" class="ag-wishlist-btn {{ isWishlisted ? 'is-active' : '' }}" title="{{ isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist' }}">
+                          <i class="bi {{ isWishlisted ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                        </button>
+                      </form>
+                    {% else %}
+                      <a href="{{ path('app_login') }}" class="ag-wishlist-btn" style="position:absolute;top:12px;right:12px;" title="Connectez-vous pour sauvegarder ce produit">
+                        <i class="bi bi-heart"></i>
+                      </a>
+                    {% endif %}
                   </div>
 
                   <div class="p-3 ag-card-body">
@@ -430,10 +511,17 @@
           </div>
 
           {# PAGINATION (KNP) #}
-          {% if produits is defined and produits.getTotalItemCount() > produits.getItemNumberPerPage() %}
-            <nav class="d-flex justify-content-center mt-4" aria-label="Pagination des produits">
-              {{ knp_pagination_render(produits, null, { query: app.request.query.all }) }}
-            </nav>
+          {% if produits is defined and produits.getTotalItemCount() > 0 %}
+            <div class="d-flex flex-column align-items-center mt-4 gap-2">
+              <div class="small text-muted">
+                Page {{ produits.getCurrentPageNumber() }} / {{ produits.getPageCount() }}
+              </div>
+              {% if produits.getPageCount() > 1 %}
+                <nav class="ag-pagination" aria-label="Pagination des produits">
+                  {{ knp_pagination_render(produits, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+                </nav>
+              {% endif %}
+            </div>
           {% endif %}
 
         </div>
@@ -852,6 +940,97 @@
       setButtonIdle();
       alert('Accès micro refusé ou indisponible.');
     }
+  });
+})();
+</script>
+
+<script>
+(function () {
+  const forms = document.querySelectorAll('[data-wishlist-form]');
+  if (!forms.length) return;
+  const headerBadge = document.querySelector('[data-wishlist-count]');
+
+  const getCount = () => {
+    if (!headerBadge) return 0;
+    const count = parseInt((headerBadge.textContent || '0').trim(), 10);
+    return Number.isNaN(count) ? 0 : count;
+  };
+
+  const setCount = (count) => {
+    if (!headerBadge) return;
+    const safeCount = Math.max(0, count);
+    headerBadge.textContent = String(safeCount);
+    headerBadge.classList.toggle('d-none', safeCount === 0);
+  };
+
+  const updateButton = (button, wishlisted) => {
+    button.classList.toggle('is-active', wishlisted);
+
+    const icon = button.querySelector('i');
+    if (icon) {
+      icon.classList.toggle('bi-heart-fill', wishlisted);
+      icon.classList.toggle('bi-heart', !wishlisted);
+    }
+
+    button.title = wishlisted
+      ? 'Retirer de la wishlist'
+      : 'Ajouter à la wishlist';
+  };
+
+  forms.forEach((form) => {
+    const button = form.querySelector('.ag-wishlist-btn');
+    if (!button) return;
+
+    let isBusy = false;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (isBusy) return;
+
+      const url = form.dataset.toggleUrl;
+      const tokenInput = form.querySelector('input[name="_token"]');
+      const token = tokenInput ? tokenInput.value : '';
+
+      if (!url || !token) {
+        form.submit();
+        return;
+      }
+
+      isBusy = true;
+      const previousState = button.classList.contains('is-active');
+      const previousCount = getCount();
+      updateButton(button, !previousState);
+      setCount(previousState ? previousCount - 1 : previousCount + 1);
+      button.disabled = true;
+
+      try {
+        const body = new URLSearchParams({ _token: token });
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: body.toString(),
+        });
+
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || !data.ok || typeof data.wishlisted !== 'boolean') {
+          throw new Error('wishlist_toggle_failed');
+        }
+
+        updateButton(button, data.wishlisted);
+        setCount(previousCount + (data.wishlisted ? 1 : 0) - (previousState ? 1 : 0));
+      } catch (error) {
+        updateButton(button, previousState);
+        setCount(previousCount);
+        form.submit();
+        return;
+      } finally {
+        button.disabled = false;
+        isBusy = false;
+      }
+    });
   });
 })();
 </script>

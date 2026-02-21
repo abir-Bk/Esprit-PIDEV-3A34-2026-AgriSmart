@@ -1,0 +1,192 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Ma Wishlist | AgriSmart{% endblock %}
+
+{% block body %}
+<style>
+.ag-wishlist{
+  --ag-primary:#1A4331;
+  --ag-accent:#F4B400;
+  --ag-bg:#F6F8F7;
+  --ag-text:#111827;
+  --ag-muted:#6B7280;
+  --ag-border:rgba(17,24,39,.08);
+}
+
+.ag-wishlist .ag-hero{
+  background: linear-gradient(180deg, #FBF7EE, #ffffff);
+  border-bottom: 1px solid var(--ag-border);
+  padding: 2rem 0;
+}
+
+.ag-wishlist .ag-content{
+  background: var(--ag-bg);
+  padding: 2rem 0 3rem;
+}
+
+.ag-wishlist .ag-card{
+  border: 1px solid var(--ag-border);
+  border-radius: 18px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 .7rem 1.3rem rgba(0,0,0,.06);
+}
+
+.ag-wishlist .ag-empty{
+  border: 1px dashed rgba(17,24,39,.16);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  color: var(--ag-muted);
+  background: #fff;
+}
+</style>
+
+<div class="ag-wishlist">
+  <section class="ag-hero">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h1 class="h3 fw-bold mb-1" style="color:var(--ag-text);">Ma Wishlist</h1>
+        <p class="mb-0" style="color:var(--ag-muted);">Retrouvez vos produits favoris.</p>
+      </div>
+      <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Retour marketplace
+      </a>
+    </div>
+  </section>
+
+  <section class="ag-content">
+    <div class="container">
+      {% if items is empty %}
+        <div class="ag-empty" data-wishlist-empty>
+          <i class="bi bi-heart fs-2 d-block mb-2"></i>
+          Votre wishlist est vide.
+        </div>
+      {% else %}
+        <div class="row g-4" data-wishlist-grid>
+          {% for item in items %}
+            {% set produit = item.produit %}
+            <div class="col-sm-6 col-xl-4" data-wishlist-item>
+              <div class="ag-card h-100 d-flex flex-column">
+                <img src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}" alt="{{ produit.nom }}" style="height: 190px; object-fit: cover;" loading="lazy">
+                <div class="p-3 d-flex flex-column flex-grow-1">
+                  <div class="small text-uppercase fw-bold text-muted">{{ produit.categorie }}</div>
+                  <div class="fw-bold mb-2" style="color:var(--ag-text);">{{ produit.nom }}</div>
+                  <div class="small text-muted mb-3">{{ produit.description|default('')|slice(0, 90) }}{% if produit.description and produit.description|length > 90 %}…{% endif %}</div>
+                  <div class="mt-auto d-flex justify-content-between align-items-center">
+                    <div class="fw-bold" style="color:var(--ag-primary);">{{ produit.getPrixEffectif() }} TND</div>
+                    <div class="d-flex gap-2">
+                      <a href="{{ path('app_produit_show', {id: produit.id}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Détails</a>
+                      <form
+                        method="post"
+                        action="{{ path('app_wishlist_toggle', {id: produit.id}) }}"
+                        data-wishlist-remove-form
+                        data-toggle-url="{{ path('app_wishlist_toggle_json', {id: produit.id}) }}"
+                      >
+                        <input type="hidden" name="_token" value="{{ csrf_token('wishlist_toggle_' ~ produit.id) }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" data-wishlist-remove-btn>Retirer</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+  (function () {
+    const forms = document.querySelectorAll('[data-wishlist-remove-form]');
+    if (!forms.length) return;
+
+    const emptyState = document.querySelector('[data-wishlist-empty]');
+    const grid = document.querySelector('[data-wishlist-grid]');
+    const headerBadge = document.querySelector('[data-wishlist-count]');
+
+    const getCount = () => {
+      if (!headerBadge) return 0;
+      const count = parseInt((headerBadge.textContent || '0').trim(), 10);
+      return Number.isNaN(count) ? 0 : count;
+    };
+
+    const setCount = (count) => {
+      if (!headerBadge) return;
+      const safeCount = Math.max(0, count);
+      headerBadge.textContent = String(safeCount);
+      headerBadge.classList.toggle('d-none', safeCount === 0);
+    };
+
+    const showEmptyStateIfNeeded = () => {
+      const remaining = document.querySelectorAll('[data-wishlist-item]').length;
+      if (remaining > 0) return;
+
+      if (grid) {
+        grid.classList.add('d-none');
+      }
+
+      if (emptyState) {
+        emptyState.classList.remove('d-none');
+      }
+    };
+
+    forms.forEach((form) => {
+      const button = form.querySelector('[data-wishlist-remove-btn]');
+      const card = form.closest('[data-wishlist-item]');
+      if (!button || !card) return;
+
+      let isBusy = false;
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (isBusy) return;
+
+        const url = form.dataset.toggleUrl;
+        const tokenInput = form.querySelector('input[name="_token"]');
+        const token = tokenInput ? tokenInput.value : '';
+
+        if (!url || !token) {
+          form.submit();
+          return;
+        }
+
+        isBusy = true;
+        button.disabled = true;
+
+        try {
+          const body = new URLSearchParams({ _token: token });
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: body.toString(),
+          });
+
+          const data = await response.json().catch(() => null);
+          if (!response.ok || !data || !data.ok || data.wishlisted !== false) {
+            throw new Error('wishlist_remove_failed');
+          }
+
+          card.remove();
+          setCount(getCount() - 1);
+          showEmptyStateIfNeeded();
+        } catch (error) {
+          form.submit();
+          return;
+        } finally {
+          button.disabled = false;
+          isBusy = false;
+        }
+      });
+    });
+  })();
+  </script>
+{% endblock %}

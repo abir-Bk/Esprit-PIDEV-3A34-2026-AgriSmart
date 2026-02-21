@@ -7,6 +7,7 @@ use App\Form\ProduitType;
 use App\Repository\MarketplaceMessageRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\UserRepository;
+use App\Repository\WishlistItemRepository;
 use App\Service\GeminiService;
 use App\Service\PanierService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +37,7 @@ final class ProduitController extends AbstractController
         ProduitRepository $repo,
         PaginatorInterface $paginator,
         MarketplaceMessageRepository $messageRepository,
+        WishlistItemRepository $wishlistRepository,
     ): Response {
         $q = trim((string) $request->query->get('q', ''));
         $type = trim((string) $request->query->get('type', ''));
@@ -77,7 +79,7 @@ final class ProduitController extends AbstractController
 
         // ✅ PAGINATION (paramètres de tri personnalisés pour ne pas conflit avec notre "sort" = recent/price_asc/price_desc)
         $page = max(1, (int) $request->query->get('page', 1));
-        $perPage = 9;
+        $perPage = 6;
 
         // Évite que KNP utilise le paramètre "sort" (recent/price_asc/price_desc) comme nom de champ
         $paginatorOptions = [
@@ -104,6 +106,20 @@ final class ProduitController extends AbstractController
             ? $messageRepository->countUnreadForUser($currentUser)
             : 0;
 
+        $wishlistProductIds = [];
+        $wishlistCount = 0;
+        if ($currentUser instanceof \App\Entity\User) {
+            $wishlistCount = $wishlistRepository->count(['user' => $currentUser]);
+            $productIds = [];
+            foreach ($produits as $produit) {
+                if ($produit instanceof Produit && $produit->getId() !== null) {
+                    $productIds[] = $produit->getId();
+                }
+            }
+
+            $wishlistProductIds = $wishlistRepository->getWishlistedProductIds($currentUser, $productIds);
+        }
+
         return $this->render('front/semi-public/produit/index.html.twig', [
             'produits' => $produits, // ✅ maintenant c'est un objet pagination KNP
             'filters' => [
@@ -116,6 +132,8 @@ final class ProduitController extends AbstractController
             ],
             'categories' => $categoriesList,
             'messagerieUnreadCount' => $messagerieUnreadCount,
+            'wishlistProductIds' => $wishlistProductIds,
+            'wishlistCount' => $wishlistCount,
         ]);
     }
 

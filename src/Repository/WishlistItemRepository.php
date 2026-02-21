@@ -47,4 +47,33 @@ class WishlistItemRepository extends ServiceEntityRepository
             'produit' => $produit,
         ]);
     }
+
+    /**
+     * @return Produit[]
+     */
+    public function findProductsByUser(User $user): array
+    {
+        $items = $this->createQueryBuilder('w')
+            ->innerJoin('w.produit', 'p')
+            ->addSelect('p')
+            ->andWhere('w.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('w.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $products = [];
+        foreach ($items as $item) {
+            if (!$item instanceof WishlistItem) {
+                continue;
+            }
+
+            $product = $item->getProduit();
+            if ($product instanceof Produit && $product->getId() !== null) {
+                $products[$product->getId()] = $product;
+            }
+        }
+
+        return array_values($products);
+    }
 }

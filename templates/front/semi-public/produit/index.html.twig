@@ -98,6 +98,48 @@
   box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
  }
 
+ .ag-marketplace .ag-search-input{
+  min-height: 52px;
+  font-size: 1.02rem;
+  padding: .8rem .95rem;
+ }
+
+ .ag-marketplace .ag-search-group{
+  border: 1px solid var(--ag-border);
+  border-radius: 26px;
+  overflow: hidden;
+  background: #fff;
+ }
+
+ .ag-marketplace .ag-search-group:focus-within{
+  border-color: rgba(26,67,49,.45);
+  box-shadow: 0 0 0 .25rem rgba(26,67,49,.12);
+ }
+
+ .ag-marketplace .ag-search-group .ag-search-input{
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent;
+ }
+
+ .ag-marketplace .ag-search-group .ag-search-input:focus{
+  box-shadow: none !important;
+  border-color: transparent !important;
+ }
+
+ .ag-marketplace .ag-search-input::placeholder{
+  font-size: 1rem;
+ }
+
+ .ag-marketplace .ag-search-group .btn{
+  min-height: 52px;
+  padding: .75rem .9rem;
+  border: 0 !important;
+  border-left: 1px solid var(--ag-border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+ }
+
  .ag-marketplace .ag-card{
   border: 1px solid rgba(17,24,39,.06);
   border-radius: 20px;
@@ -303,8 +345,8 @@
 
               <div>
                 <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Recherche</div>
-                <div class="input-group">
-                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}" data-stt-target data-stt-auto-submit="1">
+                <div class="input-group ag-search-group">
+                  <input type="text" name="q" class="form-control ag-input ag-search-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}" data-stt-target data-stt-auto-submit="1">
                   <button class="btn btn-outline-warning" type="button" title="Recherche vocale" data-stt-button>
                     <i class="bi bi-mic"></i>
                   </button>
@@ -354,6 +396,48 @@
 
         {# PRODUCTS GRID #}
         <div class="col-lg-9">
+          {% if app.user %}
+            <div class="mb-4 p-3 p-md-4 bg-white rounded-4 border shadow-sm">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 mb-0" style="color:var(--ag-text);">
+                  <i class="bi bi-stars me-2" style="color:var(--ag-accent);"></i>Recommandé pour vous (ML Python)
+                </h3>
+                <span class="small text-muted">Local · sans API externe</span>
+              </div>
+
+              {% if recommendedProducts|default([]) is not empty %}
+                <div class="row g-3">
+                  {% for rec in recommendedProducts %}
+                    <div class="col-md-4">
+                      <div class="border rounded-4 h-100 overflow-hidden">
+                        <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="text-decoration-none d-block">
+                          <img
+                            src="{{ asset(rec.image ?: 'assets/images/placeholder-product.png') }}"
+                            alt="{{ rec.nom }}"
+                            style="width:100%; height:140px; object-fit:cover;"
+                            loading="lazy"
+                          >
+                        </a>
+                        <div class="p-3">
+                          <div class="small text-uppercase fw-semibold" style="color:var(--ag-muted);">{{ rec.categorie }}</div>
+                          <div class="fw-bold mb-1" style="color:var(--ag-text);">{{ rec.nom }}</div>
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="fw-bold" style="color:var(--ag-primary);">{{ rec.getPrixEffectif() }} TND</div>
+                            <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Voir</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="text-muted small border rounded-4 p-3" style="background:#f9fafb;">
+                  Pas assez d’historique pour le modèle. Ajoutez des produits au panier/wishlist ou effectuez des commandes.
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
           {# Résultats + pagination info #}
           {% if produits is defined and produits.getTotalItemCount() > 0 %}
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">

@@ -9,6 +9,7 @@ use App\Repository\ProduitRepository;
 use App\Repository\UserRepository;
 use App\Repository\WishlistItemRepository;
 use App\Service\GeminiService;
+use App\Service\MarketplaceRecommendationService;
 use App\Service\PanierService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -27,8 +28,10 @@ final class ProduitController extends AbstractController
 {
     private const DEV_EMAIL = 'dev@agri.tn';
 
-    public function __construct(private readonly PanierService $panierService)
-    {
+    public function __construct(
+        private readonly PanierService $panierService,
+        private readonly MarketplaceRecommendationService $recommendationService,
+    ) {
     }
 
     #[Route('', name: 'app_produit_index', methods: ['GET'])]
@@ -108,6 +111,7 @@ final class ProduitController extends AbstractController
 
         $wishlistProductIds = [];
         $wishlistCount = 0;
+        $recommendedProducts = [];
         if ($currentUser instanceof \App\Entity\User) {
             $wishlistCount = $wishlistRepository->count(['user' => $currentUser]);
             $productIds = [];
@@ -118,6 +122,14 @@ final class ProduitController extends AbstractController
             }
 
             $wishlistProductIds = $wishlistRepository->getWishlistedProductIds($currentUser, $productIds);
+            $recommendedProducts = $this->recommendationService->recommendForUser($currentUser, [
+                'q' => $q,
+                'type' => $type,
+                'categorie' => $categorie,
+                'promo' => $promo,
+                'sort' => $sort,
+                'page' => $page,
+            ]);
         }
 
         return $this->render('front/semi-public/produit/index.html.twig', [
@@ -134,6 +146,7 @@ final class ProduitController extends AbstractController
             'messagerieUnreadCount' => $messagerieUnreadCount,
             'wishlistProductIds' => $wishlistProductIds,
             'wishlistCount' => $wishlistCount,
+            'recommendedProducts' => $recommendedProducts,
         ]);
     }
 

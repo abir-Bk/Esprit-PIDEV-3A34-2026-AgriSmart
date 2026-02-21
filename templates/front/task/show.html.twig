@@ -8,6 +8,9 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <h5 class="mb-0 fw-bold" style="color: var(--ag-text);">Détails de la tâche</h5>
       <div class="d-flex gap-2">
+        {% if task.statut == 'en_cours' %}
+          <a href="{{ path('suivi_tache_new', {id: task.idTask}) }}" class="btn btn-sm btn-success text-white rounded-pill">Terminer la tâche</a>
+        {% endif %}
         <a href="{{ path('tasks_edit', {id: task.idTask}) }}" class="btn btn-sm ag-btn-primary text-white rounded-pill">Modifier</a>
         <a href="{{ path('tasks_index') }}" class="btn btn-sm btn-outline-secondary rounded-pill">Retour à la liste</a>
       </div>
@@ -24,7 +27,19 @@
       <dt class="col-sm-3 ag-meta">Priorité</dt>
       <dd class="col-sm-9">{{ task.priorite }}</dd>
       <dt class="col-sm-3 ag-meta">Statut</dt>
-      <dd class="col-sm-9">{{ task.statut }}</dd>
+      <dd class="col-sm-9">
+        {% if task.statut == 'todo' %}
+          <span class="badge bg-secondary">À faire</span>
+        {% elseif task.statut == 'en_cours' %}
+          <span class="badge bg-primary">En cours</span>
+        {% elseif task.statut == 'a_valider' %}
+          <span class="badge bg-warning text-dark">À valider</span>
+        {% elseif task.statut == 'termine' %}
+          <span class="badge bg-success">Terminé</span>
+        {% else %}
+          <span class="badge bg-dark">{{ task.statut }}</span>
+        {% endif %}
+      </dd>
       <dt class="col-sm-3 ag-meta">Date début</dt>
       <dd class="col-sm-9">{{ task.dateDebut ? task.dateDebut|date('d/m/Y H:i') : '' }}</dd>
       <dt class="col-sm-3 ag-meta">Date fin</dt>

@@ -17,13 +17,13 @@ class Task
     private ?int $idTask = null;
 
     #[ORM\Column(length: 255)]
-    private string $titre;
+    private ?string $titre = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(type: 'datetime')]
-    private \DateTimeInterface $dateDebut;
+    private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
@@ -32,19 +32,19 @@ class Task
      * low / medium / high
      */
     #[ORM\Column(length: 20)]
-    private string $priorite;
+    private ?string $priorite = null;
 
     /**
-     * todo / en_cours / termine
+     * todo / en_cours / a_valider / termine
      */
     #[ORM\Column(length: 20)]
-    private string $statut;
+    private ?string $statut = null;
 
     /**
      * arrosage, récolte, fertilisation, etc.
      */
     #[ORM\Column(length: 50)]
-    private string $type;
+    private ?string $type = null;
 
     /**
      * Localisation textuelle de la tâche (adresse, coordonnées, etc.)
@@ -85,12 +85,12 @@ class Task
         return $this->idTask;
     }
 
-    public function getTitre(): string
+    public function getTitre(): ?string
     {
         return $this->titre;
     }
 
-    public function setTitre(string $titre): self
+    public function setTitre(?string $titre): self
     {
         $this->titre = $titre;
 
@@ -109,12 +109,12 @@ class Task
         return $this;
     }
 
-    public function getDateDebut(): \DateTimeInterface
+    public function getDateDebut(): ?\DateTimeInterface
     {
         return $this->dateDebut;
     }
 
-    public function setDateDebut(\DateTimeInterface $dateDebut): self
+    public function setDateDebut(?\DateTimeInterface $dateDebut): self
     {
         $this->dateDebut = $dateDebut;
 
@@ -133,36 +133,36 @@ class Task
         return $this;
     }
 
-    public function getPriorite(): string
+    public function getPriorite(): ?string
     {
         return $this->priorite;
     }
 
-    public function setPriorite(string $priorite): self
+    public function setPriorite(?string $priorite): self
     {
         $this->priorite = $priorite;
 
         return $this;
     }
 
-    public function getStatut(): string
+    public function getStatut(): ?string
     {
         return $this->statut;
     }
 
-    public function setStatut(string $statut): self
+    public function setStatut(?string $statut): self
     {
         $this->statut = $statut;
 
         return $this;
     }
 
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setType(string $type): self
+    public function setType(?string $type): self
     {
         $this->type = $type;
 
@@ -257,4 +257,3 @@ class Task
         return $this;
     }
 }
-

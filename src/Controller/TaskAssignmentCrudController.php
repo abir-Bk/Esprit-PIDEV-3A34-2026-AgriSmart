@@ -11,7 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 #[Route('/task-assignments', name: 'task_assignments_')]
+#[IsGranted('ROLE_AGRICULTEUR')]
 class TaskAssignmentCrudController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
@@ -90,7 +93,7 @@ class TaskAssignmentCrudController extends AbstractController
             throw $this->createNotFoundException('Affectation introuvable.');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$assignment->getIdAssignment(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $assignment->getIdAssignment(), $request->request->get('_token'))) {
             $em->remove($assignment);
             $em->flush();
             $this->addFlash('success', 'Affectation supprimée avec succès.');
@@ -99,4 +102,3 @@ class TaskAssignmentCrudController extends AbstractController
         return $this->redirectToRoute('task_assignments_index');
     }
 }
-

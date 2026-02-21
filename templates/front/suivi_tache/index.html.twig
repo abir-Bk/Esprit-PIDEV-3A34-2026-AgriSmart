@@ -1,0 +1,89 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Validation des suivis - AgriSmart{% endblock %}
+
+{% block task_content %}
+<div class="container py-3 py-md-4">
+    <div class="ag-card p-0 overflow-hidden">
+        <div class="p-4 border-bottom">
+            <h5 class="mb-0 fw-bold" style="color: var(--ag-text);">Suivis à valider</h5>
+        </div>
+        <div class="p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tâche</th>
+                            <th>Date</th>
+                            <th>Rendement</th>
+                            <th>Problèmes</th>
+                            <th>Statut Actuel</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for suivi in suivis %}
+                            <tr>
+                                <td>
+                                    <strong>{{ suivi.task.titre }}</strong><br>
+                                    <span class="small text-muted">{{ suivi.task.type }}</span>
+                                </td>
+                                <td>{{ suivi.date|date('d/m/Y H:i') }}</td>
+                                <td>{{ suivi.rendement }}</td>
+                                <td>
+                                    <span title="{{ suivi.problemes }}">{{ suivi.problemes|slice(0, 30) }}...</span>
+                                </td>
+                                <td>
+                                    {% if suivi.task.statut == 'a_valider' %}
+                                        <span class="badge bg-warning text-dark">En attente</span>
+                                    {% elseif suivi.task.statut == 'termine' %}
+                                        <span class="badge bg-success">Validé</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ suivi.task.statut }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if suivi.task.statut == 'a_valider' %}
+                                        <form method="post" action="{{ path('suivi_tache_validate', {id: suivi.idSuivi}) }}" class="d-inline">
+                                            <button class="btn btn-sm btn-success rounded-pill">Valider</button>
+                                        </form>
+                                        <form method="post" action="{{ path('suivi_tache_refuse', {id: suivi.idSuivi}) }}" class="d-inline">
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill">Refuser</button>
+                                        </form>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-outline-info rounded-pill" data-bs-toggle="modal" data-bs-target="#modalSuivi{{ suivi.idSuivi }}">Détails</button>
+                                </td>
+                            </tr>
+
+                            <!-- Modal Détails -->
+                            <div class="modal fade" id="modalSuivi{{ suivi.idSuivi }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Détails du suivi : {{ suivi.task.titre }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Rendement :</strong><br>{{ suivi.rendement }}</p>
+                                            <p><strong>Problèmes :</strong><br>{{ suivi.problemes }}</p>
+                                            <p><strong>Solution :</strong><br>{{ suivi.solution }}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 ag-meta">Aucun suivi en attente de validation.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

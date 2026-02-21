@@ -7,6 +7,8 @@ parameters:
     uploads_directory: '%kernel.project_dir%/public/uploads'
     recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
     recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
+    # Valeur par défaut si les clés API ne sont pas dans .env → évite une 500 au chargement
+    env_empty_string: ''
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -24,3 +26,11 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Service\GeminiService:
+        arguments:
+            $geminiApiKey: '%env(default:env_empty_string:GEMINI_API_KEY)%'
+
+    App\Service\OpenAIService:
+        arguments:
+            $openAiApiKey: '%env(default:env_empty_string:OPENAI_API_KEY)%'

@@ -1,5 +1,41 @@
 {# templates/front/produit/_form.html.twig #}
 
+<style>
+@import url('https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
+
+.am-loc-cal{ border:1px solid rgba(17,24,39,.1); border-radius:14px; background:#fff; box-shadow:0 .45rem 1rem rgba(0,0,0,.05); }
+.am-loc-cal .flatpickr-calendar.inline{ width:100%; max-width:100%; box-shadow:none !important; border:0 !important; background:transparent; }
+.am-loc-cal .flatpickr-months{ margin-bottom:.45rem; border-bottom:1px solid rgba(17,24,39,.08); padding-bottom:.2rem; }
+.am-loc-cal .flatpickr-current-month{ font-size:1rem; padding-top:.35rem; }
+.am-loc-cal .flatpickr-weekdays{ margin-bottom:.25rem; }
+.am-loc-cal .flatpickr-weekday{ color:#6b7280; font-weight:700; text-transform:capitalize; }
+.am-loc-cal .flatpickr-days{ width:100%; }
+.am-loc-cal .flatpickr-days .dayContainer{ min-width:100%; max-width:100%; width:100%; }
+.am-loc-cal .flatpickr-day{ max-width:14.285%; height:40px; line-height:40px; border-radius:10px; font-weight:600; border-color:rgba(17,24,39,.08) !important; }
+.am-loc-cal .flatpickr-day:hover{ background:#d8efdf !important; color:#111827 !important; }
+.am-loc-cal .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.flatpickr-disabled):not(.amp-past){
+    background:#e8f5e9 !important;
+}
+.am-loc-cal .flatpickr-day.amp-past{ background:#eceff1 !important; color:#8b95a1 !important; }
+.am-loc-cal .flatpickr-day.today{ border-color:rgba(17,24,39,.14) !important; }
+.am-loc-cal .flatpickr-day.inRange{ background:#ffe082 !important; border-color:#f4b400 !important; color:#111827 !important; box-shadow:none !important; }
+.am-loc-cal .flatpickr-day.startRange,
+.am-loc-cal .flatpickr-day.endRange,
+.am-loc-cal .flatpickr-day.selected{ background:#ffe082 !important; border-color:#f4b400 !important; color:#111827 !important; box-shadow:none !important; }
+.am-loc-legend-dot{ width:11px; height:11px; border-radius:50%; border:1px solid rgba(17,24,39,.12); display:inline-block; }
+
+.am-loc-cal .am-input[data-loc-picker]{
+    border-radius:12px;
+    border-color:rgba(244,180,0,.45);
+    background:#fffdf7;
+    font-weight:600;
+}
+.am-loc-cal .am-input[data-loc-picker]:focus{
+    border-color:rgba(244,180,0,.65) !important;
+    box-shadow:0 0 0 .2rem rgba(244,180,0,.16) !important;
+}
+</style>
+
 {{ form_start(form, {
     attr: {
         class: 'am-form',
@@ -138,6 +174,42 @@
         <label class="form-label fw-bold">
             Description {% if form.description.vars.required %}<span class="text-danger">*</span>{% endif %}
         </label>
+
+        {# Gemini AI suggestion button #}
+        <div class="mb-2">
+            <button type="button" id="btn-gemini-suggest"
+                    class="btn btn-sm btn-outline-success rounded-pill"
+                    title="Générer une description avec l'IA">
+                <i class="bi bi-stars me-1"></i>Suggérer une description avec l'IA
+                <span id="gemini-spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+            </button>
+        </div>
+
+        {# Suggestion card (hidden by default) #}
+        <div id="gemini-suggestion-card" class="alert alert-success border-success rounded-4 mb-2 d-none">
+            <div class="d-flex align-items-start gap-2 mb-2">
+                <i class="bi bi-stars text-success fs-5"></i>
+                <div>
+                    <strong class="d-block mb-1">Suggestion IA :</strong>
+                    <span id="gemini-suggestion-text" class="small"></span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+                <button type="button" id="btn-accept-suggestion" class="btn btn-success btn-sm rounded-pill">
+                    <i class="bi bi-check-lg me-1"></i>Accepter
+                </button>
+                <button type="button" id="btn-dismiss-suggestion" class="btn btn-outline-secondary btn-sm rounded-pill">
+                    <i class="bi bi-x me-1"></i>Ignorer
+                </button>
+            </div>
+        </div>
+
+        {# Error alert for Gemini #}
+        <div id="gemini-error" class="alert alert-warning rounded-4 small d-none">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            <span id="gemini-error-text"></span>
+        </div>
+
         {{ form_widget(form.description, {
             attr: {
                 class: (form.description.vars.errors|length ? 'form-control am-input is-invalid js-sync-desc' : 'form-control am-input js-sync-desc'),
@@ -153,6 +225,109 @@
         <div class="form-text">Minimum 10 caractères.</div>
     </div>
 
+    {# Gemini JS — inline for isolation from page JS #}
+    <script>
+    (function () {
+        const suggestUrl = '{{ path('app_produit_suggest_description') }}';
+
+        const btnSuggest   = document.getElementById('btn-gemini-suggest');
+        const spinner      = document.getElementById('gemini-spinner');
+        const card         = document.getElementById('gemini-suggestion-card');
+        const suggText     = document.getElementById('gemini-suggestion-text');
+        const btnAccept    = document.getElementById('btn-accept-suggestion');
+        const btnDismiss   = document.getElementById('btn-dismiss-suggestion');
+        const errBox       = document.getElementById('gemini-error');
+        const errText      = document.getElementById('gemini-error-text');
+        const originalBtnHtml = btnSuggest.innerHTML; // captured once, spinner is hidden at this point
+
+        function getField(cls) {
+            return document.querySelector('.' + cls);
+        }
+
+        btnSuggest.addEventListener('click', async function () {
+            const nomEl = getField('js-sync-name');
+            const catEl = getField('js-sync-cat');
+
+            const nom      = nomEl ? nomEl.value.trim() : '';
+            const categorie = catEl ? catEl.value.trim() : '';
+
+            if (!nom || !categorie) {
+                errText.textContent = 'Veuillez remplir le nom et la catégorie avant de générer une description.';
+                errBox.classList.remove('d-none');
+                card.classList.add('d-none');
+                return;
+            }
+
+            // Reset state
+            errBox.classList.add('d-none');
+            card.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            btnSuggest.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('nom', nom);
+                formData.append('categorie', categorie);
+
+                const res  = await fetch(suggestUrl, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.error) {
+                    const is429 = data.error.includes('429');
+                    if (is429) {
+                        startCooldown(60);
+                        errText.textContent = 'Limite de requêtes atteinte. Réessayez dans 60 secondes.';
+                    } else {
+                        errText.textContent = data.error;
+                    }
+                    errBox.classList.remove('d-none');
+                } else {
+                    suggText.textContent = data.description;
+                    card.classList.remove('d-none');
+                }
+            } catch (e) {
+                errText.textContent = 'Une erreur réseau est survenue.';
+                errBox.classList.remove('d-none');
+            } finally {
+                spinner.classList.add('d-none');
+                if (!btnSuggest.dataset.cooldown) {
+                    btnSuggest.disabled = false;
+                }
+            }
+        });
+
+        function startCooldown(seconds) {
+            btnSuggest.dataset.cooldown = '1';
+            btnSuggest.disabled = true;
+            let remaining = seconds;
+            const interval = setInterval(() => {
+                remaining--;
+                btnSuggest.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>Réessayer dans ${remaining}s`;
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    delete btnSuggest.dataset.cooldown;
+                    btnSuggest.disabled = false;
+                    btnSuggest.innerHTML = originalBtnHtml;
+                }
+            }, 1000);
+        }
+
+        btnAccept.addEventListener('click', function () {
+            const descEl = getField('js-sync-desc');
+            if (descEl) {
+                descEl.value = suggText.textContent;
+                // Trigger input event so the live preview updates
+                descEl.dispatchEvent(new Event('input'));
+            }
+            card.classList.add('d-none');
+        });
+
+        btnDismiss.addEventListener('click', function () {
+            card.classList.add('d-none');
+        });
+    })();
+    </script>
+
     {# SECTION LOCATION: dates uniquement (actif seulement si type=location) #}
     <div class="col-12">
         <div id="section-location" class="p-4 rounded-4 border bg-light" style="display:none;">
@@ -161,43 +336,53 @@
                 <h6 class="mb-0 fw-bold">Période de location</h6>
             </div>
 
-            <div class="row g-2">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="am-loc-cal p-3" data-loc-calendar>
+                        <input type="text" class="form-control am-input" data-loc-picker placeholder="Choisir une plage" readonly>
+
+                        <div class="d-flex flex-wrap gap-3 mt-3 small">
+                            <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#e8f5e9"></span>Disponible</span>
+                            <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#eceff1"></span>Passé</span>
+                            <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#ffe082"></span>Sélection</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-loc-clear>
+                                <i class="bi bi-eraser me-1"></i>Effacer la sélection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small">
-                        Disponible du <span class="text-danger">*</span>
-                    </label>
+                    <label class="form-label fw-bold small">Disponible du <span class="text-danger">*</span></label>
                     {{ form_widget(form.locationStart, {
                         attr: {
                             class: (form.locationStart.vars.errors|length ? 'form-control am-input is-invalid js-loc-start' : 'form-control am-input js-loc-start')
                         }
                     }) }}
                     {% if form.locationStart.vars.errors|length %}
-                        <div class="invalid-feedback d-block">
-                            {{ form_errors(form.locationStart) }}
-                        </div>
+                        <div class="invalid-feedback d-block">{{ form_errors(form.locationStart) }}</div>
                     {% endif %}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small">
-                        Au <span class="text-danger">*</span>
-                    </label>
+                    <label class="form-label fw-bold small">Au <span class="text-danger">*</span></label>
                     {{ form_widget(form.locationEnd, {
                         attr: {
                             class: (form.locationEnd.vars.errors|length ? 'form-control am-input is-invalid js-loc-end' : 'form-control am-input js-loc-end')
                         }
                     }) }}
                     {% if form.locationEnd.vars.errors|length %}
-                        <div class="invalid-feedback d-block">
-                            {{ form_errors(form.locationEnd) }}
-                        </div>
+                        <div class="invalid-feedback d-block">{{ form_errors(form.locationEnd) }}</div>
                     {% endif %}
                 </div>
 
                 <div class="col-12">
                     <div class="alert alert-info py-2 small mb-0">
                         <i class="bi bi-info-circle me-1"></i>
-                        Ces dates sont obligatoires uniquement si le type = <strong>Location</strong>.
+                        Cliquez une date de début puis une date de fin (ou glissez) pour définir la période de location.
                     </div>
                 </div>
             </div>
@@ -271,6 +456,7 @@
 
 {{ form_end(form) }}
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('produit-form');
@@ -284,6 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const startInput = form.querySelector('.js-loc-start');
     const endInput   = form.querySelector('.js-loc-end');
+    let locPicker = null;
 
     function toggleSections() {
         const isLocation = typeSelector && typeSelector.value === 'location';
@@ -303,9 +490,72 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!isLocation) endInput.value = '';
         }
 
+        if (!isLocation && locPicker) {
+            locPicker.clear();
+        }
+
         // Promo price
         if (promoSwitch && sectionPromoPrice) {
             sectionPromoPrice.style.display = promoSwitch.checked ? 'block' : 'none';
+        }
+    }
+
+    const locCalendar = document.querySelector('[data-loc-calendar]');
+    if (locCalendar && startInput && endInput) {
+        const pickerInput = locCalendar.querySelector('[data-loc-picker]');
+        const clearBtn = locCalendar.querySelector('[data-loc-clear]');
+
+        const parseDate = (str) => {
+            if (!str) return null;
+            const [y, m, d] = String(str).split('-').map(Number);
+            if (!y || !m || !d) return null;
+            return new Date(y, m - 1, d);
+        };
+        const strip = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const today = strip(new Date());
+
+        const syncInputs = (selectedDates = []) => {
+            const start = selectedDates[0] ? strip(selectedDates[0]) : null;
+            const end = selectedDates[1] ? strip(selectedDates[1]) : null;
+            startInput.value = start ? iso(start) : '';
+            endInput.value = end ? iso(end) : '';
+            endInput.min = startInput.value || '';
+            startInput.dispatchEvent(new Event('input', { bubbles: true }));
+            endInput.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        const flatpickr = window.flatpickr;
+        if (!flatpickr) {
+            return;
+        }
+
+        const defaultDates = [];
+        const start = parseDate(startInput.value);
+        const end = parseDate(endInput.value);
+        if (start) defaultDates.push(start);
+        if (end) defaultDates.push(end);
+
+        locPicker = flatpickr(pickerInput, {
+            mode: 'range',
+            inline: true,
+            dateFormat: 'Y-m-d',
+            minDate: today,
+            defaultDate: defaultDates,
+            onDayCreate: (_dObj, _dStr, _fp, dayElem) => {
+                const d = strip(dayElem.dateObj);
+                if (d < today) dayElem.classList.add('amp-past');
+            },
+            onChange: (selectedDates) => syncInputs(selectedDates),
+        });
+
+        clearBtn?.addEventListener('click', () => {
+            locPicker.clear();
+            syncInputs([]);
+        });
+
+        if (defaultDates.length > 0) {
+            syncInputs(defaultDates);
         }
     }
 

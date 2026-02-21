@@ -6,13 +6,17 @@ use App\Entity\Produit;
 use App\Form\ProduitType;
 use App\Repository\ProduitRepository;
 use App\Repository\UserRepository;
+use App\Service\GeminiService;
+use App\Service\PanierService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -20,6 +24,10 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 final class ProduitController extends AbstractController
 {
     private const DEV_EMAIL = 'dev@agri.tn';
+
+    public function __construct(private readonly PanierService $panierService)
+    {
+    }
 
     #[Route('', name: 'app_produit_index', methods: ['GET'])]
     public function index(
@@ -118,6 +126,24 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+    #[Route('/suggest-description', name: 'app_produit_suggest_description', methods: ['POST'])]
+    public function suggestDescription(Request $request, GeminiService $gemini): JsonResponse
+    {
+        $nom = trim((string) $request->request->get('nom', ''));
+        $categorie = trim((string) $request->request->get('categorie', ''));
+
+        if ($nom === '' || $categorie === '') {
+            return $this->json(['error' => 'Nom et catégorie requis.'], 400);
+        }
+
+        try {
+            $suggestion = $gemini->suggestDescription($nom, $categorie);
+            return $this->json(['description' => $suggestion]);
+        } catch (\Throwable $e) {
+            return $this->json(['error' => 'Erreur lors de la génération : ' . $e->getMessage()], 500);
+        }
+    }
+
     #[Route('/new', name: 'app_front_produit_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
@@ -163,12 +189,115 @@ final class ProduitController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_produit_show', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function show(Produit $produit): Response
+    #[Route('/{id}', name: 'app_produit_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    public function show(Produit $produit, RequestStack $requestStack): Response
     {
+        $session = $requestStack->getSession();
+        $allReservations = $session?->get('produit_reservations', []);
+        $reservationRanges = $allReservations[$produit->getId()] ?? [];
+
         return $this->render('front/semi-public/produit/show.html.twig', [
             'produit' => $produit,
+            'reservationRanges' => $reservationRanges,
         ]);
+    }
+
+    #[Route('/{id}/reserve', name: 'app_produit_reserve', methods: ['POST'], requirements: ['id' => '\\d+'])]
+    public function reserve(Produit $produit, Request $request, RequestStack $requestStack, UserRepository $userRepo): Response
+    {
+        if ($produit->getType() !== Produit::TYPE_LOCATION) {
+            $this->addFlash('warning', 'La réservation est disponible uniquement pour les produits en location.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+
+        if (!$this->isCsrfTokenValid('produit_reserve_' . $produit->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+
+        $user = $this->getCurrentUserOrDev($userRepo);
+        if ($user && $produit->getVendeur() && $produit->getVendeur() === $user) {
+            $this->addFlash('warning', 'Vous ne pouvez pas réserver votre propre annonce.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+
+        $startRaw = trim((string) $request->request->get('start_date', ''));
+        $endRaw = trim((string) $request->request->get('end_date', ''));
+
+        $start = \DateTimeImmutable::createFromFormat('Y-m-d', $startRaw) ?: null;
+        $end = \DateTimeImmutable::createFromFormat('Y-m-d', $endRaw) ?: null;
+        $today = new \DateTimeImmutable('today');
+
+        if (!$start || !$end) {
+            $this->addFlash('danger', 'Veuillez sélectionner une date de début et une date de fin valides.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+
+        if ($start < $today || $end < $today || $end < $start) {
+            $this->addFlash('danger', 'La plage sélectionnée est invalide.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+
+        $availableStart = $produit->getLocationStart();
+        $availableEnd = $produit->getLocationEnd();
+
+        if ($availableStart && $start < $availableStart) {
+            $this->addFlash('warning', 'La date de début est avant la disponibilité du produit.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+        if ($availableEnd && $end > $availableEnd) {
+            $this->addFlash('warning', 'La date de fin dépasse la disponibilité du produit.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+        }
+
+        $session = $requestStack->getSession();
+        $allReservations = $session?->get('produit_reservations', []);
+        $productReservations = $allReservations[$produit->getId()] ?? [];
+
+        foreach ($productReservations as $reservation) {
+            $rStart = \DateTimeImmutable::createFromFormat('Y-m-d', (string) ($reservation['start'] ?? '')) ?: null;
+            $rEnd = \DateTimeImmutable::createFromFormat('Y-m-d', (string) ($reservation['end'] ?? '')) ?: null;
+
+            if (!$rStart || !$rEnd) {
+                continue;
+            }
+
+            $hasOverlap = $start <= $rEnd && $end >= $rStart;
+            if ($hasOverlap) {
+                $this->addFlash('danger', 'Ce créneau est déjà réservé. Merci de choisir d’autres dates.');
+                return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
+            }
+        }
+
+        $productReservations[] = [
+            'start' => $start->format('Y-m-d'),
+            'end' => $end->format('Y-m-d'),
+            'created_at' => (new \DateTimeImmutable())->format(DATE_ATOM),
+        ];
+
+        $allReservations[$produit->getId()] = $productReservations;
+        $session?->set('produit_reservations', $allReservations);
+
+        $days = ((int) $start->diff($end)->days) + 1;
+        $unitPrice = $produit->getPrixEffectif() ?? 0;
+        $total = $days * $unitPrice;
+
+        $this->addFlash(
+            'success',
+            sprintf(
+                'Réservation ajoutée au panier du %s au %s (%d jour%s) — Total estimé: %.2f TND. Choisissez maintenant votre mode de paiement.',
+                $start->format('d/m/Y'),
+                $end->format('d/m/Y'),
+                $days,
+                $days > 1 ? 's' : '',
+                $total
+            )
+        );
+
+        $this->panierService->setLocationBooking($produit->getId(), $start->format('Y-m-d'), $end->format('Y-m-d'), $days);
+        $this->panierService->setQty($produit->getId(), $days);
+
+        return $this->redirectToRoute('app_checkout_index');
     }
 
     #[Route('/{id}/edit', name: 'app_produit_edit', methods: ['GET', 'POST'])]

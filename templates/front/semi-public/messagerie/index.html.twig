@@ -1,0 +1,166 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Messagerie Marketplace | AgriSmart{% endblock %}
+
+{% block body %}
+<style>
+.ag-msg{
+  --ag-primary:#1A4331;
+  --ag-accent:#F4B400;
+  --ag-cream:#FBF7EE;
+  --ag-bg:#F6F8F7;
+  --ag-text:#111827;
+  --ag-muted:#6B7280;
+  --ag-border:rgba(17,24,39,.08);
+}
+
+.ag-msg .ag-hero{
+  background:
+    radial-gradient(900px 420px at 15% 35%, rgba(46,125,50,.16), transparent 60%),
+    radial-gradient(700px 320px at 85% 10%, rgba(244,180,0,.14), transparent 55%),
+    linear-gradient(180deg, var(--ag-cream), #ffffff);
+  border-bottom: 1px solid var(--ag-border);
+  padding: 2rem 0;
+}
+
+.ag-msg .ag-title{
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: -.02em;
+  color: var(--ag-text);
+}
+
+.ag-msg .ag-subtitle{ color: var(--ag-muted); }
+
+.ag-msg .ag-back-btn{
+  border-color: rgba(244,180,0,.45);
+  color: #111827;
+  background: #fffdf6;
+}
+
+.ag-msg .ag-back-btn:hover{
+  background: rgba(244,180,0,.18);
+  border-color: rgba(244,180,0,.65);
+}
+
+.ag-msg .ag-content{
+  background: var(--ag-bg);
+  padding: 2.2rem 0 3rem;
+}
+
+.ag-msg .ag-card{
+  border: 1px solid var(--ag-border);
+  border-radius: 20px;
+  box-shadow: 0 .7rem 1.5rem rgba(0,0,0,.06);
+}
+
+.ag-msg .ag-conv{
+  border: 1px solid var(--ag-border);
+  border-radius: 16px;
+  padding: .95rem 1rem;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: .15s ease;
+}
+
+.ag-msg .ag-conv:hover{
+  transform: translateY(-1px);
+  border-color: rgba(26,67,49,.28);
+  box-shadow: 0 .4rem 1rem rgba(0,0,0,.06);
+}
+
+.ag-msg .ag-avatar{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+  background: var(--ag-primary);
+  flex-shrink: 0;
+}
+
+.ag-msg .ag-badge-soft{
+  background: rgba(244,180,0,.2);
+  color:#6a4c00;
+  border:1px solid rgba(244,180,0,.45);
+  border-radius: 999px;
+  padding: .22rem .55rem;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.ag-msg .ag-empty{
+  border: 1px dashed rgba(17,24,39,.16);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  color: var(--ag-muted);
+}
+</style>
+
+<div class="ag-msg">
+  <section class="ag-hero">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h1 class="ag-title mb-1">Messagerie Marketplace</h1>
+        <p class="ag-subtitle mb-0">
+          Conversations liées à vos produits et réservations.
+          {% if unreadTotal|default(0) > 0 %}
+            <span class="ag-badge-soft ms-2">{{ unreadTotal }} non lu{{ unreadTotal > 1 ? 's' : '' }}</span>
+          {% endif %}
+        </p>
+      </div>
+      <a href="{{ path('app_produit_index') }}" class="btn ag-back-btn rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Retour marketplace
+      </a>
+    </div>
+  </section>
+
+  <section class="ag-content">
+    <div class="container">
+      <div class="card ag-card border-0">
+        <div class="card-body p-4 p-md-5">
+          {% if conversations is empty %}
+            <div class="ag-empty">
+              <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+              Aucune conversation pour le moment.
+            </div>
+          {% else %}
+            <div class="d-flex flex-column gap-2">
+              {% for c in conversations %}
+                {% set other = c.buyer.id == app.user.id ? c.seller : c.buyer %}
+                {% set isBuyer = c.buyer.id == app.user.id %}
+                {% set unreadCount = unreadByConversation[c.id]|default(0) %}
+                {% set initials = (other.firstName|default('U')|slice(0,1) ~ other.lastName|default('')|slice(0,1))|upper %}
+                <a href="{{ path('app_marketplace_messagerie_show', {id: c.id}) }}" class="ag-conv">
+                  <div class="d-flex align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <span class="ag-avatar">{{ initials }}</span>
+                      <div>
+                        <div class="fw-semibold">{{ c.produit.nom }}</div>
+                        <div class="small text-muted">Avec {{ other.firstName }} {{ other.lastName }}</div>
+                        <div class="small text-muted">Vendeur: {{ c.seller.firstName }} {{ c.seller.lastName }}</div>
+                      </div>
+                    </div>
+                    <div class="text-end">
+                      {% if unreadCount > 0 %}
+                        <span class="badge rounded-pill text-bg-warning mb-1">{{ unreadCount }} non lu{{ unreadCount > 1 ? 's' : '' }}</span><br>
+                      {% endif %}
+                      <span class="ag-badge-soft d-inline-block mb-1">{{ isBuyer ? 'Vous: Acheteur' : 'Vous: Vendeur' }}</span>
+                      <div class="small text-muted text-nowrap">{{ c.lastMessageAt|date('d/m/Y H:i') }}</div>
+                    </div>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

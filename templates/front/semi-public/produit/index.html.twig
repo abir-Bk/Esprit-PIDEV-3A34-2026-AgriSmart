@@ -66,40 +66,39 @@
   font-size: .92rem;
   transition: .15s;
 }
-.ag-marketplace a.ag-pill:hover{
+ .ag-marketplace a.ag-pill:hover{
   border-color: rgba(26,67,49,.35);
   box-shadow: 0 .4rem 1rem rgba(0,0,0,.06);
   transform: translateY(-1px);
-}
-.ag-marketplace a.ag-pill.active,
-.ag-marketplace a.ag-pill.active:visited{
+ }
+ .ag-marketplace a.ag-pill.active,
+ .ag-marketplace a.ag-pill.active:visited{
   border-color: rgba(26,67,49,.35);
   background: rgba(26,67,49,.08);
   color: var(--ag-primary) !important;
-}
+ }
 
-/* Content background */
-.ag-marketplace .ag-content{
+ .ag-marketplace .ag-content{
   background: var(--ag-bg);
   padding: 2.0rem 0 3.0rem;
-}
+ }
 
-/* Filter card */
-.ag-marketplace .ag-filter-card{
+ .ag-marketplace .ag-filter-card{
   border: 1px solid rgba(17,24,39,.06) !important;
   border-radius: 20px !important;
-}
-.ag-marketplace .ag-input{
+ }
+
+ .ag-marketplace .ag-input{
   border-radius: 14px !important;
   border: 1px solid var(--ag-border) !important;
-}
-.ag-marketplace .ag-input:focus{
+ }
+
+ .ag-marketplace .ag-input:focus{
   border-color: rgba(26,67,49,.45) !important;
   box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
-}
+ }
 
-/* Product cards */
-.ag-marketplace .ag-card{
+ .ag-marketplace .ag-card{
   border: 1px solid rgba(17,24,39,.06);
   border-radius: 20px;
   overflow: hidden;
@@ -108,62 +107,80 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-}
-.ag-marketplace .ag-card:hover{
+ }
+
+ .ag-marketplace .ag-card:hover{
   transform: translateY(-2px);
   box-shadow: 0 .9rem 1.6rem rgba(0,0,0,.08);
-}
-.ag-marketplace .ag-badges{
-  position:absolute; top: 12px; left: 12px;
-  display:flex; flex-wrap:wrap; gap:.35rem;
-}
-.ag-marketplace .ag-badge{
+ }
+
+ .ag-marketplace .ag-badges{
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+ }
+
+ .ag-marketplace .ag-badge{
   border-radius: 999px;
   padding: .35rem .55rem;
   font-weight: 800;
   font-size: .72rem;
   letter-spacing: .06em;
   backdrop-filter: blur(6px);
-}
-.ag-marketplace .ag-badge.type-vente{ background: rgba(26,67,49,.92); color:#fff; }
-.ag-marketplace .ag-badge.type-location{ background: rgba(30,136,229,.92); color:#fff; }
-.ag-marketplace .ag-badge.promo{ background: rgba(244,180,0,.95); color:#111827; }
+ }
 
-.ag-marketplace .ag-meta{
+ .ag-marketplace .ag-badge.type-vente{
+  background: rgba(26,67,49,.92);
+  color: #fff;
+ }
+
+ .ag-marketplace .ag-badge.type-location{
+  background: rgba(244,180,0,.95);
+  color: #111827;
+ }
+
+ .ag-marketplace .ag-badge.promo{
+  background: rgba(244,180,0,.95);
+  color: #111827;
+ }
+
+ .ag-marketplace .ag-meta{
   color: var(--ag-muted);
   font-size: .86rem;
-}
+ }
 
-.ag-marketplace .ag-card-body{
-  display:flex;
-  flex-direction:column;
-  flex:1;
-}
+ .ag-marketplace .ag-card-body{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+ }
 
-.ag-marketplace .ag-head{
+ .ag-marketplace .ag-head{
   min-height: 86px;
-}
+ }
 
-.ag-marketplace .ag-name{
+ .ag-marketplace .ag-name{
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 48px;
-}
+ }
 
-.ag-marketplace .ag-desc{
+ .ag-marketplace .ag-desc{
   min-height: 44px;
-}
+ }
 
-.ag-marketplace .ag-price-wrap{
+ .ag-marketplace .ag-price-wrap{
   margin-top: auto;
-}
+ }
 
-.ag-marketplace .ag-actions{
+ .ag-marketplace .ag-actions{
   margin-top: .8rem;
-}
-
+ }
 </style>
 
 <div class="ag-marketplace">
@@ -182,6 +199,12 @@
             <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-outline-dark rounded-pill">
               <i class="bi bi-person-circle me-2"></i>Espace vendeur
             </a>
+            <a href="{{ path('app_marketplace_messagerie') }}" class="btn btn-outline-warning rounded-pill">
+              <i class="bi bi-chat-dots me-2"></i>Messagerie
+              {% if messagerieUnreadCount|default(0) > 0 %}
+                <span class="badge text-bg-danger ms-2">{{ messagerieUnreadCount }}</span>
+              {% endif %}
+            </a>
             <a href="{{ path('app_front_produit_new') }}" class="btn ag-btn-primary text-white rounded-pill">
               <i class="bi bi-plus-circle me-2"></i>Publier une annonce
             </a>
@@ -190,7 +213,6 @@
             </a>
           </div>
 
-          {# CATEGORIES CHIPS #}
           {% set chipFilters = (filters|default({}))|merge({ page: 1 }) %}
           <div class="mt-4 d-flex flex-wrap gap-2">
             <a class="ag-pill {{ not (filters.categorie|default('')) ? 'active' : '' }}"
@@ -205,7 +227,6 @@
             {% endfor %}
           </div>
         </div>
-
       </div>
     </div>
   </section>
@@ -223,7 +244,10 @@
               <div>
                 <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Recherche</div>
                 <div class="input-group">
-                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}">
+                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}" data-stt-target data-stt-auto-submit="1">
+                  <button class="btn btn-outline-warning" type="button" title="Recherche vocale" data-stt-button>
+                    <i class="bi bi-mic"></i>
+                  </button>
                   <button class="btn btn-outline-secondary" type="submit" title="Rechercher">
                     <i class="bi bi-search"></i>
                   </button>
@@ -743,6 +767,92 @@
   setTimeout(() => {
     if (!isOpen) bubbleDot.style.display = 'block';
   }, 3000);
+})();
+</script>
+
+<script>
+(function () {
+  const button = document.querySelector('[data-stt-button]');
+  const input = document.querySelector('[data-stt-target]');
+  const form = document.getElementById('filter-form');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!button || !input || !form || !SpeechRecognition) {
+    if (button) button.disabled = true;
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-FR';
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  let recording = false;
+
+  const setButtonIdle = () => {
+    button.disabled = false;
+    button.innerHTML = '<i class="bi bi-mic"></i>';
+    recording = false;
+  };
+
+  const sanitizeVoiceSearch = (value) => {
+    return value
+      .replace(/\s+pt\.?$/i, '')
+      .trim();
+  };
+
+  recognition.addEventListener('result', (event) => {
+    const text = Array.from(event.results)
+      .map(result => result[0]?.transcript || '')
+      .join(' ')
+      .trim();
+
+    if (!text) {
+      return;
+    }
+
+    const cleanedText = sanitizeVoiceSearch(text);
+    if (!cleanedText) {
+      return;
+    }
+
+    input.value = cleanedText;
+    form.submit();
+  });
+
+  recognition.addEventListener('error', (event) => {
+    let message = 'Transcription impossible pour le moment.';
+    if (event && event.error === 'not-allowed') {
+      message = 'Micro refusé. Autorisez le microphone dans le navigateur.';
+    } else if (event && event.error === 'service-not-allowed') {
+      message = 'Service vocal indisponible sur ce navigateur.';
+    } else if (event && event.error === 'no-speech') {
+      message = 'Aucune voix détectée. Parlez plus près du micro.';
+    }
+
+    alert(message);
+    setButtonIdle();
+  });
+
+  recognition.addEventListener('end', () => {
+    setButtonIdle();
+  });
+
+  button.addEventListener('click', async () => {
+    if (recording) {
+      recognition.stop();
+      return;
+    }
+
+    try {
+      recording = true;
+      button.innerHTML = '<i class="bi bi-stop-circle"></i>';
+      recognition.start();
+    } catch (error) {
+      setButtonIdle();
+      alert('Accès micro refusé ou indisponible.');
+    }
+  });
 })();
 </script>
 

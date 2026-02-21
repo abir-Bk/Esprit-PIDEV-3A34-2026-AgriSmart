@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Produit;
 use App\Form\ProduitType;
+use App\Repository\MarketplaceMessageRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\UserRepository;
 use App\Service\GeminiService;
@@ -33,7 +34,8 @@ final class ProduitController extends AbstractController
     public function index(
         Request $request,
         ProduitRepository $repo,
-        PaginatorInterface $paginator
+        PaginatorInterface $paginator,
+        MarketplaceMessageRepository $messageRepository,
     ): Response {
         $q = trim((string) $request->query->get('q', ''));
         $type = trim((string) $request->query->get('type', ''));
@@ -97,6 +99,11 @@ final class ProduitController extends AbstractController
 
         $categoriesList = array_values(array_map(static fn($r) => $r['categorie'], $catsRows));
 
+        $currentUser = $this->getUser();
+        $messagerieUnreadCount = $currentUser instanceof \App\Entity\User
+            ? $messageRepository->countUnreadForUser($currentUser)
+            : 0;
+
         return $this->render('front/semi-public/produit/index.html.twig', [
             'produits' => $produits, // ✅ maintenant c'est un objet pagination KNP
             'filters' => [
@@ -108,6 +115,7 @@ final class ProduitController extends AbstractController
                 'page' => $page,
             ],
             'categories' => $categoriesList,
+            'messagerieUnreadCount' => $messagerieUnreadCount,
         ]);
     }
 
@@ -190,15 +198,21 @@ final class ProduitController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_produit_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
-    public function show(Produit $produit, RequestStack $requestStack): Response
+    public function show(Produit $produit, RequestStack $requestStack, MarketplaceMessageRepository $messageRepository): Response
     {
         $session = $requestStack->getSession();
         $allReservations = $session?->get('produit_reservations', []);
         $reservationRanges = $allReservations[$produit->getId()] ?? [];
 
+        $currentUser = $this->getUser();
+        $messagerieUnreadCount = $currentUser instanceof \App\Entity\User
+            ? $messageRepository->countUnreadForUser($currentUser)
+            : 0;
+
         return $this->render('front/semi-public/produit/show.html.twig', [
             'produit' => $produit,
             'reservationRanges' => $reservationRanges,
+            'messagerieUnreadCount' => $messagerieUnreadCount,
         ]);
     }
 

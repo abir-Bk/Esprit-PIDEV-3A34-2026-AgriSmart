@@ -63,7 +63,7 @@
 }
 
 .ag-show .ag-badge.type-vente{ background: rgba(26,67,49,.92); color:#fff; }
-.ag-show .ag-badge.type-location{ background: rgba(30,136,229,.92); color:#fff; }
+.ag-show .ag-badge.type-location{ background: rgba(244,180,0,.95); color:#111827; }
 .ag-show .ag-badge.promo{ background: rgba(244,180,0,.95); color:#111827; }
 .ag-show .ag-badge.cat{ background: rgba(255,255,255,.90); color:#111827; border:1px solid rgba(17,24,39,.10); }
 
@@ -92,6 +92,16 @@
   font-weight: 800;
 }
 .ag-show .ag-btn-accent:hover{ filter: brightness(.96); }
+
+.ag-show .ag-btn-outline-accent{
+  border:1px solid rgba(244,180,0,.55);
+  background:#fffdf6;
+  color:#111827;
+}
+.ag-show .ag-btn-outline-accent:hover{
+  background: rgba(244,180,0,.2);
+  border-color: rgba(244,180,0,.7);
+}
 
 .ag-show .ag-pill{
   display:inline-flex; align-items:center; gap:.4rem;
@@ -195,8 +205,8 @@
 
 .ag-show .ag-day-selected,
 .ag-show .ag-day-range{
-  background: var(--ag-sky);
-  border-color: rgba(30,136,229,.32);
+  background: var(--ag-select);
+  border-color: rgba(244,180,0,.45);
 }
 
 .ag-show .ag-day-start,
@@ -310,6 +320,12 @@
         <div class="d-flex gap-2 flex-wrap">
           <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
             <i class="bi bi-arrow-left me-1"></i> Retour
+          </a>
+          <a href="{{ path('app_marketplace_messagerie') }}" class="btn ag-btn-outline-accent rounded-pill">
+            <i class="bi bi-chat-dots me-1"></i> Messagerie
+            {% if messagerieUnreadCount|default(0) > 0 %}
+              <span class="badge text-bg-danger ms-1">{{ messagerieUnreadCount }}</span>
+            {% endif %}
           </a>
           <button class="btn btn-outline-dark rounded-pill" type="button" data-copy-link>
             <i class="bi bi-link-45deg me-1"></i> Copier le lien
@@ -487,6 +503,15 @@
                 {% set stock = produit.quantiteStock ?? 0 %}
 
                 <div class="d-grid gap-2">
+                  {% if app.user and produit.vendeur and produit.vendeur.id != app.user.id %}
+                    <form method="post" action="{{ path('app_marketplace_messagerie_start', {id: produit.id}) }}" class="d-grid mb-2">
+                      <input type="hidden" name="_token" value="{{ csrf_token('start_conversation_' ~ produit.id) }}">
+                      <button class="btn ag-btn-outline-accent rounded-pill py-2" type="submit">
+                        <i class="bi bi-chat-dots me-1"></i> Contacter {{ produit.vendeur.firstName|default('le vendeur') }}
+                      </button>
+                    </form>
+                  {% endif %}
+
                   {% if produit.type == 'vente' %}
                     <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                       <div class="small ag-muted">Quantité</div>

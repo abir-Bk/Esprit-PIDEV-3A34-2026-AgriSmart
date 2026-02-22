@@ -1,0 +1,21 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Two Factor Authentication{% endblock %}
+
+{% block body %}
+<h2>Two-Factor Authentication</h2>
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">{{ message }}</div>
+{% endfor %}
+
+<p>A code was sent to your email. Enter it below:</p>
+
+<form method="post">
+    <div class="mb-3">
+        <label for="code">2FA Code</label>
+        <input type="text" name="code" id="code" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Verify</button>
+</form>
+{% endblock %}

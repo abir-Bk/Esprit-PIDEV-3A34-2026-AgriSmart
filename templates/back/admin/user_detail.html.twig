@@ -41,7 +41,7 @@
                             {% if user.image %}
                             <img class="avatar-img rounded-circle" src="{{ asset('uploads/images/' ~ user.image) }}" alt="avatar">
                             {% else %}
-                            <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="font-size: 3rem;">
+                            <div class="avatar-img rounded-circle text-white d-flex align-items-center justify-content-center" style="font-size: 3rem;background: linear-gradient(135deg, #1F3D2B, #2d9c5a);">
                                 {{ user.firstName|slice(0, 1)|upper }}{{ user.lastName|slice(0, 1)|upper }}
                             </div>
                             {% endif %}
@@ -127,7 +127,7 @@
                                 <h6 class="mb-0">Document justificatif</h6>
                                 <small class="text-muted">{{ user.documentFile }}</small>
                             </div>
-                            <a href="{{ asset('uploads/documents/' ~ user.documentFile) }}" class="btn btn-sm btn-primary-soft" download>
+                            <a href="{{ asset('uploads/users/documents/' ~ user.documentFile) }}" class="btn btn-sm btn-primary-soft" download>
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>

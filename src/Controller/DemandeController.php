@@ -248,61 +248,77 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-   #[Route('/candidature/generate-cv-ia', name: 'app_cv_ia_generate', methods: ['POST'])]
+  #[Route('/candidature/generate-cv-ia', name: 'app_cv_ia_generate', methods: ['POST'])]
 public function generateCvIa(Request $request): JsonResponse
 {
-    $data = json_decode($request->getContent(), true);
-    if (!$data) return new JsonResponse(['error' => 'Données invalides'], 400);
+    // On récupère les données textuelles envoyées via FormData
+    $params = $request->request->all();
+    
+    // --- TRAITEMENT DE LA PHOTO ---
+    $photoBase64 = null;
+    $photoFile = $request->files->get('photo'); // Récupère le fichier 'photo' du FormData
 
-    // 1. Structure des données mise à jour avec les nouveaux champs
+    if ($photoFile) {
+        try {
+            $type = $photoFile->getMimeType();
+            $binary = file_get_contents($photoFile->getPathname());
+            $photoBase64 = 'data:' . $type . ';base64,' . base64_encode($binary);
+        } catch (\Exception $e) {
+            // En cas d'erreur sur l'image, on laisse $photoBase64 à null
+        }
+    }
+
+    // 1. Structure des données alignée sur ton template Twig
     $resumeJson = [
         "basics" => [
-            "name" => ($data['prenom'] ?? '') . " " . ($data['nom'] ?? ''),
-            "label" => $data['jobTitle'] ?? '',
-            "email" => $data['email'] ?? '',
-            "phone" => $data['phone'] ?? '',
-            "photo" => $data['photo'] ?? null,
-            "sexe" => $data['sexe'] ?? '', // AJOUTÉ
-            "birthdate" => $data['birthdate'] ?? '', // AJOUTÉ
-            "ville" => $data['ville'] ?? '', // AJOUTÉ
-            "permis" => $data['permis'] ?? '', // AJOUTÉ
-            "summary" => $data['expDesc'] ?? '', // Utilise la description de l'expérience
-            "speciality" => $data['specialite'] ?? '',
-            "study" => $data['etude'] ?? '',
-            "study_year" => $data['etudeAnnee'] ?? '', // AJOUTÉ
-            "french" => $data['french'] ?? '', 
-            "english" => $data['english'] ?? '', // AJOUTÉ
-            "it_skills" => $data['informatique'] ?? '', // AJOUTÉ
+            "name"       => ($params['prenom'] ?? '') . " " . ($params['nom'] ?? ''),
+            "label"      => $params['jobTitle'] ?? '',
+            "email"      => $params['email'] ?? '',
+            "phone"      => $params['phone'] ?? '',
+            "photo"      => $photoBase64, // L'image en Base64 pour Dompdf
+            "sexe"       => $params['sexe'] ?? '',
+            "birthdate"  => $params['birthdate'] ?? '',
+            "ville"      => $params['ville'] ?? '',
+            "permis"     => $params['permis'] ?? '',
+            "summary"    => $params['expDesc'] ?? '', 
+            "speciality" => $params['specialite'] ?? '',
+            "study"      => $params['etude'] ?? '',
+            "study_year" => $params['etudeAnnee'] ?? '',
+            "french"     => $params['french'] ?? '', 
+            "english"    => $params['english'] ?? '',
+            "it_skills"  => $params['informatique'] ?? '',
             "experience" => [
-                "entreprise" => $data['entreprise'] ?? '',
-                "debut" => $data['expDebut'] ?? '',
-                "fin" => $data['expFin'] ?? ''
+                "entreprise" => $params['entreprise'] ?? '',
+                "debut"      => $params['expDebut'] ?? '',
+                "fin"        => $params['expFin'] ?? ''
             ]
         ],
         "skills" => array_map(function($skill) {
             return ["name" => trim($skill)];
-        }, explode(',', $data['skills'] ?? '')),
+        }, explode(',', $params['skills'] ?? '')),
+        
         "interests" => array_map(function($i) {
             return ["name" => trim($i)];
-        }, explode(',', $data['loisirs'] ?? ''))
+        }, explode(',', $params['loisirs'] ?? ''))
     ];
 
-    // 2. Rendu du template Twig
+    // 2. Rendu du template Twig (le HTML du CV)
     $html = $this->renderView('front/demande/cv_template_json.html.twig', [
         'resume' => $resumeJson
     ]);
 
-    // 3. Configuration Dompdf
+    // 3. Configuration de Dompdf
     $options = new \Dompdf\Options();
     $options->set('defaultFont', 'Helvetica');
-    $options->set('isRemoteEnabled', true);
+    $options->set('isRemoteEnabled', true);      // Autorise les ressources externes
+    $options->set('isHtml5ParserEnabled', true); // Meilleur support du CSS moderne
     
     $dompdf = new \Dompdf\Dompdf($options);
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
 
-    // 4. Enregistrement
+    // 4. Préparation du dossier et sauvegarde du fichier
     $fileName = 'CV_IA_AgriSmart_' . uniqid() . '.pdf';
     $directory = $this->getParameter('kernel.project_dir') . '/public/uploads/cv';
     
@@ -312,8 +328,13 @@ public function generateCvIa(Request $request): JsonResponse
     
     file_put_contents($directory . '/' . $fileName, $dompdf->output());
 
-    return new JsonResponse(['success' => true, 'fileName' => $fileName]);
+    // On retourne le nom du fichier pour que le JS puisse l'utiliser
+    return new JsonResponse([
+        'success' => true, 
+        'fileName' => $fileName
+    ]);
 }
+
    #[Route('/demande/analyze-voice', name: 'app_demande_analyze_voice', methods: ['POST'])]
 public function analyzeVoice(Request $request): JsonResponse
 {

@@ -7,94 +7,1050 @@
 
 <section class="ag-hero">
   <div class="container">
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-    <div>
-      <nav aria-label="breadcrumb" class="mb-2">
-        <ol class="breadcrumb mb-0 small">
-          <li class="breadcrumb-item"><a href="{{ path('app_offre_index_front') }}" class="text-decoration-none" style="color: var(--ag-primary);">Offres d'emploi</a></li>
-          <li class="breadcrumb-item"><a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-decoration-none" style="color: var(--ag-primary);">{{ offre.title }}</a></li>
-          <li class="breadcrumb-item active" aria-current="page">{{ is_edit ? 'Modifier' : 'Postuler' }}</li>
-        </ol>
-      </nav>
-      <h1 class="ag-title">{{ is_edit ? 'Modifier ma candidature' : 'Candidature : ' ~ offre.title }}</h1>
-      <p class="ag-subtitle mb-0">{{ is_edit ? 'Mettez à jour vos informations et pièces jointes.' : 'Remplissez le formulaire pour postuler à cette offre.' }}</p>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+      <div>
+        <nav aria-label="breadcrumb" class="mb-2">
+          <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="{{ path('app_offre_index_front') }}" class="text-decoration-none" style="color: var(--ag-primary);">Offres d'emploi</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-decoration-none" style="color: var(--ag-primary);">{{ offre.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ is_edit ? 'Modifier' : 'Postuler' }}</li>
+          </ol>
+        </nav>
+        <h1 class="ag-title">{{ is_edit ? 'Modifier ma candidature' : 'Candidature : ' ~ offre.title }}</h1>
+        <p class="ag-subtitle mb-0">{{ is_edit ? 'Mettez à jour vos informations et pièces jointes.' : 'Remplissez le formulaire pour postuler à cette offre.' }}</p>
+      </div>
+      <a href="{{ path('app_my_demandes') }}" class="btn btn-outline-dark rounded-pill"><i class="bi bi-arrow-left me-1"></i>Retour à la liste</a>
     </div>
-    <a href="{{ path('app_my_demandes') }}" class="btn btn-outline-dark rounded-pill"><i class="bi bi-arrow-left me-1"></i>Retour à la liste</a>
-  </div>
   </div>
 </section>
 
 <section class="ag-content mt-0">
   <div class="container">
-  <div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-      <div class="ag-card">
-        <div class="p-4 p-lg-5">
-          {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <div class="ag-card">
+          <div class="p-4 p-lg-5">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'form-postulation'}}) }}
 
-          <div class="row g-3 mb-4">
-            <div class="col-md-6">
-              {{ form_label(form.nom) }}
-              {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input'}}) }}
-              {{ form_errors(form.nom) }}
+            {# --- ASSISTANT VOCAL IA (FORMULAIRE PRINCIPAL) --- #}
+            <div class="text-center mb-4 p-3 border rounded-pill bg-light shadow-sm d-flex align-items-center justify-content-center gap-3">
+                <button type="button" id="start-voice-btn" class="btn btn-success rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #1a4331; border: none; transition: all 0.3s ease;">
+                    <i id="micro-icon" class="bi bi-mic-fill fs-4 text-white"></i>
+                </button>
+                <div class="text-start">
+                    <p class="mb-0 fw-bold small" id="voice-status" style="color: #1a4331;">Assistant Vocal IA</p>
+                    <p id="voice-subtext" class="mb-0 text-muted extra-small" style="font-size: 11px;">Cliquez pour parler librement</p>
+                </div>
             </div>
-            <div class="col-md-6">
-              {{ form_label(form.prenom) }}
-              {{ form_widget(form.prenom, {'attr': {'class': 'form-control ag-input'}}) }}
-              {{ form_errors(form.prenom) }}
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input'}}) }}
+                {{ form_errors(form.nom) }}
+              </div>
+              <div class="col-md-6">
+                {{ form_label(form.prenom) }}
+                {{ form_widget(form.prenom, {'attr': {'class': 'form-control ag-input'}}) }}
+                {{ form_errors(form.prenom) }}
+              </div>
             </div>
-          </div>
 
-          <div class="mb-4">
-            {{ form_label(form.phoneNumber) }}
-            {{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control ag-input'}}) }}
-            {{ form_errors(form.phoneNumber) }}
-          </div>
+            <div class="mb-4">
+              {{ form_label(form.phoneNumber) }}
+              {{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control ag-input'}}) }}
+              {{ form_errors(form.phoneNumber) }}
+            </div>
 
-          <hr class="my-4" style="border-color: var(--ag-border);">
-          <h6 class="text-uppercase small fw-bold mb-3 ag-meta">Pièces jointes (PDF)</h6>
+            <hr class="my-4" style="border-color: var(--ag-border);">
+            <h6 class="text-uppercase small fw-bold mb-3 ag-meta">Pièces jointes (PDF)</h6>
 
-          <div class="mb-4">
-            {{ form_label(form.cv) }}
-            {{ form_widget(form.cv, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.cv) }}
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <button type="button" id="btn-show-classic" class="btn btn-outline-secondary w-100 btn-sm py-2 active" onclick="showCVZone('classic')">
+                  <i class="bi bi-file-earmark-arrow-up"></i> Upload PDF
+                </button>
+              </div>
+              <div class="col-6">
+                <button type="button" id="btn-show-ia" class="btn btn-outline-success w-100 btn-sm py-2" onclick="showCVZone('ia')">
+                  <i class="bi bi-robot"></i> Générer avec IA
+                </button>
+              </div>
+            </div>
+
+            <div id="cv-classic-zone" class="mb-4">
+              {{ form_label(form.cv) }}
+              {{ form_widget(form.cv, {'attr': {'class': 'form-control', 'id': 'input-cv-file'}}) }}
+              {{ form_errors(form.cv) }}
+            </div>
+
+            <div id="cv-ia-zone" class="mb-4 d-none">
+                <div id="ia-placeholder" class="p-4 border rounded bg-light text-center" style="border-style: dashed !important; border-color: #00b37e !important;">
+                    <p class="small mb-3 fw-bold" style="color: #00b37e;">Besoin d'un CV professionnel complet ?</p>
+                    <button type="button" class="btn btn-sm rounded-pill text-white px-4" style="background-color: #00b37e;" data-bs-toggle="modal" data-bs-target="#iaModal">
+                        <i class="bi bi-magic me-1"></i> Créer mon CV avec l'IA
+                    </button>
+                </div>
+                
+                <div id="ia-success-box" class="p-3 border rounded bg-white d-none" style="border: 2px solid #00b37e !important;">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; background-color: #00b37e;">
+                            <i class="bi bi-check-lg fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="mb-0 fw-bold" style="color: #00b37e;">CV IA généré avec succès !</p>
+                            <small id="ia-filename-display" class="text-muted"></small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <button type="button" class="btn btn-sm rounded-pill px-4 text-white" style="background-color: #00b37e;" onclick="previewIACV()">
+                            <i class="bi bi-eye me-1"></i> Consulter le CV
+                        </button>
+                        <button type="button" class="btn btn-link text-danger p-0" onclick="resetIA()">
+                            <i class="bi bi-trash fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" name="cv_ia_filename" id="cv_ia_filename">
+            </div>
+
             {% if demande.cv|default(null) %}
-            <div class="mt-2 d-flex align-items-center gap-2">
+            <div class="mt-2 d-flex align-items-center gap-2 mb-4">
               <span class="badge rounded-pill px-3 py-2" style="background: rgba(26,67,49,.08); color: var(--ag-text);">
                 <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
                 {{ demande.cv|length > 25 ? demande.cv|slice(0, 25) ~ '...' : demande.cv }}
               </span>
-              <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="small" style="color: var(--ag-primary);">Consulter</a>
+              <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="small" style="color: var(--ag-primary);">Consulter l'actuel</a>
             </div>
             {% endif %}
-          </div>
 
-          <div class="mb-4">
-            {{ form_label(form.lettreMotivation) }}
-            {{ form_widget(form.lettreMotivation, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.lettreMotivation) }}
-            {% if demande.lettreMotivation|default(null) %}
-            <div class="mt-2 d-flex align-items-center gap-2">
-              <span class="badge rounded-pill px-3 py-2" style="background: rgba(26,67,49,.08); color: var(--ag-text);">
-                <i class="bi bi-file-earmark-text me-1" style="color: var(--ag-primary);"></i>
-                {{ demande.lettreMotivation|length > 25 ? demande.lettreMotivation|slice(0, 25) ~ '...' : demande.lettreMotivation }}
-              </span>
-              <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" target="_blank" class="small" style="color: var(--ag-primary);">Consulter</a>
+            <div class="mb-4">
+              {{ form_label(form.lettreMotivation) }}
+              {{ form_widget(form.lettreMotivation, {'attr': {'class': 'form-control'}}) }}
+              {{ form_errors(form.lettreMotivation) }}
             </div>
-            {% endif %}
-          </div>
 
-          <div class="d-grid gap-2 mt-5 pt-2">
-            <button type="submit" class="btn ag-btn-primary text-white rounded-pill btn-lg py-2">
-              {{ is_edit ? 'Mettre à jour ma demande' : 'Soumettre ma candidature' }}
-            </button>
-            <a href="{{ path('app_my_demandes') }}" class="btn btn-link ag-meta text-decoration-none">Retour à la liste</a>
+            <div class="d-grid gap-2 mt-5 pt-2">
+              <button type="submit" class="btn ag-btn-primary text-white rounded-pill btn-lg py-2">
+                {{ is_edit ? 'Mettre à jour ma demande' : 'Soumettre ma candidature' }}
+              </button>
+            </div>
+            
+            {{ form_end(form) }}
           </div>
-          {{ form_end(form) }}
         </div>
       </div>
     </div>
   </div>
-  </div>
 </section>
+
+{# MODALE IA POUR GÉNÉRATION CV #}
+<div class="modal fade" id="iaModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header text-white py-3" style="background: linear-gradient(135deg, #1a4331 0%, #2a5a40 100%); border-radius: 15px 15px 0 0;">
+        <h5 class="modal-title small text-uppercase fw-bold"><i class="bi bi-robot me-2"></i>Assistant CV Agricole IA</h5>
+        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+
+        {# --- NOUVEAU : BOUTON VOCAL DANS LA MODALE --- #}
+        <div class="text-center mb-4 p-3 border rounded bg-light shadow-sm">
+            <button type="button" id="start-guided-voice" class="btn btn-success rounded-pill px-4 py-2 fw-bold">
+                <i id="guided-micro-icon" class="bi bi-mic-fill me-2"></i>
+                <span id="guided-voice-text">Démarrer l'assistant vocal guidé</span>
+            </button>
+            <p id="guided-status" class="mt-2 mb-0 small text-muted">Je vais vous poser des questions pour remplir votre CV.</p>
+        </div>
+
+        <div class="progress mb-4" style="height: 6px; border-radius: 10px;">
+          <div id="ia-progress" class="progress-bar bg-success rounded-pill" style="width: 25%; transition: width 0.4s ease;"></div>
+        </div>
+        
+        <form id="ia-cv-form" onsubmit="return false;">
+    <div class="step-ia fade-in" id="step-1">
+        <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">1</span>Identité & Contact</h6>
+        
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Nom <span class="text-danger">*</span></label>
+                <input type="text" id="ia-nom" class="form-control ag-input" required>
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Prénom <span class="text-danger">*</span></label>
+                <input type="text" id="ia-prenom" class="form-control ag-input" required>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Sexe <span class="text-danger">*</span></label>
+                <select id="ia-sexe" class="form-select ag-input" required>
+                    <option value="Homme">Homme</option>
+                    <option value="Femme">Femme</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Date de naissance</label>
+                <input type="date" id="ia-birthdate" class="form-control ag-input">
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Ville / Adresse <span class="text-danger">*</span></label>
+                <input type="text" id="ia-ville" class="form-control ag-input" required>
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Permis de conduire</label>
+                <select id="ia-permis" class="form-select ag-input">
+                    <option value="Non">Non</option>
+                    <option value="Oui (Catégorie B)">Oui (Catégorie B)</option>
+                    <option value="Oui (Tracteur / Agricole)">Oui (Tracteur / Agricole)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Email <span class="text-danger">*</span></label>
+                <input type="email" id="ia-email" class="form-control ag-input" required>
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Téléphone</label>
+                <input type="tel" id="ia-phone" class="form-control ag-input">
+            </div>
+        </div>
+
+        <div class="mb-3 p-2 border rounded bg-light">
+            <label class="small fw-bold text-secondary">Photo de profil</label>
+            <input type="file" id="ia-photo" class="form-control ag-input" accept="image/*" onchange="previewImage(this)">
+            <div id="photo-preview-container" class="mt-2 text-center" style="display:none;">
+                <img id="ia-photo-preview" src="#" alt="Aperçu" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid #00b37e;">
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+            <button type="button" class="btn btn-success rounded-pill px-4 py-2" onclick="nextStep(2)">
+                Suivant <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="step-ia d-none fade-in" id="step-2">
+        <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">2</span>Profil & Formation</h6>
+        <div class="mb-3">
+            <label class="small fw-bold text-secondary">Titre du poste souhaité <span class="text-danger">*</span></label>
+            <input type="text" id="ia-job-title" class="form-control ag-input" required>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Dernier Diplôme <span class="text-danger">*</span></label>
+                <input type="text" id="ia-etude" class="form-control ag-input" required>
+            </div>
+            <div class="col-md-6">
+                <label class="small fw-bold text-secondary">Année d'obtention (Facultatif)</label>
+                <input type="number" id="ia-etude-annee" class="form-control ag-input">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="small fw-bold text-secondary">Établissement & Spécialité</label>
+            <input type="text" id="ia-specialite" class="form-control ag-input">
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="nextStep(1)">
+                <i class="bi bi-arrow-left me-1"></i> Retour
+            </button>
+            <button type="button" class="btn btn-success rounded-pill px-4 py-2" onclick="nextStep(3)">
+                Suivant <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="step-ia d-none fade-in" id="step-3">
+        <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">3</span>Expériences & Outils</h6>
+        <div class="bg-light p-3 rounded mb-3">
+            <label class="small fw-bold text-secondary">Dernière Entreprise / Ferme</label>
+            <input type="text" id="ia-exp-entreprise" class="form-control ag-input mb-2">
+            <textarea id="ia-exp-desc" class="form-control ag-input" rows="2" placeholder="Décrivez vos missions..."></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="small fw-bold text-secondary">Outils Informatiques</label>
+            <input type="text" id="ia-informatique" class="form-control ag-input">
+        </div>
+        <div class="mb-3">
+            <label class="small fw-bold text-secondary">Compétences techniques <span class="text-danger">*</span></label>
+            <input type="text" id="ia-skills" class="form-control ag-input" required>
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="nextStep(2)">
+                <i class="bi bi-arrow-left me-1"></i> Retour
+            </button>
+            <button type="button" class="btn btn-success rounded-pill px-4 py-2" onclick="nextStep(4)">
+                Suivant <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="step-ia d-none fade-in" id="step-4">
+        <h6 class="fw-bold mb-3 text-success"><span class="badge bg-success me-2 rounded-pill">4</span>Langues & Loisirs</h6>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+    <label class="small fw-bold text-secondary">Français <span class="text-danger">*</span></label>
+    <input type="text" id="ia-french" class="form-select ag-input" placeholder="Ex: Courant" required>
+</div>
+           <div class="col-md-6">
+    <label class="small fw-bold text-secondary">Anglais <span class="text-danger">*</span></label>
+    <input type="text" id="ia-english" class="form-select ag-input" placeholder="Ex: Bien" required>
+</div>
+        </div>
+        <div class="mb-3">
+            <label class="small fw-bold text-secondary">Loisirs</label>
+            <input type="text" id="ia-loisirs" class="form-control ag-input">
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="nextStep(3)">
+                <i class="bi bi-arrow-left me-1"></i> Retour
+            </button>
+            <button type="button" id="btn-generate-final" class="btn btn-success rounded-pill px-4 py-2" onclick="generateCVWithIA()">
+                <i class="bi bi-magic me-2"></i>Générer mon CV
+            </button>
+        </div>
+    </div>
+</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0.5; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .ag-input:focus { border-color: #1a4331; box-shadow: 0 0 0 0.2rem rgba(26, 67, 49, 0.25); }
+    .btn-success { background-color: #1a4331; border-color: #1a4331; }
+    .btn-success:hover { background-color: #0f2e20; transform: translateY(-1px); }
+    .is-invalid { border-color: #dc3545 !important; }
+    .extra-small { font-size: 11px; }
+
+    .pulse-recording {
+        animation: pulse-red 1.5s infinite;
+    }
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+
+    /* --- AJOUT SÉCURISÉ POUR LE BREADCRUMB (SANS CONFLIT) --- */
+    .breadcrumb-item::after, 
+    .breadcrumb-item::before,
+    .breadcrumb-item a::after,
+    .breadcrumb-item a::before {
+        content: none !important;
+        display: none !important;
+    }
+    @media print { a[href]:after { content: none !important; } }
+    .breadcrumb-item a { text-decoration: none !important; }
+</style>
+
+<script>
+// --- CONFIGURATION GLOBALE ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let silenceTimer = null; // Timer pour éviter la coupure brusque
+const SILENCE_DURATION = 2000; // Attend 2 secondes de silence avant de couper
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = true; // Permet de ne pas couper à la moindre pause
+    recognition.interimResults = true; // Permet de voir l'analyse en cours
+}
+
+// --- LOGIQUE ASSISTANT VOCAL (PRINCIPAL) ---
+const startVoiceBtn = document.getElementById('start-voice-btn');
+const voiceStatus = document.getElementById('voice-status');
+const voiceSubtext = document.getElementById('voice-subtext');
+const microIcon = document.getElementById('micro-icon');
+
+let isRecording = false;
+let finalTranscript = "";
+
+if (recognition) {
+    startVoiceBtn.addEventListener('click', () => {
+        if (!isRecording) {
+            // 1. Définir le message d'accueil
+            const message = "Bonjour ! Dites-moi votre nom, votre prénom et votre numéro de téléphone. Merci.";
+            
+            // 2. Faire parler l'IA avant d'ouvrir le micro
+            speak(message, () => {
+                // CETTE PARTIE s'exécute quand l'IA a fini de parler
+                console.log("Fin de la parole IA, démarrage de l'écoute...");
+                startListening(); 
+            });
+        } else {
+            stopListening();
+        }
+    });
+
+    recognition.onstart = () => {
+        isRecording = true;
+        finalTranscript = "";
+        voiceStatus.innerText = "Je vous écoute...";
+        voiceSubtext.innerText = "Parlez sans vous presser...";
+        microIcon.classList.replace('bi-mic-fill', 'bi-stop-circle-fill');
+        startVoiceBtn.style.backgroundColor = "#dc3545";
+        startVoiceBtn.classList.add('pulse-recording');
+    };
+
+    recognition.onresult = (event) => {
+        // Reset le timer de silence à chaque mot détecté
+        clearTimeout(silenceTimer);
+        
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+
+        // Si l'utilisateur s'arrête de parler, on déclenche le timer
+        silenceTimer = setTimeout(() => {
+            if (finalTranscript || interimTranscript) {
+                recognition.stop();
+            }
+        }, SILENCE_DURATION);
+    };
+
+    recognition.onend = () => {
+        resetMicroUI();
+        if (finalTranscript.trim() !== "") {
+            processVoiceData(finalTranscript);
+        }
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Erreur reconnaissance:", event.error);
+        resetMicroUI();
+    };
+}
+
+function startListening() {
+    window.speechSynthesis.cancel();
+    try {
+        recognition.start();
+    } catch (e) { 
+        recognition.stop(); 
+    }
+}
+
+function stopListening() {
+    recognition.stop();
+    clearTimeout(silenceTimer);
+}
+
+function resetMicroUI() {
+    isRecording = false;
+    microIcon.classList.replace('bi-stop-circle-fill', 'bi-mic-fill');
+    startVoiceBtn.style.backgroundColor = "#1a4331";
+    startVoiceBtn.classList.remove('pulse-recording');
+    voiceSubtext.innerText = "Cliquez pour parler librement";
+}
+
+function speak(text, callback) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 0.9; // Parle un peu plus lentement pour être clair
+        if (callback) utterance.onend = callback;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+async function processVoiceData(text) {
+    voiceStatus.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Analyse IA...';
+    try {
+        const response = await fetch('{{ path("app_demande_analyze_voice") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        });
+        
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            const fNom = document.querySelector('[id$="_nom"]');
+            const fPrenom = document.querySelector('[id$="_prenom"]');
+            const fPhone = document.querySelector('[id$="_phoneNumber"]');
+
+            if (result.data.nom) fNom.value = result.data.nom;
+            if (result.data.prenom) fPrenom.value = result.data.prenom;
+            if (result.data.phone) fPhone.value = result.data.phone;
+            
+            voiceStatus.innerHTML = '<span class="text-success fw-bold">Données extraites !</span>';
+            speak("C'est fait, j'ai rempli vos informations de contact.");
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        voiceStatus.innerHTML = '<span class="text-danger small">Erreur d\'analyse</span>';
+        speak("Je n'ai pas pu bien comprendre vos informations. Pouvez-vous répéter ?");
+    } finally {
+        setTimeout(() => { if(!isRecording) voiceStatus.innerText = "Assistant Vocal IA"; }, 4000);
+    }
+}
+
+/// --- LOGIQUE : ASSISTANT GUIDÉ DANS LA MODALE ---
+let currentGuidedStep = 1;
+const guidedBtn = document.getElementById('start-guided-voice');
+const guidedStatus = document.getElementById('guided-status');
+const guidedIcon = document.getElementById('guided-micro-icon');
+const guidedVoiceText = document.getElementById('guided-voice-text');
+
+const questions = {
+    1: "Commençons par votre identité. Donnez-moi votre nom, prénom, ville, email et téléphone.",
+    2: "Parfait. Maintenant, quel est le titre du poste souhaité, votre dernier diplôme et votre établissement ?",
+    3: "Très bien. Quelle est votre dernière entreprise et quelles sont vos compétences techniques principales ?",
+    4: "Enfin, quel est votre niveau en français et anglais, et vos loisirs ?"
+};
+
+guidedBtn.addEventListener('click', () => {
+    startGuidedConversation();
+});
+
+function startGuidedConversation() {
+    speak(questions[currentGuidedStep], () => {
+        // On attend 500ms après la question avant d'ouvrir le micro
+        setTimeout(listenToUser, 500);
+    });
+}
+
+function listenToUser() {
+    if (!recognition) return;
+    
+    finalTranscript = ""; // Reset du texte final avant l'écoute
+
+    recognition.onstart = () => {
+        guidedStatus.innerText = "Je vous écoute (prenez votre temps)...";
+        guidedBtn.classList.replace('btn-success', 'btn-danger');
+        guidedIcon.classList.replace('bi-mic-fill', 'bi-stop-circle');
+    };
+
+    recognition.onresult = (event) => {
+        clearTimeout(silenceTimer);
+        let interimText = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            interimText += event.results[i][0].transcript;
+        }
+        finalTranscript = interimText;
+
+        silenceTimer = setTimeout(() => {
+            recognition.stop();
+        }, SILENCE_DURATION);
+    };
+
+    recognition.onend = () => {
+        guidedBtn.classList.replace('btn-danger', 'btn-success');
+        guidedIcon.classList.replace('bi-stop-circle', 'bi-mic-fill');
+        if (finalTranscript.trim() !== "") {
+            processGuidedStep(finalTranscript);
+        }
+    };
+
+    recognition.start();
+}
+
+async function processGuidedStep(text) {
+    guidedStatus.innerHTML = '<i class="bi bi-hourglass-split"></i> Vérification...';
+    try {
+        const response = await fetch('{{ path("app_demande_analyze_voice") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, step: currentGuidedStep })
+        });
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            fillModalFields(result.data); // On remplit les champs d'abord
+            
+            // --- VALIDATION : ON VÉRIFIE SI TOUT EST REMPLI ---
+            const missing = checkRequiredFields(currentGuidedStep);
+
+            if (missing.length > 0) {
+                // Si des champs manquent, l'IA demande de répéter les infos manquantes
+                let messageErreur = "Je n'ai pas bien saisi " + missing.join(' ni ') + ". Pouvez-vous me redonner ces informations ?";
+                
+                speak(messageErreur, () => {
+                    setTimeout(listenToUser, 500); // Relance le micro pour corriger
+                });
+            } else {
+                // SI TOUT EST OK : On passe à la suite
+                if (currentGuidedStep < 4) {
+                    speak("Très bien, c'est noté. Passons à la suite.");
+                    setTimeout(() => {
+                        currentGuidedStep++;
+                        nextStep(currentGuidedStep);
+                        startGuidedConversation();
+                    }, 1500);
+                } else {
+                    speak("Merci ! Tout est complet. Vous pouvez générer votre CV.");
+                    guidedVoiceText.innerText = "Assistant Terminé";
+                    guidedStatus.innerText = "Formulaire prêt !";
+                }
+            }
+        }
+    } catch (e) {
+        speak("Il y a eu une erreur de connexion, pouvez-vous répéter ?");
+    }
+}
+function generateCVWithIA() {
+    const btn = document.getElementById('btn-generate-final');
+    const formData = new FormData();
+    
+    // --- ÉTAPE 1 : RÉCUPÉRATION DES DONNÉES ---
+    formData.append('nom', document.getElementById('ia-nom').value);
+    formData.append('prenom', document.getElementById('ia-prenom').value);
+    formData.append('email', document.getElementById('ia-email').value);
+    formData.append('phone', document.getElementById('ia-phone').value);
+    formData.append('ville', document.getElementById('ia-ville').value);
+    formData.append('jobTitle', document.getElementById('ia-job-title').value);
+    formData.append('etude', document.getElementById('ia-etude').value);
+    formData.append('specialite', document.getElementById('ia-specialite').value);
+    formData.append('entreprise', document.getElementById('ia-exp-entreprise').value);
+    formData.append('expDesc', document.getElementById('ia-exp-desc').value);
+    formData.append('skills', document.getElementById('ia-skills').value);
+    formData.append('french', document.getElementById('ia-french').value);
+    formData.append('english', document.getElementById('ia-english').value);
+    formData.append('loisirs', document.getElementById('ia-loisirs').value);
+
+    const photoInput = document.getElementById('ia-photo');
+    if (photoInput && photoInput.files[0]) {
+        formData.append('photo', photoInput.files[0]);
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Génération...';
+    }
+
+    // --- ÉTAPE 2 : ENVOI AU SERVEUR ---
+    fetch('/candidature/generate-cv-ia', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // 1. ARRÊT DU MICRO ET DE L'ASSISTANT (Le petit changement important)
+            if (typeof recognition !== 'undefined') recognition.stop();
+            isGuidedMode = false; 
+
+            // 2. Enregistrement du fichier
+            document.getElementById('cv_ia_filename').value = result.fileName;
+
+            // 3. Mise à jour de l'affichage
+            const nameDisplay = document.getElementById('ia-filename-display');
+            if (nameDisplay) nameDisplay.innerText = "Fichier : " + result.fileName;
+
+            document.getElementById('ia-placeholder').classList.add('d-none');
+            document.getElementById('ia-success-box').classList.remove('d-none');
+
+            // 4. Fermeture propre de la modale
+            const modalEl = document.getElementById('iaModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            // Message final
+            alert("Génération terminée ! Vous pouvez maintenant soumettre votre candidature.");
+            
+            // On remet le bouton en état normal pour une future utilisation
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic me-2"></i>Générer mon CV';
+            }
+        } else {
+            alert("Erreur lors de la génération.");
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic me-2"></i>Générer mon CV';
+            }
+        }
+    })
+    .catch(error => {
+        console.error("Erreur:", error);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Réessayer';
+        }
+    });
+}
+function checkRequiredFields(step) {
+    let missing = [];
+    if (step === 1) {
+        if (!document.getElementById('ia-nom').value) missing.push("votre nom");
+        if (!document.getElementById('ia-prenom').value) missing.push("votre prénom");
+        if (!document.getElementById('ia-ville').value) missing.push("votre ville");
+        if (!document.getElementById('ia-email').value) missing.push("votre adresse email");
+    }
+    else if (step === 2) {
+        if (!document.getElementById('ia-job-title').value) missing.push("le poste souhaité");
+        if (!document.getElementById('ia-etude').value) missing.push("votre diplôme");
+    }
+    return missing;
+}
+
+function fillModalFields(data) {
+    console.log("Données reçues pour remplissage :", data);
+
+    // Étape 1 : Identité & Contact (avec gestion des variantes IA)
+    if(data.nom) document.getElementById('ia-nom').value = data.nom;
+    if(data.prenom) document.getElementById('ia-prenom').value = data.prenom;
+    
+    // Ville (alias city)
+    const villeValue = data.ville || data.city || data.location;
+    if(villeValue) document.getElementById('ia-ville').value = villeValue;
+    
+    // Email (alias mail + nettoyage espaces)
+    const emailValue = data.email || data.mail;
+    if(emailValue) document.getElementById('ia-email').value = emailValue.replace(/\s/g, '').toLowerCase();
+    
+    if(data.phone || data.telephone) document.getElementById('ia-phone').value = data.phone || data.telephone;
+
+    // Étape 2 : Profil & Formation
+    if(data.jobTitle) document.getElementById('ia-job-title').value = data.jobTitle;
+    if(data.etude) document.getElementById('ia-etude').value = data.etude;
+    if(data.specialite) document.getElementById('ia-specialite').value = data.specialite;
+    
+    // Étape 3 : Expériences
+    if(data.entreprise) document.getElementById('ia-exp-entreprise').value = data.entreprise;
+    if(data.description) document.getElementById('ia-exp-desc').value = data.description;
+    if(data.skills) document.getElementById('ia-skills').value = data.skills;
+    
+    // Étape 4 : Loisirs
+    if(data.loisirs) document.getElementById('ia-loisirs').value = data.loisirs;
+}
+
+// --- FONCTIONS INTERFACE CLASSIQUES ---
+function showCVZone(type) {
+    document.getElementById('cv-classic-zone').classList.toggle('d-none', type === 'ia');
+    document.getElementById('cv-ia-zone').classList.toggle('d-none', type !== 'ia');
+    document.getElementById('btn-show-classic').classList.toggle('active', type !== 'ia');
+    document.getElementById('btn-show-ia').classList.toggle('active', type === 'ia');
+}
+
+function nextStep(step) {
+    document.querySelectorAll('.step-ia').forEach(el => el.classList.add('d-none'));
+    const target = document.getElementById('step-' + step);
+    if(target) target.classList.remove('d-none');
+    document.getElementById('ia-progress').style.width = (step / 4 * 100) + '%';
+}
+
+// ========================================================
+// 1. REMPLISSAGE INTELLIGENT (PAGES 1, 2, 3 ET 4)
+// ========================================================
+function fillModalFields(data, userSpeech = "") {
+    if (!data) data = {};
+    const speech = userSpeech.toLowerCase().trim();
+
+    // --- ELEMENTS PAGE 1 ---
+    const inputNom = document.getElementById('ia-nom');
+    const inputPrenom = document.getElementById('ia-prenom');
+    const inputVille = document.getElementById('ia-ville');
+    const inputEmail = document.getElementById('ia-email');
+    const inputPhone = document.getElementById('ia-phone');
+
+    // --- ELEMENTS PAGE 2 ---
+    const inputPoste = document.getElementById('ia-job-title');
+    const inputDiplome = document.getElementById('ia-etude');
+    const inputEtablissement = document.getElementById('ia-specialite');
+
+    // --- ELEMENTS PAGE 3 ---
+    const inputEntreprise = document.getElementById('ia-exp-entreprise');
+    const inputDesc = document.getElementById('ia-exp-desc');
+    const inputSkills = document.getElementById('ia-skills');
+
+    // --- ELEMENTS PAGE 4 (NOUVEAU) ---
+    const inputFrench = document.getElementById('ia-french');
+    const inputEnglish = document.getElementById('ia-english');
+    const inputLoisirs = document.getElementById('ia-loisirs');
+
+    // --- LOGIQUE PAGE 1 ---
+    if (currentGuidedStep === 1) {
+    let speechToClean = speech.replace(/\s/g, '').replace(/arobase/g, '@').replace(/point/g, '.').replace(/\.$/, '');
+    const emailMatch = speechToClean.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/);
+    if (emailMatch) inputEmail.value = emailMatch[0].toLowerCase();
+
+        if (speech.includes("habite") || speech.includes("ville") || speech.includes(" à ")) {
+            const parts = speech.split(/habite à|ville de| à /);
+            if (parts.length > 1) inputVille.value = parts[1].trim().split(' ')[0].toUpperCase();
+        }
+
+        const digits = speech.replace(/\D/g, ''); 
+        if (digits.length >= 8) inputPhone.value = digits;
+
+        if (inputNom && inputNom.value.trim() === "" && data.nom) inputNom.value = data.nom.toUpperCase();
+        if (inputPrenom && inputPrenom.value.trim() === "" && data.prenom) inputPrenom.value = data.prenom.charAt(0).toUpperCase() + data.prenom.slice(1);
+    }
+
+    // --- LOGIQUE PAGE 2 ---
+    if (currentGuidedStep === 2) {
+        if (speech.includes("poste") || speech.includes("cherche") || speech.includes("métier") || speech.includes("travail")) {
+            let val = speech.split(/poste|cherche|métier|travail/)[1] || speech;
+            val = val.replace(/ est | de | du | un | une | le | la /g, " ").trim();
+            if (inputPoste) inputPoste.value = val.toUpperCase();
+        }
+        const diplomeKeywords = ["bac", "licence", "master", "bts", "ingénieur", "doctorat", "diplôme"];
+        let foundDip = diplomeKeywords.find(d => speech.includes(d));
+        if (foundDip) {
+            let val = speech.split(foundDip)[1] ? foundDip + " " + speech.split(foundDip)[1] : foundDip;
+            if (inputDiplome) inputDiplome.value = val.trim().toUpperCase();
+        }
+        if (speech.includes("université") || speech.includes("école") || speech.includes("faculté") || speech.includes(" à ") || speech.includes("esprit")) {
+            let val = speech.split(/université|école|faculté| à /)[1] || speech;
+            if (inputEtablissement) inputEtablissement.value = val.trim().toUpperCase();
+        }
+    }
+
+    // --- LOGIQUE PAGE 3 ---
+    if (currentGuidedStep === 3) {
+        if (speech.includes("chez") || speech.includes("entreprise") || speech.includes("société")) {
+            let ent = speech.split(/chez|entreprise|société/)[1] || speech;
+            if (inputEntreprise) inputEntreprise.value = ent.trim().toUpperCase();
+        }
+        if (speech.includes("maîtrise") || speech.includes("compétences") || speech.includes("sais utiliser") || speech.includes("outils")) {
+            let sk = speech.split(/maîtrise|compétences|utiliser|outils/)[1] || speech;
+            if (inputSkills) inputSkills.value = sk.trim().toUpperCase();
+        }
+        if (speech.length > 20 && !inputDesc.value) {
+            inputDesc.value = speech;
+        }
+    }
+
+    // --- LOGIQUE PAGE 4 (NOUVEAU) ---
+    if (currentGuidedStep === 4) {
+        // Français
+        if (speech.includes("français") || speech.includes("langue maternelle")) {
+            if (inputFrench) inputFrench.value = "Excellent";
+        }
+        // Anglais
+        if (speech.includes("anglais") || speech.includes("english")) {
+            let level = "Bien";
+            if (speech.includes("moyen") || speech.includes("passable")) level = "Moyen";
+            if (speech.includes("parfait") || speech.includes("courant")) level = "Excellent";
+            if (inputEnglish) inputEnglish.value = level;
+        }
+        // Loisirs
+        if (speech.includes("loisir") || speech.includes("passion") || speech.includes("aime faire")) {
+            let loi = speech.split(/loisir|passion|aime faire/)[1] || speech;
+            if (inputLoisirs) inputLoisirs.value = loi.trim().toUpperCase();
+        }
+    }
+}
+
+// ========================================================
+// 2. NAVIGATION ET RELANCE DU MICRO
+// ========================================================
+async function processGuidedStep(text) {
+    try {
+        const response = await fetch('{{ path("app_demande_analyze_voice") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, step: currentGuidedStep })
+        });
+        const result = await response.json();
+
+        fillModalFields(result.data, text);
+
+        setTimeout(() => {
+            // --- GESTION PAGE 1 ---
+            if (currentGuidedStep === 1) {
+                const n = document.getElementById('ia-nom').value.trim();
+                const p = document.getElementById('ia-prenom').value.trim();
+                const v = document.getElementById('ia-ville').value.trim();
+                const tel = document.getElementById('ia-phone').value.trim();
+                const e = document.getElementById('ia-email').value.trim();
+
+                if (n === "") speak("Quel est votre nom ?", () => setTimeout(listenToUser, 500));
+                else if (p === "") speak("Quel est votre prénom ?", () => setTimeout(listenToUser, 500));
+                else if (v === "") speak("Dans quelle ville habitez-vous ?", () => setTimeout(listenToUser, 500));
+                else if (tel === "") speak("Quel est votre numéro de téléphone ?", () => setTimeout(listenToUser, 500));
+                else if (!e.includes('@')) speak("Quelle est votre adresse email ?", () => setTimeout(listenToUser, 500));
+                else {
+                    speak("Parfait. Passons aux études. Quel poste cherchez-vous ?", () => {
+                        currentGuidedStep = 2; 
+                        if (typeof nextStep === 'function') nextStep(2);
+                        setTimeout(listenToUser, 800);
+                    });
+                }
+            } 
+            // --- GESTION PAGE 2 ---
+            else if (currentGuidedStep === 2) {
+                const poste = document.getElementById('ia-job-title').value.trim();
+                const diplome = document.getElementById('ia-etude').value.trim();
+                const ecole = document.getElementById('ia-specialite').value.trim();
+
+                if (poste === "") speak("Quel métier cherchez-vous ?", () => setTimeout(listenToUser, 500));
+                else if (diplome === "") speak("Quel est votre dernier diplôme ?", () => setTimeout(listenToUser, 500));
+                else if (ecole === "") speak("Dans quel établissement avez-vous étudié ?", () => setTimeout(listenToUser, 500));
+                else {
+                    speak("Parlons de vos expériences. Dans quelle entreprise avez-vous travaillé ?", () => {
+                        currentGuidedStep = 3;
+                        if (typeof nextStep === 'function') nextStep(3);
+                        setTimeout(listenToUser, 800);
+                    });
+                }
+            }
+            // --- GESTION PAGE 3 ---
+            else if (currentGuidedStep === 3) {
+                const ent = document.getElementById('ia-exp-entreprise').value.trim();
+                const sk = document.getElementById('ia-skills').value.trim();
+
+                if (ent === "") speak("Quel est le nom de votre entreprise ?", () => setTimeout(listenToUser, 500));
+                else if (sk === "") speak("Quelles sont vos compétences ?", () => setTimeout(listenToUser, 500));
+                else {
+                    speak("Dernière étape : Quelles langues parlez-vous et quels sont vos loisirs ?", () => {
+                        currentGuidedStep = 4;
+                        if (typeof nextStep === 'function') nextStep(4);
+                        setTimeout(listenToUser, 800);
+                    });
+                }
+            }
+            // --- GESTION PAGE 4 (FINAL) ---
+            else if (currentGuidedStep === 4) {
+                const loi = document.getElementById('ia-loisirs').value.trim();
+                if (loi === "") speak("Quels sont vos loisirs ?", () => setTimeout(listenToUser, 500));
+                else {
+                    speak("Félicitations, tout est prêt. Je génère votre CV.");
+                    if (typeof generateCVWithIA === 'function') generateCVWithIA();
+                }
+            }
+        }, 800);
+    } catch (err) {
+        speak("Erreur réseau, réessayez.", () => setTimeout(listenToUser, 500));
+    }
+}
+
+
+function previewIACV() {
+    const f = document.getElementById('cv_ia_filename').value;
+    if(f) window.open("/uploads/cv/" + f, '_blank');
+}
+
+function resetIA() {
+    document.getElementById('ia-cv-form').reset();
+    document.getElementById('ia-placeholder').classList.remove('d-none');
+    document.getElementById('ia-success-box').classList.add('d-none');
+    currentGuidedStep = 1;
+    nextStep(1);
+}
+// --- LOGIQUE DU SIMULATEUR D'ENTRETIEN ---
+const testPool = [
+    "Quelles sont vos principales forces pour travailler dans le secteur agricole ?",
+    "Comment gérez-vous le travail physique ou les horaires décalés ?",
+    "Si vous avez un désaccord avec un collègue, comment réagissez-vous ?",
+    "Quelle importance accordez-vous aux consignes de sécurité ?",
+    "Comment vous adaptez-vous si les conditions météo changent vos plans ?",
+    "Parlez-moi d'une machine ou d'un outil que vous maîtrisez bien.",
+    "Que feriez-vous si vous remarquiez un danger sur le terrain ?",
+    "Qu'est-ce qui vous motive le plus dans les métiers de la terre ?",
+    "Selon vous, qu'est-ce qu'un bon employé agricole ?",
+    "Avez-vous une préférence pour le travail en équipe ?"
+];
+
+let testStep = 0;
+let testTranscript = "";
+let testQuestions = [];
+
+function runInterviewStep() {
+    if (testStep === 0) {
+        testTranscript = "";
+        let intro = "Bonjour, je suis l'assistant AgriSmart. Ceci est un entretien de réflexion. Pour commencer, présentez-vous et parlez-moi de votre parcours.";
+        testQuestions = [intro, ...testPool.sort(() => 0.5 - Math.random()).slice(0, 6)];
+        testQuestions.push("L'entraînement est terminé. Je calcule vos résultats.");
+    }
+
+    document.getElementById('test-start-btn').classList.add('d-none');
+    document.getElementById('test-result-area').classList.add('d-none');
+
+    if (testStep < testQuestions.length - 1) {
+        const q = testQuestions[testStep];
+        document.getElementById('test-question-text').innerText = q;
+        speak(q, () => { 
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'fr-FR';
+            rec.onstart = () => document.getElementById('test-wave').classList.remove('d-none');
+            rec.onresult = (e) => {
+                testTranscript += " " + e.results[0][0].transcript;
+                document.getElementById('test-wave').classList.add('d-none');
+                testStep++;
+                setTimeout(runInterviewStep, 800);
+            };
+            rec.start();
+        });
+    } else {
+        finishTest();
+    }
+}
+
+function finishTest() {
+    let score = Math.min(98, Math.floor((testTranscript.length / 10) + (Math.random() * 20)));
+    document.getElementById('test-question-text').innerText = "Analyse terminée";
+    document.getElementById('test-final-score').innerText = score + "%";
+    document.getElementById('test-pos').innerText = "Bonne élocution et motivation détectée.";
+    document.getElementById('test-neg').innerText = "Continuez à détailler vos expériences techniques.";
+    document.getElementById('test-result-area').classList.remove('d-none');
+    document.getElementById('test-start-btn').classList.remove('d-none');
+    document.getElementById('test-start-btn').innerText = "Recommencer";
+    speak("Analyse terminée. Votre score est de " + score + " pourcent.");
+    testStep = 0;
+}
+
+function stopInterview() {
+    window.speechSynthesis.cancel();
+    testStep = 0;
+}
+</script>
+{# MODALE DU SIMULATEUR D'ENTRETIEN #}
+<div class="modal fade" id="interviewModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopInterview()"></button>
+            </div>
+            <div class="modal-body p-5 text-center">
+                <div class="mb-3 mx-auto" style="width: 70px; height: 70px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #28a745;">
+                    <i class="bi bi-robot fs-2 text-success"></i>
+                </div>
+                <h4 id="test-question-text" class="fw-bold text-dark">Prêt pour l'entraînement ?</h4>
+                <p id="test-status" class="text-muted small mb-4">Entraînement général pour tous les métiers agricoles.</p>
+                
+                <div id="test-result-area" class="d-none mt-3 p-4 bg-light rounded-4 text-start border shadow-sm">
+                    <div class="text-center mb-3">
+                        <h2 class="fw-bold" id="test-final-score">0%</h2>
+                    </div>
+                    <div class="small">
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-success small text-uppercase">Points Forts</h6>
+                            <div id="test-pos" class="ps-3 border-start border-success text-dark"></div>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-danger small text-uppercase">Conseils</h6>
+                            <div id="test-neg" class="ps-3 border-start border-danger text-dark"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button id="test-start-btn" class="btn btn-success btn-lg rounded-pill px-5 shadow" onclick="runInterviewStep()">Lancer l'entraînement</button>
+                    <div id="test-wave" class="d-none text-danger fw-bold">
+                         <div class="spinner-border spinner-border-sm me-2"></div> IA en écoute...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

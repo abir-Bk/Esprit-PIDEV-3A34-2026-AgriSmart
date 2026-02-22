@@ -768,9 +768,9 @@ function fillModalFields(data, userSpeech = "") {
 
     // --- LOGIQUE PAGE 1 ---
     if (currentGuidedStep === 1) {
-        let speechToClean = speech.replace(/\s/g, '').replace(/arobase/g, '@').replace(/point/g, '.').replace(/\.$/, '');
-        const emailMatch = speechToClean.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/);
-        if (emailMatch) inputEmail.value = emailMatch[0].toLowerCase();
+    let speechToClean = speech.replace(/\s/g, '').replace(/arobase/g, '@').replace(/point/g, '.').replace(/\.$/, '');
+    const emailMatch = speechToClean.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/);
+    if (emailMatch) inputEmail.value = emailMatch[0].toLowerCase();
 
         if (speech.includes("habite") || speech.includes("ville") || speech.includes(" à ")) {
             const parts = speech.split(/habite à|ville de| à /);

@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     uploads_directory: '%kernel.project_dir%/public/uploads'
+    openai_api_key: '%env(OPENAI_API_KEY)%'
+    google_calendar_api_key: '%env(GOOGLE_CALENDAR_API_KEY)%'
+    google_project_calendar_id: '%env(GOOGLE_PROJECT_CALENDAR_ID)%'
 
 services:
     # default configuration for services in *this* file

@@ -30,14 +30,38 @@
                             {{ form_errors(form.rendement) }}
                         </div>
                         <div class="col-12 mb-3">
-                            {{ form_label(form.problemes) }}
-                            {{ form_widget(form.problemes, {'attr': {'class': 'form-control rounded-3', 'rows': 4, 'placeholder': 'Décrivez les difficultés rencontrées...'}}) }}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{ form_label(form.problemes) }}
+                                <div class="input-group input-group-sm" style="width: auto;">
+                                    <select class="form-select form-select-sm border-0 bg-light-info text-info fw-bold ai-lang-suivi">
+                                        <option value="en">EN</option>
+                                        <option value="ar">AR</option>
+                                        <option value="fr">FR</option>
+                                    </select>
+                                    <button type="button" class="btn btn-sm btn-outline-info border-0 bg-light-info btn-ai-translate-suivi" data-target="problemes">
+                                        <i class="bi bi-translate text-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {{ form_widget(form.problemes, {'attr': {'class': 'form-control rounded-3', 'rows': 3, 'id': 'suivi-problemes', 'placeholder': 'Décrivez les difficultés rencontrées...'}}) }}
                             {{ form_errors(form.problemes) }}
                         </div>
                         <div class="col-12 mb-4">
-                            {{ form_label(form.solution) }}
-                            {{ form_widget(form.solution, {'attr': {'class': 'form-control rounded-3', 'rows': 4, 'placeholder': 'Expliquez comment vous avez résolu les problèmes...'}}) }}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{ form_label(form.solution) }}
+                                <button type="button" class="btn btn-sm btn-outline-info border-0 bg-light-info btn-ai-translate-suivi" data-target="solution">
+                                    <i class="bi bi-translate text-info"></i>
+                                </button>
+                            </div>
+                            {{ form_widget(form.solution, {'attr': {'class': 'form-control rounded-3', 'rows': 3, 'id': 'suivi-solution', 'placeholder': 'Expliquez comment vous avez résolu les problèmes...'}}) }}
                             {{ form_errors(form.solution) }}
+                            <div id="ai-error-suivi" class="text-danger small mt-1 d-none"></div>
+                        </div>
+
+                        <div class="col-12 mb-4">
+                            {{ form_label(form.imageFile) }}
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control rounded-3'}}) }}
+                            {{ form_errors(form.imageFile) }}
                         </div>
 
                         <div class="col-12">
@@ -51,4 +75,72 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    (function() {
+        function initAiTranslateSuivi() {
+            console.log('AI Translate Suivi Init...');
+            const btns = document.querySelectorAll('.btn-ai-translate-suivi');
+            const langSelect = document.querySelector('.ai-lang-suivi');
+            const errorDiv = document.getElementById('ai-error-suivi');
+
+            if (!btns.length) return;
+
+            btns.forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const targetId = 'suivi-' + this.dataset.target;
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+                    
+                    const text = input.value.trim();
+                    const targetLang = langSelect.value;
+
+                    if (text.length < 2) { alert('Texte trop court'); return; }
+
+                    btn.disabled = true;
+                    input.classList.add('opacity-50');
+                    if (errorDiv) errorDiv.classList.add('d-none');
+
+                    try {
+                        const response = await fetch('{{ path('task_ai_translate') }}', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ text: text, target: targetLangMapping(targetLang) })
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            input.value = data.translation;
+                        } else if (data.error && errorDiv) {
+                            errorDiv.textContent = data.error;
+                            errorDiv.classList.remove('d-none');
+                        }
+                    } catch (e) {
+                        if (errorDiv) {
+                            errorDiv.textContent = "Erreur réseau";
+                            errorDiv.classList.remove('d-none');
+                        }
+                    } finally {
+                        btn.disabled = false;
+                        input.classList.remove('opacity-50');
+                    }
+                });
+            });
+
+            function targetLangMapping(code) {
+                const map = { 'en': 'anglais', 'ar': 'arabe', 'fr': 'français', 'es': 'espagnol' };
+                return map[code] || code;
+            }
+        }
+
+        document.addEventListener('turbo:load', initAiTranslateSuivi);
+        initAiTranslateSuivi();
+    })();
+    </script>
+
+    <style>
+        .bg-light-info { background-color: rgba(13, 202, 240, 0.1); }
+    </style>
 {% endblock %}

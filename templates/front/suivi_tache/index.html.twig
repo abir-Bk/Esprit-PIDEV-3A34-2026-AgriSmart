@@ -64,6 +64,11 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
+                                            {% if suivi.image %}
+                                                <div class="mb-3 text-center">
+                                                    <img src="{{ asset('uploads/suivis/' ~ suivi.image) }}" alt="Photo du suivi" class="img-fluid rounded ag-card">
+                                                </div>
+                                            {% endif %}
                                             <p><strong>Rendement :</strong><br>{{ suivi.rendement }}</p>
                                             <p><strong>Problèmes :</strong><br>{{ suivi.problemes }}</p>
                                             <p><strong>Solution :</strong><br>{{ suivi.solution }}</p>

@@ -4,10 +4,13 @@ namespace App\Entity;
 
 use App\Repository\SuiviTacheRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: SuiviTacheRepository::class)]
 #[ORM\Table(name: 'suivi_tache')]
+#[Vich\Uploadable]
 class SuiviTache
 {
     #[ORM\Id]
@@ -48,6 +51,20 @@ class SuiviTache
     #[ORM\ManyToOne(targetEntity: Task::class)]
     #[ORM\JoinColumn(name: 'id_tache', referencedColumnName: 'id_task', nullable: false)]
     private ?Task $task = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
+    #[Vich\UploadableField(mapping: 'suivi_images', fileNameProperty: 'image')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: ['image/jpeg', 'image/png'],
+        mimeTypesMessage: 'Veuillez uploader une image JPEG ou PNG valide (max 5 Mo)'
+    )]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
 
     public function getIdSuivi(): ?int
     {
@@ -106,6 +123,42 @@ class SuiviTache
     public function setTask(?Task $task): self
     {
         $this->task = $task;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if (null !== $imageFile) {
+            $this->updatedAt = new \DateTime();
+        }
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 }

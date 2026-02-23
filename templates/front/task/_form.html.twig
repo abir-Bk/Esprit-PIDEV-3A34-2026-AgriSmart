@@ -17,9 +17,35 @@
     </div>
 
     <div class="col-md-12">
-        {{ form_label(form.description, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 3}}) }}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            {{ form_label(form.description, null, {label_attr: label_attr}) }}
+            <div class="d-flex gap-2">
+                <div class="input-group input-group-sm" style="width: auto;">
+                    <select id="select-ai-lang" class="form-select form-select-sm rounded-start-pill border-0 bg-light-info text-info fw-bold">
+                        <option value="en">EN</option>
+                        <option value="ar">AR</option>
+                        <option value="fr">FR</option>
+                        <option value="es">ES</option>
+                    </select>
+                    <button type="button" id="btn-ai-translate" class="btn btn-sm btn-outline-info rounded-end-pill px-3 shadow-sm border-0 bg-light-info">
+                        <i class="bi bi-translate me-1 text-info"></i> <span class="small fw-bold">Traduire</span>
+                    </button>
+                </div>
+                <button type="button" id="btn-ai-summarize" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
+                    <i class="bi bi-stars me-1 text-info"></i> <span class="small fw-bold">Générer un résumé</span>
+                    <span id="ai-spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+        {{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 4, 'id': 'task-description'}}) }}
         {{ form_errors(form.description) }}
+    </div>
+
+    <div class="col-md-12">
+        {{ form_label(form.resume, null, {label_attr: label_attr}) }}
+        {{ form_widget(form.resume, {'attr': {'class': 'form-control ag-input bg-light-subtle', 'rows': 2, 'id': 'task-resume', 'placeholder': 'Générez un résumé ou saisissez-le ici...'}}) }}
+        {{ form_errors(form.resume) }}
+        <div id="ai-error" class="text-danger small mt-1 d-none"></div>
     </div>
 
     <div class="col-md-6">
@@ -79,3 +105,97 @@
 </div>
 
 {{ form_end(form) }}
+
+<script>
+(function() {
+    function initAiSummarize() {
+        console.log('AI Summarize Init...');
+        const btnSummarize = document.getElementById('btn-ai-summarize');
+        const btnTranslate = document.getElementById('btn-ai-translate');
+        const langSelect = document.getElementById('select-ai-lang');
+        const spinner = document.getElementById('ai-spinner');
+        const descriptionInput = document.getElementById('task-description') || document.querySelector('[id$="_description"]');
+        const resumeInput = document.getElementById('task-resume') || document.querySelector('[id$="_resume"]');
+        const errorDiv = document.getElementById('ai-error');
+
+        if (!btnSummarize) {
+            console.error('AI Button not found');
+            return;
+        }
+        
+        console.log('AI Buttons found, attaching listeners');
+
+        // Logic for Summarize
+        btnSummarize.addEventListener('click', async function() {
+            const text = descriptionInput.value.trim();
+            if (text.length < 10) { alert('Description trop courte (min 10 car.)'); return; }
+            
+            toggleUI(true);
+            try {
+                const response = await fetch('{{ path('task_ai_summarize') }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    resumeInput.value = data.summary;
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) { showError('Erreur réseau'); }
+            finally { toggleUI(false); }
+        });
+
+        // Logic for Translate
+        if (btnTranslate) {
+            btnTranslate.addEventListener('click', async function() {
+                const text = descriptionInput.value.trim();
+                const targetLang = langSelect.value;
+                if (text.length < 2) { alert('Texte trop court'); return; }
+
+                toggleUI(true);
+                try {
+                    const response = await fetch('{{ path('task_ai_translate') }}', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ text: text, target: targetLanguageMapping(targetLang) })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        descriptionInput.value = data.translation;
+                    } else {
+                        showError(data.error);
+                    }
+                } catch (error) { showError('Erreur réseau'); }
+                finally { toggleUI(false); }
+            });
+        }
+
+        function toggleUI(loading) {
+            btnSummarize.disabled = loading;
+            if (btnTranslate) btnTranslate.disabled = loading;
+            spinner.classList.toggle('d-none', !loading);
+            descriptionInput.classList.toggle('opacity-50', loading);
+            resumeInput.classList.toggle('opacity-50', loading);
+        }
+
+        function showError(msg) {
+            errorDiv.textContent = msg || 'Une erreur est survenue';
+            errorDiv.classList.remove('d-none');
+        }
+
+        function targetLanguageMapping(code) {
+            const map = { 'en': 'anglais', 'ar': 'arabe', 'fr': 'français', 'es': 'espagnol' };
+            return map[code] || code;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initAiSummarize);
+    document.addEventListener('turbo:load', initAiSummarize);
+})();
+</script>
+
+<style>
+    .bg-light-info { background-color: rgba(13, 202, 240, 0.1); }
+</style>

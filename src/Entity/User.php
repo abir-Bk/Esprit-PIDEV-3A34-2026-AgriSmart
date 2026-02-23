@@ -114,16 +114,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getFirstName(): ?string { return $this->firstName; }
-    public function setFirstName(string $firstName): static { $this->firstName = $firstName; return $this; }
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+    public function setFirstName(string $firstName): static
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
 
-    public function getLastName(): ?string { return $this->lastName; }
-    public function setLastName(string $lastName): static { $this->lastName = $lastName; return $this; }
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+    public function setLastName(string $lastName): static
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
 
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = $email; return $this; }
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
 
-    public function getUserIdentifier(): string { return (string) $this->email; }
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
 
     public function getRoles(): array
     {
@@ -136,12 +160,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         };
     }
 
-    public function getPassword(): string { return $this->password; }
-    public function setPassword(string $password): static { $this->password = $password; return $this; }
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
 
     public function eraseCredentials(): void {}
 
-    public function getRole(): string { return $this->role; }
+    public function getRole(): string
+    {
+        return $this->role;
+    }
     public function setRole(string $role): static
     {
         $allowed = ['admin', 'employee', 'agriculteur', 'fournisseur'];
@@ -161,18 +195,46 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getStatus(): string { return $this->status; }
-    public function setStatus(string $status): static { $this->status = $status; return $this; }
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
 
-    public function getPhone(): ?string { return $this->phone; }
-    public function setPhone(?string $phone): static { $this->phone = $phone; return $this; }
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
+        return $this;
+    }
 
-    public function getAddress(): ?string { return $this->address; }
-    public function setAddress(?string $address): static { $this->address = $address; return $this; }
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+    public function setAddress(?string $address): static
+    {
+        $this->address = $address;
+        return $this;
+    }
 
     // ─── Document File Methods ────────────────────────────────────────
-    public function getDocumentFile(): ?string { return $this->documentFile; }
-    public function setDocumentFile(?string $documentFile): static { $this->documentFile = $documentFile; return $this; }
+    public function getDocumentFile(): ?string
+    {
+        return $this->documentFile;
+    }
+    public function setDocumentFile(?string $documentFile): static
+    {
+        $this->documentFile = $documentFile;
+        return $this;
+    }
 
     public function setDocumentFileFile(?File $file = null): void
     {
@@ -182,11 +244,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
     }
 
-    public function getDocumentFileFile(): ?File { return $this->documentFileFile; }
+    public function getDocumentFileFile(): ?File
+    {
+        return $this->documentFileFile;
+    }
 
     // ─── Image File Methods ───────────────────────────────────────────
-    public function getImage(): ?string { return $this->image; }
-    public function setImage(?string $image): static { $this->image = $image; return $this; }
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
 
     public function setImageFile(?File $file = null): void
     {
@@ -196,13 +268,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
     }
 
-    public function getImageFile(): ?File { return $this->imageFile; }
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
 
-    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static { $this->createdAt = $createdAt; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
 
-    public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static { $this->updatedAt = $updatedAt; return $this; }
+    public function getUpdatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
 
     public function getGoogleId(): ?string
     {

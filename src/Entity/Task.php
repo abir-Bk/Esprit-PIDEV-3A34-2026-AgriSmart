@@ -22,6 +22,9 @@ class Task
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $resume = null;
+
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateDebut = null;
 
@@ -105,6 +108,18 @@ class Task
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getResume(): ?string
+    {
+        return $this->resume;
+    }
+
+    public function setResume(?string $resume): self
+    {
+        $this->resume = $resume;
 
         return $this;
     }

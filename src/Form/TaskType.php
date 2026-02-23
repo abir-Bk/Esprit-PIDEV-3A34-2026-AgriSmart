@@ -56,14 +56,22 @@ class TaskType extends AbstractType
                     ]),
                     new Assert\Length([
                         'min' => 10,
-                        'max' => 255,
+                        'max' => 2000,
                         'minMessage' => 'La description doit contenir au moins {{ limit }} caractères.',
                         'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères.',
                     ]),
-                    new Assert\Regex([
-                        'pattern' => "/^[a-zA-ZÀ-ÿ0-9\s\-',.()]*$/u",
-                        'message' => 'Caractères invalides dans la description.',
-                    ]),
+                ],
+            ])
+
+            // =========================
+            // RESUME (AI generated)
+            // =========================
+            ->add('resume', TextareaType::class, [
+                'label' => 'Résumé (automatique)',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Le résumé sera généré automatiquement ou vous pouvez le saisir manuellement...',
+                    'rows' => 3
                 ],
             ])
 

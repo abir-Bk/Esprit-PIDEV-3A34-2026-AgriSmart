@@ -19,9 +19,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/tasks', name: 'tasks_')]
+
 #[IsGranted('ROLE_AGRICULTEUR')]
 class TaskCrudController extends AbstractController
 {
@@ -113,7 +115,58 @@ class TaskCrudController extends AbstractController
         return $this->render('front/task/calendar.html.twig', [
             'tasks' => $tasks,
             'events' => $events,
+            'google_api_key' => $this->getParameter('google_calendar_api_key'),
+            'google_calendar_id' => $this->getParameter('google_project_calendar_id'),
         ]);
+    }
+
+    #[Route('/export/ical', name: 'export_ical', methods: ['GET'])]
+    public function exportIcal(TaskRepository $taskRepository): Response
+    {
+        $tasks = $taskRepository->findAll();
+
+        $ical = "BEGIN:VCALENDAR\r\n";
+        $ical .= "VERSION:2.0\r\n";
+        $ical .= "PRODID:-//AgriSmart//Task Management//FR\r\n";
+        $ical .= "CALSCALE:GREGORIAN\r\n";
+        $ical .= "METHOD:PUBLISH\r\n";
+        $ical .= "X-WR-CALNAME:AgriSmart Tâches\r\n";
+        $ical .= "X-WR-TIMEZONE:Europe/Paris\r\n";
+
+        foreach ($tasks as $task) {
+            $uid = 'task-' . $task->getIdTask() . '@agrismart.tn';
+            $summary = str_replace([",", ";"], ["\\,", "\\;"], $task->getTitre());
+            $description = str_replace([",", ";", "\n"], ["\\,", "\\;", "\\n"], $task->getDescription() ?? '');
+
+            $start = $task->getDateDebut()->format('Ymd\THis\Z');
+            $end = $task->getDateFin() ? $task->getDateFin()->format('Ymd\THis\Z') : $start;
+
+            $ical .= "BEGIN:VEVENT\r\n";
+            $ical .= "UID:$uid\r\n";
+            $ical .= "DTSTAMP:" . date('Ymd\THis\Z') . "\r\n";
+            $ical .= "DTSTART:$start\r\n";
+            $ical .= "DTEND:$end\r\n";
+            $ical .= "SUMMARY:$summary\r\n";
+            if ($description) {
+                $ical .= "DESCRIPTION:$description\r\n";
+            }
+            if ($task->getLocalisation()) {
+                $ical .= "LOCATION:" . str_replace([",", ";"], ["\\,", "\\;"], $task->getLocalisation()) . "\r\n";
+            }
+            $ical .= "END:VEVENT\r\n";
+        }
+
+        $ical .= "END:VCALENDAR";
+
+        $response = new Response($ical);
+        $response->headers->set('Content-Type', 'text/calendar; charset=utf-8');
+        $disposition = HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            'agrismart_tasks.ics'
+        );
+        $response->headers->set('Content-Disposition', $disposition);
+
+        return $response;
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]

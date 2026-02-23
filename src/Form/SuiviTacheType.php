@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class SuiviTacheType extends AbstractType
 {
@@ -35,6 +36,14 @@ class SuiviTacheType extends AbstractType
                 'label' => 'Solutions apportées / Recommandations',
                 'required' => false,
                 'attr' => ['rows' => 4],
+            ])
+            ->add('imageFile', VichImageType::class, [
+                'label' => 'Photo du suivi',
+                'required' => false,
+                'allow_delete' => true,
+                'download_uri' => false,
+                'image_uri' => true,
+                'asset_helper' => true,
             ]);
     }
 

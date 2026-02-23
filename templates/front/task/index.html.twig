@@ -69,7 +69,14 @@
             {% for task in tasks %}
               <tr>
                 <td>{{ task.idTask }}</td>
-                <td>{{ task.titre }}</td>
+                <td>
+                    <strong>{{ task.titre }}</strong>
+                    {% if task.resume %}
+                        <div class="small text-muted mt-1 italic" style="max-width: 250px;">
+                            <i class="bi bi-info-circle me-1 small"></i>{{ task.resume|slice(0, 100) }}...
+                        </div>
+                    {% endif %}
+                </td>
                 <td>{{ task.type }}</td>
                 <td>{{ task.priorite }}</td>
                 <td>

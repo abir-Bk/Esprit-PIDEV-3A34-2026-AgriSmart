@@ -20,8 +20,21 @@
       <dd class="col-sm-9">{{ task.idTask }}</dd>
       <dt class="col-sm-3 ag-meta">Titre</dt>
       <dd class="col-sm-9">{{ task.titre }}</dd>
-      <dt class="col-sm-3 ag-meta">Description</dt>
-      <dd class="col-sm-9">{{ task.description }}</dd>
+      <dt class="col-sm-3 ag-meta">
+        Description
+        <div class="input-group input-group-sm mt-2" style="width: auto;">
+            <select id="select-ai-lang-show" class="form-select form-select-sm border-0 bg-light-info text-info fw-bold">
+                <option value="en">EN</option>
+                <option value="ar">AR</option>
+                <option value="fr">FR</option>
+                <option value="es">ES</option>
+            </select>
+            <button type="button" id="btn-ai-translate-show" class="btn btn-sm btn-outline-info border-0 bg-light-info">
+                <i class="bi bi-translate text-info"></i>
+            </button>
+        </div>
+      </dt>
+      <dd class="col-sm-9" id="task-description-show">{{ task.description }}</dd>
       <dt class="col-sm-3 ag-meta">Type</dt>
       <dd class="col-sm-9">{{ task.type }}</dd>
       <dt class="col-sm-3 ag-meta">Priorité</dt>
@@ -60,4 +73,57 @@
     <button class="btn btn-outline-danger rounded-pill">Supprimer</button>
   </form>
   </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    (function() {
+        function initAiTranslateShow() {
+            const btn = document.getElementById('btn-ai-translate-show');
+            const langSelect = document.getElementById('select-ai-lang-show');
+            const descElement = document.getElementById('task-description-show');
+
+            if (!btn || !descElement) return;
+
+            btn.addEventListener('click', async function() {
+                const text = descElement.innerText.trim();
+                const targetLang = langSelect.value;
+                if (text.length < 2) return;
+
+                btn.disabled = true;
+                descElement.classList.add('opacity-50');
+
+                try {
+                    const response = await fetch('{{ path('task_ai_translate') }}', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ text: text, target: targetLangMapping(targetLang) })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        descElement.textContent = data.translation;
+                        descElement.classList.add('text-info');
+                        setTimeout(() => descElement.classList.remove('text-info'), 2000);
+                    }
+                } catch (e) {
+                    console.error('Translation error', e);
+                } finally {
+                    btn.disabled = false;
+                    descElement.classList.remove('opacity-50');
+                }
+            });
+
+            function targetLangMapping(code) {
+                const map = { 'en': 'anglais', 'ar': 'arabe', 'fr': 'français', 'es': 'espagnol' };
+                return map[code] || code;
+            }
+        }
+        document.addEventListener('turbo:load', initAiTranslateShow);
+        initAiTranslateShow();
+    })();
+    </script>
+    <style>
+        .bg-light-info { background-color: rgba(13, 202, 240, 0.1); }
+    </style>
 {% endblock %}

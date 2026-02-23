@@ -19,8 +19,33 @@
                 <div class="row g-4">
                     <div class="col-md-8">
                         <section class="mb-4">
-                            <h6 class="text-muted text-uppercase small fw-bold mb-2">Description</h6>
-                            <p class="lead">{{ task.description ?: 'Aucune description fournie.' }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-0">Description</h6>
+                                <div class="d-flex gap-2">
+                                    <div class="input-group input-group-sm" style="width: auto;">
+                                        <select id="select-ai-lang-show" class="form-select form-select-sm rounded-start-pill border-0 bg-light-info text-info fw-bold">
+                                            <option value="en">EN</option>
+                                            <option value="ar">AR</option>
+                                            <option value="fr">FR</option>
+                                            <option value="es">ES</option>
+                                        </select>
+                                        <button type="button" id="btn-ai-translate-show" class="btn btn-sm btn-outline-info rounded-end-pill px-3 shadow-sm border-0 bg-light-info">
+                                            <i class="bi bi-translate me-1 text-info"></i> <span class="small fw-bold">Traduire</span>
+                                        </button>
+                                    </div>
+                                    <button type="button" id="btn-ai-summarize-show" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
+                                        <i class="bi bi-stars me-1 text-info"></i> <span class="small fw-bold">Résumer l'IA</span>
+                                        <span id="ai-spinner-show" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="lead" id="task-description-show">{{ task.description ?: 'Aucune description fournie.' }}</p>
+                            
+                            <div id="ai-resume-container" class="mt-3 p-3 bg-light rounded-3 d-none border-start border-info border-4 shadow-sm">
+                                <h6 class="text-info small fw-bold mb-1"><i class="bi bi-robot me-1"></i> Résumé de l'IA</h6>
+                                <p id="ai-resume-text" class="small mb-0 text-muted italic"></p>
+                            </div>
+                            <div id="ai-error-show" class="text-danger small mt-1 d-none"></div>
                         </section>
 
                         <div class="row row-cols-1 row-cols-sm-2 g-3">
@@ -92,6 +117,94 @@
                     </div>
                 </div>
             </div>
+<script>
+(function() {
+    function initAiSummarizeShow() {
+        console.log('AI Summarize Show Init...');
+        const btnSummarize = document.getElementById('btn-ai-summarize-show');
+        const btnTranslate = document.getElementById('btn-ai-translate-show');
+        const langSelect = document.getElementById('select-ai-lang-show');
+        const spinner = document.getElementById('ai-spinner-show');
+        const descElement = document.getElementById('task-description-show');
+        const descriptionText = descElement ? descElement.innerText.trim() : '';
+        const resumeContainer = document.getElementById('ai-resume-container');
+        const resumeText = document.getElementById('ai-resume-text');
+        const errorDiv = document.getElementById('ai-error-show');
+
+        if (!btnSummarize) return;
+
+        // Logic for Summarize
+        btnSummarize.addEventListener('click', async function() {
+            if (descriptionText.length < 10) { alert('Description trop courte'); return; }
+            
+            toggleUI(true);
+            try {
+                const response = await fetch('{{ path('task_ai_summarize') }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: descriptionText })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    resumeText.textContent = data.summary;
+                    resumeContainer.classList.remove('d-none');
+                } else { showError(data.error); }
+            } catch (error) { showError('Erreur réseau'); }
+            finally { toggleUI(false); }
+        });
+
+        // Logic for Translate
+        if (btnTranslate) {
+            btnTranslate.addEventListener('click', async function() {
+                const targetLang = langSelect.value;
+                if (descriptionText.length < 2) { alert('Texte trop court'); return; }
+
+                toggleUI(true);
+                try {
+                    const response = await fetch('{{ path('task_ai_translate') }}', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ text: descriptionText, target: targetLanguageMapping(targetLang) })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        descElement.textContent = data.translation;
+                        descElement.classList.add('text-info');
+                        setTimeout(() => descElement.classList.remove('text-info'), 2000);
+                        if (data.warning) showError(data.warning);
+                    } else { showError(data.error); }
+                } catch (error) { showError('Erreur réseau'); }
+                finally { toggleUI(false); }
+            });
+        }
+
+        function toggleUI(loading) {
+            btnSummarize.disabled = loading;
+            if (btnTranslate) btnTranslate.disabled = loading;
+            spinner.classList.toggle('d-none', !loading);
+            if (resumeContainer) resumeContainer.classList.toggle('opacity-50', loading);
+        }
+
+        function showError(msg) {
+            errorDiv.textContent = msg || 'Erreur';
+            errorDiv.classList.remove('d-none');
+        }
+
+        function targetLanguageMapping(code) {
+            const map = { 'en': 'anglais', 'ar': 'arabe', 'fr': 'français', 'es': 'espagnol' };
+            return map[code] || code;
+        }
+    }
+
+    document.addEventListener('turbo:load', initAiSummarizeShow);
+    initAiSummarizeShow();
+})();
+</script>
+
+<style>
+    .bg-light-info { background-color: rgba(13, 202, 240, 0.1); }
+    .italic { font-style: italic; }
+</style>
         </div>
     </div>
 {% endblock %}

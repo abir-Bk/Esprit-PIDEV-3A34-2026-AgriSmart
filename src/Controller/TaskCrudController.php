@@ -98,16 +98,20 @@ class TaskCrudController extends AbstractController
         $tasks = $taskRepository->findAll();
         $events = [];
         foreach ($tasks as $task) {
+            $isMultiDay = $task->getDateFin() && $task->getDateFin()->format('Y-m-d') !== $task->getDateDebut()->format('Y-m-d');
+
             $events[] = [
                 'id' => $task->getIdTask(),
-                'title' => $task->getTitre() . ' (' . $task->getType() . ')',
+                'title' => $task->getTitre(),
                 'start' => $task->getDateDebut()->format('c'),
                 'end' => $task->getDateFin() ? $task->getDateFin()->format('c') : $task->getDateDebut()->format('c'),
+                'allDay' => $isMultiDay,
                 'url' => $this->generateUrl('tasks_show', ['id' => $task->getIdTask()]),
                 'extendedProps' => [
                     'type' => $task->getType(),
                     'statut' => $task->getStatut(),
                     'priorite' => $task->getPriorite(),
+                    'description' => $task->getDescription(),
                 ],
             ];
         }
@@ -127,23 +131,28 @@ class TaskCrudController extends AbstractController
 
         $ical = "BEGIN:VCALENDAR\r\n";
         $ical .= "VERSION:2.0\r\n";
-        $ical .= "PRODID:-//AgriSmart//Task Management//FR\r\n";
+        $ical .= "PRODID:-//AgriSmart//Task Management//TN\r\n";
         $ical .= "CALSCALE:GREGORIAN\r\n";
         $ical .= "METHOD:PUBLISH\r\n";
         $ical .= "X-WR-CALNAME:AgriSmart Tâches\r\n";
-        $ical .= "X-WR-TIMEZONE:Europe/Paris\r\n";
+        $ical .= "X-WR-TIMEZONE:Africa/Tunis\r\n";
+        $ical .= "X-PUBLISHED-TTL:PT1H\r\n"; // Suggest 1 hour refresh
 
         foreach ($tasks as $task) {
             $uid = 'task-' . $task->getIdTask() . '@agrismart.tn';
             $summary = str_replace([",", ";"], ["\\,", "\\;"], $task->getTitre());
             $description = str_replace([",", ";", "\n"], ["\\,", "\\;", "\\n"], $task->getDescription() ?? '');
 
-            $start = $task->getDateDebut()->format('Ymd\THis\Z');
-            $end = $task->getDateFin() ? $task->getDateFin()->format('Ymd\THis\Z') : $start;
+            // Ensure we have a DateTime object to work with setTimezone
+            $startDate = \DateTimeImmutable::createFromInterface($task->getDateDebut());
+            $endDate = \DateTimeImmutable::createFromInterface($task->getDateFin() ?: $task->getDateDebut());
+
+            $start = $startDate->setTimezone(new \DateTimeZone('UTC'))->format('Ymd\THis\Z');
+            $end = $endDate->setTimezone(new \DateTimeZone('UTC'))->format('Ymd\THis\Z');
 
             $ical .= "BEGIN:VEVENT\r\n";
             $ical .= "UID:$uid\r\n";
-            $ical .= "DTSTAMP:" . date('Ymd\THis\Z') . "\r\n";
+            $ical .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
             $ical .= "DTSTART:$start\r\n";
             $ical .= "DTEND:$end\r\n";
             $ical .= "SUMMARY:$summary\r\n";

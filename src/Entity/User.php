@@ -2,8 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Commande;
-use App\Entity\Produit;
+
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -113,9 +112,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
+#[ORM\Column(type: 'string', length: 6, nullable: true)]
+private ?string $twoFactorCode = null;
 
-    // ─── Getters & Setters ────────────────────────────────────────────
+#[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $twoFactorExpiresAt = null;
 
+// Getters / Setters
+public function getTwoFactorCode(): ?string
+{
+    return $this->twoFactorCode;
+}
+
+public function setTwoFactorCode(?string $code): self
+{
+    $this->twoFactorCode = $code;
+    return $this;
+}
+
+public function getTwoFactorExpiresAt(): ?\DateTimeInterface
+{
+    return $this->twoFactorExpiresAt;
+}
+
+public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
+{
+    $this->twoFactorExpiresAt = $expiresAt;
+    return $this;
+}
+  
     public function getId(): ?int
     {
         return $this->id;

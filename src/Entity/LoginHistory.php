@@ -30,7 +30,7 @@ class LoginHistory
     #[ORM\Column(type: 'string', length: 180, nullable: true)]
     private ?string $attemptedEmail = null;
 
-    #[ORM\Column(type: 'string', length: 2, nullable: true)]
+    #[ORM\Column(type: 'string', length: 200, nullable: true)]
     private ?string $country = null;
     #[ORM\Column(type: 'boolean')]
 private bool $suspicious = false;

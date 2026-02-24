@@ -2,7 +2,6 @@
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class ResendMailer
 {
@@ -11,8 +10,9 @@ class ResendMailer
         private string $apiKey,
     ) {}
 
-    public function sendEmail(string $to, string $subject, string $htmlContent): void
-    {
+ public function sendEmail(string $to, string $subject, string $htmlContent): void
+{
+    try {
         $response = $this->client->request('POST', 'https://api.resend.com/emails', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->apiKey,
@@ -26,10 +26,15 @@ class ResendMailer
             ],
         ]);
 
-        if ($response->getStatusCode() !== 202) {
-            throw new TransportExceptionInterface(
-                'Erreur lors de l\'envoi de l\'email via Resend'
-            );
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode !== 200 && $statusCode !== 202) {
+            // just log instead of breaking login
+            dump('Email failed: ' . $statusCode);
         }
+
+    } catch (\Throwable $e) {
+        // NEVER break authentication flow
+        dump('Mailer error: ' . $e->getMessage());
     }
-}
+}}

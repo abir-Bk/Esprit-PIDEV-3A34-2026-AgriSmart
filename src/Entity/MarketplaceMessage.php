@@ -24,10 +24,12 @@ class MarketplaceMessage
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $sender = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: 'Le message ne peut pas être vide.')]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 3000, maxMessage: 'Le message ne doit pas dépasser {{ limit }} caractères.')]
     private ?string $content = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $audioPath = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createdAt = null;
@@ -77,9 +79,21 @@ class MarketplaceMessage
         return $this->content;
     }
 
-    public function setContent(string $content): static
+    public function setContent(?string $content): static
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    public function getAudioPath(): ?string
+    {
+        return $this->audioPath;
+    }
+
+    public function setAudioPath(?string $audioPath): static
+    {
+        $this->audioPath = $audioPath;
 
         return $this;
     }

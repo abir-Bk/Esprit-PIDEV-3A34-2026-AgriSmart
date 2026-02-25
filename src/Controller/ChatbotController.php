@@ -2,13 +2,14 @@
 
 namespace App\Controller;
 
+use App\Exception\AiProviderException;
 use App\Repository\ProduitRepository;
-use App\Service\GeminiService;
-use App\Service\OpenAIService;
+use App\Service\HuggingFaceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ChatbotController extends AbstractController
 {
@@ -18,8 +19,7 @@ class ChatbotController extends AbstractController
     #[Route('/chatbot/message', name: 'app_chatbot_message', methods: ['POST'])]
     public function message(
         Request $request,
-        OpenAIService $openAIService,
-        GeminiService $geminiService,
+        HuggingFaceService $huggingFaceService,
         ProduitRepository $produitRepository
     ): JsonResponse {
         try {
@@ -46,19 +46,14 @@ class ChatbotController extends AbstractController
 
             $catalog = $this->buildCatalog($produitRepository);
 
-            // 1 requête utilisateur = 1 appel OpenAI (ou 1 Gemini en secours si quota OpenAI)
-            try {
-                $reply = $openAIService->chat($messages, $catalog);
-                return $this->json(['reply' => $reply]);
-            } catch (\RuntimeException $e) {
-                // Quota / limite OpenAI → secours Gemini (une seule tentative)
-                try {
-                    $reply = $geminiService->chat($messages, $catalog);
-                    return $this->json(['reply' => $reply]);
-                } catch (\Throwable $geminiEx) {
-                    return $this->json(['error' => $e->getMessage()], 503);
-                }
-            }
+            $reply = $huggingFaceService->chat($messages, $catalog);
+            return $this->json(['reply' => $reply]);
+        } catch (AiProviderException $e) {
+            return $this->json([
+                'error' => $e->getUserMessage(),
+                'provider' => $e->getProvider(),
+                'kind' => $e->getKind(),
+            ], $e->getStatusCode());
         } catch (\RuntimeException $e) {
             return $this->json(['error' => $e->getMessage()], 503);
         } catch (\Throwable $e) {
@@ -68,7 +63,7 @@ class ChatbotController extends AbstractController
 
     /**
      * Fetch up to 35 in-stock products and format them as a concise catalog string.
-     * Limité pour rester sous les quotas OpenAI (tokens/requête) et éviter 429.
+     * Limité pour rester sous les quotas IA (tokens/requête) et éviter 429.
      */
     private function buildCatalog(ProduitRepository $repo): string
     {
@@ -89,13 +84,19 @@ class ChatbotController extends AbstractController
             $price = $p->isPromotion() && $p->getPromotionPrice()
                 ? $p->getPromotionPrice() . ' TND (promo, était ' . $p->getPrix() . ' TND)'
                 : $p->getPrix() . ' TND';
+
+            $productLink = $p->getId() !== null
+                ? $this->generateUrl('app_produit_show', ['id' => $p->getId()], UrlGeneratorInterface::ABSOLUTE_URL)
+                : '#';
+
             $lines[] = sprintf(
-                '- %s | Catégorie: %s | Prix: %s | Stock: %d unité(s)%s',
+                '- %s | Catégorie: %s | Prix: %s | Stock: %d unité(s)%s | Lien: %s',
                 $p->getNom(),
                 $p->getCategorie() ?? 'N/A',
                 $price,
                 $p->getQuantiteStock(),
-                $p->getDescription() ? ' | ' . mb_substr($p->getDescription(), 0, 50) . '…' : ''
+                $p->getDescription() ? ' | ' . mb_substr($p->getDescription(), 0, 50) . '…' : '',
+                $productLink
             );
         }
 

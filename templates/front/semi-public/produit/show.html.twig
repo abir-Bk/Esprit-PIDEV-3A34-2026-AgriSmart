@@ -629,6 +629,47 @@
     </div>
   </section>
 
+  {% if recommendedProducts|default([]) is not empty %}
+  <section class="pb-5">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 fw-bold mb-0" style="color:var(--ag-text);">
+          <i class="bi bi-stars me-2" style="color:var(--ag-accent);"></i>Autres recommandations
+        </h2>
+        <a href="{{ path('app_produit_index') }}" class="small text-decoration-none" style="color:var(--ag-primary);">
+          Voir plus
+        </a>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        {% for rec in recommendedProducts %}
+          <div class="col-sm-6 col-lg-4">
+            <article class="ag-mini rounded-4 overflow-hidden h-100">
+              <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="d-block text-decoration-none">
+                <img
+                  src="{{ asset(rec.image ?: 'assets/images/placeholder-product.png') }}"
+                  alt="{{ rec.nom }}"
+                  style="height: 180px; width: 100%; object-fit: cover;"
+                  loading="lazy"
+                >
+              </a>
+
+              <div class="p-3">
+                <div class="small text-uppercase fw-bold mb-1" style="color:var(--ag-muted);">{{ rec.categorie }}</div>
+                <div class="fw-bold mb-2" style="color:var(--ag-text);">{{ rec.nom }}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="fw-bold" style="color:var(--ag-primary);">{{ rec.getPrixEffectif()|number_format(2, '.', ' ') }} TND</div>
+                  <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Détails</a>
+                </div>
+              </div>
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   {# ===== Toast container ===== #}
   <div class="toast-container"></div>
 </div>

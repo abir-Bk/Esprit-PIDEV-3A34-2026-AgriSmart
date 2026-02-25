@@ -27,10 +27,7 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    App\Service\GeminiService:
+    App\Service\HuggingFaceService:
         arguments:
-            $geminiApiKey: '%env(default:env_empty_string:GEMINI_API_KEY)%'
-
-    App\Service\OpenAIService:
-        arguments:
-            $openAiApiKey: '%env(default:env_empty_string:OPENAI_API_KEY)%'
+            $huggingFaceApiKey: '%env(default:env_empty_string:HUGGINGFACE_API_KEY)%'
+            $huggingFaceModel: '%env(default:env_empty_string:HUGGINGFACE_MODEL)%'

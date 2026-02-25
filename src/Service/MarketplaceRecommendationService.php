@@ -107,14 +107,41 @@ class MarketplaceRecommendationService
             ];
         }
 
-        foreach ($this->commandeItemRepository->findPurchasedProductsByUser($user) as $row) {
+        $purchaseRows = $this->commandeItemRepository->findPurchasedProductsByUser($user);
+        $cartEntries = $this->panierService->getCart();
+
+        $idsToFetch = [];
+        foreach ($purchaseRows as $row) {
+            $productId = (int) ($row['productId'] ?? 0);
+            if ($productId > 0) {
+                $idsToFetch[] = $productId;
+            }
+        }
+        foreach ($cartEntries as $productId => $qty) {
+            $productId = (int) $productId;
+            if ($productId > 0) {
+                $idsToFetch[] = $productId;
+            }
+        }
+
+        $productsById = [];
+        if ($idsToFetch !== []) {
+            $batchProducts = $this->produitRepository->findBy(['id' => array_values(array_unique($idsToFetch))]);
+            foreach ($batchProducts as $product) {
+                if ($product instanceof Produit && $product->getId() !== null) {
+                    $productsById[$product->getId()] = $product;
+                }
+            }
+        }
+
+        foreach ($purchaseRows as $row) {
             $productId = (int) ($row['productId'] ?? 0);
             $qty = max(1, (int) ($row['qty'] ?? 1));
             if ($productId <= 0) {
                 continue;
             }
 
-            $product = $this->produitRepository->find($productId);
+            $product = $productsById[$productId] ?? null;
             if (!$product instanceof Produit || $product->getId() === null) {
                 continue;
             }
@@ -126,8 +153,8 @@ class MarketplaceRecommendationService
             ];
         }
 
-        foreach ($this->panierService->getCart() as $productId => $qty) {
-            $product = $this->produitRepository->find((int) $productId);
+        foreach ($cartEntries as $productId => $qty) {
+            $product = $productsById[(int) $productId] ?? null;
             if (!$product instanceof Produit || $product->getId() === null) {
                 continue;
             }

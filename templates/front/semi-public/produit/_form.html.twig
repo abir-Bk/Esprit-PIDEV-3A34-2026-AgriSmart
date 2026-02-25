@@ -12,9 +12,9 @@
 .am-loc-cal .flatpickr-days{ width:100%; }
 .am-loc-cal .flatpickr-days .dayContainer{ min-width:100%; max-width:100%; width:100%; }
 .am-loc-cal .flatpickr-day{ max-width:14.285%; height:40px; line-height:40px; border-radius:10px; font-weight:600; border-color:rgba(17,24,39,.08) !important; }
-.am-loc-cal .flatpickr-day:hover{ background:#d8efdf !important; color:#111827 !important; }
-.am-loc-cal .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.flatpickr-disabled):not(.amp-past){
-    background:#e8f5e9 !important;
+.am-loc-cal .flatpickr-day:hover{ background:#f3f4f6 !important; color:#111827 !important; }
+.am-loc-cal .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.flatpickr-disabled):not(.amp-past):not(.inRange):not(.startRange):not(.endRange):not(.selected){
+    background:#ffffff !important;
 }
 .am-loc-cal .flatpickr-day.amp-past{ background:#eceff1 !important; color:#8b95a1 !important; }
 .am-loc-cal .flatpickr-day.today{ border-color:rgba(17,24,39,.14) !important; }
@@ -342,7 +342,7 @@
                         <input type="text" class="form-control am-input" data-loc-picker placeholder="Choisir une plage" readonly>
 
                         <div class="d-flex flex-wrap gap-3 mt-3 small">
-                            <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#e8f5e9"></span>Disponible</span>
+                            <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#ffffff"></span>Disponible</span>
                             <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#eceff1"></span>Passé</span>
                             <span class="d-inline-flex align-items-center gap-2"><span class="am-loc-legend-dot" style="background:#ffe082"></span>Sélection</span>
                         </div>
@@ -382,7 +382,7 @@
                 <div class="col-12">
                     <div class="alert alert-info py-2 small mb-0">
                         <i class="bi bi-info-circle me-1"></i>
-                        Cliquez une date de début puis une date de fin (ou glissez) pour définir la période de location.
+                        Cliquez une seule date pour 1 jour, ou une date de début puis une date de fin (ou glissez) pour un intervalle.
                     </div>
                 </div>
             </div>
@@ -471,6 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const startInput = form.querySelector('.js-loc-start');
     const endInput   = form.querySelector('.js-loc-end');
     let locPicker = null;
+    let wasLocation = typeSelector && typeSelector.value === 'location';
 
     function toggleSections() {
         const isLocation = typeSelector && typeSelector.value === 'location';
@@ -490,9 +491,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!isLocation) endInput.value = '';
         }
 
-        if (!isLocation && locPicker) {
+        // Clear flatpickr only when switching from location -> vente,
+        // not on every input event (avoids recursive onChange/input loop).
+        if (!isLocation && wasLocation && locPicker) {
             locPicker.clear();
         }
+
+        wasLocation = !!isLocation;
 
         // Promo price
         if (promoSwitch && sectionPromoPrice) {
@@ -517,12 +522,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const syncInputs = (selectedDates = []) => {
             const start = selectedDates[0] ? strip(selectedDates[0]) : null;
-            const end = selectedDates[1] ? strip(selectedDates[1]) : null;
-            startInput.value = start ? iso(start) : '';
-            endInput.value = end ? iso(end) : '';
+            const end = selectedDates[1]
+                ? strip(selectedDates[1])
+                : (selectedDates[0] ? strip(selectedDates[0]) : null);
+
+            const nextStart = start ? iso(start) : '';
+            const nextEnd = end ? iso(end) : '';
+            const changed = startInput.value !== nextStart || endInput.value !== nextEnd;
+
+            startInput.value = nextStart;
+            endInput.value = nextEnd;
             endInput.min = startInput.value || '';
-            startInput.dispatchEvent(new Event('input', { bubbles: true }));
-            endInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+            if (changed) {
+                startInput.dispatchEvent(new Event('input', { bubbles: true }));
+                endInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         };
 
         const flatpickr = window.flatpickr;

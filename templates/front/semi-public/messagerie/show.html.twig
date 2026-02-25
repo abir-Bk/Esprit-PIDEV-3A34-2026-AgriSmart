@@ -69,6 +69,18 @@
   margin-bottom: .28rem;
 }
 
+.ag-thread .ag-seen{
+  margin-top:.4rem;
+  font-size:.72rem;
+  color:#6b7280;
+  text-align:right;
+}
+
+.ag-thread .ag-seen.is-read{
+  color:#166534;
+  font-weight:700;
+}
+
 .ag-thread .ag-chip{
   display:inline-flex;
   align-items:center;
@@ -95,8 +107,45 @@
 .ag-thread .ag-voice-row{
   display:flex;
   align-items:center;
+  flex-wrap:wrap;
   gap:.55rem;
   margin-top:.7rem;
+}
+
+.ag-thread .ag-voice-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  border:1px solid rgba(17,24,39,.16);
+  border-radius:999px;
+  padding:.3rem .6rem;
+  background:#fff;
+  font-size:.74rem;
+  color:#374151;
+}
+
+.ag-thread .ag-voice-badge.recording{
+  background:#fef2f2;
+  border-color:rgba(220,38,38,.28);
+  color:#b91c1c;
+}
+
+.ag-thread .ag-audio{
+  width: 100%;
+  margin-top: .5rem;
+}
+
+.ag-thread .ag-audio-preview{
+  display:none;
+  margin-top:.55rem;
+  border:1px dashed rgba(17,24,39,.2);
+  border-radius: 12px;
+  padding:.55rem;
+  background:#fff;
+}
+
+.ag-thread .ag-audio-preview.active{
+  display:block;
 }
 
 .ag-thread .ag-voice-status{
@@ -158,7 +207,23 @@
                       <div class="ag-meta">
                         {{ msg.sender.firstName }} {{ msg.sender.lastName }} • {{ msg.createdAt|date('d/m/Y H:i') }}
                       </div>
-                      <div style="white-space: pre-line; color:var(--ag-text);">{{ msg.content }}</div>
+                      {% if msg.content %}
+                        <div style="white-space: pre-line; color:var(--ag-text);">{{ msg.content }}</div>
+                      {% endif %}
+                      {% if msg.audioPath %}
+                        <audio class="ag-audio" controls preload="none">
+                          <source src="{{ asset(msg.audioPath) }}">
+                        </audio>
+                      {% endif %}
+                      {% if mine %}
+                        <div class="ag-seen {{ msg.isRead ? 'is-read' : '' }}" data-seen-status>
+                          {% if msg.isRead and msg.readAt %}
+                            Vu {{ msg.readAt|date('d/m/Y H:i') }}
+                          {% else %}
+                            Envoyé
+                          {% endif %}
+                        </div>
+                      {% endif %}
                     </div>
                   </div>
                 {% else %}
@@ -174,12 +239,26 @@
             <div class="card-body p-4 ag-compose">
               <h2 class="h6 fw-bold mb-3" style="color:var(--ag-text);">Envoyer un message</h2>
               {{ form_start(messageForm, {attr: {id: 'message-form'}}) }}
-                {{ form_widget(messageForm) }}
+                {{ form_widget(messageForm.content) }}
+                {{ form_widget(messageForm.audioFile) }}
+                {{ form_widget(messageForm.audioBlob) }}
                 <div class="ag-voice-row">
                   <button class="btn btn-outline-warning rounded-pill" type="button" data-stt-button>
                     <i class="bi bi-mic me-1"></i> Dicter
                   </button>
+                  <button class="btn btn-outline-primary rounded-pill" type="button" data-audio-record>
+                    <i class="bi bi-record-circle me-1"></i> Vocal
+                  </button>
+                  <button class="btn btn-outline-secondary rounded-pill" type="button" data-audio-clear>
+                    <i class="bi bi-x-circle me-1"></i> Effacer vocal
+                  </button>
+                  <span class="ag-voice-badge" data-audio-badge>
+                    <i class="bi bi-stopwatch"></i><span data-audio-timer>00:00</span>
+                  </span>
                   <span class="ag-voice-status" data-stt-status>Reconnaissance vocale prête</span>
+                </div>
+                <div class="ag-audio-preview" data-audio-preview-wrap>
+                  <audio controls class="ag-audio" data-audio-preview></audio>
                 </div>
                 <button class="btn btn-success rounded-pill mt-3 w-100" type="submit">
                   <i class="bi bi-send me-1"></i> Envoyer
@@ -205,12 +284,30 @@
   const conversationId = list.dataset.conversationId;
   const currentUserId = Number(list.dataset.currentUserId || '0');
   const fallbackUrl = '{{ path('app_marketplace_messagerie_messages', {id: conversation.id})|e('js') }}';
+  const ackReadUrl = '{{ path('app_marketplace_messagerie_ack_read', {id: conversation.id})|e('js') }}';
   const sttButton = form.querySelector('[data-stt-button]');
   const sttStatus = form.querySelector('[data-stt-status]');
+  const audioInput = form.querySelector('[data-audio-file]');
+  const audioBlobInput = form.querySelector('[data-audio-blob]');
+  const audioRecordBtn = form.querySelector('[data-audio-record]');
+  const audioClearBtn = form.querySelector('[data-audio-clear]');
+  const audioBadge = form.querySelector('[data-audio-badge]');
+  const audioTimer = form.querySelector('[data-audio-timer]');
+  const audioPreviewWrap = form.querySelector('[data-audio-preview-wrap]');
+  const audioPreview = form.querySelector('[data-audio-preview]');
   let pollingStarted = false;
   let pollingTimer = null;
+  let pollingInFlight = false;
   let sttRecognition = null;
   let sttActive = false;
+  let mediaRecorder = null;
+  let mediaStream = null;
+  let audioChunks = [];
+  let recordTimer = null;
+  let recordStartAt = null;
+  let readAckTimer = null;
+  let readAckInFlight = false;
+  let readAfterId = 0;
 
   const scrollToBottom = () => {
     scroll.scrollTo({ top: scroll.scrollHeight, behavior: 'smooth' });
@@ -218,6 +315,186 @@
 
   const notify = (message) => {
     window.alert(message);
+  };
+
+  const normalizeAudioUrl = (audioPath) => {
+    if (!audioPath) {
+      return null;
+    }
+    if (/^https?:\/\//i.test(audioPath)) {
+      return audioPath;
+    }
+    return `/${String(audioPath).replace(/^\/+/, '')}`;
+  };
+
+  const hasAudioFile = () => !!(audioInput && audioInput.files && audioInput.files.length > 0);
+  const hasAudioBlob = () => !!(audioBlobInput && String(audioBlobInput.value || '').trim() !== '');
+
+  const formatDuration = (seconds) => {
+    const safe = Math.max(0, seconds);
+    const mm = String(Math.floor(safe / 60)).padStart(2, '0');
+    const ss = String(safe % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+  };
+
+  const stopRecordTimer = () => {
+    if (recordTimer) {
+      clearInterval(recordTimer);
+      recordTimer = null;
+    }
+    recordStartAt = null;
+  };
+
+  const resetAudioUi = () => {
+    stopRecordTimer();
+    if (audioTimer) {
+      audioTimer.textContent = '00:00';
+    }
+    audioBadge?.classList.remove('recording');
+    if (audioRecordBtn) {
+      audioRecordBtn.innerHTML = '<i class="bi bi-record-circle me-1"></i> Vocal';
+      audioRecordBtn.classList.remove('btn-danger');
+      audioRecordBtn.classList.add('btn-outline-primary');
+    }
+  };
+
+  const startRecordTimer = () => {
+    stopRecordTimer();
+    recordStartAt = Date.now();
+    audioBadge?.classList.add('recording');
+    recordTimer = setInterval(() => {
+      if (!recordStartAt || !audioTimer) {
+        return;
+      }
+      const elapsed = Math.floor((Date.now() - recordStartAt) / 1000);
+      audioTimer.textContent = formatDuration(elapsed);
+      if (elapsed >= 60 && mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    }, 200);
+  };
+
+  const clearAudioPreview = () => {
+    if (audioPreview) {
+      audioPreview.removeAttribute('src');
+      audioPreview.load();
+    }
+    if (audioBlobInput) {
+      audioBlobInput.value = '';
+    }
+    audioPreviewWrap?.classList.remove('active');
+  };
+
+  const setAudioPreview = (url) => {
+    if (!audioPreview || !audioPreviewWrap || !url) {
+      return;
+    }
+    audioPreview.src = url;
+    audioPreviewWrap.classList.add('active');
+  };
+
+  const setupAudioRecorder = async () => {
+    if (!audioRecordBtn || !audioInput) {
+      return;
+    }
+
+    const hasRecorderSupport = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+    if (!hasRecorderSupport) {
+      audioRecordBtn.disabled = true;
+      if (audioClearBtn) {
+        audioClearBtn.disabled = true;
+      }
+      return;
+    }
+
+    audioRecordBtn.addEventListener('click', async () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+
+        const preferredMimeTypes = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/ogg',
+          'audio/mp4'
+        ];
+        const selectedMimeType = preferredMimeTypes.find((mime) => window.MediaRecorder.isTypeSupported && window.MediaRecorder.isTypeSupported(mime));
+        mediaRecorder = selectedMimeType
+          ? new MediaRecorder(mediaStream, { mimeType: selectedMimeType })
+          : new MediaRecorder(mediaStream);
+
+        mediaRecorder.addEventListener('dataavailable', (event) => {
+          if (event.data && event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        });
+
+        mediaRecorder.addEventListener('stop', () => {
+          const blobType = mediaRecorder && mediaRecorder.mimeType ? mediaRecorder.mimeType : 'audio/webm';
+          const blob = new Blob(audioChunks, { type: blobType });
+          if (blob.size > 0) {
+            const fileExtension = blobType.includes('ogg') ? 'ogg' : (blobType.includes('mp4') ? 'm4a' : 'webm');
+            const file = new File([blob], `voice-${Date.now()}.${fileExtension}`, { type: blobType });
+            if (audioInput) {
+              try {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                audioInput.files = dataTransfer.files;
+              } catch (error) {
+              }
+            }
+
+            if (audioBlobInput) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                audioBlobInput.value = typeof reader.result === 'string' ? reader.result : '';
+              };
+              reader.readAsDataURL(blob);
+            }
+            setAudioPreview(URL.createObjectURL(blob));
+          }
+
+          if (mediaStream) {
+            mediaStream.getTracks().forEach((track) => track.stop());
+            mediaStream = null;
+          }
+
+          resetAudioUi();
+          sttStatus.textContent = 'Message vocal prêt';
+          sttStatus.classList.add('active');
+        });
+
+        mediaRecorder.start();
+        startRecordTimer();
+        audioRecordBtn.innerHTML = '<i class="bi bi-stop-circle me-1"></i> Stop vocal';
+        audioRecordBtn.classList.remove('btn-outline-primary');
+        audioRecordBtn.classList.add('btn-danger');
+        sttStatus.textContent = 'Enregistrement vocal...';
+        sttStatus.classList.add('active');
+      } catch (error) {
+        resetAudioUi();
+        notify('Micro indisponible pour le message vocal.');
+      }
+    });
+
+    audioClearBtn?.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+      if (audioInput) {
+        audioInput.value = '';
+      }
+      clearAudioPreview();
+      resetAudioUi();
+      sttStatus.textContent = 'Reconnaissance vocale prête';
+      sttStatus.classList.remove('active');
+    });
   };
 
   const setupVoice = () => {
@@ -313,13 +590,40 @@
     meta.className = 'ag-meta';
     meta.textContent = `${safeSenderName} • ${payload.createdAt || ''}`;
 
-    const content = document.createElement('div');
-    content.style.whiteSpace = 'pre-line';
-    content.style.color = 'var(--ag-text)';
-    content.textContent = payload.content;
-
     bubble.appendChild(meta);
-    bubble.appendChild(content);
+
+    if (payload.content) {
+      const content = document.createElement('div');
+      content.style.whiteSpace = 'pre-line';
+      content.style.color = 'var(--ag-text)';
+      content.textContent = payload.content;
+      bubble.appendChild(content);
+    }
+
+    if (payload.audioPath) {
+      const audio = document.createElement('audio');
+      audio.className = 'ag-audio';
+      audio.controls = true;
+      audio.preload = 'none';
+      audio.src = normalizeAudioUrl(payload.audioPath);
+      bubble.appendChild(audio);
+    }
+
+    if (mine) {
+      const seen = document.createElement('div');
+      seen.className = 'ag-seen';
+      seen.dataset.seenStatus = '1';
+
+      if (payload.isRead && payload.readAt) {
+        seen.classList.add('is-read');
+        seen.textContent = `Vu ${payload.readAt}`;
+      } else {
+        seen.textContent = 'Envoyé';
+      }
+
+      bubble.appendChild(seen);
+    }
+
     wrapper.appendChild(bubble);
     return wrapper;
   };
@@ -332,7 +636,57 @@
       return;
     }
     list.appendChild(createMessageNode(payload));
+    if (Number(payload.senderId) !== currentUserId) {
+      acknowledgeReadRealtime();
+    }
     scrollToBottom();
+  };
+
+  const markMessagesAsRead = (messageIds, readAt) => {
+    if (!Array.isArray(messageIds) || !messageIds.length) {
+      return;
+    }
+
+    messageIds.forEach((id) => {
+      readAfterId = Math.max(readAfterId, Number(id) || 0);
+      const node = list.querySelector(`[data-message-id="${id}"]`);
+      if (!node) {
+        return;
+      }
+      const seen = node.querySelector('[data-seen-status]');
+      if (!seen) {
+        return;
+      }
+
+      seen.classList.add('is-read');
+      seen.textContent = readAt ? `Vu ${readAt}` : 'Vu';
+    });
+  };
+
+  const acknowledgeReadRealtime = () => {
+    if (readAckInFlight) {
+      return;
+    }
+
+    if (readAckTimer) {
+      clearTimeout(readAckTimer);
+    }
+
+    readAckTimer = setTimeout(async () => {
+      readAckInFlight = true;
+      try {
+        await fetch(ackReadUrl, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          }
+        });
+      } catch (error) {
+      } finally {
+        readAckInFlight = false;
+      }
+    }, 120);
   };
 
   const getLastMessageId = () => {
@@ -349,16 +703,27 @@
     }
     pollingStarted = true;
 
-    pollingTimer = setInterval(async () => {
-      if (document.hidden) {
+    const pollOnce = async () => {
+      if (!pollingStarted) {
         return;
       }
+
+      if (document.hidden || pollingInFlight) {
+        pollingTimer = setTimeout(pollOnce, 3000);
+        return;
+      }
+
+      pollingInFlight = true;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       try {
         const afterId = getLastMessageId();
-        const response = await fetch(`${fallbackUrl}?afterId=${afterId}`, {
+        const response = await fetch(`${fallbackUrl}?afterId=${afterId}&readAfterId=${readAfterId}`, {
           headers: {
             'Accept': 'application/json'
-          }
+          },
+          signal: controller.signal
         });
         if (!response.ok) {
           return;
@@ -368,9 +733,22 @@
           return;
         }
         data.messages.forEach(appendMessage);
+        if (Array.isArray(data.readUpdates) && data.readUpdates.length) {
+          const ids = data.readUpdates.map((item) => Number(item.id || 0)).filter((id) => id > 0);
+          const lastReadAt = data.readUpdates[data.readUpdates.length - 1]?.readAt || null;
+          markMessagesAsRead(ids, lastReadAt);
+        }
       } catch (error) {
+      } finally {
+        clearTimeout(timeoutId);
+        pollingInFlight = false;
+        if (pollingStarted) {
+          pollingTimer = setTimeout(pollOnce, 3000);
+        }
       }
-    }, 8000);
+    };
+
+    pollingTimer = setTimeout(pollOnce, 0);
   };
 
   form.addEventListener('submit', async (event) => {
@@ -378,7 +756,7 @@
     const submitBtn = form.querySelector('button[type="submit"]');
     const textarea = form.querySelector('textarea');
 
-    if (textarea && !textarea.value.trim()) {
+    if (textarea && !textarea.value.trim() && !hasAudioFile() && !hasAudioBlob()) {
       textarea.focus();
       return;
     }
@@ -422,6 +800,13 @@
         textarea.value = '';
         textarea.focus();
       }
+      if (audioInput) {
+        audioInput.value = '';
+      }
+      clearAudioPreview();
+      resetAudioUi();
+      sttStatus.textContent = 'Reconnaissance vocale prête';
+      sttStatus.classList.remove('active');
     } catch (error) {
       form.submit();
     } finally {
@@ -435,15 +820,15 @@
   const eventSource = new EventSource(streamUrl, { withCredentials: true });
 
   eventSource.onopen = () => {
-    if (pollingTimer) {
-      clearInterval(pollingTimer);
-      pollingTimer = null;
-    }
   };
 
   eventSource.onmessage = (event) => {
     try {
       const payload = JSON.parse(event.data);
+      if (payload && payload.type === 'read') {
+        markMessagesAsRead(payload.messageIds, payload.readAt);
+        return;
+      }
       appendMessage(payload);
     } catch (error) {
     }
@@ -453,7 +838,29 @@
     startPolling();
   };
 
+  window.addEventListener('beforeunload', () => {
+    pollingStarted = false;
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
+      pollingTimer = null;
+    }
+    eventSource.close();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      acknowledgeReadRealtime();
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    acknowledgeReadRealtime();
+  });
+
+  startPolling();
+  setupAudioRecorder();
   setupVoice();
+  acknowledgeReadRealtime();
   scrollToBottom();
 })();
 </script>

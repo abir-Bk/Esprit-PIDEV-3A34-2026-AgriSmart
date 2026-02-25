@@ -13,6 +13,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
@@ -27,26 +28,39 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     }
 
     public function authenticate(Request $request): Passport
-    {$recaptcha = $request->request->get('g-recaptcha-response');
+    {
+        $recaptcha = $request->request->get('g-recaptcha-response');
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create();
-
-        $response = $client->request('POST',
-            'https://www.google.com/recaptcha/api/siteverify',
-            [
-                'body' => [
-                    'secret' => $_ENV['RECAPTCHA_SECRET_KEY'],
-                    'response' => $recaptcha
-                ]
-            ]
-        );
-
-        $result = $response->toArray();
-
-        if (!$result['success']) {
-            throw new \Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException('Captcha failed');
+        if (!is_string($recaptcha) || trim($recaptcha) === '') {
+            throw new CustomUserMessageAuthenticationException('Captcha manquant.');
         }
-       $email = $request->request->get('_username');
+
+        $client = \Symfony\Component\HttpClient\HttpClient::create([
+            'timeout' => 8,
+            'max_duration' => 12,
+        ]);
+
+        try {
+            $response = $client->request(
+                'POST',
+                'https://www.google.com/recaptcha/api/siteverify',
+                [
+                    'body' => [
+                        'secret' => $_ENV['RECAPTCHA_SECRET_KEY'],
+                        'response' => $recaptcha,
+                    ],
+                ]
+            );
+
+            $result = $response->toArray(false);
+        } catch (\Throwable) {
+            throw new CustomUserMessageAuthenticationException('Service captcha indisponible. Réessayez.');
+        }
+
+        if (($result['success'] ?? false) !== true) {
+            throw new CustomUserMessageAuthenticationException('Captcha failed');
+        }
+        $email = $request->request->get('_username');
         $password = $request->request->get('_password');
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
@@ -59,24 +73,24 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
                 new RememberMeBadge(),
             ]
         );
-            }
+    }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
-{
-    if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
-        return new RedirectResponse($targetPath);
+    {
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+            return new RedirectResponse($targetPath);
+        }
+
+        $user = $token->getUser();
+
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('user_dashboard'));
+        }
+
+        return new RedirectResponse($this->urlGenerator->generate('app_produit_index'));
     }
-
-    $user = $token->getUser();
-
-    if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-        return new RedirectResponse($this->urlGenerator->generate('user_dashboard'));
-    }
-
-    return new RedirectResponse($this->urlGenerator->generate('app_produit_index'));
-}
     protected function getLoginUrl(Request $request): string
     {
-    return $this->urlGenerator->generate('app_login');
+        return $this->urlGenerator->generate('app_login');
     }
 }

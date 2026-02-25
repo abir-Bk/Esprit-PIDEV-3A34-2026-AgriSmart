@@ -55,21 +55,46 @@ class MarketplaceMessageRepository extends ServiceEntityRepository
         return $result;
     }
 
-    public function markConversationAsReadForUser(MarketplaceConversation $conversation, User $user): void
+    /**
+     * @return array{messageIds:int[],readAt:\DateTimeImmutable|null}
+     */
+    public function markConversationAsReadForUser(MarketplaceConversation $conversation, User $user): array
     {
+        $rows = $this->createQueryBuilder('m')
+            ->select('m.id AS id')
+            ->andWhere('m.conversation = :conversation')
+            ->andWhere('m.sender != :user')
+            ->andWhere('m.isRead = false')
+            ->setParameter('conversation', $conversation)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getArrayResult();
+
+        $messageIds = array_map(static fn(array $row): int => (int) $row['id'], $rows);
+        if ($messageIds === []) {
+            return [
+                'messageIds' => [],
+                'readAt' => null,
+            ];
+        }
+
+        $readAt = new \DateTimeImmutable();
+
         $this->createQueryBuilder('m')
             ->update()
             ->set('m.isRead', ':read')
             ->set('m.readAt', ':readAt')
-            ->andWhere('m.conversation = :conversation')
-            ->andWhere('m.sender != :user')
-            ->andWhere('m.isRead = false')
+            ->andWhere('m.id IN (:messageIds)')
             ->setParameter('read', true)
-            ->setParameter('readAt', new \DateTimeImmutable())
-            ->setParameter('conversation', $conversation)
-            ->setParameter('user', $user)
+            ->setParameter('readAt', $readAt)
+            ->setParameter('messageIds', $messageIds)
             ->getQuery()
             ->execute();
+
+        return [
+            'messageIds' => $messageIds,
+            'readAt' => $readAt,
+        ];
     }
 
     /**
@@ -81,6 +106,25 @@ class MarketplaceMessageRepository extends ServiceEntityRepository
             ->andWhere('m.conversation = :conversation')
             ->andWhere('m.id > :afterId')
             ->setParameter('conversation', $conversation)
+            ->setParameter('afterId', $afterId)
+            ->orderBy('m.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return MarketplaceMessage[]
+     */
+    public function findReadUpdatesForSender(MarketplaceConversation $conversation, User $sender, int $afterId): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.conversation = :conversation')
+            ->andWhere('m.sender = :sender')
+            ->andWhere('m.isRead = true')
+            ->andWhere('m.readAt IS NOT NULL')
+            ->andWhere('m.id > :afterId')
+            ->setParameter('conversation', $conversation)
+            ->setParameter('sender', $sender)
             ->setParameter('afterId', $afterId)
             ->orderBy('m.id', 'ASC')
             ->getQuery()

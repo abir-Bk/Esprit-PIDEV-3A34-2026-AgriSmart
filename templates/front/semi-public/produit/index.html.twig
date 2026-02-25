@@ -396,48 +396,6 @@
 
         {# PRODUCTS GRID #}
         <div class="col-lg-9">
-          {% if app.user %}
-            <div class="mb-4 p-3 p-md-4 bg-white rounded-4 border shadow-sm">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="h5 mb-0" style="color:var(--ag-text);">
-                  <i class="bi bi-stars me-2" style="color:var(--ag-accent);"></i>Recommandé pour vous (ML Python)
-                </h3>
-                <span class="small text-muted">Local · sans API externe</span>
-              </div>
-
-              {% if recommendedProducts|default([]) is not empty %}
-                <div class="row g-3">
-                  {% for rec in recommendedProducts %}
-                    <div class="col-md-4">
-                      <div class="border rounded-4 h-100 overflow-hidden">
-                        <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="text-decoration-none d-block">
-                          <img
-                            src="{{ asset(rec.image ?: 'assets/images/placeholder-product.png') }}"
-                            alt="{{ rec.nom }}"
-                            style="width:100%; height:140px; object-fit:cover;"
-                            loading="lazy"
-                          >
-                        </a>
-                        <div class="p-3">
-                          <div class="small text-uppercase fw-semibold" style="color:var(--ag-muted);">{{ rec.categorie }}</div>
-                          <div class="fw-bold mb-1" style="color:var(--ag-text);">{{ rec.nom }}</div>
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div class="fw-bold" style="color:var(--ag-primary);">{{ rec.getPrixEffectif() }} TND</div>
-                            <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Voir</a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              {% else %}
-                <div class="text-muted small border rounded-4 p-3" style="background:#f9fafb;">
-                  Pas assez d’historique pour le modèle. Ajoutez des produits au panier/wishlist ou effectuez des commandes.
-                </div>
-              {% endif %}
-            </div>
-          {% endif %}
-
           {# Résultats + pagination info #}
           {% if produits is defined and produits.getTotalItemCount() > 0 %}
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -742,6 +700,30 @@
     box-shadow: 0 1px 4px rgba(0,0,0,.05);
   }
   .ag-msg.typing { color: #6B7280; font-style: italic; }
+  .ag-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .ag-typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: .22rem;
+  }
+  .ag-typing-dots span {
+    width: .38rem;
+    height: .38rem;
+    border-radius: 999px;
+    background: #6B7280;
+    opacity: .35;
+    animation: agTypingPulse 1s infinite ease-in-out;
+  }
+  .ag-typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .ag-typing-dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes agTypingPulse {
+    0%, 80%, 100% { transform: translateY(0); opacity: .35; }
+    40% { transform: translateY(-2px); opacity: 1; }
+  }
 
   /* Input area */
   #ag-chat-form {
@@ -866,10 +848,24 @@
   });
 
   /* ---- Add message bubble ---- */
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderMessageHtml(text) {
+    const escaped = escapeHtml(text).replace(/\n/g, '<br>');
+    return escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
+
   function addMessage(role, text, isTyping = false) {
     const div = document.createElement('div');
     div.className = 'ag-msg ' + role + (isTyping ? ' typing' : '');
-    div.innerHTML = text.replace(/\n/g, '<br>');
+    div.innerHTML = renderMessageHtml(text);
     messages.appendChild(div);
     scrollBottom();
     return div;
@@ -877,6 +873,15 @@
 
   function scrollBottom() {
     messages.scrollTop = messages.scrollHeight;
+  }
+
+  function addTypingIndicator() {
+    const div = document.createElement('div');
+    div.className = 'ag-msg bot typing';
+    div.innerHTML = '<span class="ag-typing"><span>Assistant écrit</span><span class="ag-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span></span>';
+    messages.appendChild(div);
+    scrollBottom();
+    return div;
   }
 
   /* ---- Submit ---- */
@@ -895,7 +900,7 @@
     history.push({ role: 'user', content: text });
 
     // Typing indicator
-    const typingEl = addMessage('bot', '…', true);
+    const typingEl = addTypingIndicator();
 
     try {
       const resp = await fetch('{{ path('app_chatbot_message') }}', {
@@ -907,21 +912,31 @@
       const contentType = resp.headers.get('Content-Type') || '';
       const raw = await resp.text();
       let data = null;
-      if (contentType.includes('application/json')) {
-        try {
-          data = raw ? JSON.parse(raw) : null;
-        } catch (_) {
-          data = null;
-        }
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        data = null;
       }
       typingEl.remove();
 
       if (data && data.error) {
-        addMessage('bot', '⚠️ ' + data.error);
+        let message = '⚠️ ' + data.error;
+        if (data.provider || data.kind) {
+          const meta = [data.provider, data.kind].filter(Boolean).join(' / ');
+          message += ' (' + meta + ')';
+        }
+        addMessage('bot', message);
       } else if (data && data.reply) {
         addMessage('bot', data.reply);
         history.push({ role: 'assistant', content: data.reply });
         if (history.length > 20) history = history.slice(-20);
+      } else if (!resp.ok) {
+        const textFallback = raw
+          ? raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180)
+          : '';
+        const contentHint = contentType ? ' [' + contentType + ']' : '';
+        const suffix = textFallback ? ' — ' + textFallback : '';
+        addMessage('bot', '⚠️ Erreur serveur (#' + resp.status + ')' + contentHint + suffix + '.');
       } else {
         addMessage('bot', '⚠️ Réponse inattendue du serveur (#' + resp.status + ').');
       }

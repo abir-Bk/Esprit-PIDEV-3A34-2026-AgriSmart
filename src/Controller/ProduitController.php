@@ -3,15 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Produit;
+use App\Entity\LocationReservation;
 use App\Form\ProduitType;
+use App\Repository\LocationReservationRepository;
 use App\Repository\MarketplaceMessageRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\UserRepository;
 use App\Repository\WishlistItemRepository;
-use App\Service\GeminiService;
+use App\Service\HuggingFaceService;
 use App\Service\MarketplaceRecommendationService;
 use App\Service\PanierService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\LockMode;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -31,6 +34,9 @@ final class ProduitController extends AbstractController
     public function __construct(
         private readonly PanierService $panierService,
         private readonly MarketplaceRecommendationService $recommendationService,
+        private readonly ProduitRepository $produitRepository,
+        private readonly LocationReservationRepository $locationReservationRepository,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -111,7 +117,6 @@ final class ProduitController extends AbstractController
 
         $wishlistProductIds = [];
         $wishlistCount = 0;
-        $recommendedProducts = [];
         if ($currentUser instanceof \App\Entity\User) {
             $wishlistCount = $wishlistRepository->count(['user' => $currentUser]);
             $productIds = [];
@@ -122,14 +127,6 @@ final class ProduitController extends AbstractController
             }
 
             $wishlistProductIds = $wishlistRepository->getWishlistedProductIds($currentUser, $productIds);
-            $recommendedProducts = $this->recommendationService->recommendForUser($currentUser, [
-                'q' => $q,
-                'type' => $type,
-                'categorie' => $categorie,
-                'promo' => $promo,
-                'sort' => $sort,
-                'page' => $page,
-            ]);
         }
 
         return $this->render('front/semi-public/produit/index.html.twig', [
@@ -146,7 +143,6 @@ final class ProduitController extends AbstractController
             'messagerieUnreadCount' => $messagerieUnreadCount,
             'wishlistProductIds' => $wishlistProductIds,
             'wishlistCount' => $wishlistCount,
-            'recommendedProducts' => $recommendedProducts,
         ]);
     }
 
@@ -165,8 +161,23 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+    #[Route('/mes-reservations', name: 'app_produit_mes_reservations', methods: ['GET'])]
+    public function mesReservations(UserRepository $userRepo): Response
+    {
+        $user = $this->getCurrentUserOrDev($userRepo);
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Connexion requise.');
+        }
+
+        $reservations = $this->locationReservationRepository->findForVendeur($user);
+
+        return $this->render('front/semi-public/produit/mes_reservations.html.twig', [
+            'reservations' => $reservations,
+        ]);
+    }
+
     #[Route('/suggest-description', name: 'app_produit_suggest_description', methods: ['POST'])]
-    public function suggestDescription(Request $request, GeminiService $gemini): JsonResponse
+    public function suggestDescription(Request $request, HuggingFaceService $huggingFace): JsonResponse
     {
         $nom = trim((string) $request->request->get('nom', ''));
         $categorie = trim((string) $request->request->get('categorie', ''));
@@ -176,7 +187,7 @@ final class ProduitController extends AbstractController
         }
 
         try {
-            $suggestion = $gemini->suggestDescription($nom, $categorie);
+            $suggestion = $huggingFace->suggestDescription($nom, $categorie);
             return $this->json(['description' => $suggestion]);
         } catch (\Throwable $e) {
             return $this->json(['error' => 'Erreur lors de la génération : ' . $e->getMessage()], 500);
@@ -231,19 +242,57 @@ final class ProduitController extends AbstractController
     #[Route('/{id}', name: 'app_produit_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
     public function show(Produit $produit, RequestStack $requestStack, MarketplaceMessageRepository $messageRepository): Response
     {
-        $session = $requestStack->getSession();
-        $allReservations = $session?->get('produit_reservations', []);
-        $reservationRanges = $allReservations[$produit->getId()] ?? [];
+        $reservationRanges = $this->locationReservationRepository->findReservedRangesForProduit($produit);
 
         $currentUser = $this->getUser();
         $messagerieUnreadCount = $currentUser instanceof \App\Entity\User
             ? $messageRepository->countUnreadForUser($currentUser)
             : 0;
 
+        $recommendedProducts = [];
+        if ($currentUser instanceof \App\Entity\User) {
+            $recommendedProducts = $this->recommendationService->recommendForUser($currentUser, [
+                'q' => (string) $produit->getNom(),
+                'type' => (string) ($produit->getType() ?? ''),
+                'categorie' => (string) ($produit->getCategorie() ?? ''),
+                'promo' => '',
+                'sort' => 'recent',
+                'page' => 1,
+            ], 6);
+
+            $recommendedProducts = array_values(array_filter(
+                $recommendedProducts,
+                static fn(Produit $p): bool => $p->getId() !== $produit->getId()
+            ));
+        }
+
+        if ($recommendedProducts === []) {
+            $fallback = $this->produitRepository->createQueryBuilder('p')
+                ->andWhere('p.banned = false')
+                ->andWhere('p.id != :currentId')
+                ->setParameter('currentId', $produit->getId())
+                ->setMaxResults(6)
+                ->orderBy('p.createdAt', 'DESC');
+
+            if ($produit->getCategorie()) {
+                $fallback->andWhere('p.categorie = :categorie')
+                    ->setParameter('categorie', $produit->getCategorie());
+            }
+
+            if ($produit->getType()) {
+                $fallback->andWhere('p.type = :type')
+                    ->setParameter('type', $produit->getType());
+            }
+
+            /** @var Produit[] $recommendedProducts */
+            $recommendedProducts = $fallback->getQuery()->getResult();
+        }
+
         return $this->render('front/semi-public/produit/show.html.twig', [
             'produit' => $produit,
             'reservationRanges' => $reservationRanges,
             'messagerieUnreadCount' => $messagerieUnreadCount,
+            'recommendedProducts' => array_slice($recommendedProducts, 0, 3),
         ]);
     }
 
@@ -295,33 +344,46 @@ final class ProduitController extends AbstractController
             return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
         }
 
-        $session = $requestStack->getSession();
-        $allReservations = $session?->get('produit_reservations', []);
-        $productReservations = $allReservations[$produit->getId()] ?? [];
+        if (!$user instanceof \App\Entity\User) {
+            $this->addFlash('danger', 'Connexion requise pour réserver.');
+            return $this->redirectToRoute('app_login');
+        }
 
-        foreach ($productReservations as $reservation) {
-            $rStart = \DateTimeImmutable::createFromFormat('Y-m-d', (string) ($reservation['start'] ?? '')) ?: null;
-            $rEnd = \DateTimeImmutable::createFromFormat('Y-m-d', (string) ($reservation['end'] ?? '')) ?: null;
+        try {
+            $this->entityManager->beginTransaction();
+            $this->entityManager->lock($produit, LockMode::PESSIMISTIC_WRITE);
 
-            if (!$rStart || !$rEnd) {
-                continue;
-            }
-
-            $hasOverlap = $start <= $rEnd && $end >= $rStart;
-            if ($hasOverlap) {
+            if ($this->locationReservationRepository->hasOverlap($produit, $start, $end)) {
+                $this->entityManager->rollback();
                 $this->addFlash('danger', 'Ce créneau est déjà réservé. Merci de choisir d’autres dates.');
                 return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
             }
+
+            $days = ((int) $start->diff($end)->days) + 1;
+            $unitPrice = $produit->getPrixEffectif() ?? 0;
+            $total = $days * $unitPrice;
+
+            $reservation = (new LocationReservation())
+                ->setProduit($produit)
+                ->setLocataire($user)
+                ->setStartDate($start)
+                ->setEndDate($end)
+                ->setDays($days)
+                ->setUnitPrice((float) $unitPrice)
+                ->setTotalPrice((float) $total)
+                ->setStatus(LocationReservation::STATUS_ACTIVE);
+
+            $this->entityManager->persist($reservation);
+            $this->entityManager->flush();
+            $this->entityManager->commit();
+        } catch (\Throwable $exception) {
+            if ($this->entityManager->getConnection()->isTransactionActive()) {
+                $this->entityManager->rollback();
+            }
+
+            $this->addFlash('danger', 'Une erreur est survenue pendant la réservation. Réessayez.');
+            return $this->redirectToRoute('app_produit_show', ['id' => $produit->getId()]);
         }
-
-        $productReservations[] = [
-            'start' => $start->format('Y-m-d'),
-            'end' => $end->format('Y-m-d'),
-            'created_at' => (new \DateTimeImmutable())->format(DATE_ATOM),
-        ];
-
-        $allReservations[$produit->getId()] = $productReservations;
-        $session?->set('produit_reservations', $allReservations);
 
         $days = ((int) $start->diff($end)->days) + 1;
         $unitPrice = $produit->getPrixEffectif() ?? 0;

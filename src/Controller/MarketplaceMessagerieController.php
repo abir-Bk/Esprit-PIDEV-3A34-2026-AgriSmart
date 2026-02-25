@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Attribute\Route;
@@ -109,13 +110,141 @@ final class MarketplaceMessagerieController extends AbstractController
             throw $this->createNotFoundException('Conversation introuvable.');
         }
 
-        $messageRepository->markConversationAsReadForUser($conversation, $user);
+        $readReceipt = $messageRepository->markConversationAsReadForUser($conversation, $user);
+        $this->publishReadReceipt($hub, $conversation, $user, $readReceipt);
 
         $message = new MarketplaceMessage();
         $form = $this->createForm(MarketplaceMessageType::class, $message);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $textContent = trim((string) ($message->getContent() ?? ''));
+            $message->setContent($textContent !== '' ? $textContent : null);
+
+            $audioFile = $form->has('audioFile') ? $form->get('audioFile')->getData() : null;
+            $audioBlob = $form->has('audioBlob') ? trim((string) $form->get('audioBlob')->getData()) : '';
+
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/marketplace/messages/audio';
+            if (!is_dir($uploadDir)) {
+                @mkdir($uploadDir, 0775, true);
+            }
+
+            if ($audioFile instanceof UploadedFile) {
+                $mimeType = strtolower((string) $audioFile->getMimeType());
+                $allowedMimeTypes = [
+                    'audio/webm',
+                    'audio/ogg',
+                    'audio/mpeg',
+                    'audio/mp3',
+                    'audio/mp4',
+                    'audio/x-m4a',
+                    'audio/wav',
+                    'audio/x-wav',
+                    'audio/aac',
+                    'video/webm',
+                    'video/mp4',
+                    'application/octet-stream',
+                ];
+
+                if (!in_array($mimeType, $allowedMimeTypes, true)) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => 'Format du message vocal non supporté.',
+                    ], 422);
+                }
+
+                if ($audioFile->getSize() !== null && $audioFile->getSize() > 8 * 1024 * 1024) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => 'Message vocal trop volumineux (max 8MB).',
+                    ], 422);
+                }
+
+                $extension = $audioFile->guessExtension() ?: 'webm';
+                if ($extension === 'bin' || $extension === '') {
+                    $map = [
+                        'audio/webm' => 'webm',
+                        'video/webm' => 'webm',
+                        'audio/ogg' => 'ogg',
+                        'audio/mpeg' => 'mp3',
+                        'audio/mp3' => 'mp3',
+                        'audio/mp4' => 'm4a',
+                        'video/mp4' => 'm4a',
+                        'audio/x-m4a' => 'm4a',
+                        'audio/wav' => 'wav',
+                        'audio/x-wav' => 'wav',
+                        'audio/aac' => 'aac',
+                        'application/octet-stream' => 'webm',
+                    ];
+                    $extension = $map[$mimeType] ?? 'webm';
+                }
+                $filename = 'voice-' . bin2hex(random_bytes(12)) . '.' . $extension;
+                $audioFile->move($uploadDir, $filename);
+                $message->setAudioPath('uploads/marketplace/messages/audio/' . $filename);
+            } elseif ($audioBlob !== '') {
+                if (!preg_match('/^data:(audio\/[a-zA-Z0-9.+-]+);base64,(.+)$/', $audioBlob, $matches)) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => 'Format du message vocal invalide.',
+                    ], 422);
+                }
+
+                $mimeType = strtolower((string) $matches[1]);
+                $base64Data = (string) $matches[2];
+                $binary = base64_decode($base64Data, true);
+
+                if ($binary === false || strlen($binary) === 0) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => 'Message vocal vide ou corrompu.',
+                    ], 422);
+                }
+
+                if (strlen($binary) > 8 * 1024 * 1024) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => 'Message vocal trop volumineux (max 8MB).',
+                    ], 422);
+                }
+
+                $extensions = [
+                    'audio/webm' => 'webm',
+                    'audio/ogg' => 'ogg',
+                    'audio/mpeg' => 'mp3',
+                    'audio/mp3' => 'mp3',
+                    'audio/mp4' => 'm4a',
+                    'audio/x-m4a' => 'm4a',
+                    'audio/wav' => 'wav',
+                    'audio/x-wav' => 'wav',
+                    'audio/aac' => 'aac',
+                ];
+
+                if (!isset($extensions[$mimeType])) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => 'Type audio non supporté.',
+                    ], 422);
+                }
+
+                $filename = 'voice-' . bin2hex(random_bytes(12)) . '.' . $extensions[$mimeType];
+                $target = $uploadDir . '/' . $filename;
+                file_put_contents($target, $binary);
+                $message->setAudioPath('uploads/marketplace/messages/audio/' . $filename);
+            }
+
+            if ($message->getContent() === null && $message->getAudioPath() === null) {
+                $error = 'Ajoutez un texte ou un message vocal.';
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'ok' => false,
+                        'error' => $error,
+                    ], 422);
+                }
+
+                $this->addFlash('warning', $error);
+                return $this->redirectToRoute('app_marketplace_messagerie_show', ['id' => $conversation->getId()]);
+            }
+
             $message
                 ->setConversation($conversation)
                 ->setSender($user)
@@ -137,7 +266,10 @@ final class MarketplaceMessagerieController extends AbstractController
                 'conversationId' => $conversation->getId(),
                 'senderId' => $user->getId(),
                 'senderName' => $senderName,
-                'content' => (string) $message->getContent(),
+                'content' => $message->getContent(),
+                'audioPath' => $message->getAudioPath(),
+                'isRead' => $message->isRead(),
+                'readAt' => $message->getReadAt()?->format('d/m/Y H:i'),
                 'createdAt' => $message->getCreatedAt()?->format('d/m/Y H:i'),
                 'live' => true,
             ];
@@ -157,9 +289,16 @@ final class MarketplaceMessagerieController extends AbstractController
         }
 
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+
             return new JsonResponse([
                 'ok' => false,
-                'error' => 'Message invalide. Vérifiez le contenu et réessayez.',
+                'error' => $errors !== []
+                    ? implode(' ', array_unique($errors))
+                    : 'Message invalide. Vérifiez le contenu et réessayez.',
             ], 422);
         }
 
@@ -184,13 +323,22 @@ final class MarketplaceMessagerieController extends AbstractController
             return new JsonResponse(['ok' => false, 'error' => 'Connexion requise.'], 401);
         }
 
+        if ($request->hasSession()) {
+            $session = $request->getSession();
+            if ($session->isStarted()) {
+                $session->save();
+            }
+        }
+
         $conversation = $conversationRepository->findUserConversationById($user, $id);
         if (!$conversation) {
             return new JsonResponse(['ok' => false, 'error' => 'Conversation introuvable.'], 404);
         }
 
         $afterId = max(0, (int) $request->query->get('afterId', 0));
+        $readAfterId = max(0, (int) $request->query->get('readAfterId', 0));
         $messages = $messageRepository->findAfterIdForConversation($conversation, $afterId);
+        $readUpdates = $messageRepository->findReadUpdatesForSender($conversation, $user, $readAfterId);
 
         $payload = array_map(static function (MarketplaceMessage $message): array {
             $sender = $message->getSender();
@@ -203,14 +351,78 @@ final class MarketplaceMessagerieController extends AbstractController
                 'id' => $message->getId(),
                 'senderId' => $sender?->getId(),
                 'senderName' => $senderName,
-                'content' => (string) $message->getContent(),
+                'content' => $message->getContent(),
+                'audioPath' => $message->getAudioPath(),
+                'isRead' => $message->isRead(),
+                'readAt' => $message->getReadAt()?->format('d/m/Y H:i'),
                 'createdAt' => $message->getCreatedAt()?->format('d/m/Y H:i'),
             ];
         }, $messages);
 
+        $readPayload = array_map(static function (MarketplaceMessage $message): array {
+            return [
+                'id' => $message->getId(),
+                'readAt' => $message->getReadAt()?->format('d/m/Y H:i'),
+            ];
+        }, $readUpdates);
+
         return new JsonResponse([
             'ok' => true,
             'messages' => $payload,
+            'readUpdates' => $readPayload,
         ]);
+    }
+
+    #[Route('/{id}/ack-read', name: 'app_marketplace_messagerie_ack_read', methods: ['POST'], requirements: ['id' => '\\d+'])]
+    public function acknowledgeRead(
+        int $id,
+        MarketplaceConversationRepository $conversationRepository,
+        MarketplaceMessageRepository $messageRepository,
+        HubInterface $hub,
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(['ok' => false, 'error' => 'Connexion requise.'], 401);
+        }
+
+        $conversation = $conversationRepository->findUserConversationById($user, $id);
+        if (!$conversation) {
+            return new JsonResponse(['ok' => false, 'error' => 'Conversation introuvable.'], 404);
+        }
+
+        $readReceipt = $messageRepository->markConversationAsReadForUser($conversation, $user);
+        $this->publishReadReceipt($hub, $conversation, $user, $readReceipt);
+
+        return new JsonResponse([
+            'ok' => true,
+            'readCount' => count($readReceipt['messageIds'] ?? []),
+            'readAt' => $readReceipt['readAt'] instanceof \DateTimeImmutable
+                ? $readReceipt['readAt']->format('d/m/Y H:i')
+                : null,
+        ]);
+    }
+
+    /**
+     * @param array{messageIds:int[],readAt:\DateTimeImmutable|null} $readReceipt
+     */
+    private function publishReadReceipt(HubInterface $hub, MarketplaceConversation $conversation, User $reader, array $readReceipt): void
+    {
+        if (empty($readReceipt['messageIds']) || !$readReceipt['readAt'] instanceof \DateTimeImmutable) {
+            return;
+        }
+
+        $topic = sprintf('/marketplace/messagerie/%d', $conversation->getId());
+        $readPayload = [
+            'type' => 'read',
+            'conversationId' => $conversation->getId(),
+            'readerId' => $reader->getId(),
+            'messageIds' => $readReceipt['messageIds'],
+            'readAt' => $readReceipt['readAt']->format('d/m/Y H:i'),
+        ];
+
+        try {
+            $hub->publish(new Update($topic, json_encode($readPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
+        } catch (\Throwable) {
+        }
     }
 }

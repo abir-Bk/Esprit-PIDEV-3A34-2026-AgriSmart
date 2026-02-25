@@ -4,25 +4,27 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    uploads_directory: '%kernel.project_dir%/public/uploads'
-    openai_api_key: '%env(OPENAI_API_KEY)%'
-    google_calendar_api_key: '%env(GOOGLE_CALENDAR_API_KEY)%'
-    google_project_calendar_id: '%env(GOOGLE_PROJECT_CALENDAR_ID)%'
+  uploads_directory: "%kernel.project_dir%/public/uploads"
+  openai_api_key: "%env(OPENAI_API_KEY)%"
+  google_calendar_api_key: "%env(GOOGLE_CALENDAR_API_KEY)%"
+  google_project_calendar_id: "%env(GOOGLE_PROJECT_CALENDAR_ID)%"
+  huggingface_api_key: "%env(HUGGINGFACE_API_KEY)%"
+  huggingface_model: "%env(HUGGINGFACE_MODEL)%"
 
 services:
-    # default configuration for services in *this* file
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
-    App\:
-        resource: '../src/'
-        exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
-            - '../src/Kernel.php'
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: "../src/"
+    exclude:
+      - "../src/DependencyInjection/"
+      - "../src/Entity/"
+      - "../src/Kernel.php"
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+  # add more service definitions when explicit configuration is needed
+  # please note that last definitions always *replace* previous ones

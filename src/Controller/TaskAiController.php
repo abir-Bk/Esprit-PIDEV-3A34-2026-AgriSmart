@@ -12,124 +12,59 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class TaskAiController extends AbstractController
 {
     #[Route('/summarize', name: 'task_ai_summarize', methods: ['POST'])]
-    public function summarize(Request $request, HttpClientInterface $httpClient): JsonResponse
+    public function summarize(Request $request, \App\Service\HuggingFaceService $hfService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $text = $data['text'] ?? '';
-
-        // On récupère la clé via les paramètres du conteneur (plus fiable)
-        $apiKey = $this->getParameter('openai_api_key');
-
-        if (!$apiKey || $apiKey === 'TODO') {
-            return new JsonResponse(['error' => 'Clé API OpenAI non configurée dans le fichier .env.local'], 500);
-        }
 
         if (strlen($text) < 10) {
             return new JsonResponse(['error' => 'Le texte est trop court pour être résumé.'], 400);
         }
 
-        try {
-            $response = $httpClient->request('POST', 'https://api.openai.com/v1/chat/completions', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-3.5-turbo',
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Tu es un assistant agricole. Résume le texte suivant en une seule phrase courte et claire (max 150 car.).'
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $text
-                        ]
-                    ],
-                    'temperature' => 0.7,
-                ],
-                // Optionnel : Désactiver la vérification SSL si on est sur un environnement local capricieux
-                'verify_peer' => false,
-            ]);
+        $summary = $hfService->summarizeText($text);
 
-            $statusCode = $response->getStatusCode();
-            if ($statusCode === 429) {
-                // Quota dépassé : on renvoie un mock pour ne pas bloquer l'utilisateur
-                $mockSummary = "[Simulation] " . (explode('.', $text)[0] ?? $text) . ".";
-                return new JsonResponse(['summary' => trim($mockSummary), 'warning' => 'Quota API dépassé, mode simulation activé.']);
-            }
-
-            if ($statusCode !== 200) {
-                $content = $response->toArray(false);
-                $errorMsg = $content['error']['message'] ?? 'Erreur inconnue de l\'API OpenAI';
-                return new JsonResponse(['error' => 'Erreur API OpenAI (' . $statusCode . ') : ' . $errorMsg], $statusCode);
-            }
-
-            $result = $response->toArray();
-            $summary = $result['choices'][0]['message']['content'] ?? 'Résumé non disponible.';
-
-            return new JsonResponse(['summary' => trim($summary)]);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Erreur technique : ' . $e->getMessage()], 500);
-        }
+        return new JsonResponse(['summary' => $summary]);
     }
 
     #[Route('/translate', name: 'task_ai_translate', methods: ['POST'])]
-    public function translate(Request $request, HttpClientInterface $httpClient): JsonResponse
+    public function translate(Request $request, \App\Service\HuggingFaceService $hfService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $text = $data['text'] ?? '';
         $targetLanguage = $data['target'] ?? 'en';
 
-        $apiKey = $this->getParameter('openai_api_key');
-
-        if (!$apiKey || $apiKey === 'TODO') {
-            return new JsonResponse(['error' => 'Clé API OpenAI non configurée.'], 500);
-        }
-
         if (strlen($text) < 2) {
             return new JsonResponse(['error' => 'Le texte est trop court pour être traduit.'], 400);
         }
 
-        try {
-            $response = $httpClient->request('POST', 'https://api.openai.com/v1/chat/completions', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-3.5-turbo',
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => "Tu es un traducteur professionnel. Traduis le texte suivant en $targetLanguage. Ne renvoie QUE la traduction."
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $text
-                        ]
-                    ],
-                    'temperature' => 0.3,
-                ],
-                'verify_peer' => false,
-            ]);
+        $translation = $hfService->translateText($text, $targetLanguage);
 
-            $statusCode = $response->getStatusCode();
-            if ($statusCode === 429) {
-                $mockTranslation = "[Simulation-$targetLanguage] " . $text;
-                return new JsonResponse(['translation' => $mockTranslation, 'warning' => 'Quota API dépassé, mode simulation activé.']);
-            }
+        return new JsonResponse(['translation' => $translation]);
+    }
 
-            if ($statusCode !== 200) {
-                return new JsonResponse(['error' => 'Erreur API OpenAI (' . $statusCode . ')'], $statusCode);
-            }
+    #[Route('/recommend', name: 'task_ai_recommend', methods: ['POST'])]
+    public function recommend(Request $request, \App\Service\HuggingFaceService $hfService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $title = $data['title'] ?? '';
+        $type = $data['type'] ?? '';
 
-            $result = $response->toArray();
-            $translation = $result['choices'][0]['message']['content'] ?? 'Traduction non disponible.';
-
-            return new JsonResponse(['translation' => trim($translation)]);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Erreur technique : ' . $e->getMessage()], 500);
+        if (empty($title)) {
+            return new JsonResponse(['error' => 'Le titre est requis pour générer une recommandation.'], 400);
         }
+
+        $recommendation = $hfService->recommendDescription($title, $type);
+        return new JsonResponse(['recommendation' => $recommendation]);
+    }
+    #[Route('/analyze-priority', name: 'task_ai_analyze_priority', methods: ['POST'])]
+    public function analyzePriority(Request $request, \App\Service\LocalAiAnalyzer $analyzer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $title = $data['title'] ?? '';
+        $description = $data['description'] ?? '';
+
+        $priority = $analyzer->analyzePriority($title, $description);
+
+        return new JsonResponse(['priority' => $priority]);
     }
 }

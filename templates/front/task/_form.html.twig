@@ -4,198 +4,384 @@
 {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
 
 <div class="row g-3">
-    <div class="col-md-6">
-        {{ form_label(form.titre, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.titre, {'attr': {'class': 'form-control ag-input'}}) }}
-        {{ form_errors(form.titre) }}
-    </div>
+	<div class="col-md-6">
+		{{ form_label(form.titre, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.titre, {'attr': {'class': 'form-control ag-input', 'id': 'task-titre'}}) }}
+		{{ form_errors(form.titre) }}
+	</div>
 
-    <div class="col-md-6">
-        {{ form_label(form.type, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.type, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.type) }}
-    </div>
+	<div class="col-md-6">
+		{{ form_label(form.type, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.type, {'attr': {'class': 'form-select ag-input'}}) }}
+		{{ form_errors(form.type) }}
+	</div>
 
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            {{ form_label(form.description, null, {label_attr: label_attr}) }}
-            <div class="d-flex gap-2">
-                <div class="input-group input-group-sm" style="width: auto;">
-                    <select id="select-ai-lang" class="form-select form-select-sm rounded-start-pill border-0 bg-light-info text-info fw-bold">
-                        <option value="en">EN</option>
-                        <option value="ar">AR</option>
-                        <option value="fr">FR</option>
-                        <option value="es">ES</option>
-                    </select>
-                    <button type="button" id="btn-ai-translate" class="btn btn-sm btn-outline-info rounded-end-pill px-3 shadow-sm border-0 bg-light-info">
-                        <i class="bi bi-translate me-1 text-info"></i> <span class="small fw-bold">Traduire</span>
-                    </button>
-                </div>
-                <button type="button" id="btn-ai-summarize" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
-                    <i class="bi bi-stars me-1 text-info"></i> <span class="small fw-bold">Générer un résumé</span>
-                    <span id="ai-spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
-                </button>
-            </div>
-        </div>
-        {{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 4, 'id': 'task-description'}}) }}
-        {{ form_errors(form.description) }}
-    </div>
+	<div class="col-md-12">
+		<div class="d-flex justify-content-between align-items-center mb-2">
+			{{ form_label(form.description, null, {label_attr: label_attr}) }}
+			<div class="d-flex gap-2">
+				<div class="input-group input-group-sm" style="width: auto;">
+					<select id="select-ai-lang" class="form-select form-select-sm rounded-start-pill border-0 bg-light-info text-info fw-bold">
+						<option value="en">EN</option>
+						<option value="ar">AR</option>
+						<option value="fr">FR</option>
+						<option value="es">ES</option>
+					</select>
+					<button type="button" id="btn-ai-translate" class="btn btn-sm btn-outline-info rounded-end-pill px-3 shadow-sm border-0 bg-light-info">
+						<i class="bi bi-translate me-1 text-info"></i>
+						<span class="small fw-bold">Traduire</span>
+					</button>
+				</div>
+				<button type="button" id="btn-ai-recommend" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
+					<i class="bi bi-lightbulb me-1 text-info"></i>
+					<span class="small fw-bold">Recommander</span>
+				</button>
+				<button type="button" id="btn-ai-summarize" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
+					<i class="bi bi-stars me-1 text-info"></i>
+					<span class="small fw-bold">Générer un résumé</span>
+					<span id="ai-spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+				</button>
+			</div>
+		</div>
+		{{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 4, 'id': 'task-description'}}) }}
+		{{ form_errors(form.description) }}
+	</div>
 
-    <div class="col-md-12">
-        {{ form_label(form.resume, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.resume, {'attr': {'class': 'form-control ag-input bg-light-subtle', 'rows': 2, 'id': 'task-resume', 'placeholder': 'Générez un résumé ou saisissez-le ici...'}}) }}
-        {{ form_errors(form.resume) }}
-        <div id="ai-error" class="text-danger small mt-1 d-none"></div>
-    </div>
+	<div class="col-md-12">
+		{{ form_label(form.resume, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.resume, {'attr': {'class': 'form-control ag-input bg-light-subtle', 'rows': 2, 'id': 'task-resume', 'placeholder': 'Générez un résumé ou saisissez-le ici...'}}) }}
+		{{ form_errors(form.resume) }}
+		<div id="ai-error" class="text-danger small mt-1 d-none"></div>
+	</div>
 
-    <div class="col-md-6">
-        {{ form_label(form.dateDebut, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control ag-input'}}) }}
-        {{ form_errors(form.dateDebut) }}
-    </div>
+	<div class="col-md-6">
+		{{ form_label(form.dateDebut, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.dateDebut, {'attr': {'class': 'form-control ag-input'}}) }}
+		{{ form_errors(form.dateDebut) }}
+	</div>
 
-    <div class="col-md-6">
-        {{ form_label(form.dateFin, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control ag-input'}}) }}
-        {{ form_errors(form.dateFin) }}
-    </div>
+	<div class="col-md-6">
+		{{ form_label(form.dateFin, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.dateFin, {'attr': {'class': 'form-control ag-input'}}) }}
+		{{ form_errors(form.dateFin) }}
+	</div>
 
-    <div class="col-md-4">
-        {{ form_label(form.priorite, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.priorite, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.priorite) }}
-    </div>
+	<div class="col-md-4">
+		{{ form_label(form.priorite, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.priorite, {'attr': {'class': 'form-select ag-input', 'id': 'task-priorite'}}) }}
+		{{ form_errors(form.priorite) }}
+		<div id="priority-hint" class="text-danger small mt-1 d-none animate__animated animate__fadeIn">
+			<i class="bi bi-exclamation-triangle-fill"></i>
+			Urgence détectée localement
+		</div>
+	</div>
 
-    <div class="col-md-4">
-        {{ form_label(form.statut, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.statut) }}
-    </div>
+	<div class="col-md-4">
+		{{ form_label(form.statut, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input'}}) }}
+		{{ form_errors(form.statut) }}
+	</div>
 
-    <div class="col-md-4">
-        {{ form_label(form.localisation, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.localisation, {'attr': {'class': 'form-control ag-input'}}) }}
-        {{ form_errors(form.localisation) }}
-    </div>
+	<div class="col-md-4">
+		{{ form_label(form.localisation, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.localisation, {'attr': {'class': 'form-control ag-input'}}) }}
+		{{ form_errors(form.localisation) }}
+	</div>
 
-    <div class="col-md-4">
-        {{ form_label(form.parcelleId, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.parcelleId, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.parcelleId) }}
-    </div>
+	<div class="col-md-4">
+		{{ form_label(form.parcelleId, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.parcelleId, {'attr': {'class': 'form-select ag-input'}}) }}
+		{{ form_errors(form.parcelleId) }}
+	</div>
 
-    <div class="col-md-4">
-        {{ form_label(form.culture, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.culture, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.culture) }}
-    </div>
+	<div class="col-md-4">
+		{{ form_label(form.culture, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.culture, {'attr': {'class': 'form-select ag-input'}}) }}
+		{{ form_errors(form.culture) }}
+	</div>
 
-    <div class="col-md-4">
-        {{ form_label(form.createdByUser, null, {label_attr: label_attr}) }}
-        {{ form_widget(form.createdByUser, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.createdByUser) }}
-    </div>
+	<div class="col-md-4">
+		{{ form_label(form.createdByUser, null, {label_attr: label_attr}) }}
+		{{ form_widget(form.createdByUser, {'attr': {'class': 'form-select ag-input'}}) }}
+		{{ form_errors(form.createdByUser) }}
+	</div>
 </div>
 
 <div class="mt-4 d-flex gap-2">
-    <button class="btn ag-btn-primary text-white rounded-pill px-4">
-        {{ button_label|default('Enregistrer') }}
-    </button>
-    <a href="{{ path('tasks_index') }}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
+	<button class="btn ag-btn-primary text-white rounded-pill px-4">
+		{{ button_label|default('Enregistrer') }}
+	</button>
+	<a href="{{ path('tasks_index') }}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
 </div>
 
 {{ form_end(form) }}
 
 <script>
-(function() {
-    function initAiSummarize() {
-        console.log('AI Summarize Init...');
-        const btnSummarize = document.getElementById('btn-ai-summarize');
-        const btnTranslate = document.getElementById('btn-ai-translate');
-        const langSelect = document.getElementById('select-ai-lang');
-        const spinner = document.getElementById('ai-spinner');
-        const descriptionInput = document.getElementById('task-description') || document.querySelector('[id$="_description"]');
-        const resumeInput = document.getElementById('task-resume') || document.querySelector('[id$="_resume"]');
-        const errorDiv = document.getElementById('ai-error');
+	(function () {
+let _aiInitialized = false;
 
-        if (!btnSummarize) {
-            console.error('AI Button not found');
-            return;
-        }
-        
-        console.log('AI Buttons found, attaching listeners');
+function initAiFeatures() {
+if (_aiInitialized) 
+return;
 
-        // Logic for Summarize
-        btnSummarize.addEventListener('click', async function() {
-            const text = descriptionInput.value.trim();
-            if (text.length < 10) { alert('Description trop courte (min 10 car.)'); return; }
-            
-            toggleUI(true);
-            try {
-                const response = await fetch('{{ path('task_ai_summarize') }}', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ text: text })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    resumeInput.value = data.summary;
-                } else {
-                    showError(data.error);
-                }
-            } catch (error) { showError('Erreur réseau'); }
-            finally { toggleUI(false); }
-        });
 
-        // Logic for Translate
-        if (btnTranslate) {
-            btnTranslate.addEventListener('click', async function() {
-                const text = descriptionInput.value.trim();
-                const targetLang = langSelect.value;
-                if (text.length < 2) { alert('Texte trop court'); return; }
 
-                toggleUI(true);
-                try {
-                    const response = await fetch('{{ path('task_ai_translate') }}', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ text: text, target: targetLanguageMapping(targetLang) })
-                    });
-                    const data = await response.json();
-                    if (response.ok) {
-                        descriptionInput.value = data.translation;
-                    } else {
-                        showError(data.error);
-                    }
-                } catch (error) { showError('Erreur réseau'); }
-                finally { toggleUI(false); }
-            });
-        }
+_aiInitialized = true;
 
-        function toggleUI(loading) {
-            btnSummarize.disabled = loading;
-            if (btnTranslate) btnTranslate.disabled = loading;
-            spinner.classList.toggle('d-none', !loading);
-            descriptionInput.classList.toggle('opacity-50', loading);
-            resumeInput.classList.toggle('opacity-50', loading);
-        }
+console.log('AI Features Init...');
+const btnSummarize = document.getElementById('btn-ai-summarize');
+const btnTranslate = document.getElementById('btn-ai-translate');
+const btnRecommend = document.getElementById('btn-ai-recommend');
+const langSelect = document.getElementById('select-ai-lang');
+const spinner = document.getElementById('ai-spinner');
+const descriptionInput = document.getElementById('task-description') || document.getElementById('task_description') || document.querySelector('[id$="_description"]');
+const resumeInput = document.getElementById('task-resume') || document.getElementById('task_resume') || document.querySelector('[id$="_resume"]');
+const errorDiv = document.getElementById('ai-error');
 
-        function showError(msg) {
-            errorDiv.textContent = msg || 'Une erreur est survenue';
-            errorDiv.classList.remove('d-none');
-        }
+function toggleUI(loading) {
+if (btnSummarize) 
+btnSummarize.disabled = loading;
 
-        function targetLanguageMapping(code) {
-            const map = { 'en': 'anglais', 'ar': 'arabe', 'fr': 'français', 'es': 'espagnol' };
-            return map[code] || code;
-        }
-    }
 
-    document.addEventListener('DOMContentLoaded', initAiSummarize);
-    document.addEventListener('turbo:load', initAiSummarize);
+
+if (btnTranslate) 
+btnTranslate.disabled = loading;
+
+
+
+if (btnRecommend) 
+btnRecommend.disabled = loading;
+
+
+
+if (spinner) 
+spinner.classList.toggle('d-none', ! loading);
+
+
+
+if (descriptionInput) 
+descriptionInput.classList.toggle('opacity-50', loading);
+
+
+
+if (resumeInput) 
+resumeInput.classList.toggle('opacity-50', loading);
+
+
+
+}
+
+function showError(msg) {
+if (errorDiv) {
+errorDiv.textContent = msg || 'Une erreur est survenue';
+errorDiv.classList.remove('d-none');
+}
+}
+
+if (! btnSummarize) {
+console.warn('AI buttons not found, AI features disabled.');
+} else {
+console.log('AI Buttons found, attaching listeners');
+
+// Logic for Summarize
+btnSummarize.addEventListener('click', async function () {
+const text = descriptionInput.value.trim();
+if (text.length < 10) {
+showError('Le texte doit contenir au moins 10 caractères pour être résumé.');
+return;
+}
+
+toggleUI(true);
+try {
+const response = await fetch('{{ path('task_ai_summarize') }}', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({text})
+});
+
+const data = await response.json();
+if (data.summary) {
+resumeInput.value = data.summary;
+errorDiv.classList.add('d-none');
+} else if (data.error) {
+showError(data.error);
+}
+} catch (e) {
+console.error('Summarize Error', e);
+showError('Erreur lors de la génération du résumé.');
+} finally {
+toggleUI(false);
+}
+});
+
+// Logic for Translate
+if (btnTranslate) {
+btnTranslate.addEventListener('click', async function () {
+const text = descriptionInput.value.trim();
+const targetLang = langSelect.value;
+
+if (text.length < 2) {
+showError('Le texte doit contenir au moins 2 caractères pour être traduit.');
+return;
+}
+
+toggleUI(true);
+try {
+const response = await fetch('{{ path('task_ai_translate') }}', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{text, target: targetLang}
+)
+});
+
+const data = await response.json();
+if (data.translation) {
+descriptionInput.value = data.translation;
+errorDiv.classList.add('d-none');
+} else if (data.error) {
+showError(data.error);
+}
+} catch (e) {
+console.error('Translate Error', e);
+showError('Erreur lors de la traduction.');
+} finally {
+toggleUI(false);
+}
+});
+}
+
+// Logic for Recommend
+if (btnRecommend) {
+btnRecommend.addEventListener('click', async function () {
+const titreEl = document.getElementById('task-titre') || document.getElementById('task_titre') || document.querySelector('[id$="_titre"]');
+if (! titreEl) {
+showError('Champ titre introuvable.');
+toggleUI(false);
+return;
+}
+const title = titreEl.value.trim();
+const typeSelect = document.querySelector('[name$="[type]"]');
+const type = typeSelect ? typeSelect.value : '';
+
+if (title.length < 3) {
+showError('Le titre doit contenir au moins 3 caractères pour générer une recommandation.');
+return;
+}
+
+toggleUI(true);
+try {
+const response = await fetch('{{ path('task_ai_recommend') }}', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{title, type}
+)
+});
+
+const data = await response.json();
+if (data.recommendation) {
+descriptionInput.value = data.recommendation;
+errorDiv.classList.add('d-none');
+} else if (data.error) {
+showError(data.error);
+}
+} catch (e) {
+console.error('Recommend Error', e);
+showError('Erreur lors de la génération de la recommandation.');
+} finally {
+toggleUI(false);
+}
+});
+}
+}
+
+// Emergency Detective (Priority Analysis)
+const titleInput = document.getElementById('task-titre') || document.getElementById('task_titre') || document.querySelector('[id$="_titre"]');
+const prioritySelect = document.getElementById('task-priorite') || document.getElementById('task_priorite') || document.querySelector('[id$="_priorite"]');
+const priorityHint = document.getElementById('priority-hint');
+
+if (titleInput && prioritySelect) {
+console.log('Urgency Detective initialized');
+
+let timeout = null;
+const analyzeUrgency = () => {
+clearTimeout(timeout);
+timeout = setTimeout(async () => {
+const title = titleInput.value.trim();
+const description = descriptionInput ? descriptionInput.value.trim() : '';
+
+if (title.length < 3) 
+return;
+
+
+
+try {
+const response = await fetch('{{ path('task_ai_analyze_priority') }}', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{title, description}
+)
+});
+const data = await response.json();
+console.log('Urgency Result:', data.priority);
+
+if (data.priority === 'high') {
+for (let option of prioritySelect.options) {
+if (option.value.toLowerCase().includes('high') || option.text.toLowerCase().includes('haut')) {
+prioritySelect.value = option.value;
+prioritySelect.dispatchEvent(new Event('change'));
+break;
+}
+}
+if (priorityHint) 
+priorityHint.classList.remove('d-none');
+
+
+
+} else {
+if (priorityHint) 
+priorityHint.classList.add('d-none');
+
+
+
+}
+} catch (e) {
+console.error('Local Analysis Error', e);
+}
+}, 500);
+};
+
+titleInput.addEventListener('input', analyzeUrgency);
+if (descriptionInput) 
+descriptionInput.addEventListener('input', analyzeUrgency);
+
+
+
+} else {
+console.warn('Urgency Detective: Inputs not found');
+}
+}
+
+document.addEventListener('DOMContentLoaded', initAiFeatures);
+document.addEventListener('turbo:load', function () {
+_aiInitialized = false;
+initAiFeatures();
+});
 })();
 </script>
 
 <style>
-    .bg-light-info { background-color: rgba(13, 202, 240, 0.1); }
+	.bg-light-info {
+		background-color: rgba(13, 202, 240, 0.1);
+	}
 </style>

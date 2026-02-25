@@ -12,13 +12,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/suivi-tache')]
 class SuiviTacheController extends AbstractController
 {
     #[Route('/new/{id}', name: 'suivi_tache_new', methods: ['GET', 'POST'])]
-    public function new(Task $task, Request $request, EntityManagerInterface $em): Response
+    public function new(#[MapEntity(expr: 'repository.find(id)')] Task $task, Request $request, EntityManagerInterface $em): Response
     {
         // Seuls les ouvriers (ou l'utilisateur assigné) devraient pouvoir créer un suivi ?
         // Pour l'instant on reste sur la logique fonctionnelle simple demandée.
@@ -49,7 +50,7 @@ class SuiviTacheController extends AbstractController
 
     #[Route('/validate/{id}', name: 'suivi_tache_validate', methods: ['POST'])]
     #[IsGranted('ROLE_AGRICULTEUR')]
-    public function validate(SuiviTache $suivi, EntityManagerInterface $em): Response
+    public function validate(#[MapEntity(expr: 'repository.find(id)')] SuiviTache $suivi, EntityManagerInterface $em): Response
     {
         $task = $suivi->getTask();
         $task->setStatut('termine');
@@ -62,7 +63,7 @@ class SuiviTacheController extends AbstractController
 
     #[Route('/refuse/{id}', name: 'suivi_tache_refuse', methods: ['POST'])]
     #[IsGranted('ROLE_AGRICULTEUR')]
-    public function refuse(SuiviTache $suivi, EntityManagerInterface $em): Response
+    public function refuse(#[MapEntity(expr: 'repository.find(id)')] SuiviTache $suivi, EntityManagerInterface $em): Response
     {
         $task = $suivi->getTask();
         $task->setStatut('en_cours');

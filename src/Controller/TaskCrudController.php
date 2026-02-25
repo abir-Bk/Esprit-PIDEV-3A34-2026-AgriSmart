@@ -95,30 +95,7 @@ class TaskCrudController extends AbstractController
     #[Route('/calendar', name: 'calendar', methods: ['GET'])]
     public function calendar(TaskRepository $taskRepository): Response
     {
-        $tasks = $taskRepository->findAll();
-        $events = [];
-        foreach ($tasks as $task) {
-            $isMultiDay = $task->getDateFin() && $task->getDateFin()->format('Y-m-d') !== $task->getDateDebut()->format('Y-m-d');
-
-            $events[] = [
-                'id' => $task->getIdTask(),
-                'title' => $task->getTitre(),
-                'start' => $task->getDateDebut()->format('c'),
-                'end' => $task->getDateFin() ? $task->getDateFin()->format('c') : $task->getDateDebut()->format('c'),
-                'allDay' => $isMultiDay,
-                'url' => $this->generateUrl('tasks_show', ['id' => $task->getIdTask()]),
-                'extendedProps' => [
-                    'type' => $task->getType(),
-                    'statut' => $task->getStatut(),
-                    'priorite' => $task->getPriorite(),
-                    'description' => $task->getDescription(),
-                ],
-            ];
-        }
-
         return $this->render('front/task/calendar.html.twig', [
-            'tasks' => $tasks,
-            'events' => $events,
             'google_api_key' => $this->getParameter('google_calendar_api_key'),
             'google_calendar_id' => $this->getParameter('google_project_calendar_id'),
         ]);

@@ -49,7 +49,7 @@ class SuiviTache
     private ?string $solution = null;
 
     #[ORM\ManyToOne(targetEntity: Task::class)]
-    #[ORM\JoinColumn(name: 'id_tache', referencedColumnName: 'id_task', nullable: false)]
+    #[ORM\JoinColumn(name: 'id_tache', referencedColumnName: 'id_task', nullable: false, onDelete: 'CASCADE')]
     private ?Task $task = null;
 
     #[ORM\Column(length: 255, nullable: true)]

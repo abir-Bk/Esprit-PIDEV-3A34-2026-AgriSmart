@@ -31,3 +31,8 @@ services:
         arguments:
             $huggingFaceApiKey: '%env(default:env_empty_string:HUGGINGFACE_API_KEY)%'
             $huggingFaceModel: '%env(default:env_empty_string:HUGGINGFACE_MODEL)%'
+
+    App\Service\ExchangeRateService:
+        arguments:
+            $apiUrl: '%env(EXCHANGE_RATE_API_URL)%'
+            $cacheTtlSeconds: '%env(int:EXCHANGE_RATE_CACHE_TTL)%'

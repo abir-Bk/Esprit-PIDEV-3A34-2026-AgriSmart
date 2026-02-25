@@ -73,8 +73,24 @@
                   <div class="small text-uppercase fw-bold text-muted">{{ produit.categorie }}</div>
                   <div class="fw-bold mb-2" style="color:var(--ag-text);">{{ produit.nom }}</div>
                   <div class="small text-muted mb-3">{{ produit.description|default('')|slice(0, 90) }}{% if produit.description and produit.description|length > 90 %}…{% endif %}</div>
+                  {% set priceEur = fx_convert(produit.getPrixEffectif(), 'EUR') %}
+                  {% set priceUsd = fx_convert(produit.getPrixEffectif(), 'USD') %}
                   <div class="mt-auto d-flex justify-content-between align-items-center">
-                    <div class="fw-bold" style="color:var(--ag-primary);">{{ produit.getPrixEffectif() }} TND</div>
+                    <div>
+                      <div class="fw-bold" style="color:var(--ag-primary);">{{ produit.getPrixEffectif() }} TND</div>
+                      {% if priceEur is not null or priceUsd is not null %}
+                        <div class="small text-muted">
+                          ≈
+                          {% if priceEur is not null %}
+                            {{ priceEur|number_format(2, '.', ' ') }} EUR
+                          {% endif %}
+                          {% if priceEur is not null and priceUsd is not null %} • {% endif %}
+                          {% if priceUsd is not null %}
+                            {{ priceUsd|number_format(2, '.', ' ') }} USD
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
                     <div class="d-flex gap-2">
                       <a href="{{ path('app_produit_show', {id: produit.id}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Détails</a>
                       <form

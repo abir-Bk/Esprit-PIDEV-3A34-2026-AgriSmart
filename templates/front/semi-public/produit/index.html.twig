@@ -484,6 +484,10 @@
 
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top ag-price-wrap">
                       <div>
+                        {% set effectivePrice = (produit.isPromotion and produit.promotionPrice is not null) ? produit.promotionPrice : produit.prix %}
+                        {% set priceEur = fx_convert(effectivePrice, 'EUR') %}
+                        {% set priceUsd = fx_convert(effectivePrice, 'USD') %}
+
                         {% if produit.isPromotion and produit.promotionPrice is not null %}
                           <div class="fw-bold text-danger">
                             {{ produit.promotionPrice }} TND
@@ -492,6 +496,19 @@
                         {% else %}
                           <div class="fw-bold" style="color:var(--ag-text);">
                             {{ produit.prix }} TND
+                          </div>
+                        {% endif %}
+
+                        {% if priceEur is not null or priceUsd is not null %}
+                          <div class="ag-meta mt-1">
+                            ≈
+                            {% if priceEur is not null %}
+                              {{ priceEur|number_format(2, '.', ' ') }} EUR
+                            {% endif %}
+                            {% if priceEur is not null and priceUsd is not null %} • {% endif %}
+                            {% if priceUsd is not null %}
+                              {{ priceUsd|number_format(2, '.', ' ') }} USD
+                            {% endif %}
                           </div>
                         {% endif %}
 

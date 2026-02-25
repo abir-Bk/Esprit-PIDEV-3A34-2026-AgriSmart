@@ -39,7 +39,7 @@
                         <!-- Avatar -->
                         <div class="avatar avatar-xxl mb-3 mx-auto">
                             {% if user.image %}
-                            <img class="avatar-img rounded-circle" src="{{ asset('uploads/images/' ~ user.image) }}" alt="avatar">
+                            <img class="avatar-img rounded-circle" src="{{ asset('uploads/users/images/' ~ user.image) }}" alt="avatar">
                             {% else %}
                             <div class="avatar-img rounded-circle text-white d-flex align-items-center justify-content-center" style="font-size: 3rem;background: linear-gradient(135deg, #1F3D2B, #2d9c5a);">
                                 {{ user.firstName|slice(0, 1)|upper }}{{ user.lastName|slice(0, 1)|upper }}

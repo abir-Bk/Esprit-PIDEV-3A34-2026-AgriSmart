@@ -27,3 +27,7 @@ services:
     App\Service\GeoIpService:
         arguments:
             $dbPath: '%kernel.project_dir%/config/geoip/GeoLite2-Country.mmdb'
+    App\Service\FaceRecognitionService:
+        arguments:
+            $uploadDir:  '%kernel.project_dir%/public/uploads'
+            $projectDir: '%kernel.project_dir%'

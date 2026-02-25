@@ -1,53 +1,743 @@
 {% extends 'base.html.twig' %}
+{% block title %}Verify Your Identity — AgriSmart{% endblock %}
 
-{% block title %}Verify Your Identity{% endblock %}
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+    :root {
+        --green-dark:  #2d5a27;
+        --green-mid:   #4a7c3f;
+        --green-light: #7ab648;
+        --earth:       #8b6914;
+        --cream:       #f7f4ee;
+        --text-dark:   #1e2d1a;
+        --text-mid:    #5a6e55;
+        --border:      #dde8d0;
+    }
+
+    body {
+        background-color: var(--cream);
+        font-family: 'DM Sans', sans-serif;
+        color: var(--text-dark);
+    }
+
+    .page-wrap {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background-image:
+            radial-gradient(ellipse at 10% 80%, rgba(74,124,63,0.08) 0%, transparent 60%),
+            radial-gradient(ellipse at 90% 20%, rgba(122,182,72,0.06) 0%, transparent 50%);
+    }
+
+    .card-wrap {
+        width: 100%;
+        max-width: 460px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 4px 32px rgba(45,90,39,0.08);
+        overflow: hidden;
+    }
+
+    /* ── Header strip ── */
+    .card-header-strip {
+        background: var(--green-dark);
+        padding: 1.75rem 2rem 1.5rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .card-header-strip::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0; right: 0;
+        height: 20px;
+        background: #ffffff;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .brand-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .brand-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--green-light);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+    }
+
+    .brand-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+    }
+
+    .header-title {
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 300;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.7);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    /* ── Card body ── */
+    .card-body-inner {
+        padding: 1.75rem 2rem 2rem;
+    }
+
+    /* ── Tabs ── */
+    .tab-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        background: var(--cream);
+        border-radius: 10px;
+        padding: 5px;
+        margin-bottom: 1.75rem;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        border-radius: 7px;
+        padding: 0.6rem 0.5rem;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-mid);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .tab-btn i { font-size: 14px; }
+
+    .tab-btn.active {
+        background: #ffffff;
+        color: var(--green-dark);
+        box-shadow: 0 1px 6px rgba(45,90,39,0.12);
+    }
+
+    .tab-btn:not(.active):hover {
+        color: var(--green-mid);
+    }
+
+    /* ── Section label ── */
+    .section-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-mid);
+        margin-bottom: 0.5rem;
+    }
+
+    .hint-text {
+        font-size: 0.875rem;
+        color: var(--text-mid);
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+    }
+
+    .hint-text strong {
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    /* ── Input ── */
+    .code-input {
+        width: 100%;
+        text-align: center;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 300;
+        letter-spacing: 12px;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--cream);
+        color: var(--text-dark);
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        margin-bottom: 1rem;
+    }
+
+    .code-input:focus {
+        border-color: var(--green-mid);
+        box-shadow: 0 0 0 3px rgba(74,124,63,0.1);
+        background: #fff;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary-green {
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--green-dark);
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary-green:hover {
+        background: var(--green-mid);
+    }
+
+    .btn-primary-green:active {
+        transform: scale(0.99);
+    }
+
+    .btn-outline-green {
+        width: 100%;
+        padding: 0.75rem;
+        background: transparent;
+        color: var(--green-dark);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-outline-green:hover {
+        border-color: var(--green-mid);
+        background: rgba(74,124,63,0.04);
+    }
+
+    .btn-ghost {
+        width: 100%;
+        padding: 0.5rem;
+        background: transparent;
+        color: var(--text-mid);
+        border: none;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 0.5rem;
+        transition: color 0.2s;
+    }
+
+    .btn-ghost:hover { color: var(--green-dark); }
+
+    /* ── Alerts ── */
+    .alert-info-custom {
+        background: #eef6e8;
+        border: 1px solid #c8e0b8;
+        border-radius: 8px;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.84rem;
+        color: var(--green-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .alert-error-custom {
+        background: #fdf2f2;
+        border: 1px solid #f0c8c8;
+        border-radius: 8px;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.84rem;
+        color: #8b2222;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 1.25rem 0;
+    }
+
+    /* ── Camera area ── */
+    .camera-wrap {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #1a2416;
+        margin-bottom: 0.75rem;
+        aspect-ratio: 4/3;
+    }
+
+    #video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .camera-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.5);
+        font-size: 0.8rem;
+        gap: 8px;
+        pointer-events: none;
+    }
+
+    .camera-overlay i { font-size: 2rem; }
+
+    .face-guide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .face-guide-ring {
+        width: 140px;
+        height: 170px;
+        border: 2px solid rgba(122,182,72,0.6);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(122,182,72,0.1);
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.84rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-bar.checking {
+        background: #eef6e8;
+        color: var(--green-dark);
+        border: 1px solid #c8e0b8;
+    }
+
+    /* ── Result ── */
+    .result-wrap {
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .result-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .result-icon.success {
+        background: #eef6e8;
+        color: var(--green-mid);
+    }
+
+    .result-icon.fail {
+        background: #fdf2f2;
+        color: #c0392b;
+    }
+
+    .result-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .score-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 0.5rem;
+    }
+
+    .score-bar-bg {
+        flex: 1;
+        height: 6px;
+        background: var(--border);
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .score-bar-fill {
+        height: 100%;
+        border-radius: 99px;
+        width: 0%;
+        transition: width 0.5s ease;
+    }
+
+    .score-bar-fill.good { background: var(--green-light); }
+    .score-bar-fill.bad  { background: #e74c3c; }
+
+    .score-pct {
+        font-size: 0.78rem;
+        color: var(--text-mid);
+        min-width: 32px;
+        text-align: right;
+    }
+
+    /* ── Unavailable state ── */
+    .unavailable-box {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: var(--cream);
+        border-radius: 10px;
+        border: 1px dashed var(--border);
+    }
+
+    .unavailable-box i {
+        font-size: 2rem;
+        color: var(--text-mid);
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .unavailable-box h6 {
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+        color: var(--text-dark);
+    }
+
+    .unavailable-box p {
+        font-size: 0.84rem;
+        color: var(--text-mid);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    .card-footer-inner {
+        border-top: 1px solid var(--border);
+        padding: 1rem 2rem;
+        text-align: center;
+    }
+
+    .card-footer-inner a {
+        font-size: 0.8rem;
+        color: var(--text-mid);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s;
+    }
+
+    .card-footer-inner a:hover { color: var(--green-dark); }
+
+    /* ── Spinner ── */
+    .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .d-none { display: none !important; }
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card shadow p-4" style="max-width: 420px; width: 100%;">
-        <div class="text-center mb-4">
-            <h4 class="fw-bold">🔐 Security Verification</h4>
-            <p class="text-muted">
-                A 6-digit code was sent to<br>
-                <strong>{{ email|u.truncate(30, '…') }}</strong>
-            </p>
-        </div>
+<div class="page-wrap">
+    <div class="card-wrap">
 
-        {% for message in app.flashes('info') %}
-            <div class="alert alert-info">{{ message }}</div>
-        {% endfor %}
-
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-
-        <form method="post" action="{{ path('app_2fa_check') }}">
-            <div class="mb-3">
-                <label for="code" class="form-label">Verification Code</label>
-                <input
-                    type="text"
-                    id="code"
-                    name="code"
-                    class="form-control form-control-lg text-center"
-                    maxlength="6"
-                    pattern="\d{6}"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    autofocus
-                    placeholder="______"
-                    required
-                >
+        {# ── Header ── #}
+        <div class="card-header-strip">
+            <div class="brand-row">
+                <div class="brand-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <span class="brand-name">AgriSmart</span>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Verify</button>
-        </form>
-
-        <form method="post" action="{{ path('app_2fa_resend') }}" class="mt-3 text-center">
-            <button type="submit" class="btn btn-link btn-sm">Didn't receive a code? Resend</button>
-        </form>
-
-        <div class="text-center mt-2">
-            <a href="{{ path('app_logout') }}" class="text-muted small">Cancel and log out</a>
+            <p class="header-title">Security Verification</p>
         </div>
+
+        {# ── Body ── #}
+        <div class="card-body-inner">
+
+            {# Tab bar #}
+            <div class="tab-bar">
+                <button class="tab-btn active" id="tab-btn-email" onclick="showTab('email')">
+                    <i class="bi bi-envelope"></i> Email Code
+                </button>
+                <button class="tab-btn" id="tab-btn-face" onclick="showTab('face')">
+                    <i class="bi bi-person-bounding-box"></i> Face ID
+                </button>
+            </div>
+
+            {# ════════════════════════════ #}
+            {# TAB 1 — Email Code          #}
+            {# ════════════════════════════ #}
+            <div id="tab-email">
+
+                {% for message in app.flashes('info') %}
+                    <div class="alert-info-custom">
+                        <i class="bi bi-info-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+
+                {% if error %}
+                    <div class="alert-error-custom">
+                        <i class="bi bi-exclamation-circle"></i> {{ error }}
+                    </div>
+                {% endif %}
+
+                <p class="hint-text">
+                    A 6-digit code was sent to <strong>{{ email }}</strong>
+                </p>
+
+                <form method="post" action="{{ path('app_2fa_check') }}">
+                    <input
+                        type="text"
+                        name="code"
+                        class="code-input"
+                        maxlength="6"
+                        pattern="\d{6}"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        autofocus
+                        placeholder="000000"
+                        required
+                    >
+                    <button type="submit" class="btn-primary-green">
+                        <i class="bi bi-check-lg"></i> Verify Code
+                    </button>
+                </form>
+
+                <form method="post" action="{{ path('app_2fa_resend') }}">
+                    <button type="submit" class="btn-ghost">
+                        <i class="bi bi-arrow-clockwise"></i> Resend code
+                    </button>
+                </form>
+
+            </div>
+
+            {# ════════════════════════════ #}
+            {# TAB 2 — Face Recognition    #}
+            {# ════════════════════════════ #}
+            <div id="tab-face" class="d-none">
+
+                {% if has_photo %}
+
+                    <p class="hint-text">
+                        Position your face within the guide and click verify.
+                    </p>
+
+                    {# Camera area #}
+                    <div class="camera-wrap" id="camera-wrap">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="camera-overlay" id="camera-placeholder">
+                            <i class="bi bi-camera"></i>
+                            <span>Camera not started</span>
+                        </div>
+                        <div class="face-guide d-none" id="face-guide">
+                            <div class="face-guide-ring"></div>
+                        </div>
+                    </div>
+
+                    <canvas id="canvas" class="d-none"></canvas>
+
+                    {# Status #}
+                    <div class="status-bar checking d-none" id="face-status">
+                        <span class="spinner"></span> Analyzing... please hold still
+                    </div>
+
+                    {# Buttons #}
+                    <button id="btn-start-camera" class="btn-outline-green" onclick="startCamera()">
+                        <i class="bi bi-camera"></i> Start Camera
+                    </button>
+
+                    <button id="btn-verify-face" class="btn-primary-green d-none" onclick="captureFace()">
+                        <i class="bi bi-person-check"></i> Verify My Face
+                    </button>
+
+                    {# Result #}
+                    <div id="face-result" class="result-wrap d-none">
+                        <div id="face-result-icon" class="result-icon"></div>
+                        <p id="face-result-message" class="result-label"></p>
+                        <div class="score-row">
+                            <span style="font-size:0.75rem;color:var(--text-mid)">Confidence</span>
+                            <div class="score-bar-bg">
+                                <div id="face-score-bar" class="score-bar-fill"></div>
+                            </div>
+                            <span class="score-pct" id="face-score-text">0%</span>
+                        </div>
+                    </div>
+
+                {% else %}
+
+                    <div class="unavailable-box">
+                        <i class="bi bi-person-x"></i>
+                        <h6>Feature Unavailable</h6>
+                        <p>
+                            No profile photo was found on your account.<br>
+                            Face recognition requires a photo uploaded during registration.
+                        </p>
+                        <button class="btn-ghost" style="margin-top:0.75rem" onclick="showTab('email')">
+                            <i class="bi bi-arrow-left"></i> Use email code instead
+                        </button>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {# ── Footer ── #}
+        <div class="card-footer-inner">
+            <a href="{{ path('app_logout') }}">
+                <i class="bi bi-box-arrow-left"></i> Cancel and sign out
+            </a>
+        </div>
+
     </div>
 </div>
+
+<script>
+function showTab(tab) {
+    document.getElementById('tab-email').classList.toggle('d-none', tab !== 'email');
+    document.getElementById('tab-face').classList.toggle('d-none',  tab !== 'face');
+    document.getElementById('tab-btn-email').classList.toggle('active', tab === 'email');
+    document.getElementById('tab-btn-face').classList.toggle('active',  tab === 'face');
+    if (tab !== 'face') stopCamera();
+}
+
+let stream = null;
+
+function stopCamera() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    const ph = document.getElementById('camera-placeholder');
+    const fg = document.getElementById('face-guide');
+    if (ph) ph.classList.remove('d-none');
+    if (fg) fg.classList.add('d-none');
+}
+
+async function startCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        document.getElementById('video').srcObject = stream;
+        document.getElementById('camera-placeholder').classList.add('d-none');
+        document.getElementById('face-guide').classList.remove('d-none');
+        document.getElementById('btn-start-camera').classList.add('d-none');
+        document.getElementById('btn-verify-face').classList.remove('d-none');
+    } catch {
+        alert('Camera access denied. Please allow camera access in your browser settings.');
+    }
+}
+
+async function captureFace() {
+    const video  = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    const photo = canvas.toDataURL('image/jpeg', 0.9);
+
+    document.getElementById('face-status').classList.remove('d-none');
+    document.getElementById('btn-verify-face').disabled = true;
+
+    try {
+        const res  = await fetch('{{ path("app_2fa_face_verify") }}', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ photo }),
+        });
+        const data = await res.json();
+
+        stopCamera();
+        document.getElementById('face-status').classList.add('d-none');
+        document.getElementById('face-result').classList.remove('d-none');
+
+        const score   = Math.round((data.score ?? 0) * 100);
+        const bar     = document.getElementById('face-score-bar');
+        const icon    = document.getElementById('face-result-icon');
+        const message = document.getElementById('face-result-message');
+
+        document.getElementById('face-score-text').textContent = score + '%';
+        bar.style.width = score + '%';
+
+        if (data.success) {
+            icon.className    = 'result-icon success';
+            icon.innerHTML    = '<i class="bi bi-check-lg"></i>';
+            message.textContent = 'Identity confirmed. Redirecting...';
+            bar.className     = 'score-bar-fill good';
+            setTimeout(() => window.location.href = data.redirect, 1500);
+        } else {
+            icon.className    = 'result-icon fail';
+            icon.innerHTML    = '<i class="bi bi-x-lg"></i>';
+            message.textContent = data.message ?? 'Face did not match. Please try again.';
+            bar.className     = 'score-bar-fill bad';
+
+            setTimeout(() => {
+                document.getElementById('face-result').classList.add('d-none');
+                bar.className = 'score-bar-fill';
+                bar.style.width = '0%';
+                document.getElementById('btn-start-camera').classList.remove('d-none');
+                document.getElementById('btn-verify-face').classList.add('d-none');
+                document.getElementById('btn-verify-face').disabled = false;
+            }, 2500);
+        }
+
+    } catch {
+        document.getElementById('face-status').classList.add('d-none');
+        alert('Connection error. Please use the email code instead.');
+    }
+}
+</script>
 {% endblock %}

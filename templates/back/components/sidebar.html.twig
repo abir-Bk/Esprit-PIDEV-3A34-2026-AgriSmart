@@ -56,8 +56,8 @@
             <ul class="ag-nav">
 
                 <li>
-                    <a href="{{ is_granted('ROLE_ADMIN') ? path('admin_marketplace_dashboard') : path('user_dashboard') }}"
-                       class="ag-link {% if app.request.attributes.get('_route') in ['user_dashboard','admin_marketplace_dashboard'] %}ag-link--active{% endif %}">
+                    <a href="{{ is_granted('ROLE_ADMIN') ? path('admin_dashboard') : path('user_dashboard') }}"
+                       class="ag-link {% if app.request.attributes.get('_route') in ['user_dashboard','admin_dashboard'] %}ag-link--active{% endif %}">
                         <span class="ag-link__icon"><i class="fa-solid fa-house"></i></span>
                         <span>Dashboard</span>
                     </a>

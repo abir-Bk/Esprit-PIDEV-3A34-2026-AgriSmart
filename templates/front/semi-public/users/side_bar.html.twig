@@ -24,7 +24,7 @@
                     <div class="ag-avatar mb-2">
                         {% if app.user.image %}
                             <img class="ag-avatar__img"
-                                 src="{{ asset('uploads/images/' ~ app.user.image) }}"
+                                 src="{{ asset('uploads/users/images/' ~ app.user.image) }}"
                                  alt="{{ app.user.firstName ~ ' ' ~ app.user.lastName }}">
                         {% else %}
                             <div class="ag-avatar__initials">

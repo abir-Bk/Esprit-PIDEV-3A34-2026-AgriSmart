@@ -28,19 +28,22 @@
         {{ include('_partials/_header.html.twig') }}
     {% endblock %}
 
-    {# Messages flash globaux (dismissible) — affiché seulement s'il y a des messages #}
+    {# Messages flash globaux (dismissible) — une page peut surcharger ce bloc pour afficher les flashes ailleurs #}
+    {% block flash_messages %}
     {% if app.flashes|length > 0 %}
-    <div class="container py-2 py-md-3" id="flash-container">
+    <div class="container py-2 py-md-3" id="flash-container" role="region" aria-live="polite">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-2 mb-md-3" role="alert">
-                    {{ message }}
+                {% set alert_class = label == 'danger' ? 'danger' : (label == 'warning' ? 'warning' : (label == 'info' ? 'info' : 'success')) %}
+                <div class="alert alert-{{ alert_class }} alert-dismissible fade show rounded-3 shadow-sm mb-2 mb-md-3 d-flex align-items-center flash-message" role="alert">
+                    <span class="flex-grow-1">{{ message }}</span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                 </div>
             {% endfor %}
         {% endfor %}
     </div>
     {% endif %}
+    {% endblock %}
 
     <main class="flex-grow-1">
         {% block body %}{% endblock %}

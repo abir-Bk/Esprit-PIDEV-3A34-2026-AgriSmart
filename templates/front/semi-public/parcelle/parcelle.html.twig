@@ -5,6 +5,10 @@
     <link rel="stylesheet" href="{{ asset('styles/parcelle.css') }}">
 {% endblock %}
 
+{% block flash_messages %}
+    {# On n'affiche pas les flashes ici pour les afficher dans le contenu de la page parcelle #}
+{% endblock %}
+
 {% block body %}
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -18,7 +22,39 @@
     selectedCultureName: '',
     weather: { temp: '--', desc: 'Chargement...', icon: 'fa-sun', wind: '--' },
     advice: { text: 'Analyse en cours...', color: '#64748b', icon: 'fa-info-circle', bg: '#f1f5f9' },
-   
+    conseillerParcelleId: null,
+    conseillerParcelleNom: '',
+    conseillerLoading: false,
+    conseillerResult: null,
+    conseillerError: null,
+    async getConseillerIa() {
+        if (!this.conseillerParcelleId) return;
+        const parcelle = this.parcelles.find(p => p.id === this.conseillerParcelleId);
+        if (!parcelle) return;
+        this.conseillerLoading = true;
+        this.conseillerResult = null;
+        this.conseillerError = null;
+        const formData = new FormData();
+        formData.append('_token', parcelle.conseillerCsrfToken);
+        try {
+            const res = await fetch('/parcelle/' + this.conseillerParcelleId + '/conseiller-ia', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success && data.recommendations) {
+                this.conseillerResult = data.recommendations;
+            } else {
+                this.conseillerError = data.error || 'Erreur inconnue';
+            }
+        } catch (e) {
+            this.conseillerError = 'Impossible de contacter le conseiller IA.';
+        }
+        this.conseillerLoading = false;
+    },
+    openConseillerIa(parcelle) {
+        this.conseillerParcelleId = parcelle.id;
+        this.conseillerParcelleNom = parcelle.nom;
+        this.conseillerResult = null;
+        this.conseillerError = null;
+    },
     parcelles: [
         {% for p in parcelles %}
         {
@@ -29,6 +65,7 @@
             latitude: {{ p.latitude|default(36.8) }},
             longitude: {{ p.longitude|default(10.2) }},
             csrfToken: '{{ csrf_token('delete' ~ p.id) }}',
+            conseillerCsrfToken: '{{ csrf_token('conseiller_ia_' ~ p.id) }}',
             cultures: [
                 {% for c in p.cultures %}
                 {
@@ -160,6 +197,15 @@
                             <i class="fa-solid fa-plus me-2"></i>Nouvelle parcelle
                         </button>
                     </div>
+                    <div class="position-fixed bottom-0 end-0 m-4" style="z-index: 2000;">
+    <button id="start-voice-btn" class="btn btn-lg shadow-lg rounded-circle p-3" 
+            style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; width: 65px; height: 65px; border: none;">
+        <i class="fa-solid fa-microphone fa-xl"></i>
+    </button>
+    <div id="voice-status" class="badge bg-dark position-absolute top-0 start-0 translate-middle-y mt-n2 d-none">
+        Écoute en cours...
+    </div>
+</div>
                     {# Pills tri = style Marketplace #}
                     <div class="mt-4 d-flex flex-wrap gap-2">
                         <a class="ag-pill {{ (sort|default('nbCultures')) == 'nbCultures' ? 'active' : '' }}"
@@ -184,9 +230,11 @@
         <div class="container">
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ label == 'danger' ? 'danger' : 'success' }} alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
-                        <i class="fa-solid {{ label == 'danger' ? 'fa-triangle-exclamation' : 'fa-circle-check' }} me-2"></i>
-                        {{ message }}
+                    {% set alert_class = label == 'danger' ? 'danger' : (label == 'warning' ? 'warning' : (label == 'info' ? 'info' : 'success')) %}
+                    {% set icon = label == 'danger' ? 'fa-triangle-exclamation' : (label == 'warning' ? 'fa-exclamation-circle' : (label == 'info' ? 'fa-info-circle' : 'fa-circle-check')) %}
+                    <div class="alert alert-{{ alert_class }} alert-dismissible fade show rounded-3 shadow-sm mb-3 d-flex align-items-center" role="alert">
+                        <i class="fa-solid {{ icon }} me-2 flex-shrink-0" style="font-size: 1.25rem;"></i>
+                        <span class="flex-grow-1">{{ message }}</span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                     </div>
                 {% endfor %}
@@ -324,14 +372,18 @@
                                                     Coordonnées: <span x-text="parseFloat(parcelle.latitude).toFixed(4)"></span>, <span x-text="parseFloat(parcelle.longitude).toFixed(4)"></span>
                                                 </p>
                                                
-                                                <div class="mt-3">
-                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill me-2" @click="editParcelle(parcelle)" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle">
+                                                <div class="mt-3 d-flex flex-wrap gap-2">
+                                                    <button type="button" class="btn btn-sm rounded-pill me-2"
+                                                            style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: #fff; border: none;"
+                                                            @click="openConseillerIa(parcelle)" data-bs-toggle="modal" data-bs-target="#modalConseillerIA">
+                                                        <i class="fa-solid fa-robot me-1"></i> Conseiller IA
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" @click="editParcelle(parcelle)" data-bs-toggle="modal" data-bs-target="#modalAjouterParcelle">
                                                         <i class="fa-solid fa-pen me-1"></i> Modifier
                                                     </button>
-                                                    <form :action="'/parcelle/delete/' + parcelle.id" method="post" class="d-inline" onsubmit="return confirm('Supprimer cette parcelle ?');">
-                                                        <input type="hidden" name="_token" :value="parcelle.csrfToken">
-                                                        <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fa-solid fa-trash me-1"></i> Supprimer</button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="modal" :data-bs-target="'#modalDeleteParcelle' + parcelle.id">
+                                                        <i class="fa-solid fa-trash me-1"></i> Supprimer
+                                                    </button>
                                                 </div>
                                             </div>
                                         </template>
@@ -394,14 +446,12 @@
                                                                 </button>
                                                                 
                                                                 <!-- Bouton Supprimer -->
-                                                                <form :action="'/culture/' + c.id + '/delete'" method="post" class="d-inline">
-                                                                    <input type="hidden" name="_token" :value="c.csrfDeleteToken">
-                                                                    <button class="btn-action btn-delete btn-action-sm" 
-                                                                            onclick="return confirm('Supprimer cette culture ?')"
-                                                                            title="Supprimer">
-                                                                        <i class="fa-solid fa-trash"></i>
-                                                                    </button>
-                                                                </form>
+                                                                <button type="button" class="btn-action btn-delete btn-action-sm" 
+                                                                        data-bs-toggle="modal" 
+                                                                        :data-bs-target="'#modalDeleteCulture' + c.id"
+                                                                        title="Supprimer">
+                                                                    <i class="fa-solid fa-trash"></i>
+                                                                </button>
                                                             </div>
                                                         </div>
 
@@ -449,44 +499,102 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Modal Consommer -->
-                                                    <div class="modal fade" :id="'modalConsommer' + c.id" tabindex="-1">
+                                                    <!-- Modal Consommer - CORRIGÉ : validation stock uniquement quand quantité saisie et > stock -->
+<div class="modal fade" :id="'modalConsommer' + c.id" tabindex="-1" aria-labelledby="modalConsommerLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold">
+                    <i class="fa-solid fa-flask me-2" style="color:var(--ag-primary);"></i>
+                    Utiliser une ressource pour <span x-text="c.typeCulture"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form :action="'/culture/' + c.id + '/consommer'" method="POST"
+                  x-data="{
+                      stockError: false,
+                      maxStock: 0,
+                      unite: '',
+                      checkStock() {
+                          const form = this.$el;
+                          const sel = form.querySelector('select[name=ressource_id]');
+                          const qtyInput = form.querySelector('input[name=quantite]');
+                          if (!sel || !qtyInput) return;
+                          const opt = sel.options[sel.selectedIndex];
+                          const ressourceChoisie = opt && opt.value !== '';
+                          if (!ressourceChoisie) {
+                              this.stockError = false;
+                              this.maxStock = 0;
+                              this.unite = '';
+                              return;
+                          }
+                          const stockStr = String(opt.dataset.stock || '0').replace(',', '.');
+                          this.maxStock = parseFloat(stockStr) || 0;
+                          this.unite = (opt.dataset.unite || '');
+                          const qtyStr = String(qtyInput.value || '').trim().replace(',', '.');
+                          const qty = parseFloat(qtyStr) || 0;
+                          this.stockError = qty > 0 && qty > this.maxStock;
+                      }
+                  }"
+                  @submit="if(stockError) $event.preventDefault()">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Ressource disponible</label>
+                        <select name="ressource_id" class="form-select rounded-3" required @change="checkStock()">
+                            <option value="" data-stock="0" data-unite="">-- Choisir --</option>
+                            {% for r in ressources %}
+                                <option value="{{ r.id }}" data-stock="{{ r.stockRestant|number_format(10, '.', '') }}" data-unite="{{ r.unite|e('html_attr') }}">
+                                    {{ r.nom }} (Reste: {{ r.stockRestant }} {{ r.unite }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Quantité à utiliser</label>
+<input type="number" name="quantite" step="0.1" min="0.1" class="form-control rounded-3" placeholder="Quantité en kg ou L" required @input="checkStock()" @change="checkStock()" :class="{ 'is-invalid': stockError }">
+                            
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="submit" class="btn btn-parcelle-primary text-white rounded-pill px-5 py-2 fw-bold" :disabled="stockError">
+                        <i class="fa-solid fa-check me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+                                                    <!-- Modal confirmation suppression culture -->
+                                                    <div class="modal fade" :id="'modalDeleteCulture' + c.id" tabindex="-1" aria-labelledby="modalDeleteCultureLabel" aria-hidden="true">
                                                         <div class="modal-dialog modal-dialog-centered">
-                                                            <div class="modal-content border-0 shadow-lg rounded-4">
-                                                                <div class="modal-header border-0 p-4 pb-0">
-                                                                    <h5 class="fw-bold">
-                                                                        <i class="fa-solid fa-flask me-2" style="color:var(--ag-primary);"></i>
-                                                                        Utiliser une ressource pour <span x-text="c.typeCulture"></span>
+                                                            <div class="modal-content border-0 shadow-lg rounded-3">
+                                                                <div class="modal-header border-0 pb-0">
+                                                                    <h5 class="modal-title text-danger">
+                                                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>Confirmer la suppression
                                                                     </h5>
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                                                                 </div>
-                                                                <form :action="'/culture/' + c.id + '/consommer'" method="POST">
-                                                                    <div class="modal-body p-4">
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label small fw-bold">Ressource disponible</label>
-                                                                            <select name="ressource_id" class="form-select rounded-3" required>
-                                                                                <option value="">-- Choisir --</option>
-                                                                                {% for r in ressources %}
-                                                                                    <option value="{{ r.id }}">
-                                                                                        {{ r.nom }} (Reste: {{ r.stockRestant }} {{ r.unite }})
-                                                                                    </option>
-                                                                                {% endfor %}
-                                                                            </select>
-                                                                        </div>
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label small fw-bold">Quantité à utiliser</label>
-                                                                            <input type="number" name="quantite" step="0.1" class="form-control rounded-3" placeholder="Quantité en kg ou L" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer border-0 p-4 pt-0">
-                                                                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                                                                            <i class="fa-solid fa-times me-2"></i>Annuler
+                                                                <div class="modal-body pt-2">
+                                                                    <p class="mb-0">
+                                                                        Êtes-vous sûr de vouloir supprimer la culture <strong x-text="c.typeCulture"></strong> (<span x-text="c.variete"></span>) ?
+                                                                        <span class="d-block small text-danger mt-2">Cette action est irréversible.</span>
+                                                                    </p>
+                                                                </div>
+                                                                <div class="modal-footer border-0">
+                                                                    <form :action="'/culture/' + c.id + '/delete'" method="post" class="d-inline">
+                                                                        <input type="hidden" name="_token" :value="c.csrfDeleteToken">
+                                                                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">
+                                                                            <i class="fa-solid fa-times me-1"></i>Annuler
                                                                         </button>
-                                                                        <button type="submit" class="btn ag-btn-primary text-white rounded-pill px-5 py-2 fw-bold">
-                                                                            <i class="fa-solid fa-check me-2"></i>Confirmer
+                                                                        <button type="submit" class="btn btn-danger rounded-pill">
+                                                                            <i class="fa-solid fa-trash me-1"></i>Supprimer
                                                                         </button>
-                                                                    </div>
-                                                                </form>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -582,7 +690,7 @@
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
                             <i class="fa-solid fa-times me-2"></i>Annuler
                         </button>
-                        <button type="submit" class="btn ag-btn-primary text-white rounded-pill px-5 py-2 fw-bold">
+                        <button type="submit" class="btn btn-parcelle-primary text-white rounded-pill px-5 py-2 fw-bold">
                             <i class="fa-solid fa-check me-2"></i>Confirmer
                         </button>
                     </div>
@@ -661,11 +769,90 @@
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
                             <i class="fa-solid fa-times me-2"></i>Annuler
                         </button>
-                        <button type="submit" class="btn ag-btn-primary text-white rounded-pill px-5 py-2 fw-bold">
+                        <button type="submit" class="btn btn-parcelle-primary text-white rounded-pill px-5 py-2 fw-bold">
                             <i class="fa-solid fa-save me-2"></i>Enregistrer
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales de confirmation suppression parcelle (dans le scope Alpine) -->
+    <template x-for="parcelle in parcelles" :key="'del-parcelle-' + parcelle.id">
+        <div class="modal fade" :id="'modalDeleteParcelle' + parcelle.id" tabindex="-1" aria-labelledby="modalDeleteParcelleLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-3">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title text-danger">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>Confirmer la suppression
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <p class="mb-0">
+                            Êtes-vous sûr de vouloir supprimer la parcelle <strong x-text="parcelle.nom"></strong> ?
+                            <span class="d-block small text-danger mt-2">Toutes les cultures associées seront également supprimées. Cette action est irréversible.</span>
+                        </p>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <form :action="'/parcelle/delete/' + parcelle.id" method="post" class="d-inline">
+                            <input type="hidden" name="_token" :value="parcelle.csrfToken">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">
+                                <i class="fa-solid fa-times me-1"></i>Annuler
+                            </button>
+                            <button type="submit" class="btn btn-danger rounded-pill">
+                                <i class="fa-solid fa-trash me-1"></i>Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal Conseiller IA : recommandations de cultures selon la parcelle -->
+    <div class="modal fade" id="modalConseillerIA" tabindex="-1" aria-labelledby="modalConseillerIALabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-3">
+                <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: #fff; border-radius: 1rem 1rem 0 0;">
+                    <h5 class="modal-title fw-bold" id="modalConseillerIALabel">
+                        <i class="fa-solid fa-robot me-2"></i>Conseiller IA
+                        <span x-show="conseillerParcelleNom" x-text="' — ' + conseillerParcelleNom" class="opacity-90"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3" x-show="conseillerParcelleNom && !conseillerResult && !conseillerError">
+                        Recommandations de cultures adaptées à cette parcelle (sol, surface, localisation).
+                    </p>
+                    <div x-show="conseillerLoading" class="text-center py-4">
+                        <div class="spinner-border text-primary mb-2" role="status"></div>
+                        <p class="mb-0 text-muted">Analyse de la parcelle en cours...</p>
+                    </div>
+                    <div x-show="conseillerError" x-cloak class="alert alert-danger mb-0">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i><span x-text="conseillerError"></span>
+                    </div>
+                    <div x-show="conseillerResult && !conseillerLoading" x-cloak class="conseiller-result rounded-3 p-3 bg-light border"
+                         style="white-space: pre-line; font-size: 0.95rem;" x-text="conseillerResult"></div>
+                    <div x-show="!conseillerLoading && (!conseillerResult || conseillerError) && conseillerParcelleId" class="text-center py-2">
+                        <button type="button" class="btn btn-primary rounded-pill px-4"
+                                style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border: none;"
+                                @click="conseillerError = null; getConseillerIa()">
+                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Obtenir les recommandations
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-times me-1"></i>Fermer
+                    </button>
+                    <button x-show="conseillerResult" type="button" class="btn btn-primary rounded-pill"
+                            style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border: none;"
+                            @click="conseillerResult = null; conseillerError = null; getConseillerIa()">
+                        <i class="fa-solid fa-rotate me-1"></i>Nouvelles recommandations
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -720,5 +907,109 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    
+    const btn = document.getElementById('start-voice-btn');
+    const status = document.getElementById('voice-status');
+
+    // Fonction de réponse vocale
+    function speak(text) {
+        window.speechSynthesis.cancel(); // Arrête toute voix en cours
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        window.speechSynthesis.speak(utterance);
+    }
+
+    btn.addEventListener('click', () => {
+        recognition.start();
+        status.classList.remove('d-none');
+        btn.classList.add('pulse-animation'); // Optionnel: ajouter une classe CSS pulse
+    });
+
+    recognition.onresult = (event) => {
+        const command = event.results[0][0].transcript.toLowerCase();
+        status.classList.add('d-none');
+        console.log("Commande : " + command);
+
+        // --- 1. AJOUT & CRÉATION ---
+        if (command.includes("ajouter") || command.includes("nouvelle")) {
+            if (command.includes("parcelle")) {
+                document.querySelector('[data-bs-target="#modalAjouterParcelle"]')?.click();
+                speak("Ouverture du formulaire de nouvelle parcelle.");
+            } else if (command.includes("culture")) {
+                document.querySelector('.btn-parcelle-primary[data-bs-target="#modalAjouterCulture"]')?.click();
+                speak("Ouverture du formulaire de culture.");
+            }
+        }
+
+        // --- 2. MODIFICATION ---
+        else if (command.includes("modifier") || command.includes("éditer")) {
+            const editBtn = document.querySelector('[data-bs-target="#modalEditCulture"]');
+            if (editBtn) {
+                editBtn.click();
+                speak("Modification de la culture activée.");
+            }
+        }
+
+        // --- 3. SUPPRESSION ---
+        else if (command.includes("supprimer") || command.includes("effacer")) {
+            const delBtn = document.querySelector('[data-bs-target^="#modalDeleteParcelle"]');
+            if (delBtn) {
+                delBtn.click();
+                speak("Attention, confirmez-vous la suppression ?");
+            }
+        }
+
+        // --- 4. DIAGNOSTIC & IA ---
+        else if (command.includes("diagnostic") || command.includes("santé") || command.includes("maladie")) {
+            // Cherche le bouton IA Diagnostic (Partie 2)
+            const diagBtn = document.querySelector('button[onclick*="analyzeHealth"]');
+            if (diagBtn) {
+                diagBtn.click();
+                speak("Analyse de santé par intelligence artificielle en cours.");
+            }
+        }
+        else if (command.includes("conseil") || command.includes("recommandation")) {
+            document.querySelector('[data-bs-target="#modalConseillerIA"]')?.click();
+            speak("J'ouvre le conseiller pour vos prochaines cultures.");
+        }
+
+        // --- 5. FILTRAGE ---
+        else if (command.includes("filtrer") || command.includes("montre")) {
+            const filterSelect = document.querySelector('select[x-model="filterStatus"]');
+            if (filterSelect) {
+                if (command.includes("croissance")) { filterSelect.value = "En croissance"; speak("Affichage des cultures en croissance."); }
+                else if (command.includes("besoin d'eau")) { filterSelect.value = "Besoin d'eau"; speak("Affichage des cultures ayant soif."); }
+                else if (command.includes("récolté")) { filterSelect.value = "Récolté"; speak("Affichage des récoltes terminées."); }
+                else { filterSelect.value = "all"; speak("Affichage de toutes les parcelles."); }
+                // Déclencher l'événement change pour Alpine.js
+                filterSelect.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // --- 6. VALIDATION & FERMETURE ---
+        else if (command.includes("valider") || command.includes("enregistrer") || command.includes("confirmer")) {
+            const submitBtn = document.querySelector('.modal.show .btn-parcelle-primary, .modal.show .btn-danger');
+            if (submitBtn) {
+                speak("Action confirmée.");
+                submitBtn.click();
+            }
+        }
+        else if (command.includes("fermer") || command.includes("quitter")) {
+            document.querySelectorAll('.btn-close, [data-bs-dismiss="modal"]').forEach(b => b.click());
+            speak("Fermeture.");
+        }
+    };
+
+    recognition.onerror = () => { status.classList.add('d-none'); };
+});
+</script>
 {{ include('front/semi-public/parcelle/_modal_ia.html.twig') }}
 {% endblock %}

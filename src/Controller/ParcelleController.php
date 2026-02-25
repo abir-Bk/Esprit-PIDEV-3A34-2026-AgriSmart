@@ -9,8 +9,10 @@ use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/parcelle')]
 class ParcelleController extends AbstractController
@@ -160,6 +162,69 @@ class ParcelleController extends AbstractController
 
         return $this->redirectToRoute('app_parcelle_index');
     }
+
+    #[Route('/{id}/conseiller-ia', name: 'app_parcelle_conseiller_ia', methods: ['POST'])]
+    public function conseillerIa(
+        Request $request,
+        Parcelle $parcelle,
+        HttpClientInterface $httpClient
+    ): JsonResponse {
+        if ($parcelle->getUser() !== $this->getUser()) {
+            return new JsonResponse(['success' => false, 'error' => 'Accès refusé.'], 403);
+        }
+
+        if (!$this->isCsrfTokenValid('conseiller_ia_' . $parcelle->getId(), $request->request->get('_token'))) {
+            return new JsonResponse(['success' => false, 'error' => 'Token invalide.'], 400);
+        }
+
+        $apiKey = $_ENV['GEMINI_API_KEY'] ?? null;
+        if (!$apiKey) {
+            return new JsonResponse(['success' => false, 'error' => 'Service IA non configuré.'], 503);
+        }
+
+        $nom = $parcelle->getNom();
+        $surface = $parcelle->getSurface();
+        $typeSol = $parcelle->getTypeSol();
+        $lat = $parcelle->getLatitude();
+        $lng = $parcelle->getLongitude();
+
+        $prompt = sprintf(
+            "Tu es un conseiller agricole expert. Une parcelle a les caractéristiques suivantes :\n" .
+            "- Nom : %s\n- Surface : %s hectare(s)\n- Type de sol : %s\n- Localisation : latitude %s, longitude %s\n\n" .
+            "Recommande 3 à 5 cultures adaptées à cette parcelle (variétés et pratiques si possible). " .
+            "Réponds en français, de façon claire et structurée (liste ou paragraphes courts). " .
+            "Ne mets pas de titre générique, va directement aux recommandations.",
+            $nom,
+            $surface,
+            $typeSol,
+            $lat,
+            $lng
+        );
+
+        try {
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey;
+            $response = $httpClient->request('POST', $url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'json' => [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                ],
+            ]);
+            $data = $response->toArray();
+
+            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                $text = $data['candidates'][0]['content']['parts'][0]['text'];
+                return new JsonResponse(['success' => true, 'recommendations' => $text]);
+            }
+
+            return new JsonResponse(['success' => false, 'error' => 'Réponse IA invalide.'], 502);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Erreur lors de la consultation du conseiller : ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     #[Route('/admin/toutes-les-parcelles', name: 'admin_parcelles_index', methods: ['GET'])]
     public function adminIndex(ParcelleRepository $parcelleRepository): Response
     {

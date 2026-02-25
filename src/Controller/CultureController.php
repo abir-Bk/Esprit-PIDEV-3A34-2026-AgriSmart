@@ -55,7 +55,7 @@ class CultureController extends AbstractController
         $entityManager->persist($culture);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Nouvelle culture ajoutée avec succès.');
+        $this->addFlash('success', '✅ Nouvelle culture ajoutée avec succès.');
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -97,7 +97,7 @@ class CultureController extends AbstractController
         $em->persist($consommation);
         $em->flush();
 
-        $this->addFlash('success', "Stock mis à jour.");
+        $this->addFlash('success', "✅ Stock mis à jour.");
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -119,7 +119,7 @@ class CultureController extends AbstractController
         $culture->setStatut((string) $request->request->get('statut', ''));
 
         $entityManager->flush();
-        $this->addFlash('success', 'Culture mise à jour.');
+        $this->addFlash('success', '✅ Culture mise à jour.');
         return $this->redirectToRoute('app_parcelle_index');
     }
 

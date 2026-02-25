@@ -327,6 +327,56 @@ body {
     color: #fff !important;
 }
 
+/* Modal Utiliser une ressource (Consommer) – design et bouton visible */
+.modal-consommer .modal-content {
+    border-radius: 1rem;
+    overflow: visible;
+}
+
+.modal-consommer .modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.modal-consommer .modal-footer.modal-consommer-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.modal-consommer .btn-consommer-submit {
+    background: #1A4331 !important;
+    border: none;
+    color: #fff !important;
+}
+
+.modal-consommer .btn-consommer-submit:hover:not(:disabled) {
+    background: #163828 !important;
+    color: #fff !important;
+}
+
+.modal-consommer .btn-consommer-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Message de contrôle de saisie "Quantité insuffisante" dans la modale */
+.modal-consommer .invalid-feedback.d-block {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* Masquer message Alpine avant init */
+[x-cloak] {
+    display: none !important;
+}
+
 /* Badge pour les ressources */
 .ressource-badge {
     background: #f8f9fa;

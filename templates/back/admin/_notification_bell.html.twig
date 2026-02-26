@@ -1,0 +1,238 @@
+<div class="notification-bell" id="notif-wrap">
+    <button class="bell-btn" id="bell-btn" onclick="toggleDropdown()">
+        <i class="bi bi-bell"></i>
+        <span class="badge-count d-none" id="badge-count">0</span>
+    </button>
+
+    <div class="notif-dropdown d-none" id="notif-dropdown">
+        <div class="notif-header">
+            <span class="notif-title">Notifications</span>
+            <button class="mark-all-btn" onclick="markAllRead()">Mark all read</button>
+        </div>
+
+        <div id="notif-list">
+            <div class="notif-empty">No notifications</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.notification-bell {
+    position: relative;
+    display: inline-block;
+}
+
+.bell-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: #4a7c3f;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.bell-btn:hover { background: #eef6e8; }
+
+.badge-count {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    background: #e74c3c;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 320px;
+    background: #fff;
+    border: 1px solid #dde8d0;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(45,90,39,0.12);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #dde8d0;
+}
+
+.notif-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1e2d1a;
+}
+
+.mark-all-btn {
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: #4a7c3f;
+    cursor: pointer;
+    padding: 0;
+}
+
+.mark-all-btn:hover { text-decoration: underline; }
+
+#notif-list {
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    display: flex;
+    gap: 10px;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #f0f5ea;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.notif-item:hover { background: #f7f4ee; }
+
+.notif-item.unread { background: #f0f7eb; }
+
+.notif-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+
+.notif-dot.warning { background: #e67e22; }
+.notif-dot.info    { background: #4a7c3f; }
+.notif-dot.success { background: #27ae60; }
+
+.notif-body { flex: 1; min-width: 0; }
+
+.notif-item-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1e2d1a;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notif-item-msg {
+    font-size: 0.78rem;
+    color: #5a6e55;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notif-item-time {
+    font-size: 0.7rem;
+    color: #a0b090;
+    margin-top: 3px;
+}
+
+.notif-empty {
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.84rem;
+    color: #a0b090;
+}
+</style>
+
+<script>
+let dropdownOpen = false;
+
+function toggleDropdown() {
+    dropdownOpen = !dropdownOpen;
+    document.getElementById('notif-dropdown').classList.toggle('d-none', !dropdownOpen);
+}
+
+// Close when clicking outside
+document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('notif-wrap');
+    if (!wrap.contains(e.target)) {
+        dropdownOpen = false;
+        document.getElementById('notif-dropdown').classList.add('d-none');
+    }
+});
+
+async function pollNotifications() {
+    try {
+        const res  = await fetch('{{ path("admin_notifications_poll") }}');
+        const data = await res.json();
+
+        // ── Badge ──
+        const badge = document.getElementById('badge-count');
+        if (data.unread > 0) {
+            badge.textContent = data.unread > 99 ? '99+' : data.unread;
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+
+        // ── List ──
+        const list = document.getElementById('notif-list');
+        if (data.notifications.length === 0) {
+            list.innerHTML = '<div class="notif-empty">No notifications</div>';
+            return;
+        }
+
+        list.innerHTML = data.notifications.map(n => `
+            <div class="notif-item ${n.isRead ? '' : 'unread'}"
+                 onclick="handleClick(${n.id}, '${n.link ?? ''}')">
+                <div class="notif-dot ${n.type}"></div>
+                <div class="notif-body">
+                    <div class="notif-item-title">${n.title}</div>
+                    <div class="notif-item-msg">${n.message}</div>
+                    <div class="notif-item-time">${n.createdAt}</div>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        // Silent fail — don't break admin UI
+    }
+}
+
+async function handleClick(id, link) {
+    // Mark as read
+    await fetch(`/admin/notifications/${id}/read`, { method: 'POST' });
+
+    // Redirect if link provided
+    if (link) {
+        window.location.href = link;
+    } else {
+        pollNotifications();
+    }
+}
+
+async function markAllRead() {
+    await fetch('{{ path("admin_notifications_read_all") }}', { method: 'POST' });
+    pollNotifications();
+}
+
+// ── Poll every 10 seconds ──
+pollNotifications();
+setInterval(pollNotifications, 10000);
+</script>

@@ -1,6 +1,6 @@
 {% extends 'front/base.html.twig' %}
 
-{% block title %}My Profile - AgriSmart{% endblock %}
+{% block title %}Mon Profil - AgriSmart{% endblock %}
 
 {% block body %}
 <main>
@@ -8,64 +8,100 @@
 <div class="container">
 <div class="row">
 
-    <!-- Sidebar -->
+    <!-- Barre latérale -->
     {% include 'front/semi-public/users/side_bar.html.twig' %}
 
-    <!-- MAIN CONTENT -->
+    <!-- CONTENU PRINCIPAL -->
     <div class="col-lg-8 col-xl-9">
         <div class="vstack gap-4">
 
-            <!-- PERSONAL INFO -->
-            <div class="card border">
-                <div class="card-header border-bottom">
-                    <h4 class="card-header-title">Personal Information</h4>
+            <!-- INFORMATIONS PERSONNELLES -->
+            <div class="ag-profile-card card border-0">
+                <div class="ag-card-header">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Informations personnelles
                 </div>
 
-                <div class="card-body">
-                    <div class="row g-3">
+                <div class="card-body p-4">
+                    <div class="row g-4">
 
                         <!-- Avatar -->
-                        <div class="col-12 mb-3 text-center">
+                        <div class="col-12 text-center mb-2">
                             {% if app.user.image %}
-                                <img src="{{ asset('uploads/images/' ~ app.user.image) }}" 
-                                     alt="Profile Image" class="img-thumbnail mb-2" width="150">
+                                <img src="{{ asset('uploads/users/images/' ~ app.user.image) }}"
+                                     alt="Photo de profil"
+                                     class="ag-avatar-img">
                             {% else %}
-                                <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:150px; height:150px; font-size:2rem;">
+                                <div class="ag-avatar-initials mx-auto">
                                     {{ app.user.firstName|slice(0,1)|upper }}{{ app.user.lastName|slice(0,1)|upper }}
                                 </div>
                             {% endif %}
+                            <h5 class="ag-username mt-3 mb-0">
+                                {{ app.user.firstName }} {{ app.user.lastName }}
+                            </h5>
                         </div>
 
-                        <!-- First Name -->
+                        <!-- Prénom -->
                         <div class="col-md-6">
-                            <label class="fw-bold">First Name</label>
-                            <p>{{ app.user.firstName }}</p>
+                            <div class="ag-field">
+                                <span class="ag-field__label">
+                                    <i class="bi bi-person me-1"></i> Prénom
+                                </span>
+                                <span class="ag-field__value">{{ app.user.firstName }}</span>
+                            </div>
                         </div>
 
-                        <!-- Last Name -->
+                        <!-- Nom -->
                         <div class="col-md-6">
-                            <label class="fw-bold">Last Name</label>
-                            <p>{{ app.user.lastName }}</p>
+                            <div class="ag-field">
+                                <span class="ag-field__label">
+                                    <i class="bi bi-person me-1"></i> Nom
+                                </span>
+                                <span class="ag-field__value">{{ app.user.lastName }}</span>
+                            </div>
                         </div>
 
                         <!-- Email -->
                         <div class="col-md-6">
-                            <label class="fw-bold">Email</label>
-                            <p>{{ app.user.email }}</p>
+                            <div class="ag-field">
+                                <span class="ag-field__label">
+                                    <i class="bi bi-envelope me-1"></i> Adresse e-mail
+                                </span>
+                                <span class="ag-field__value">{{ app.user.email }}</span>
+                            </div>
                         </div>
 
-                        <!-- Phone -->
+                        <!-- Téléphone -->
                         <div class="col-md-6">
-                            <label class="fw-bold">Phone</label>
-                            <p>{{ app.user.phone ?? 'Not provided' }}</p>
+                            <div class="ag-field">
+                                <span class="ag-field__label">
+                                    <i class="bi bi-telephone me-1"></i> Téléphone
+                                </span>
+                                <span class="ag-field__value {% if not app.user.phone %}ag-field__value--empty{% endif %}">
+                                    {{ app.user.phone ?? 'Non renseigné' }}
+                                </span>
+                            </div>
                         </div>
 
-                        <!-- Address -->
+                        <!-- Adresse -->
                         <div class="col-12">
-                            <label class="fw-bold">Address</label>
-                            <p>{{ app.user.address ?? 'Not provided' }}</p>
+                            <div class="ag-field">
+                                <span class="ag-field__label">
+                                    <i class="bi bi-geo-alt me-1"></i> Adresse
+                                </span>
+                                <span class="ag-field__value {% if not app.user.address %}ag-field__value--empty{% endif %}">
+                                    {{ app.user.address ?? 'Non renseignée' }}
+                                </span>
+                            </div>
                         </div>
 
+                    </div>
+
+                    <!-- Bouton modifier -->
+                    <div class="text-end mt-4">
+                        <a href="{{ path('app_profile_edit') }}" class="ag-btn-edit">
+                            <i class="bi bi-pencil me-2"></i>Modifier le profil
+                        </a>
                     </div>
                 </div>
             </div>
@@ -77,4 +113,109 @@
 </div>
 </section>
 </main>
+
+<style>
+/* ── Card ── */
+.ag-profile-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(31, 61, 43, 0.08);
+    background: #fff;
+}
+
+/* ── En-tête ── */
+.ag-card-header {
+    background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+/* ── Avatar ── */
+.ag-avatar-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 16px rgba(31, 61, 43, 0.2);
+}
+
+.ag-avatar-initials {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1F3D2B, #2d9c5a);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 16px rgba(31, 61, 43, 0.2);
+}
+
+.ag-username {
+    color: #1F3D2B;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* ── Champs ── */
+.ag-field {
+    background: #f4f8f5;
+    border: 1px solid #d4e6da;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    height: 100%;
+}
+
+.ag-field__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c8c78;
+}
+
+.ag-field__value {
+    font-size: 0.95rem;
+    color: #1F3D2B;
+    font-weight: 500;
+}
+
+.ag-field__value--empty {
+    color: #a0b4a8;
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* ── Bouton ── */
+.ag-btn-edit {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
+    color: #fff;
+    text-decoration: none;
+    padding: 0.55rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ag-btn-edit:hover {
+    color: #E6BF4A;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(31, 61, 43, 0.3);
+}
+</style>
+
 {% endblock %}

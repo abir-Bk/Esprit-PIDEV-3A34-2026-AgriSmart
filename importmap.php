@@ -32,4 +32,7 @@ return [
         'version' => '4.6.13',
         'type' => 'css',
     ],
+    'chart.js' => [
+        'version' => '3.9.1',
+    ],
 ];

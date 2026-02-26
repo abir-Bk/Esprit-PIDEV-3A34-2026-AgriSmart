@@ -1,416 +1,427 @@
 <!-- Sidebar START -->
-<nav class="navbar sidebar navbar-expand-xl navbar-light">
-    <!-- Navbar brand for mobile -->
-    <div class="d-flex align-items-center justify-content-between w-100 px-3 py-2 d-xl-none">
-        <a class="navbar-brand d-flex align-items-center py-0" href="#">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
-            <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">
-                Agri<span style="color: #28a745;">Smart</span>
-            </span>
+<nav class="ag-sidebar navbar navbar-expand-xl">
+
+    <!-- Mobile topbar -->
+    <div class="ag-topbar d-xl-none">
+        <a href="#" class="ag-brand">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" style="height:28px;">
+            <span class="ag-brand__name">Agri<em>Smart</em></span>
         </a>
-        <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
-            <i class="fa-solid fa-bars fa-lg"></i>
+        <button class="ag-burger" type="button" data-bs-toggle="offcanvas" data-bs-target="#agSidebarCanvas" aria-label="Menu">
+            <span></span><span></span><span></span>
         </button>
     </div>
 
-    <!-- Offcanvas Sidebar -->
-    <div class="offcanvas-xl offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1" id="offcanvasSidebar">
-        <!-- Offcanvas header (mobile only) -->
-        <div class="offcanvas-header d-xl-none border-bottom">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:30px;">
-                <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.1rem;">
-                    Agri<span style="color: #28a745;">Smart</span>
-                </span>
+    <!-- Offcanvas -->
+    <div class="offcanvas-xl offcanvas-start ag-canvas" tabindex="-1" id="agSidebarCanvas" data-bs-backdrop="true">
+
+        <div class="offcanvas-header d-xl-none ag-canvas__header">
+            <a href="#" class="ag-brand">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" style="height:28px;">
+                <span class="ag-brand__name">Agri<em>Smart</em></span>
             </a>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasSidebar" aria-label="Close"></button>
+            <button class="ag-close" type="button" data-bs-dismiss="offcanvas" data-bs-target="#agSidebarCanvas" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
-        <!-- Offcanvas body -->
-        <div class="offcanvas-body sidebar-content d-flex flex-column p-0">
-            
-            <!-- Brand for desktop -->
-            <div class="d-none d-xl-flex align-items-center px-4 py-3 border-bottom">
-                <a class="navbar-brand d-flex align-items-center py-0 w-100" href="#">
-                    <img src="{{ asset('assets/images/logo.png') }}" alt="logo" style="height:32px;">
-                    <span class="fw-bold ms-2" style="color: #1a4331; font-size: 1.2rem;">
-                        Agri<span style="color: #28a745;">Smart</span>
-                    </span>
+        <div class="ag-body">
+
+            <!-- Logo desktop -->
+            <div class="ag-logo d-none d-xl-flex">
+                <a href="#" class="ag-brand">
+                    <img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" style="height:30px;">
+                    <span class="ag-brand__name">Agri<em>Smart</em></span>
                 </a>
             </div>
 
-            <!-- Sidebar menu -->
-            <ul class="navbar-nav flex-column px-3 pt-4 flex-grow-1" id="navbar-sidebar">
+            <!-- User chip -->
+            {% if app.user %}
+            <div class="ag-user">
+                <div class="ag-user__avatar">
+                    {% if app.user.image %}
+                        <img src="{{ asset('uploads/images/' ~ app.user.image) }}" alt="">
+                    {% else %}
+                        <i class="fa-solid fa-user"></i>
+                    {% endif %}
+                </div>
+                <div class="ag-user__info">
+                    <span class="ag-user__name">{{ app.user.firstName }}</span>
+                    <span class="ag-user__role">{{ app.user.roles[0]|replace({'ROLE_': '', '_': ' '})|title }}</span>
+                </div>
+            </div>
+            {% endif %}
 
-                <!-- Main Navigation -->
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') in ['user_dashboard', 'admin_marketplace_dashboard'] %}active{% endif %}" href="{{ is_granted('ROLE_ADMIN') ? path('admin_marketplace_dashboard') : path('user_dashboard') }}">
-                        <i class="fa-solid fa-house me-2"></i>
+            <!-- Nav -->
+            <ul class="ag-nav">
+
+                <li>
+                    <a href="{{ is_granted('ROLE_ADMIN') ? path('admin_dashboard') : path('user_dashboard') }}"
+                       class="ag-link {% if app.request.attributes.get('_route') in ['user_dashboard','admin_dashboard'] %}ag-link--active{% endif %}">
+                        <span class="ag-link__icon"><i class="fa-solid fa-house"></i></span>
                         <span>Dashboard</span>
                     </a>
                 </li>
 
                 {% if is_granted('ROLE_ADMIN') %}
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}" href="{{ path('admin_users') }}">
-                        <i class="fa-solid fa-users me-2"></i>
+                <li>
+                    <a href="{{ path('admin_users') }}"
+                       class="ag-link {% if app.request.attributes.get('_route') == 'admin_users' %}ag-link--active{% endif %}">
+                        <span class="ag-link__icon"><i class="fa-solid fa-users"></i></span>
                         <span>Utilisateurs</span>
                     </a>
                 </li>
                 {% endif %}
 
-                <li class="nav-item mb-1">
+                <li>
                     {% if is_granted('ROLE_ADMIN') %}
-                        <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'app_offre_admin_index' %}active{% endif %}" href="{{ path('app_offre_admin_index') }}">
-                            <i class="fa-solid fa-briefcase me-2"></i>
+                        <a href="{{ path('app_offre_admin_index') }}"
+                           class="ag-link {% if app.request.attributes.get('_route') == 'app_offre_admin_index' %}ag-link--active{% endif %}">
+                            <span class="ag-link__icon"><i class="fa-solid fa-briefcase"></i></span>
                             <span>Offres d'emploi</span>
                         </a>
                     {% else %}
-                        <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'app_admin_offres' %}active{% endif %}" href="{{ path('app_admin_offres') }}">
-                            <i class="fa-solid fa-briefcase me-2"></i>
+                        <a href="{{ path('app_admin_offres') }}"
+                           class="ag-link {% if app.request.attributes.get('_route') == 'app_admin_offres' %}ag-link--active{% endif %}">
+                            <span class="ag-link__icon"><i class="fa-solid fa-briefcase"></i></span>
                             <span>Mes offres</span>
                         </a>
                     {% endif %}
                 </li>
 
                 {% if is_granted('ROLE_ADMIN') %}
-                <!-- Section MARKETPLACE -->
-                <li class="nav-item mt-4 mb-2">
-                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Marketplace</span>
-                </li>
+                <li class="ag-section-label">Marketplace</li>
 
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_dashboard' %}active{% endif %}" href="{{ path('admin_marketplace_dashboard') }}">
-                        <i class="fa-solid fa-chart-line me-2"></i>
+                <li>
+                    <a href="{{ path('admin_marketplace_dashboard') }}"
+                       class="ag-link {% if app.request.attributes.get('_route') == 'admin_marketplace_dashboard' %}ag-link--active{% endif %}">
+                        <span class="ag-link__icon"><i class="fa-solid fa-chart-line"></i></span>
                         <span>Statistiques</span>
                     </a>
                 </li>
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_commandes' %}active{% endif %}" href="{{ path('admin_marketplace_commandes') }}">
-                        <i class="fa-solid fa-cart-shopping me-2"></i>
+                <li>
+                    <a href="{{ path('admin_marketplace_commandes') }}"
+                       class="ag-link {% if app.request.attributes.get('_route') == 'admin_marketplace_commandes' %}ag-link--active{% endif %}">
+                        <span class="ag-link__icon"><i class="fa-solid fa-cart-shopping"></i></span>
                         <span>Commandes</span>
                     </a>
                 </li>
-                <li class="nav-item mb-1">
-                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_produits' %}active{% endif %}" href="{{ path('admin_marketplace_produits') }}">
-                        <i class="fa-solid fa-box me-2"></i>
+                <li>
+                    <a href="{{ path('admin_marketplace_produits') }}"
+                       class="ag-link {% if app.request.attributes.get('_route') == 'admin_marketplace_produits' %}ag-link--active{% endif %}">
+                        <span class="ag-link__icon"><i class="fa-solid fa-box"></i></span>
                         <span>Catalogue produits</span>
                     </a>
                 </li>
                 {% endif %}
 
             </ul>
-            <!-- Sidebar menu end -->
 
-            <!-- Sidebar footer -->
-            <div class="sidebar-footer border-top mt-auto">
-                <div class="d-flex align-items-center justify-content-between p-3">
-                    <a class="sidebar-footer-link d-flex align-items-center text-decoration-none" href="{{ path('app_logout') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
-                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>
-                        <span class="small fw-medium">Log out</span>
-                    </a>
-                    <a class="sidebar-footer-link" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
-                        <i class="fa-solid fa-gear"></i>
-                    </a>
-                </div>
+            <!-- Footer -->
+            <div class="ag-footer">
+                <a href="{{ path('app_logout') }}" class="ag-footer__link">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Déconnexion</span>
+                </a>
+                <a href="#" class="ag-footer__icon" title="Paramètres">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
             </div>
+
         </div>
     </div>
 </nav>
 <!-- Sidebar END -->
 
 <style>
-/* ================================
-   SIDEBAR STYLES
-   ================================ */
-
-/* Sidebar Base */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 280px;
-    background: #ffffff;
-    border-right: 1px solid #e9ecef;
-    transition: all 0.3s ease-in-out;
-    z-index: 1040;
+/* ── CSS Variables — adapts to light & dark browser themes ── */
+:root {
+    --ag-bg:        #ffffff;
+    --ag-border:    #e8eceb;
+    --ag-text:      #374151;
+    --ag-muted:     #9ca3af;
+    --ag-accent:    #1a4331;
+    --ag-accent-lt: #eaf3ee;
+    --ag-active-tx: #1a4331;
+    --ag-hover-bg:  #f4f8f5;
+    --ag-user-bg:   #f4f8f5;
+    --ag-width:     260px;
+    --ag-radius:    10px;
+    --ag-transition: 0.18s ease;
 }
 
-/* Custom Scrollbar */
-.custom-scrollbar {
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ag-bg:        #111827;
+        --ag-border:    #1f2d24;
+        --ag-text:      #d1d5db;
+        --ag-muted:     #6b7280;
+        --ag-accent:    #34d399;
+        --ag-accent-lt: #052e1a;
+        --ag-active-tx: #34d399;
+        --ag-hover-bg:  #1a2e22;
+        --ag-user-bg:   #1a2e22;
+    }
+}
+
+/* ── Sidebar shell ── */
+.ag-sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--ag-width);
+    height: 100vh;
+    background: var(--ag-bg);
+    border-right: 1px solid var(--ag-border);
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Canvas (offcanvas) ── */
+.ag-canvas {
+    width: var(--ag-width) !important;
+    background: var(--ag-bg) !important;
+    border-right: 1px solid var(--ag-border) !important;
+}
+
+.ag-canvas__header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ag-border);
+}
+
+/* ── Body ── */
+.ag-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e0 transparent;
+    scrollbar-color: var(--ag-border) transparent;
+}
+.ag-body::-webkit-scrollbar { width: 4px; }
+.ag-body::-webkit-scrollbar-thumb { background: var(--ag-border); border-radius: 4px; }
+
+/* ── Logo ── */
+.ag-logo {
+    padding: 1.125rem 1.25rem;
+    border-bottom: 1px solid var(--ag-border);
+    flex-shrink: 0;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #cbd5e0;
-    border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: #a0aec0;
-}
-
-/* Sidebar Content */
-.sidebar-content {
-    height: 100%;
-}
-
-/* Sidebar Headings */
-.sidebar-heading {
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-}
-
-/* Navigation Links */
-.sidebar-link {
+.ag-brand {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem;
-    color: #4a5568;
+    gap: 0.6rem;
     text-decoration: none;
-    border-radius: 0.5rem;
-    margin: 0 0.25rem;
-    transition: all 0.2s ease;
+}
+
+.ag-brand__name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ag-accent);
+    letter-spacing: -0.01em;
+}
+
+.ag-brand__name em {
+    font-style: normal;
+    color: var(--ag-muted);
     font-weight: 500;
-    font-size: 0.95rem;
-    position: relative;
 }
 
-.sidebar-link i:first-child {
-    width: 20px;
-    text-align: center;
-    font-size: 1rem;
-    opacity: 0.8;
-}
-
-.sidebar-link:hover {
-    background: #f7fafc;
-    color: #1a4331;
-    transform: translateX(2px);
-}
-
-.sidebar-link:hover i {
-    opacity: 1;
-}
-
-/* Active Link */
-.sidebar-link.active {
-    background: linear-gradient(135deg, #1a4331 0%, #28a745 100%);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(26, 67, 49, 0.2);
-}
-
-.sidebar-link.active i {
-    opacity: 1;
-    color: #ffffff;
-}
-
-/* Collapse Arrow */
-.sidebar-arrow {
-    font-size: 0.7rem;
-    transition: transform 0.3s ease;
-}
-
-.sidebar-link:not(.collapsed) .sidebar-arrow {
-    transform: rotate(180deg);
-}
-
-/* Submenu */
-.submenu {
-    padding-left: 1rem;
-    margin-top: 0.25rem;
-}
-
-.sidebar-sublink {
+/* ── User chip ── */
+.ag-user {
     display: flex;
     align-items: center;
-    padding: 0.6rem 1rem 0.6rem 2.5rem;
-    color: #718096;
-    text-decoration: none;
-    border-radius: 0.5rem;
-    margin: 0 0.25rem 0.25rem;
-    transition: all 0.2s ease;
-    font-size: 0.9rem;
-    position: relative;
+    gap: 0.75rem;
+    margin: 1rem 1rem 0.5rem;
+    padding: 0.75rem;
+    background: var(--ag-user-bg);
+    border-radius: var(--ag-radius);
 }
 
-.sidebar-sublink::before {
-    content: '';
-    position: absolute;
-    left: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 4px;
-    background: currentColor;
+.ag-user__avatar {
+    width: 36px; height: 36px;
     border-radius: 50%;
-    opacity: 0.5;
+    background: var(--ag-border);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    color: var(--ag-muted);
+    font-size: 0.9rem;
 }
 
-.sidebar-sublink i.fa-circle {
-    font-size: 0.4rem;
-    opacity: 0.6;
+.ag-user__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.ag-user__name {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ag-text);
+    line-height: 1.2;
 }
 
-.sidebar-sublink:hover {
-    background: #f7fafc;
-    color: #28a745;
-    padding-left: 2.7rem;
+.ag-user__role {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--ag-muted);
 }
 
-.sidebar-sublink:hover::before {
+/* ── Nav ── */
+.ag-nav {
+    list-style: none;
+    padding: 0.75rem 0.75rem;
+    margin: 0;
+    flex: 1;
+}
+
+.ag-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ag-muted);
+    padding: 1rem 0.75rem 0.4rem;
+}
+
+.ag-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--ag-radius);
+    color: var(--ag-text);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--ag-transition), color var(--ag-transition);
+    margin-bottom: 2px;
+}
+
+.ag-link:hover {
+    background: var(--ag-hover-bg);
+    color: var(--ag-accent);
+}
+
+.ag-link--active {
+    background: var(--ag-accent-lt);
+    color: var(--ag-active-tx);
+    font-weight: 600;
+}
+
+.ag-link__icon {
+    width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.ag-link:hover .ag-link__icon,
+.ag-link--active .ag-link__icon {
     opacity: 1;
 }
 
-/* Sidebar Footer */
-.sidebar-footer {
-    background: #f8f9fa;
+/* ── Footer ── */
+.ag-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    border-top: 1px solid var(--ag-border);
+    flex-shrink: 0;
 }
 
-.sidebar-footer-link {
-    color: #4a5568;
+.ag-footer__link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ag-muted);
     text-decoration: none;
-    transition: all 0.2s ease;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: color var(--ag-transition);
 }
 
-.sidebar-footer-link:hover {
-    color: #1a4331;
+.ag-footer__link:hover { color: var(--ag-text); }
+
+.ag-footer__icon {
+    color: var(--ag-muted);
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color var(--ag-transition);
 }
 
-.sidebar-footer-link i {
+.ag-footer__icon:hover { color: var(--ag-text); }
+
+/* ── Mobile topbar ── */
+.ag-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    width: 100%;
+}
+
+.ag-burger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 4px;
+}
+
+.ag-burger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ag-text);
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+
+.ag-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ag-muted);
     font-size: 1.1rem;
+    padding: 4px;
+    transition: color var(--ag-transition);
 }
 
-/* ================================
-   RESPONSIVE STYLES
-   ================================ */
+.ag-close:hover { color: var(--ag-text); }
 
-/* Tablet and below */
-@media (max-width: 1199.98px) {
-    .sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .offcanvas-start {
-        width: 280px !important;
-    }
-}
-
-/* Mobile */
-@media (max-width: 575.98px) {
-    .offcanvas-start {
-        width: 85% !important;
-        max-width: 300px;
-    }
-
-    .sidebar-link {
-        font-size: 0.9rem;
-        padding: 0.65rem 0.875rem;
-    }
-
-    .sidebar-sublink {
-        font-size: 0.85rem;
-        padding: 0.55rem 0.875rem 0.55rem 2.25rem;
-    }
-}
-
-/* Desktop - add padding to main content */
+/* ── Responsive ── */
 @media (min-width: 1200px) {
-    body {
-        padding-left: 280px;
-    }
+    body { padding-left: var(--ag-width); }
+    .ag-body { height: 100vh; }
 }
 
-/* ================================
-   ANIMATIONS
-   ================================ */
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+@media (max-width: 1199px) {
+    .ag-sidebar { position: static; width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--ag-border); }
 }
 
-.nav-item {
-    animation: slideInLeft 0.3s ease forwards;
-}
-
-.nav-item:nth-child(1) { animation-delay: 0.05s; }
-.nav-item:nth-child(2) { animation-delay: 0.1s; }
-.nav-item:nth-child(3) { animation-delay: 0.15s; }
-.nav-item:nth-child(4) { animation-delay: 0.2s; }
-.nav-item:nth-child(5) { animation-delay: 0.25s; }
-
-/* Smooth collapse animation */
-.collapse {
-    transition: height 0.35s ease;
-}
-
-/* Focus states for accessibility */
-.sidebar-link:focus,
-.sidebar-sublink:focus {
-    outline: 2px solid #28a745;
-    outline-offset: 2px;
-}
-
-/* Print styles */
 @media print {
-    .sidebar {
-        display: none;
-    }
+    .ag-sidebar { display: none; }
+    body { padding-left: 0 !important; }
 }
 </style>
 
 <script>
-// Initialize Bootstrap tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    // Bootstrap tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
-    // Close mobile menu on link click
-    const navLinks = document.querySelectorAll('.sidebar-link:not([data-bs-toggle="collapse"])');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasSidebar'));
-            if (offcanvas && window.innerWidth < 1200) {
-                offcanvas.hide();
-            }
+    // Close mobile offcanvas on nav link click
+    document.querySelectorAll('.ag-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const canvas = bootstrap.Offcanvas.getInstance(document.getElementById('agSidebarCanvas'));
+            if (canvas && window.innerWidth < 1200) canvas.hide();
         });
     });
-
-    // Active submenu parent highlighting
-    const activeSublink = document.querySelector('.sidebar-sublink.active');
-    if (activeSublink) {
-        const parentCollapse = activeSublink.closest('.collapse');
-        if (parentCollapse) {
-            const parentLink = document.querySelector(`[href="#${parentCollapse.id}"]`);
-            if (parentLink) {
-                parentLink.classList.add('active-parent');
-                new bootstrap.Collapse(parentCollapse, { toggle: true });
-            }
-        }
-    }
 });
 </script>

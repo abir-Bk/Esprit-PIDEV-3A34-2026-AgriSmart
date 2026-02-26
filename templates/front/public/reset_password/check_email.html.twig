@@ -1,7 +1,6 @@
 {% extends 'front/base.html.twig' %}
 
-{% block title %}Password Reset Email Sent{% endblock %}
-
+{% block title %}Email de réinitialisation envoyé{% endblock %}
 {% block stylesheets %}
     {{ parent() }}
     <style>
@@ -232,34 +231,34 @@
                 </div>
 
                 <div class="text-content">
-                    <h1>Check Your Email</h1>
+                   <h1>Vérifiez votre email</h1>
 
-                    <p>
-                        <strong>🌱 Email Sent Successfully!</strong><br>
-                        If an account matching your email exists, we've just sent you a password reset link.
-                    </p>
-
-                    <div class="info-box">
                         <p>
-                            <strong>Next step:</strong> Check your inbox (and spam folder) and click the link to reset your password.
+                            <strong>Email envoyé avec succès !</strong><br>
+                            Si un compte correspond à votre adresse email, nous venons de vous envoyer un lien de réinitialisation du mot de passe.
                         </p>
-                        <span class="expiration-badge">
-                            ⏱️ Expires in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}
-                        </span>
-                    </div>
 
-                    <p style="font-size: 0.9rem; color: #1a2416;">
-                        <strong>💡 Tip:</strong> If the email doesn't arrive within a few minutes, check your spam/junk folder.
-                    </p>
+                        <div class="info-box">
+                            <p>
+                                <strong>Étape suivante :</strong> Consultez votre boîte de réception (ainsi que le dossier spam) et cliquez sur le lien pour réinitialiser votre mot de passe.
+                            </p>
+                            <span class="expiration-badge">
+                                ⏱️ Expire dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}
+                            </span>
+                        </div>
+
+                        <p style="font-size: 0.9rem; color: #1a2416;">
+                            <strong>💡 Astuce :</strong> Si l’email n’arrive pas dans quelques minutes, vérifiez votre dossier spam ou courrier indésirable.
+                        </p>
 
                     <!-- Improved buttons area -->
                     <div class="actions">
                         <a href="{{ path('app_forgot_password_request') }}" class="btn-primary">
-                            ↻ Resend Reset Link
+                            ↻ Renvoyer le lien
                         </a>
 
                         <a href="{{ path('app_login') }}" class="btn-secondary">
-                            ← Back to Login
+                            ← Retour à la connexion
                         </a>
                     </div>
                 </div>

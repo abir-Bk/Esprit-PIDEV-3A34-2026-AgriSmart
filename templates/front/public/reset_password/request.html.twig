@@ -1,7 +1,6 @@
 {% extends 'front/base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
-
+{% block title %}Réinitialiser votre mot de passe{% endblock %}
 {% block body %}
 <main>
 <section class="vh-xxl-100">
@@ -13,8 +12,14 @@
 
 						<div class="col-lg-6 d-md-flex align-items-center order-2 order-lg-1">
 							<div class="p-3 p-lg-5">
-								<img src="{{ asset('assets/images/element/forgot-pass.svg') }}" alt="">
-							</div>
+ 								<lottie-player 
+                                    src="{{ asset('assets/images/Forgot_Password.json') }}"
+                                    background="transparent" 
+                                    speed="1" 
+                                    style="width: 100%; max-width: 380px; height: auto;"
+                                    loop 
+                                    autoplay>
+                                </lottie-player>							</div>
 							<div class="vr opacity-1 d-none d-lg-block"></div>
 						</div>
 
@@ -25,8 +30,8 @@
 									<div class="alert alert-danger">{{ flash_error }}</div>
 								{% endfor %}
 
-								<h1 class="mb-2 h3">Forgot password?</h1>
-								<p>Enter your email to receive reset link.</p>
+								<h1 class="mb-2 h3">Mot de passe oublié ?</h1>
+								<p>Entrez votre adresse email pour recevoir un lien de réinitialisation.</p>
 
 								{{ form_start(requestForm, {'attr': {'class':'mt-sm-4 text-start'}}) }}
 
@@ -37,9 +42,14 @@
 								</div>
 
 								<div class="d-grid">
-									<button class="btn btn-primary">
-										Send password reset email
-									</button>
+									<button class="btn btn-primary"style="background: linear-gradient(135deg, #1F3D2B 0%, #2a5438 100%); 
+                                               border: none; 
+                                               border-radius: 12px; 
+                                               padding: 12px; 
+                                               transition: all 0.3s ease;
+                                               font-size: 15px;"> 
+								Envoyer le lien de réinitialisation							
+								</button>
 								</div>
 
 								{{ form_end(requestForm) }}
@@ -54,4 +64,10 @@
 	</div>
 </section>
 </main>
+{% endblock %}
+{% block javascripts %}
+
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 {% endblock %}

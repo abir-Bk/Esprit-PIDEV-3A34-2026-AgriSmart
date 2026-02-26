@@ -126,35 +126,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
-#[ORM\Column(type: 'string', length: 6, nullable: true)]
-private ?string $twoFactorCode = null;
+    #[ORM\Column(type: 'string', length: 6, nullable: true)]
+    private ?string $twoFactorCode = null;
 
-#[ORM\Column(type: 'datetime', nullable: true)]
-private ?\DateTimeInterface $twoFactorExpiresAt = null;
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $twoFactorExpiresAt = null;
 
-// Getters / Setters
-public function getTwoFactorCode(): ?string
-{
-    return $this->twoFactorCode;
-}
+    // Getters / Setters
+    public function getTwoFactorCode(): ?string
+    {
+        return $this->twoFactorCode;
+    }
 
-public function setTwoFactorCode(?string $code): self
-{
-    $this->twoFactorCode = $code;
-    return $this;
-}
+    public function setTwoFactorCode(?string $code): self
+    {
+        $this->twoFactorCode = $code;
+        return $this;
+    }
 
-public function getTwoFactorExpiresAt(): ?\DateTimeInterface
-{
-    return $this->twoFactorExpiresAt;
-}
+    public function getTwoFactorExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->twoFactorExpiresAt;
+    }
 
-public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
-{
-    $this->twoFactorExpiresAt = $expiresAt;
-    return $this;
-}
-  
+    public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
+    {
+        $this->twoFactorExpiresAt = $expiresAt;
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

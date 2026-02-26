@@ -10,16 +10,19 @@ class HuggingFaceService
 {
     private string $apiKey;
     private string $model;
+    private string $tasksModel;
     private HttpClientInterface $httpClient;
 
     public function __construct(
         HttpClientInterface $httpClient,
         ?string $huggingFaceApiKey = null,
-        ?string $huggingFaceModel = null
+        ?string $huggingFaceModel = null,
+        ?string $huggingFaceTasksModel = null
     ) {
         $this->httpClient = $httpClient;
         $this->apiKey = (string) ($huggingFaceApiKey ?? '');
         $this->model = trim((string) ($huggingFaceModel ?? '')) ?: 'Qwen/Qwen2.5-7B-Instruct';
+        $this->tasksModel = trim((string) ($huggingFaceTasksModel ?? '')) ?: $this->model;
     }
 
     /**
@@ -56,6 +59,23 @@ class HuggingFaceService
             $messages
         );
 
+        return $this->requestCompletion($fullMessages, $this->model);
+    }
+
+    /**
+     * @param array<int, array{role: string, content: string}> $messages
+     */
+    private function requestCompletion(array $messages, string $model): string
+    {
+        if ($this->apiKey === '' || trim($this->apiKey) === '') {
+            throw new AiProviderException(
+                provider: 'huggingface',
+                kind: 'config',
+                userMessage: 'Service Hugging Face non configuré.',
+                statusCode: 500
+            );
+        }
+
         try {
             $response = $this->httpClient->request('POST', 'https://router.huggingface.co/v1/chat/completions', [
                 'timeout' => 12,
@@ -65,8 +85,8 @@ class HuggingFaceService
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model' => $this->model,
-                    'messages' => $fullMessages,
+                    'model' => $model,
+                    'messages' => $messages,
                     'max_tokens' => 350,
                     'temperature' => 0.7,
                 ],
@@ -124,6 +144,36 @@ class HuggingFaceService
 
         return $data['choices'][0]['message']['content']
             ?? 'Je suis désolé, je n\'ai pas pu générer une réponse.';
+    }
+
+    public function summarizeText(string $text): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Résume le texte en français en 3 à 5 points clairs et actionnables.'],
+            ['role' => 'user', 'content' => $text],
+        ];
+
+        return $this->requestCompletion($messages, $this->tasksModel);
+    }
+
+    public function translateText(string $text, string $targetLanguage = 'en'): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Traduis fidèlement le texte donné vers la langue cible. Retourne uniquement la traduction.'],
+            ['role' => 'user', 'content' => sprintf('Langue cible: %s\n\nTexte:\n%s', $targetLanguage, $text)],
+        ];
+
+        return $this->requestCompletion($messages, $this->tasksModel);
+    }
+
+    public function recommendDescription(string $title, string $type = ''): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Tu aides à améliorer la clarté des tâches. Rédige une recommandation concise et utile en français.'],
+            ['role' => 'user', 'content' => sprintf('Titre: %s\nType: %s\n\nFais une recommandation courte.', $title, $type ?: 'non précisé')],
+        ];
+
+        return $this->requestCompletion($messages, $this->tasksModel);
     }
 
     /**

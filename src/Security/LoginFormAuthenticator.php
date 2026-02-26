@@ -27,7 +27,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private Security $security,
-    ) {}
+    ) {
+    }
 
     public function supports(Request $request): bool
     {

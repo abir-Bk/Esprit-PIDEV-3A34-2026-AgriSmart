@@ -19,10 +19,13 @@ class Offre
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le titre est obligatoire")]
+    #[Assert\Length(min: 5, minMessage: "Le titre doit faire au moins {{ limit }} caractères")]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le type de poste est obligatoire")]
+    #[Assert\Length(min: 3, minMessage: "Le type de poste est trop court")]
+    #[Assert\Regex(pattern: "/^[a-zA-ZÀ-ÿ\s\-]+$/", message: "Le type de poste ne doit contenir que des lettres")]
     private ?string $typePoste = null;
 
     #[ORM\Column(length: 255)]
@@ -31,10 +34,12 @@ class Offre
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(min: 10, minMessage: "La description doit faire au moins {{ limit }} caractères")]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le lieu est obligatoire")]
+    #[Assert\Length(min: 3, minMessage: "Le nom du lieu est trop court")]
     private ?string $lieu = null;
 
     #[ORM\Column(length: 255)]

@@ -1,121 +1,456 @@
-{% set label_attr = {'class': 'form-label fw-bold small', 'style': 'color: var(--ag-muted);'} %}
+{% set label_attr = {'class': 'form-label fw-semibold small text-uppercase letter-spacing-1', 'style': 'color: var(--ag-muted); font-size: 0.72rem; letter-spacing: 0.05em;'} %}
 
 {# Désactivation de la validation HTML5 #}
-{{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+{{ form_start(form, { attr: { novalidate: 'novalidate', class: 'task-form-enhanced' } }) }}
 
-<div class="row g-3">
-	<div class="col-md-6">
-		{{ form_label(form.titre, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.titre, {'attr': {'class': 'form-control ag-input', 'id': 'task-titre'}}) }}
-		{{ form_errors(form.titre) }}
+{# ═══════════════════════════════════════════════
+   SECTION 1 : Informations de base
+   ═══════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+	<div class="form-section-header">
+		<div class="form-section-icon">
+			<i class="bi bi-pencil-square"></i>
+		</div>
+		<div>
+			<h6 class="form-section-title mb-0">Informations de base</h6>
+			<span class="form-section-subtitle">Titre, type et description de la tâche</span>
+		</div>
 	</div>
-
-	<div class="col-md-6">
-		{{ form_label(form.type, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.type, {'attr': {'class': 'form-select ag-input'}}) }}
-		{{ form_errors(form.type) }}
-	</div>
-
-	<div class="col-md-12">
-		<div class="d-flex justify-content-between align-items-center mb-2">
-			{{ form_label(form.description, null, {label_attr: label_attr}) }}
-			<div class="d-flex gap-2">
-				<div class="input-group input-group-sm" style="width: auto;">
-					<select id="select-ai-lang" class="form-select form-select-sm rounded-start-pill border-0 bg-light-info text-info fw-bold">
-						<option value="en">EN</option>
-						<option value="ar">AR</option>
-						<option value="fr">FR</option>
-						<option value="es">ES</option>
-					</select>
-					<button type="button" id="btn-ai-translate" class="btn btn-sm btn-outline-info rounded-end-pill px-3 shadow-sm border-0 bg-light-info">
-						<i class="bi bi-translate me-1 text-info"></i>
-						<span class="small fw-bold">Traduire</span>
-					</button>
+	<div class="form-section-body">
+		<div class="row g-3">
+			<div class="col-md-7">
+				{{ form_label(form.titre, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-type-h1 input-icon"></i>
+					{{ form_widget(form.titre, {'attr': {'class': 'form-control ag-input ps-icon', 'id': 'task-titre', 'placeholder': 'Ex: Arrosage parcelle Nord...'}}) }}
 				</div>
-				<button type="button" id="btn-ai-recommend" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
-					<i class="bi bi-lightbulb me-1 text-info"></i>
-					<span class="small fw-bold">Recommander</span>
-				</button>
-				<button type="button" id="btn-ai-summarize" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
-					<i class="bi bi-stars me-1 text-info"></i>
-					<span class="small fw-bold">Générer un résumé</span>
-					<span id="ai-spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
-				</button>
+				{{ form_errors(form.titre) }}
+			</div>
+			<div class="col-md-5">
+				{{ form_label(form.type, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-tag input-icon"></i>
+					{{ form_widget(form.type, {'attr': {'class': 'form-select ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.type) }}
 			</div>
 		</div>
-		{{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 4, 'id': 'task-description'}}) }}
-		{{ form_errors(form.description) }}
-	</div>
-
-	<div class="col-md-12">
-		{{ form_label(form.resume, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.resume, {'attr': {'class': 'form-control ag-input bg-light-subtle', 'rows': 2, 'id': 'task-resume', 'placeholder': 'Générez un résumé ou saisissez-le ici...'}}) }}
-		{{ form_errors(form.resume) }}
-		<div id="ai-error" class="text-danger small mt-1 d-none"></div>
-	</div>
-
-	<div class="col-md-6">
-		{{ form_label(form.dateDebut, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.dateDebut, {'attr': {'class': 'form-control ag-input'}}) }}
-		{{ form_errors(form.dateDebut) }}
-	</div>
-
-	<div class="col-md-6">
-		{{ form_label(form.dateFin, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.dateFin, {'attr': {'class': 'form-control ag-input'}}) }}
-		{{ form_errors(form.dateFin) }}
-	</div>
-
-	<div class="col-md-4">
-		{{ form_label(form.priorite, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.priorite, {'attr': {'class': 'form-select ag-input', 'id': 'task-priorite'}}) }}
-		{{ form_errors(form.priorite) }}
-		<div id="priority-hint" class="text-danger small mt-1 d-none animate__animated animate__fadeIn">
-			<i class="bi bi-exclamation-triangle-fill"></i>
-			Urgence détectée localement
-		</div>
-	</div>
-
-	<div class="col-md-4">
-		{{ form_label(form.statut, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input'}}) }}
-		{{ form_errors(form.statut) }}
-	</div>
-
-	<div class="col-md-4">
-		{{ form_label(form.localisation, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.localisation, {'attr': {'class': 'form-control ag-input'}}) }}
-		{{ form_errors(form.localisation) }}
-	</div>
-
-	<div class="col-md-4">
-		{{ form_label(form.parcelleId, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.parcelleId, {'attr': {'class': 'form-select ag-input'}}) }}
-		{{ form_errors(form.parcelleId) }}
-	</div>
-
-	<div class="col-md-4">
-		{{ form_label(form.culture, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.culture, {'attr': {'class': 'form-select ag-input'}}) }}
-		{{ form_errors(form.culture) }}
-	</div>
-
-	<div class="col-md-4">
-		{{ form_label(form.createdByUser, null, {label_attr: label_attr}) }}
-		{{ form_widget(form.createdByUser, {'attr': {'class': 'form-select ag-input'}}) }}
-		{{ form_errors(form.createdByUser) }}
 	</div>
 </div>
 
-<div class="mt-4 d-flex gap-2">
-	<button class="btn ag-btn-primary text-white rounded-pill px-4">
+{# ═══════════════════════════════════════════════
+   SECTION 2 : Description & IA
+   ═══════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+	<div class="form-section-header">
+		<div class="form-section-icon ai-glow">
+			<i class="bi bi-stars"></i>
+		</div>
+		<div class="flex-grow-1">
+			<h6 class="form-section-title mb-0">Description & Assistance IA</h6>
+			<span class="form-section-subtitle">Rédigez ou laissez l'IA vous aider</span>
+		</div>
+		<div class="ai-toolbar d-flex flex-wrap gap-2">
+			<div class="input-group input-group-sm ai-btn-group">
+				<select id="select-ai-lang" class="form-select form-select-sm ai-lang-select">
+					<option value="en">EN</option>
+					<option value="ar">AR</option>
+					<option value="fr">FR</option>
+					<option value="es">ES</option>
+				</select>
+				<button type="button" id="btn-ai-translate" class="btn btn-sm ai-action-btn" title="Traduire la description">
+					<i class="bi bi-translate me-1"></i>Traduire
+				</button>
+			</div>
+			<button type="button" id="btn-ai-recommend" class="btn btn-sm ai-action-btn" title="Générer une description recommandée">
+				<i class="bi bi-lightbulb me-1"></i>Recommander
+			</button>
+			<button type="button" id="btn-ai-summarize" class="btn btn-sm ai-action-btn ai-primary-btn" title="Générer un résumé automatique">
+				<i class="bi bi-magic me-1"></i>Résumer
+				<span id="ai-spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+			</button>
+		</div>
+	</div>
+	<div class="form-section-body">
+		<div class="row g-3">
+			<div class="col-12">
+				{{ form_label(form.description, null, {label_attr: label_attr}) }}
+				{{ form_widget(form.description, {'attr': {'class': 'form-control ag-input', 'rows': 5, 'id': 'task-description', 'placeholder': 'Décrivez la tâche en détail…'}}) }}
+				{{ form_errors(form.description) }}
+			</div>
+			<div class="col-12">
+				{{ form_label(form.resume, null, {label_attr: label_attr}) }}
+				<div class="resume-field-wrap">
+					<i class="bi bi-robot resume-icon"></i>
+					{{ form_widget(form.resume, {'attr': {'class': 'form-control ag-input resume-input', 'rows': 2, 'id': 'task-resume', 'placeholder': 'Cliquez sur « Résumer » ou saisissez manuellement…'}}) }}
+				</div>
+				{{ form_errors(form.resume) }}
+				<div id="ai-error" class="ai-error-box d-none mt-2">
+					<i class="bi bi-exclamation-circle me-1"></i>
+					<span></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{# ═══════════════════════════════════════════════
+   SECTION 3 : Planification
+   ═══════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+	<div class="form-section-header">
+		<div class="form-section-icon" style="background: rgba(244, 180, 0, 0.12); color: #D4930A;">
+			<i class="bi bi-calendar-range"></i>
+		</div>
+		<div>
+			<h6 class="form-section-title mb-0">Planification</h6>
+			<span class="form-section-subtitle">Dates, priorité et statut</span>
+		</div>
+	</div>
+	<div class="form-section-body">
+		<div class="row g-3">
+			<div class="col-md-6">
+				{{ form_label(form.dateDebut, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-calendar-event input-icon"></i>
+					{{ form_widget(form.dateDebut, {'attr': {'class': 'form-control ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.dateDebut) }}
+			</div>
+			<div class="col-md-6">
+				{{ form_label(form.dateFin, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-calendar-check input-icon"></i>
+					{{ form_widget(form.dateFin, {'attr': {'class': 'form-control ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.dateFin) }}
+			</div>
+			<div class="col-md-4">
+				{{ form_label(form.priorite, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-flag input-icon"></i>
+					{{ form_widget(form.priorite, {'attr': {'class': 'form-select ag-input ps-icon', 'id': 'task-priorite'}}) }}
+				</div>
+				{{ form_errors(form.priorite) }}
+				<div id="priority-hint" class="priority-hint-box d-none">
+					<i class="bi bi-exclamation-triangle-fill me-1"></i>
+					Urgence détectée par l'IA
+				</div>
+			</div>
+			<div class="col-md-4">
+				{{ form_label(form.statut, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-check2-circle input-icon"></i>
+					{{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.statut) }}
+			</div>
+			<div class="col-md-4">
+				{{ form_label(form.localisation, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-geo-alt input-icon"></i>
+					{{ form_widget(form.localisation, {'attr': {'class': 'form-control ag-input ps-icon', 'placeholder': 'Ex: Parcelle Nord…'}}) }}
+				</div>
+				{{ form_errors(form.localisation) }}
+			</div>
+		</div>
+	</div>
+</div>
+
+{# ═══════════════════════════════════════════════
+   SECTION 4 : Affectation
+   ═══════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+	<div class="form-section-header">
+		<div class="form-section-icon" style="background: rgba(103, 58, 183, 0.10); color: #673AB7;">
+			<i class="bi bi-people"></i>
+		</div>
+		<div>
+			<h6 class="form-section-title mb-0">Affectation</h6>
+			<span class="form-section-subtitle">Parcelle, culture et responsable</span>
+		</div>
+	</div>
+	<div class="form-section-body">
+		<div class="row g-3">
+			<div class="col-md-4">
+				{{ form_label(form.parcelleId, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-map input-icon"></i>
+					{{ form_widget(form.parcelleId, {'attr': {'class': 'form-select ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.parcelleId) }}
+			</div>
+			<div class="col-md-4">
+				{{ form_label(form.culture, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-flower1 input-icon"></i>
+					{{ form_widget(form.culture, {'attr': {'class': 'form-select ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.culture) }}
+			</div>
+			<div class="col-md-4">
+				{{ form_label(form.createdByUser, null, {label_attr: label_attr}) }}
+				<div class="input-icon-wrap">
+					<i class="bi bi-person input-icon"></i>
+					{{ form_widget(form.createdByUser, {'attr': {'class': 'form-select ag-input ps-icon'}}) }}
+				</div>
+				{{ form_errors(form.createdByUser) }}
+			</div>
+		</div>
+	</div>
+</div>
+
+{# ═══════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════ #}
+<div class="form-actions">
+	<button class="btn ag-btn-primary text-white rounded-pill px-5 py-2 btn-submit-task">
+		<i class="bi bi-check-lg me-2"></i>
 		{{ button_label|default('Enregistrer') }}
 	</button>
-	<a href="{{ path('tasks_index') }}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
+	<a href="{{ path('tasks_index') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+		<i class="bi bi-x-lg me-1"></i>Annuler
+	</a>
 </div>
 
 {{ form_end(form) }}
 
+{# ═══════════════════════════════════════════════
+   STYLES
+   ═══════════════════════════════════════════════ #}
+<style>
+	/* === Form Sections === */
+	.form-section {
+		background: #fff;
+		border: 1px solid rgba(0, 0, 0, 0.06);
+		border-radius: 16px;
+		overflow: hidden;
+		transition: box-shadow 0.25s ease;
+	}
+	.form-section:hover {
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+	}
+	.form-section-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem 1.25rem;
+		background: linear-gradient(135deg, #fafbfc, #f6f8f7);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+		flex-wrap: wrap;
+	}
+	.form-section-icon {
+		width: 38px;
+		height: 38px;
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.1rem;
+		flex-shrink: 0;
+		background: rgba(26, 67, 49, 0.1);
+		color: var(--ag-primary, #1A4331);
+	}
+	.form-section-icon.ai-glow {
+		background: linear-gradient(135deg, rgba(13, 202, 240, 0.15), rgba(111, 66, 193, 0.12));
+		color: #0dcaf0;
+	}
+	.form-section-title {
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: var(--ag-text, #111827);
+	}
+	.form-section-subtitle {
+		font-size: 0.75rem;
+		color: var(--ag-muted, #6B7280);
+	}
+	.form-section-body {
+		padding: 1.25rem;
+	}
+
+	/* === Input with icon === */
+	.input-icon-wrap {
+		position: relative;
+	}
+	.input-icon {
+		position: absolute;
+		left: 14px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #adb5bd;
+		font-size: 0.9rem;
+		z-index: 2;
+		pointer-events: none;
+	}
+	.ps-icon {
+		padding-left: 2.5rem !important;
+	}
+
+	/* === AI Toolbar === */
+	.ai-toolbar {
+		margin-left: auto;
+	}
+	.ai-action-btn {
+		background: rgba(13, 202, 240, 0.08);
+		border: 1px solid rgba(13, 202, 240, 0.2);
+		color: #0ba5c7;
+		border-radius: 999px;
+		font-size: 0.78rem;
+		font-weight: 600;
+		padding: 0.35rem 0.85rem;
+		transition: all 0.2s ease;
+	}
+	.ai-action-btn:hover {
+		background: rgba(13, 202, 240, 0.18);
+		border-color: rgba(13, 202, 240, 0.4);
+		color: #087a96;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(13, 202, 240, 0.15);
+	}
+	.ai-action-btn:disabled {
+		opacity: 0.5;
+		transform: none;
+		box-shadow: none;
+	}
+	.ai-primary-btn {
+		background: linear-gradient(135deg, rgba(13, 202, 240, 0.15), rgba(111, 66, 193, 0.1));
+		border-color: rgba(111, 66, 193, 0.25);
+		color: #6f42c1;
+	}
+	.ai-primary-btn:hover {
+		background: linear-gradient(135deg, rgba(13, 202, 240, 0.25), rgba(111, 66, 193, 0.18));
+		border-color: rgba(111, 66, 193, 0.4);
+		color: #5a32a3;
+	}
+	.ai-lang-select {
+		border-radius: 999px 0 0 999px !important;
+		border: 1px solid rgba(13, 202, 240, 0.2);
+		background: rgba(13, 202, 240, 0.05);
+		color: #0ba5c7;
+		font-weight: 700;
+		font-size: 0.75rem;
+		padding: 0.35rem 0.5rem;
+		width: auto;
+		min-width: 52px;
+	}
+	.ai-btn-group .ai-action-btn {
+		border-radius: 0 999px 999px 0;
+		border-left: none;
+	}
+
+	/* === Résumé field === */
+	.resume-field-wrap {
+		position: relative;
+	}
+	.resume-icon {
+		position: absolute;
+		top: 12px;
+		left: 14px;
+		color: #6f42c1;
+		opacity: 0.4;
+		font-size: 1rem;
+		z-index: 2;
+		pointer-events: none;
+	}
+	.resume-input {
+		padding-left: 2.5rem !important;
+		background: #faf8ff !important;
+		border-color: rgba(111, 66, 193, 0.12) !important;
+	}
+	.resume-input:focus {
+		border-color: rgba(111, 66, 193, 0.35) !important;
+		box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.08) !important;
+	}
+
+	/* === AI Error === */
+	.ai-error-box {
+		background: #fff5f5;
+		border: 1px solid #fed7d7;
+		border-radius: 10px;
+		padding: 0.6rem 1rem;
+		font-size: 0.82rem;
+		color: #c53030;
+		display: flex;
+		align-items: center;
+	}
+
+	/* === Priority Hint === */
+	.priority-hint-box {
+		margin-top: 0.5rem;
+		background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+		border: 1px solid #fed7d7;
+		border-radius: 10px;
+		padding: 0.5rem 0.85rem;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: #c53030;
+		animation: hintPulse 0.5s ease;
+	}
+	@keyframes hintPulse {
+		0% {
+			opacity: 0;
+			transform: translateY(-5px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* === Form Actions === */
+	.form-actions {
+		display: flex;
+		gap: 0.75rem;
+		padding: 1.25rem 0 0;
+		border-top: 1px solid rgba(0, 0, 0, 0.06);
+		margin-top: 0.5rem;
+	}
+	.btn-submit-task {
+		font-weight: 600;
+		font-size: 0.95rem;
+		box-shadow: 0 4px 14px rgba(26, 67, 49, 0.3);
+		transition: all 0.25s ease;
+	}
+	.btn-submit-task:hover {
+		box-shadow: 0 6px 20px rgba(26, 67, 49, 0.4);
+		transform: translateY(-1px);
+	}
+
+	/* === Form Errors === */
+	.task-form-enhanced .invalid-feedback,
+	.task-form-enhanced .form-error-message {
+		background: #fff5f5;
+		border: 1px solid #fed7d7;
+		border-radius: 8px;
+		padding: 0.4rem 0.7rem;
+		margin-top: 0.35rem;
+		font-size: 0.78rem;
+		color: #c53030;
+	}
+
+	/* === Responsive === */
+	@media(max-width: 767px) {
+		.form-section-header {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		.ai-toolbar {
+			margin-left: 0;
+			margin-top: 0.75rem;
+			width: 100%;
+		}
+		.form-actions {
+			flex-direction: column;
+		}
+		.form-actions .btn {
+			width: 100%;
+		}
+	}
+</style>
+
+{# ═══════════════════════════════════════════════
+   SCRIPTS (AI features)
+   ═══════════════════════════════════════════════ #}
 <script>
 	(function () {
 let _aiInitialized = false;
@@ -124,11 +459,8 @@ function initAiFeatures() {
 if (_aiInitialized) 
 return;
 
-
-
 _aiInitialized = true;
 
-console.log('AI Features Init...');
 const btnSummarize = document.getElementById('btn-ai-summarize');
 const btnTranslate = document.getElementById('btn-ai-translate');
 const btnRecommend = document.getElementById('btn-ai-recommend');
@@ -142,55 +474,46 @@ function toggleUI(loading) {
 if (btnSummarize) 
 btnSummarize.disabled = loading;
 
-
-
 if (btnTranslate) 
 btnTranslate.disabled = loading;
-
-
 
 if (btnRecommend) 
 btnRecommend.disabled = loading;
 
-
-
 if (spinner) 
 spinner.classList.toggle('d-none', ! loading);
-
-
 
 if (descriptionInput) 
 descriptionInput.classList.toggle('opacity-50', loading);
 
-
-
 if (resumeInput) 
 resumeInput.classList.toggle('opacity-50', loading);
-
-
 
 }
 
 function showError(msg) {
 if (errorDiv) {
-errorDiv.textContent = msg || 'Une erreur est survenue';
+const span = errorDiv.querySelector('span') || errorDiv;
+span.textContent = msg || 'Une erreur est survenue';
 errorDiv.classList.remove('d-none');
 }
 }
 
+function hideError() {
+if (errorDiv) 
+errorDiv.classList.add('d-none');
+
+}
+
 if (! btnSummarize) {
 console.warn('AI buttons not found, AI features disabled.');
-} else {
-console.log('AI Buttons found, attaching listeners');
-
-// Logic for Summarize
+} else { // Logic for Summarize
 btnSummarize.addEventListener('click', async function () {
 const text = descriptionInput.value.trim();
 if (text.length < 10) {
 showError('Le texte doit contenir au moins 10 caractères pour être résumé.');
 return;
 }
-
 toggleUI(true);
 try {
 const response = await fetch('{{ path('task_ai_summarize') }}', {
@@ -200,11 +523,10 @@ headers: {
 },
 body: JSON.stringify({text})
 });
-
 const data = await response.json();
 if (data.summary) {
 resumeInput.value = data.summary;
-errorDiv.classList.add('d-none');
+hideError();
 } else if (data.error) {
 showError(data.error);
 }
@@ -221,12 +543,10 @@ if (btnTranslate) {
 btnTranslate.addEventListener('click', async function () {
 const text = descriptionInput.value.trim();
 const targetLang = langSelect.value;
-
 if (text.length < 2) {
 showError('Le texte doit contenir au moins 2 caractères pour être traduit.');
 return;
 }
-
 toggleUI(true);
 try {
 const response = await fetch('{{ path('task_ai_translate') }}', {
@@ -238,11 +558,10 @@ body: JSON.stringify(
 {text, target: targetLang}
 )
 });
-
 const data = await response.json();
 if (data.translation) {
 descriptionInput.value = data.translation;
-errorDiv.classList.add('d-none');
+hideError();
 } else if (data.error) {
 showError(data.error);
 }
@@ -261,18 +580,15 @@ btnRecommend.addEventListener('click', async function () {
 const titreEl = document.getElementById('task-titre') || document.getElementById('task_titre') || document.querySelector('[id$="_titre"]');
 if (! titreEl) {
 showError('Champ titre introuvable.');
-toggleUI(false);
 return;
 }
 const title = titreEl.value.trim();
 const typeSelect = document.querySelector('[name$="[type]"]');
 const type = typeSelect ? typeSelect.value : '';
-
 if (title.length < 3) {
 showError('Le titre doit contenir au moins 3 caractères pour générer une recommandation.');
 return;
 }
-
 toggleUI(true);
 try {
 const response = await fetch('{{ path('task_ai_recommend') }}', {
@@ -284,11 +600,10 @@ body: JSON.stringify(
 {title, type}
 )
 });
-
 const data = await response.json();
 if (data.recommendation) {
 descriptionInput.value = data.recommendation;
-errorDiv.classList.add('d-none');
+hideError();
 } else if (data.error) {
 showError(data.error);
 }
@@ -308,19 +623,14 @@ const prioritySelect = document.getElementById('task-priorite') || document.getE
 const priorityHint = document.getElementById('priority-hint');
 
 if (titleInput && prioritySelect) {
-console.log('Urgency Detective initialized');
-
 let timeout = null;
 const analyzeUrgency = () => {
 clearTimeout(timeout);
 timeout = setTimeout(async () => {
 const title = titleInput.value.trim();
 const description = descriptionInput ? descriptionInput.value.trim() : '';
-
 if (title.length < 3) 
 return;
-
-
 
 try {
 const response = await fetch('{{ path('task_ai_analyze_priority') }}', {
@@ -333,8 +643,6 @@ body: JSON.stringify(
 )
 });
 const data = await response.json();
-console.log('Urgency Result:', data.priority);
-
 if (data.priority === 'high') {
 for (let option of prioritySelect.options) {
 if (option.value.toLowerCase().includes('high') || option.text.toLowerCase().includes('haut')) {
@@ -346,13 +654,9 @@ break;
 if (priorityHint) 
 priorityHint.classList.remove('d-none');
 
-
-
 } else {
 if (priorityHint) 
 priorityHint.classList.add('d-none');
-
-
 
 }
 } catch (e) {
@@ -360,15 +664,10 @@ console.error('Local Analysis Error', e);
 }
 }, 500);
 };
-
 titleInput.addEventListener('input', analyzeUrgency);
 if (descriptionInput) 
 descriptionInput.addEventListener('input', analyzeUrgency);
 
-
-
-} else {
-console.warn('Urgency Detective: Inputs not found');
 }
 }
 
@@ -379,9 +678,3 @@ initAiFeatures();
 });
 })();
 </script>
-
-<style>
-	.bg-light-info {
-		background-color: rgba(13, 202, 240, 0.1);
-	}
-</style>

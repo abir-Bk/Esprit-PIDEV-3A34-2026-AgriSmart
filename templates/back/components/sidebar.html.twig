@@ -97,6 +97,18 @@
                         <span>Catalogue produits</span>
                     </a>
                 </li>
+
+                <!-- Section TÂCHES -->
+                <li class="nav-item mt-4 mb-2">
+                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Tâches</span>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_tasks_dashboard' %}active{% endif %}" href="{{ path('admin_tasks_dashboard') }}">
+                        <i class="fa-solid fa-chart-line me-2"></i>
+                        <span>Dashboard Tâches</span>
+                    </a>
+                </li>
                 {% endif %}
 
             </ul>

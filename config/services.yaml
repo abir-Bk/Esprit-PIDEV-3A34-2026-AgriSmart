@@ -9,6 +9,7 @@ parameters:
     recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
     # Valeur par défaut si les clés API ne sont pas dans .env → évite une 500 au chargement
     env_empty_string: ''
+    gemini_key: '%env(GEMINI_API_KEY)%'
 services:
     # default configuration for services in *this* file
     _defaults:

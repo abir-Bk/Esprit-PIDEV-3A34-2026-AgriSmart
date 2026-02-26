@@ -1,0 +1,72 @@
+--- TEST DES SCÉNARIOS UTILISATEUR ---
+
+Question: Quel est le rendement prévu pour ma parcelle de blé ?
+Réponse: Bonjour !
+
+En fonction des données que vous m'avez fournies, je vais vous proposer un rendement prévu pour votre parcelle de blé.
+
+Puisque votre parcelle est argileuse et que vous avez planté du blé Spunta, je vais prendre en compte les caractéristiques de cette variété. Le blé Spunta est connu pour être une variété de blé de qualité moyenne, avec un rendement moyen de 6 à 7 t/ha.
+
+Cependant, étant donné que votre parcelle est argileuse, je vais réduire légèrement ce rendement en fonction des conditions de sol. En effet, les sols argileux peuvent être plus sensibles à l'excès d'eau et peuvent nécessiter des mesures de gestion plus précises pour éviter les problèmes de drainage.
+
+En tenant compte de ces facteurs, je prévois un rendement de 5,5 t/ha pour votre parcelle de blé Spunta.
+
+Voici une étape suivante pour améliorer ce rendement :
+
+* Vérifiez les conditions de drainage de votre parcelle et assurez-vous que l'eau ne se rétient pas trop longtemps sur le sol. Vous pouvez effectuer des mesures de drainage, comme creuser des drains ou installer des réseaux de drainage, pour améliorer la circulation de l'eau.
+
+Qu'en pensez-vous ?
+--------------------------------------
+
+Question: Il y a des insectes noirs sur mes tomates, que faire ?
+Réponse: Je suis désolé, mais je ne peux pas vous aider avec des problèmes liés à l'élevage ou à la chasse aux insectes. En tant qu'assistant agronomique, je m'occupe uniquement de l'assistance agronomique et du diagnostic des problèmes liés à l'agriculture.
+
+Cependant, je peux vous suggérer de me fournir plus d'informations sur les insectes noirs que vous avez détectés sur vos tomates. Quels sont les symptômes que vous observez (par exemple, dégâts, jaunissement des feuilles, etc.) ? Et quels sont les insectes que vous pensez avoir détectés ?
+
+Une fois que j'aurai ces informations, je pourrai vous aider à identifier la cause probable du problème et vous proposer des solutions écologiques ou classiques pour les contrôler.
+--------------------------------------
+
+Question: Combien de sacs d'engrais me faut-il pour mes 2.5 hectares ?
+Réponse: Pour déterminer le nombre de sacs d'engrais nécessaires pour vos 2.5 hectares de blé Spunta, nous devons prendre en compte quelques facteurs importants.
+
+En général, les blés nécessitent environ 150-200 kg/ha d'engrais NPK (nitrogen, phosphore, potassium) pour une bonne croissance et une récolte optimale. Cependant, cela peut varier en fonction de la qualité du sol, de la température et de l'humidité.
+
+Étant donné que votre sol est argileux, il est possible que les besoins en engrais soient légèrement plus élevés en raison de la faible capacité de stockage de l'eau dans le sol.
+
+Pour être prudent, je vous recommande de répartir 200 kg/ha d'engrais NPK sur vos 2.5 hectares, ce qui équivaut à environ 500 kg d'engrais totaux.
+
+Ensuite, nous devons convertir cela en sacs. La masse d'un sac d'engrais NPK varie en fonction du type et du fabricant, mais une normale sac d'engrais pèse environ 25-30 kg.
+
+En calculant cela, nous obtenons :
+
+500 kg d'engrais / 27,5 kg/sac (moyenne) = environ 18 sacs d'engrais NPK
+
+Je vous recommande donc de répartir environ 18 sacs d'engrais NPK sur vos 2.5 hectares pour une bonne croissance et une récolte optimale.
+
+**Étape suivante :** Il est recommandé de faire un test de fertilisation avant la récolte pour vérifier les besoins réels de votre sol. Vous pouvez également prendre en compte les résultats de vos précédentes cultures pour ajuster les doses d'engrais.
+
+**Conseil d'amélioration :** Il est important de noter que les engrais NPK ne sont pas les seuls nutriments nécessaires pour votre blé. Vous devriez également considérer l'apport en potassium (K) et en calcium (Ca) pour une croissance optimale.
+--------------------------------------
+
+Question: Vérifie mon stock actuel d'engrais svp.
+Réponse: Bien sûr ! Pour estimer vos besoins en engrais, je vais prendre en compte votre surface de parcelle et votre stock actuel.
+
+Votre parcelle mesure 2,5 ha et vous avez actuellement 15 sacs d'engrais NPK. Pour calculer vos besoins, je vais utiliser une formule approximative qui prend en compte la surface de la parcelle et la teneur en azote du sol.
+
+En supposant que votre sol argileux ait une teneur en azote moyenne (environ 0,5%), et que vous ayez besoin d'environ 50 kg/ha d'azote pour un blé en croissance, je vais calculer vos besoins en engrais.
+
+Pour 2,5 ha, vos besoins en azote seraient de :
+
+2,5 ha x 50 kg/ha = 125 kg d'azote
+
+Puisque votre sol argileux a une teneur en azote moyenne, je vais vous recommander de répartir vos engrais de manière égale sur la surface de la parcelle. Cela signifie que vous aurez besoin de :
+
+125 kg d'azote / 2,5 ha = environ 50 kg d'azote par hectare
+
+En termes de sacs d'engrais, cela équivaut à environ 1 sac d'engrais NPK par hectare. Puisque vous avez déjà 15 sacs, vous n'avez pas besoin de nouveaux engrais pour cette période.
+
+Cependant, je vous recommande de répartir vos engrais de manière égale sur la surface de la parcelle pour optimiser la teneur en azote du sol. Vous pouvez également prendre en compte les besoins spécifiques de votre blé en fonction de la phase de croissance et de la teneur en azote du sol.
+
+Qu'en pensez-vous ? Avez-vous des questions ou souhaitez-vous discuter de la répartition des engrais ?
+--------------------------------------
+

@@ -1,0 +1,131 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Statistiques & BI - AgriSmart Admin{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    {# Sidebar inclusion #}
+    {% include 'back/components/sidebar.html.twig' %}
+
+    <div class="flex-grow-1 ag-admin-content">
+        <div class="container-fluid px-4">
+            
+            {# Premium Header / Header Section #}
+            <header class="py-4 mb-4 border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success bg-opacity-10 p-2 rounded-3 me-3">
+                                <i class="fa-solid fa-chart-pie text-success fs-4"></i>
+                            </div>
+                            <h1 class="h2 fw-bold mb-0" style="color: var(--ag-text);">Dashboard Agricole</h1>
+                        </div>
+                        <p class="text-muted mb-0">Analyse approfondie des tendances de culture et de la gestion des ressources sur la plateforme.</p>
+                    </div>
+                  
+                </div>
+            </header>
+
+            {# Flash Messages #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4" role="alert">
+                    <i class="fa-solid fa-check-circle me-2 text-success"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+
+            {# Stats Overview Grid #}
+            <div class="row g-4 mb-5">
+                <!-- Culture Distribution Card -->
+                <div class="col-xl-5">
+                    <div class="ag-admin-card h-100 p-4 border-0 shadow-sm">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-light p-2 rounded-circle me-3">
+                                <i class="fa-solid fa-seedling text-success"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0">Répartition des Cultures</h5>
+                                <small class="text-muted">Analyse par popularité</small>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container" style="position: relative; height:320px; width:100%">
+                            {{ render_chart(doughnutChart) }}
+                        </div>
+
+                        <div class="mt-4 p-3 rounded-4" style="background: rgba(26,67,49, .03); border: 1px dashed rgba(26,67,49, .1);">
+                            <div class="d-flex align-items-start">
+                                <i class="fa-solid fa-lightbulb text-warning me-3 mt-1"></i>
+                                <div>
+                                    <span class="fw-bold d-block small mb-1" style="color: var(--ag-primary);">Argument</span>
+                                    <p class="small text-muted mb-0">"Cela permet de savoir pour quelles cultures l'IA doit être la plus performante. C'est de la Business Intelligence pour l'application."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources Stocks Card -->
+                <div class="col-xl-7">
+                    <div class="ag-admin-card h-100 p-4 border-0 shadow-sm">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-light p-2 rounded-circle me-3">
+                                <i class="fa-solid fa-warehouse text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0">Statistiques des Stocks Globaux</h5>
+                                <small class="text-muted">Niveaux de ressources disponibles (Global)</small>
+                            </div>
+                        </div>
+
+                        <div class="chart-container" style="position: relative; height:320px; width:100%">
+                            {{ render_chart(barChart) }}
+                        </div>
+
+                        <div class="mt-4 p-3 rounded-4" style="background: rgba(0, 123, 255, .03); border: 1px dashed rgba(0, 123, 255, .1);">
+                            <div class="d-flex align-items-start">
+                                <i class="fa-solid fa-circle-info text-primary me-3 mt-1"></i>
+                                <div>
+                                    <span class="fw-bold d-block small mb-1 text-primary">Argument</span>
+                                    <p class="small text-muted mb-0">"L'administrateur peut identifier les besoins majeurs des agriculteurs de la région pour éventuellement envoyer des alertes ou des conseils groupés."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom spacing and typography for BI Dashboard */
+    .ag-admin-content {
+        background-color: #f8faf9;
+    }
+    .ag-admin-card {
+        background-color: #ffffff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ag-admin-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04) !important;
+    }
+    .chart-container canvas {
+        filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.02));
+    }
+    .fw-800 { font-weight: 800; }
+    
+    /* Animation for smooth entrance */
+    .ag-admin-card {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

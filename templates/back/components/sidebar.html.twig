@@ -72,14 +72,6 @@
                         </a>
                     {% endif %}
                 </li>
-                <li class="nav-item mb-1">
-      <li class="nav-item mb-1">
-    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_parcelles_index' %}active{% endif %}" href="{{ path('admin_parcelles_index') }}">
-        <i class="fa-solid fa-earth-africa me-2"></i>
-        <span>Vue Globale Parcelles</span>
-    </a>
-</li>
-
                 {% if is_granted('ROLE_ADMIN') %}
                 <!-- Section MARKETPLACE -->
                 <li class="nav-item mt-4 mb-2">
@@ -102,6 +94,32 @@
                     <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_marketplace_produits' %}active{% endif %}" href="{{ path('admin_marketplace_produits') }}">
                         <i class="fa-solid fa-box me-2"></i>
                         <span>Catalogue produits</span>
+                    </a>
+                </li>
+                
+                <!-- Section PARCELLES & CULTURE -->
+                <li class="nav-item mt-4 mb-2">
+                    <span class="sidebar-heading text-uppercase text-muted small fw-semibold px-3">Parcelles & Culture</span>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_parcelles_index' %}active{% endif %}" href="{{ path('admin_parcelles_index') }}">
+                        <i class="fa-solid fa-earth-africa me-2"></i>
+                        <span>Parcelles</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_ressources_index' %}active{% endif %}" href="{{ path('admin_ressources_index') }}">
+                        <i class="fa-solid fa-flask-vial me-2"></i>
+                        <span>Ressources & Consommations</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mb-1">
+                    <a class="nav-link sidebar-link {% if app.request.attributes.get('_route') == 'admin_stats_index' %}active{% endif %}" href="{{ path('admin_stats_index') }}">
+                        <i class="fa-solid fa-chart-pie me-2"></i>
+                        <span>Dashboard agricole</span>
                     </a>
                 </li>
                 {% endif %}

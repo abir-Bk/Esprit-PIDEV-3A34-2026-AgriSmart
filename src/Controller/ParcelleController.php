@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Parcelle;
 use App\Form\ParcelleType;
+use App\Entity\Culture;
 use App\Repository\ParcelleRepository;
 use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\PdfService;
 
 #[Route('/parcelle')]
 class ParcelleController extends AbstractController
@@ -154,9 +156,9 @@ class ParcelleController extends AbstractController
             try {
                 $entityManager->remove($parcelle);
                 $entityManager->flush();
-                $this->addFlash('success', '✅ Parcelle supprimée.');
+                $this->addFlash('success', ' Parcelle supprimée.');
             } catch (\Exception $e) {
-                $this->addFlash('danger', '❌ Impossible de supprimer cette parcelle.');
+                $this->addFlash('danger', ' Impossible de supprimer cette parcelle.');
             }
         }
 
@@ -241,6 +243,74 @@ class ParcelleController extends AbstractController
 
         return $this->render('back/Allparcelle/all_parcelles.html.twig', [
             'parcelles' => $allParcelles,
+        ]);
+    }
+
+    #[Route('/predict-rendement/{id}', name: 'app_culture_predict_ia', methods: ['POST'])]
+    public function predireRendement(Culture $culture, \App\Service\PredictionService $predictionService): Response
+    {
+        $totalConsomme = 0;
+        foreach ($culture->getConsommations() as $conso) {
+            $totalConsomme += $conso->getQuantite();
+        }
+
+        $surface = $culture->getParcelle()->getSurface();
+        $typeCulture = $culture->getTypeCulture();
+
+        // L'appel au service qui maintenant ne donnera que du 100% IA ou une erreur
+        $rendementEstime = $predictionService->predict($surface, $totalConsomme, $typeCulture);
+
+        return $this->render('front/semi-public/parcelle/resultat_rendement.html.twig', [
+            'rendement' => $rendementEstime,
+            'culture' => $culture,
+            'totalConsomme' => $totalConsomme
+        ]);
+    }
+
+    #[Route('/{id}/export-pdf', name: 'app_parcelle_export_pdf', methods: ['GET'])]
+    public function exportParcelle(Parcelle $parcelle, PdfService $pdfService): Response
+    {
+        if ($parcelle->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $pdfContent = $pdfService->generatePdfResponse('pdf/parcelle_fiche.html.twig', [
+            'parcelle' => $parcelle,
+            'user' => $this->getUser(),
+        ], 'fiche_parcelle_' . $parcelle->getId() . '.pdf');
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="fiche_parcelle_' . $parcelle->getId() . '.pdf"',
+        ]);
+    }
+
+    #[Route('/culture/{id}/export-prediction-pdf', name: 'app_culture_prediction_export_pdf', methods: ['GET'])]
+    public function exportPrediction(Culture $culture, PdfService $pdfService, \App\Service\PredictionService $predictionService): Response
+    {
+        if ($culture->getParcelle()->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $totalConsomme = 0;
+        foreach ($culture->getConsommations() as $conso) {
+            $totalConsomme += $conso->getQuantite();
+        }
+
+        $surfac = $culture->getParcelle()->getSurface();
+        $typeCulture = $culture->getTypeCulture();
+        $rendementEstime = $predictionService->predict($surfac, $totalConsomme, $typeCulture);
+
+        $pdfContent = $pdfService->generatePdfResponse('pdf/prediction_rapport.html.twig', [
+            'culture' => $culture,
+            'rendement' => $rendementEstime,
+            'totalConsomme' => $totalConsomme,
+            'user' => $this->getUser(),
+        ], 'rapport_prediction_' . $culture->getId() . '.pdf');
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="rapport_prediction_' . $culture->getId() . '.pdf"',
         ]);
     }
 }

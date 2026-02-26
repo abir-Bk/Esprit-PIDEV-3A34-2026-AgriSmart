@@ -1,0 +1,10 @@
+--- Pred (Mistral) ---
+Result: 12.5 Tonnes (Mistral)
+
+--- Chat (HF) With Context ---
+Result: Bienvenue dans votre espace de gestion de parcelle !
+
+Je vois que vous avez une parcelle de 5 hectares de Blé (variété Spunta) en croissance. C'est...
+
+--- Chat (HF) Off-topic ---
+Result: Désolé, je suis spécialisé uniquement en agriculture. Je ne peux pas répondre à cette question.

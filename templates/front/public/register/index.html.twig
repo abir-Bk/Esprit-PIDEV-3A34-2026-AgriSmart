@@ -3,316 +3,825 @@
 {% block title %}Inscription - AgriSmart{% endblock %}
 
 {% block body %}
-<main class="register-page d-flex align-items-center py-5" style="min-height: 100vh;">
-    <div class="container py-3">
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 col-xl-9">
-                <div class="register-card card border-0 shadow" style="border-radius: 24px; overflow: hidden;">
-                    <div class="row g-0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-                        <!-- Gauche : illustration -->
-                        <div class="col-lg-5 d-none d-lg-flex align-items-center justify-content-center p-5 register-card__left">
-                            <div class="text-center">
-                                <lottie-player
-                                    src="{{ asset('assets/images/login.json') }}"
-                                    background="transparent"
-                                    speed="1"
-                                    style="width: 100%; max-width: 320px; height: auto;"
-                                    loop
-                                    autoplay>
-                                </lottie-player>
-                                <p class="mt-3 mb-0 text-white-50 small">Rejoignez la communauté AgriSmart</p>
-                            </div>
-                        </div>
+<main class="rp-page">
 
-                        <!-- Droite : formulaire -->
-                        <div class="col-lg-7">
-                            <div class="p-4 p-lg-5 register-card__form">
+    <!-- Animated background -->
+    <div class="rp-bg">
+        <div class="rp-bg__orb rp-bg__orb--1"></div>
+        <div class="rp-bg__orb rp-bg__orb--2"></div>
+        <div class="rp-bg__orb rp-bg__orb--3"></div>
+        <svg class="rp-bg__pattern" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.04">
+                <circle cx="300" cy="300" r="200" fill="none" stroke="#1F3D2B" stroke-width="1"/>
+                <circle cx="300" cy="300" r="150" fill="none" stroke="#1F3D2B" stroke-width="1"/>
+                <circle cx="300" cy="300" r="100" fill="none" stroke="#1F3D2B" stroke-width="1"/>
+                <circle cx="300" cy="300" r="50" fill="none" stroke="#1F3D2B" stroke-width="1"/>
+            </g>
+        </svg>
+    </div>
 
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <a href="{{ path('app_home') }}" class="d-inline-block">
-                                        <img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" class="register-logo" style="height: 42px;">
-                                    </a>
-                                    <a href="{{ path('app_login') }}" class="btn btn-link text-decoration-none fw-medium" style="color: #1F3D2B;">Se connecter</a>
-                                </div>
+    <div class="rp-wrap">
 
-                                <h1 class="register-title mb-1">Créer un compte</h1>
-                                <p class="register-subtitle text-muted mb-4">Remplissez le formulaire pour vous inscrire.</p>
+        <!-- Left panel -->
+        <div class="rp-left">
+            <a href="{{ path('app_home') }}" class="rp-brand">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="AgriSmart" class="rp-logo">
+            </a>
+            <div class="rp-left__content">
+               
+                
 
-                                {% for message in app.flashes('success') %}
-                                    <div class="alert alert-success border-0 mb-4 d-flex align-items-center" style="border-radius: 14px;">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        {{ message }}
-                                    </div>
-                                {% endfor %}
-
-                                {{ form_start(registrationForm, { attr: { class: 'register-form', enctype: 'multipart/form-data', novalidate: 'novalidate' } }) }}
-
-                                <div class="row g-3">
-                                    {% for field in registrationForm %}
-                                        {% if field.vars.name != 'plainPassword' %}
-                                            <div class="mb-0 {% if field.vars.name == 'firstName' or field.vars.name == 'lastName' %}col-md-6{% else %}col-12{% endif %}">
-                                                {{ form_label(field, null, { label_attr: { class: 'form-label register-label' } }) }}
-                                                {% if field.vars.name == 'role' %}
-                                                    {{ form_widget(field, { attr: { class: 'form-select register-input register-select' } }) }}
-                                                {% elseif field.vars.name == 'documentFileFile' or field.vars.name == 'imageFile' %}
-                                                    <div class="register-file-wrap">
-                                                        {{ form_widget(field, { attr: { class: 'form-control register-input register-file' } }) }}
-                                                    </div>
-                                                {% else %}
-                                                    {{ form_widget(field, { attr: { class: 'form-control register-input', placeholder: field.vars.label } }) }}
-                                                {% endif %}
-                                                {{ form_errors(field) }}
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                    <!-- Mot de passe -->
-                                    <div class="col-12">
-                                        {{ form_label(registrationForm.plainPassword.first, null, { label_attr: { class: 'form-label register-label' } }) }}
-                                        <div class="register-password-wrap">
-                                            {{ form_widget(registrationForm.plainPassword.first, { attr: { class: 'form-control register-input register-password-input', placeholder: 'Mot de passe', 'data-toggle': 'password' } }) }}
-                                            <button type="button" class="register-password-btn btn btn-link p-0" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
-                                                <i class="fas fa-eye-slash register-password-icon"></i>
-                                            </button>
-                                        </div>
-                                        {{ form_errors(registrationForm.plainPassword.first) }}
-                                    </div>
-
-                                    <!-- Confirmer le mot de passe -->
-                                    <div class="col-12">
-                                        {{ form_label(registrationForm.plainPassword.second, null, { label_attr: { class: 'form-label register-label' } }) }}
-                                        <div class="register-password-wrap">
-                                            {{ form_widget(registrationForm.plainPassword.second, { attr: { class: 'form-control register-input register-password-input', placeholder: 'Confirmer le mot de passe', 'data-toggle': 'password' } }) }}
-                                            <button type="button" class="register-password-btn btn btn-link p-0" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
-                                                <i class="fas fa-eye-slash register-password-icon"></i>
-                                            </button>
-                                        </div>
-                                        {{ form_errors(registrationForm.plainPassword.second) }}
-                                    </div>
-                                </div>
-
-                                <p class="small text-muted mt-2 mb-0">Minimum 8 caractères, avec majuscule, minuscule, chiffre et caractère spécial.</p>
-
-                                <button type="submit" class="btn register-submit w-100 mt-4 mb-3">
-                                    Créer mon compte
-                                </button>
-
-                                {{ form_end(registrationForm, {'render_rest': false}) }}
-
-                                <div class="register-divider my-4">
-                                    <span>Ou s'inscrire avec</span>
-                                </div>
-
-                                <a href="{{ path('connect_google_start') }}" class="btn register-google d-flex align-items-center justify-content-center w-100">
-                                    <i class="fab fa-google me-2"></i>
-                                    <span>Google</span>
-                                </a>
-                            </div>
-                        </div>
+                <!-- Step indicator pills (desktop) -->
+                <div class="rp-steps-sidebar" id="stepsSidebar">
+                    <div class="rp-step-pill rp-step-pill--active" data-step="1">
+                        <span class="rp-step-pill__num">1</span>
+                        <span class="rp-step-pill__label">Identité</span>
+                    </div>
+                    <div class="rp-step-connector"></div>
+                    <div class="rp-step-pill" data-step="2">
+                        <span class="rp-step-pill__num">2</span>
+                        <span class="rp-step-pill__label">Contact</span>
+                    </div>
+                    <div class="rp-step-connector"></div>
+                    <div class="rp-step-pill" data-step="3">
+                        <span class="rp-step-pill__num">3</span>
+                        <span class="rp-step-pill__label">Sécurité</span>
+                    </div>
+                    <div class="rp-step-connector"></div>
+                    <div class="rp-step-pill" data-step="4">
+                        <span class="rp-step-pill__num">4</span>
+                        <span class="rp-step-pill__label">Documents</span>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Right panel: wizard -->
+        <div class="rp-right">
+            <div class="rp-card">
+
+                <!-- Top bar -->
+                <div class="rp-card__header">
+                    <div class="rp-progress-track">
+                        <div class="rp-progress-fill" id="progressFill" style="width: 25%"></div>
+                    </div>
+                    <div class="rp-header-row">
+                        <div>
+                            <p class="rp-step-label" id="stepLabel">Étape 1 sur 4</p>
+                            <h1 class="rp-form-title" id="formTitle">Votre identité</h1>
+                        </div>
+                        <a href="{{ path('app_login') }}" class="rp-login-link">Déjà membre ?</a>
+                    </div>
+                </div>
+
+                {% for message in app.flashes('success') %}
+                    <div class="rp-alert rp-alert--success">
+                        <i class="fas fa-check-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+
+                {{ form_start(registrationForm, { attr: { class: 'rp-form', enctype: 'multipart/form-data', novalidate: 'novalidate', id: 'registerForm' } }) }}
+
+                <!-- ===== STEP 1: Identity ===== -->
+                <div class="rp-step-pane rp-step-pane--active" data-pane="1">
+                    <div class="rp-fields-grid rp-fields-grid--two">
+                        {% for field in registrationForm %}
+                            {% if field.vars.name == 'firstName' %}
+                                <div class="rp-field">
+                                    <label class="rp-label">{{ field.vars.label }}</label>
+                                    <div class="rp-input-wrap">
+                                        <i class="fas fa-user rp-input-icon"></i>
+                                        {{ form_widget(field, { attr: { class: 'rp-input', placeholder: 'Prénom' } }) }}
+                                    </div>
+                                    {{ form_errors(field) }}
+                                </div>
+                            {% elseif field.vars.name == 'lastName' %}
+                                <div class="rp-field">
+                                    <label class="rp-label">{{ field.vars.label }}</label>
+                                    <div class="rp-input-wrap">
+                                        <i class="fas fa-user rp-input-icon"></i>
+                                        {{ form_widget(field, { attr: { class: 'rp-input', placeholder: 'Nom' } }) }}
+                                    </div>
+                                    {{ form_errors(field) }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="rp-field rp-field--full mt-3">
+                        {% for field in registrationForm %}
+                            {% if field.vars.name == 'role' %}
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-input-wrap">
+                                    <i class="fas fa-id-badge rp-input-icon"></i>
+                                    {{ form_widget(field, { attr: { class: 'rp-input rp-select' } }) }}
+                                </div>
+                                {{ form_errors(field) }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="rp-nav">
+                        <span></span>
+                        <button type="button" class="rp-btn rp-btn--next" data-goto="2">
+                            Suivant <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== STEP 2: Contact ===== -->
+                <div class="rp-step-pane" data-pane="2">
+                    {% for field in registrationForm %}
+                        {% if field.vars.name == 'email' %}
+                            <div class="rp-field">
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-input-wrap">
+                                    <i class="fas fa-envelope rp-input-icon"></i>
+                                    {{ form_widget(field, { attr: { class: 'rp-input', placeholder: 'votre@email.com' } }) }}
+                                </div>
+                                {{ form_errors(field) }}
+                            </div>
+                        {% elseif field.vars.name == 'phone' or field.vars.name == 'phoneNumber' %}
+                            <div class="rp-field mt-3">
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-input-wrap">
+                                    <i class="fas fa-phone rp-input-icon"></i>
+                                    {{ form_widget(field, { attr: { class: 'rp-input', placeholder: '+216 XX XXX XXX' } }) }}
+                                </div>
+                                {{ form_errors(field) }}
+                            </div>
+                        {% elseif field.vars.name == 'address' %}
+                            <div class="rp-field mt-3">
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-input-wrap">
+                                    <i class="fas fa-map-marker-alt rp-input-icon"></i>
+                                    {{ form_widget(field, { attr: { class: 'rp-input', placeholder: 'Votre adresse' } }) }}
+                                </div>
+                                {{ form_errors(field) }}
+                            </div>
+                        {% elseif field.vars.name not in ['firstName','lastName','role','plainPassword','documentFileFile','imageFile','email','phone','phoneNumber','address'] %}
+                            <div class="rp-field mt-3">
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-input-wrap">
+                                    <i class="fas fa-pen rp-input-icon"></i>
+                                    {{ form_widget(field, { attr: { class: 'rp-input', placeholder: field.vars.label } }) }}
+                                </div>
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="rp-nav">
+                        <button type="button" class="rp-btn rp-btn--back" data-goto="1">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </button>
+                        <button type="button" class="rp-btn rp-btn--next" data-goto="3">
+                            Suivant <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== STEP 3: Security ===== -->
+                <div class="rp-step-pane" data-pane="3">
+                    <div class="rp-field">
+                        {{ form_label(registrationForm.plainPassword.first, null, { label_attr: { class: 'rp-label' } }) }}
+                        <div class="rp-input-wrap">
+                            <i class="fas fa-lock rp-input-icon"></i>
+                            {{ form_widget(registrationForm.plainPassword.first, { attr: { class: 'rp-input rp-password-input', placeholder: 'Mot de passe', 'data-toggle': 'password' } }) }}
+                            <button type="button" class="rp-eye-btn" aria-label="Afficher">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        {{ form_errors(registrationForm.plainPassword.first) }}
+                    </div>
+
+                    <!-- Strength bar -->
+                    <div class="rp-strength mt-2">
+                        <div class="rp-strength__bar">
+                            <div class="rp-strength__fill" id="strengthFill"></div>
+                        </div>
+                        <span class="rp-strength__label" id="strengthLabel">Force du mot de passe</span>
+                    </div>
+
+                    <div class="rp-field mt-3">
+                        {{ form_label(registrationForm.plainPassword.second, null, { label_attr: { class: 'rp-label' } }) }}
+                        <div class="rp-input-wrap">
+                            <i class="fas fa-lock rp-input-icon"></i>
+                            {{ form_widget(registrationForm.plainPassword.second, { attr: { class: 'rp-input rp-password-input', placeholder: 'Confirmer', 'data-toggle': 'password' } }) }}
+                            <button type="button" class="rp-eye-btn" aria-label="Afficher">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        {{ form_errors(registrationForm.plainPassword.second) }}
+                    </div>
+                    <p class="rp-hint mt-2">Min. 8 caractères · Majuscule · Chiffre · Caractère spécial</p>
+
+                    <div class="rp-nav">
+                        <button type="button" class="rp-btn rp-btn--back" data-goto="2">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </button>
+                        <button type="button" class="rp-btn rp-btn--next" data-goto="4">
+                            Suivant <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== STEP 4: Documents ===== -->
+                <div class="rp-step-pane" data-pane="4">
+                    {% for field in registrationForm %}
+                        {% if field.vars.name == 'imageFile' %}
+                            <div class="rp-field">
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-dropzone" id="dropzoneImage">
+                                    <div class="rp-dropzone__inner">
+                                        <i class="fas fa-camera rp-dropzone__icon"></i>
+                                        <p class="rp-dropzone__text">Photo de profil</p>
+                                        <p class="rp-dropzone__sub">Cliquez ou glissez une image</p>
+                                    </div>
+                                    {{ form_widget(field, { attr: { class: 'rp-dropzone__input' } }) }}
+                                </div>
+                                <span class="rp-file-name" id="imageFileName"></span>
+                                {{ form_errors(field) }}
+                            </div>
+                        {% elseif field.vars.name == 'documentFileFile' %}
+                            <div class="rp-field mt-3">
+                                <label class="rp-label">{{ field.vars.label }}</label>
+                                <div class="rp-dropzone" id="dropzoneDoc">
+                                    <div class="rp-dropzone__inner">
+                                        <i class="fas fa-file-alt rp-dropzone__icon"></i>
+                                        <p class="rp-dropzone__text">Document officiel</p>
+                                        <p class="rp-dropzone__sub">PDF, JPG, PNG acceptés</p>
+                                    </div>
+                                    {{ form_widget(field, { attr: { class: 'rp-dropzone__input' } }) }}
+                                </div>
+                                <span class="rp-file-name" id="docFileName"></span>
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <button type="submit" class="rp-submit mt-4">
+                        <span>Créer mon compte</span>
+                        <i class="fas fa-seedling ms-2"></i>
+                    </button>
+
+                    <div class="rp-divider my-3"><span>Ou</span></div>
+                    <a href="{{ path('connect_google_start') }}" class="rp-google">
+                        <i class="fab fa-google"></i> Continuer avec Google
+                    </a>
+
+                    <div class="rp-nav mt-3">
+                        <button type="button" class="rp-btn rp-btn--back" data-goto="3">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </button>
+                        <span></span>
+                    </div>
+                </div>
+
+                {{ form_end(registrationForm, {'render_rest': false}) }}
             </div>
         </div>
     </div>
 </main>
 
 <style>
-    .register-page {
-        background: linear-gradient(160deg, #f0f7f2 0%, #ffffff 50%, #f8faf9 100%);
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .register-card {
-        box-shadow: 0 12px 48px rgba(31, 61, 43, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
-    }
+:root {
+    --green-dark: #1F3D2B;
+    --green-mid: #2d5a3d;
+    --green-light: #4a8c5c;
+    --gold: #E6BF4A;
+    --gold-soft: rgba(230,191,74,0.15);
+    --surface: #ffffff;
+    --muted: #7a8c84;
+    --border: #dde8e2;
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+}
 
-    .register-card__left {
-        background: linear-gradient(145deg, #1F3D2B 0%, #2d5a3d 50%, #1F3D2B 100%);
-    }
+body { font-family: var(--font-body); }
 
-    .register-card__form {
-        background: #fff;
-    }
+/* Page layout */
+.rp-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+    background: #f4f7f5;
+    position: relative;
+    overflow: hidden;
+}
 
-    .register-title {
-        color: #1F3D2B;
-        font-size: 1.6rem;
-        font-weight: 700;
-    }
+/* Animated background orbs */
+.rp-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.rp-bg__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    animation: orbFloat 8s ease-in-out infinite;
+}
+.rp-bg__orb--1 { width: 500px; height: 500px; background: #c8e6c9; top: -150px; left: -150px; animation-delay: 0s; }
+.rp-bg__orb--2 { width: 350px; height: 350px; background: #fff9c4; bottom: -100px; right: -100px; animation-delay: -3s; }
+.rp-bg__orb--3 { width: 250px; height: 250px; background: #a5d6a7; top: 50%; left: 60%; animation-delay: -5s; }
+.rp-bg__pattern { position: absolute; width: 600px; height: 600px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
 
-    .register-subtitle {
-        font-size: 0.95rem;
-    }
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.05); }
+    66% { transform: translate(-20px, 15px) scale(0.95); }
+}
 
-    .register-label {
-        color: #1F3D2B;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-    }
+/* Main wrapper */
+.rp-wrap {
+    display: flex;
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
 
-    .register-input {
-        border: 2px solid #e2e8e6;
-        border-radius: 12px;
-        padding: 0.6rem 1rem;
-        font-size: 0.95rem;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
+/* Left panel */
+.rp-left {
+    width: 380px;
+    flex-shrink: 0;
+    background: linear-gradient(155deg, var(--green-dark) 0%, var(--green-mid) 60%, var(--green-light) 100%);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+.rp-left::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.rp-brand { display: block; margin-bottom: 2rem; }
+.rp-logo { height: 38px; filter: brightness(0) invert(1); opacity: 0.92; }
+.rp-left__content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.rp-left__headline {
+    font-family: var(--font-head);
+    color: #fff;
+    font-size: 1.8rem;
+    line-height: 1.3;
+    text-align: center;
+    margin-top: 1.5rem;
+}
+.rp-left__sub { color: rgba(255,255,255,0.55); font-size: 0.875rem; text-align: center; margin-top: 0.75rem; }
 
-    .register-input:focus {
-        border-color: #E6BF4A;
-        box-shadow: 0 0 0 3px rgba(230, 191, 74, 0.2);
-        outline: 0;
-    }
+/* Sidebar steps */
+.rp-steps-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2.5rem;
+    width: 100%;
+}
+.rp-step-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: default;
+    transition: all 0.3s;
+    width: 160px;
+}
+.rp-step-pill--active {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+.rp-step-pill--done {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.3);
+}
+.rp-step-pill__num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    flex-shrink: 0;
+}
+.rp-step-pill--active .rp-step-pill__num { background: rgba(31,61,43,0.25); color: var(--green-dark); }
+.rp-step-pill__label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+}
+.rp-step-pill--active .rp-step-pill__label { color: var(--green-dark); font-weight: 700; }
+.rp-step-connector {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.15);
+    margin: 2px 0;
+}
 
-    .register-input.is-invalid {
-        border-color: #dc3545;
-    }
+/* Right panel */
+.rp-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+}
+.rp-card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(31,61,43,0.12), 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
 
-    .register-select {
-        cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%231F3D2B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        padding-right: 2.25rem;
-    }
+/* Card header */
+.rp-card__header { padding: 1.75rem 2rem 1.25rem; border-bottom: 1px solid var(--border); }
+.rp-progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+}
+.rp-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-dark), var(--gold));
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.rp-header-row { display: flex; align-items: flex-start; justify-content: space-between; }
+.rp-step-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+.rp-form-title { font-family: var(--font-head); font-size: 1.5rem; color: var(--green-dark); margin-top: 0.2rem; }
+.rp-login-link {
+    font-size: 0.82rem;
+    color: var(--green-dark);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 1px;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+    margin-top: 0.25rem;
+}
+.rp-login-link:hover { opacity: 0.7; }
 
-    .register-password-wrap {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
+/* Form body */
+.rp-form { padding: 1.5rem 2rem 2rem; }
 
-    .register-password-input {
-        padding-right: 3rem;
-        flex: 1;
-    }
+/* Step panes */
+.rp-step-pane {
+    display: none;
+    animation: paneFadeIn 0.35s ease forwards;
+}
+.rp-step-pane--active { display: block; }
+.rp-step-pane--exit {
+    display: block;
+    animation: paneFadeOut 0.25s ease forwards;
+}
 
-    .register-password-btn {
-        position: absolute;
-        right: 0.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1rem;
-        border: none;
-        background: none;
-        cursor: pointer;
-        line-height: 1;
-        transition: color 0.2s;
-    }
+@keyframes paneFadeIn {
+    from { opacity: 0; transform: translateX(18px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes paneFadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-18px); }
+}
+@keyframes paneFadeInBack {
+    from { opacity: 0; transform: translateX(-18px); }
+    to { opacity: 1; transform: translateX(0); }
+}
 
-    .register-password-btn:hover {
-        color: #1F3D2B;
-    }
+/* Fields */
+.rp-fields-grid { display: grid; gap: 1rem; }
+.rp-fields-grid--two { grid-template-columns: 1fr 1fr; }
+.rp-field { display: flex; flex-direction: column; }
+.rp-field--full { grid-column: 1 / -1; }
+.rp-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--green-dark);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.03em;
+}
+.rp-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.rp-input-icon {
+    position: absolute;
+    left: 0.9rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+    transition: color 0.2s;
+}
+.rp-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.65rem 1rem 0.65rem 2.4rem;
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    color: #1a1a1a;
+    background: #fafcfb;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+}
+.rp-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-soft);
+    background: #fff;
+}
+.rp-input:focus ~ .rp-input-icon,
+.rp-input-wrap:focus-within .rp-input-icon { color: var(--green-dark); }
+.rp-select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%231F3D2B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
 
-    .register-password-btn:focus {
-        outline: none;
-        color: #E6BF4A;
-    }
+/* Password toggle */
+.rp-eye-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 0.25rem;
+    transition: color 0.2s;
+}
+.rp-eye-btn:hover { color: var(--green-dark); }
 
-    .register-file-wrap .register-file {
-        padding: 0.5rem;
-        font-size: 0.875rem;
-    }
+/* Strength bar */
+.rp-strength { display: flex; align-items: center; gap: 0.75rem; }
+.rp-strength__bar { flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.rp-strength__fill { height: 100%; width: 0; border-radius: 4px; transition: width 0.4s, background 0.4s; }
+.rp-strength__label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 
-    .register-submit {
-        background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
-        color: #fff;
-        font-weight: 600;
-        font-size: 1rem;
-        border: none;
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
+/* Dropzone */
+.rp-dropzone {
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: #fafcfb;
+    overflow: hidden;
+}
+.rp-dropzone:hover, .rp-dropzone--active {
+    border-color: var(--gold);
+    background: var(--gold-soft);
+}
+.rp-dropzone__inner { text-align: center; pointer-events: none; }
+.rp-dropzone__icon { font-size: 1.6rem; color: var(--green-light); margin-bottom: 0.4rem; }
+.rp-dropzone__text { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); }
+.rp-dropzone__sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+.rp-dropzone__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+.rp-file-name { display: block; font-size: 0.75rem; color: var(--green-light); margin-top: 0.35rem; font-weight: 500; }
 
-    .register-submit:hover {
-        color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(31, 61, 43, 0.35);
-    }
+/* Nav buttons */
+.rp-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.75rem;
+}
+.rp-btn {
+    display: inline-flex;
+    align-items: center;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+}
+.rp-btn--next {
+    background: var(--green-dark);
+    color: #fff;
+}
+.rp-btn--next:hover { background: var(--green-mid); transform: translateX(2px); }
+.rp-btn--back {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+}
+.rp-btn--back:hover { border-color: var(--green-dark); color: var(--green-dark); }
 
-    .register-divider {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
+/* Submit */
+.rp-submit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 14px;
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.rp-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(31,61,43,0.35); }
 
-    .register-divider::before,
-    .register-divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: #e2e8e6;
-    }
+/* Divider */
+.rp-divider { display: flex; align-items: center; gap: 0.75rem; }
+.rp-divider::before, .rp-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.rp-divider span { color: var(--muted); font-size: 0.8rem; }
 
-    .register-divider span {
-        color: #6c757d;
-        font-size: 0.875rem;
-    }
+/* Google */
+.rp-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--green-dark);
+    text-decoration: none;
+    width: 100%;
+    transition: border-color 0.2s, background 0.2s;
+}
+.rp-google:hover { border-color: var(--gold); background: var(--gold-soft); color: var(--green-dark); }
+.rp-google .fab { color: #DB4437; }
 
-    .register-google {
-        border: 2px solid #e2e8e6;
-        border-radius: 12px;
-        padding: 0.6rem 1rem;
-        color: #1F3D2B;
-        font-weight: 600;
-        font-size: 0.95rem;
-        background: #fff;
-        transition: border-color 0.2s, background 0.2s;
-    }
+/* Hint */
+.rp-hint { font-size: 0.75rem; color: var(--muted); }
 
-    .register-google:hover {
-        border-color: #E6BF4A;
-        background: #fefce8;
-        color: #1F3D2B;
-    }
+/* Alert */
+.rp-alert { padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.875rem; margin: 0 2rem 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.rp-alert--success { background: #e8f5e9; color: #2e7d32; }
 
-    .register-google .fab {
-        color: #DB4437;
-    }
+/* Invalid */
+.invalid-feedback { font-size: 0.75rem; color: #dc3545; margin-top: 0.3rem; }
+.is-invalid { border-color: #dc3545 !important; }
 
-    .invalid-feedback {
-        font-size: 0.8rem;
-        margin-top: 0.35rem;
-    }
+/* mt helpers */
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+.ms-1 { margin-left: 0.25rem; }
+.ms-2 { margin-left: 0.5rem; }
 
-    @media (max-width: 991px) {
-        .register-card {
-            margin: 0 0.5rem;
-        }
-        .register-card__form {
-            padding: 1.5rem !important;
-        }
-    }
+/* Responsive */
+@media (max-width: 900px) {
+    .rp-left { display: none; }
+    .rp-wrap { justify-content: center; }
+    .rp-right { padding: 1.25rem; width: 100%; max-width: 560px; }
+    .rp-fields-grid--two { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+    .rp-right { padding: 0.75rem; }
+    .rp-card__header { padding: 1.25rem 1.25rem 1rem; }
+    .rp-form { padding: 1.25rem 1.25rem 1.5rem; }
+}
 </style>
 
 {% block javascripts %}
-    {{ parent() }}
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <script>
-        document.querySelectorAll('.register-password-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var wrap = this.closest('.register-password-wrap');
-                var input = wrap.querySelector('.register-password-input');
-                var icon = wrap.querySelector('.register-password-icon');
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                    btn.setAttribute('aria-label', 'Masquer le mot de passe');
-                    btn.setAttribute('title', 'Masquer le mot de passe');
-                } else {
-                    input.type = 'password';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                    btn.setAttribute('aria-label', 'Afficher le mot de passe');
-                    btn.setAttribute('title', 'Afficher le mot de passe');
-                }
-            });
+{{ parent() }}
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<script>
+(function() {
+    const stepTitles = ['Votre identité', 'Vos coordonnées', 'Sécurité', 'Documents'];
+    const progress = [25, 50, 75, 100];
+    let currentStep = 1;
+    let direction = 1; // 1=forward, -1=backward
+
+    const progressFill = document.getElementById('progressFill');
+    const stepLabel = document.getElementById('stepLabel');
+    const formTitle = document.getElementById('formTitle');
+    const pills = document.querySelectorAll('.rp-step-pill');
+
+    function goTo(step) {
+        direction = step > currentStep ? 1 : -1;
+        const current = document.querySelector(`.rp-step-pane[data-pane="${currentStep}"]`);
+        const next = document.querySelector(`.rp-step-pane[data-pane="${step}"]`);
+        if (!next) return;
+
+        // Exit animation
+        current.style.animation = direction > 0
+            ? 'paneFadeOut 0.25s ease forwards'
+            : 'paneFadeInBack 0.25s ease reverse';
+
+        setTimeout(() => {
+            current.classList.remove('rp-step-pane--active');
+            current.style.animation = '';
+            next.style.animation = direction > 0
+                ? 'paneFadeIn 0.35s ease forwards'
+                : 'paneFadeInBack 0.35s ease forwards';
+            next.classList.add('rp-step-pane--active');
+            currentStep = step;
+            updateUI();
+        }, 220);
+    }
+
+    function updateUI() {
+        progressFill.style.width = progress[currentStep - 1] + '%';
+        stepLabel.textContent = `Étape ${currentStep} sur 4`;
+        formTitle.textContent = stepTitles[currentStep - 1];
+
+        pills.forEach((pill, i) => {
+            pill.classList.remove('rp-step-pill--active', 'rp-step-pill--done');
+            if (i + 1 === currentStep) pill.classList.add('rp-step-pill--active');
+            else if (i + 1 < currentStep) pill.classList.add('rp-step-pill--done');
         });
-    </script>
+    }
+
+    // Nav button listeners
+    document.querySelectorAll('[data-goto]').forEach(btn => {
+        btn.addEventListener('click', () => goTo(parseInt(btn.dataset.goto)));
+    });
+
+    // Password toggle
+    document.querySelectorAll('.rp-eye-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const wrap = btn.closest('.rp-input-wrap');
+            const input = wrap.querySelector('.rp-password-input');
+            const icon = btn.querySelector('i');
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            icon.className = isHidden ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+    });
+
+    // Password strength
+    const pwInput = document.querySelector('.rp-password-input');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthLabel = document.getElementById('strengthLabel');
+    if (pwInput && strengthFill) {
+        pwInput.addEventListener('input', () => {
+            const val = pwInput.value;
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+            const pct = (score / 4) * 100;
+            strengthFill.style.width = pct + '%';
+            const colors = ['#dc3545','#fd7e14','#ffc107','#28a745'];
+            const labels = ['Très faible','Moyen','Bon','Excellent'];
+            strengthFill.style.background = colors[score - 1] || '#dee2e6';
+            strengthLabel.textContent = labels[score - 1] || 'Force du mot de passe';
+            strengthLabel.style.color = colors[score - 1] || '#7a8c84';
+        });
+    }
+
+    // Dropzone file name display
+    function bindDropzone(inputSel, nameSel) {
+        const inp = document.querySelector(inputSel);
+        const nm = document.querySelector(nameSel);
+        if (!inp || !nm) return;
+        const zone = inp.closest('.rp-dropzone');
+        inp.addEventListener('change', () => {
+            const f = inp.files[0];
+            nm.textContent = f ? '✓ ' + f.name : '';
+            if (f) zone.classList.add('rp-dropzone--active');
+        });
+    }
+    bindDropzone('#dropzoneImage .rp-dropzone__input', '#imageFileName');
+    bindDropzone('#dropzoneDoc .rp-dropzone__input', '#docFileName');
+})();
+</script>
 {% endblock %}
 {% endblock %}

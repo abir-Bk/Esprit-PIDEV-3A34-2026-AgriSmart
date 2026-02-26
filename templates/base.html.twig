@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<title>{% block title %}AgriSmart{% endblock %}</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	{# Favicon (logo in browser tab) #}
+	<link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/svg+xml">
+	<link rel="alternate icon" href="{{ asset('assets/images/logo.png') }}" type="image/svg+xml">
+
+	<script>
+		// Force le thème clair (white theme) partout
+		document.documentElement.setAttribute('data-bs-theme', 'light');
+	</script>
+
+	{% block stylesheets %}
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/overlay-scrollbar/css/overlayscrollbars.min.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+	{% endblock %}
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+  
+
+    {# Messages flash globaux (dismissible) — affiché seulement s'il y a des messages #}
+    {% if app.flashes|length > 0 %}
+    <div class="container py-2 py-md-3" id="flash-container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-2 mb-md-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-grow-1">
+        {% block body %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="bg-light border-top py-4 mt-auto">
+        <div class="container text-center text-muted small">
+            <span>© {{ 'now'|date('Y') }} AgriSmart · Marketplace agricole</span>
+        </div>
+    </footer>
+    {% endblock %}
+
+    {% block javascripts %}
+        <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    {% endblock %}
+</body>
+</html>

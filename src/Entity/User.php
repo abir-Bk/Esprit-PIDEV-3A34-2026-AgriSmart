@@ -2,8 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Commande;
-use App\Entity\Produit;
+
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -93,11 +92,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Offre::class, mappedBy: 'agriculteur')]
     private Collection $offres;
 
+    /**
+     * @var Collection<int, LoginHistory>
+     */
+    #[ORM\OneToMany(targetEntity: LoginHistory::class, mappedBy: 'user')]
+    private Collection $loginTime;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->offres = new ArrayCollection();
+        $this->loginTime = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -106,9 +112,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
+#[ORM\Column(type: 'string', length: 6, nullable: true)]
+private ?string $twoFactorCode = null;
 
-    // ─── Getters & Setters ────────────────────────────────────────────
+#[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $twoFactorExpiresAt = null;
 
+// Getters / Setters
+public function getTwoFactorCode(): ?string
+{
+    return $this->twoFactorCode;
+}
+
+public function setTwoFactorCode(?string $code): self
+{
+    $this->twoFactorCode = $code;
+    return $this;
+}
+
+public function getTwoFactorExpiresAt(): ?\DateTimeInterface
+{
+    return $this->twoFactorExpiresAt;
+}
+
+public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
+{
+    $this->twoFactorExpiresAt = $expiresAt;
+    return $this;
+}
+  
     public function getId(): ?int
     {
         return $this->id;
@@ -329,6 +361,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($offre->getAgriculteur() === $this) {
                 $offre->setAgriculteur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LoginHistory>
+     */
+    public function getLoginTime(): Collection
+    {
+        return $this->loginTime;
+    }
+
+    public function addLoginTime(LoginHistory $loginTime): static
+    {
+        if (!$this->loginTime->contains($loginTime)) {
+            $this->loginTime->add($loginTime);
+            $loginTime->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLoginTime(LoginHistory $loginTime): static
+    {
+        if ($this->loginTime->removeElement($loginTime)) {
+            // set the owning side to null (unless already changed)
+            if ($loginTime->getUser() === $this) {
+                $loginTime->setUser(null);
             }
         }
 

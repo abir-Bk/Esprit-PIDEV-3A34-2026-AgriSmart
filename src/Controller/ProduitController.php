@@ -231,6 +231,8 @@ final class ProduitController extends AbstractController
                 $this->addFlash('success', 'Félicitations ! Votre annonce est maintenant en ligne.');
                 return $this->redirectToRoute('app_produit_mes_offres');
             }
+
+            $this->addFlash('danger', 'Impossible de publier l\'annonce. Merci de corriger les champs en erreur.');
         }
 
         return $this->render('front/semi-public/produit/new.html.twig', [
@@ -426,17 +428,21 @@ final class ProduitController extends AbstractController
         $form = $this->createForm(ProduitType::class, $produit);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($produit->getType() !== Produit::TYPE_LOCATION) {
-                $produit->setLocationStart(null);
-                $produit->setLocationEnd(null);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                if ($produit->getType() !== Produit::TYPE_LOCATION) {
+                    $produit->setLocationStart(null);
+                    $produit->setLocationEnd(null);
+                }
+
+                $this->handleImageUpload($form->get('imageFile')->getData(), $produit, $slugger);
+
+                $em->flush();
+                $this->addFlash('success', 'Votre annonce a été mise à jour avec succès.');
+                return $this->redirectToRoute('app_produit_mes_offres');
             }
 
-            $this->handleImageUpload($form->get('imageFile')->getData(), $produit, $slugger);
-
-            $em->flush();
-            $this->addFlash('success', 'Votre annonce a été mise à jour avec succès.');
-            return $this->redirectToRoute('app_produit_mes_offres');
+            $this->addFlash('danger', 'Mise à jour impossible. Merci de corriger les champs en erreur.');
         }
 
         return $this->render('front/semi-public/produit/edit.html.twig', [
@@ -461,9 +467,13 @@ final class ProduitController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete' . $produit->getId(), (string) $request->request->get('_token'))) {
-            $em->remove($produit);
-            $em->flush();
-            $this->addFlash('success', 'Annonce retirée de la marketplace.');
+            try {
+                $em->remove($produit);
+                $em->flush();
+                $this->addFlash('success', 'Annonce supprimée avec succès.');
+            } catch (\Throwable) {
+                $this->addFlash('danger', 'Suppression impossible pour le moment. Veuillez réessayer.');
+            }
         } else {
             $this->addFlash('danger', 'Token CSRF invalide.');
         }

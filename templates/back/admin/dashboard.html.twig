@@ -44,123 +44,263 @@
     font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--slate-900);
   }
-/* ── Calm Milky Header ───────────────────────────────────────── */
 
-.page-header {
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    #f8fafc 40%,
-    #f3f6f9 100%
-  );
-  border-bottom: 1px solid #e9eef3;
-  position: relative;
-  overflow: hidden;
-}
+  /* ══════════════════════ TOPBAR ══════════════════════════════ */
+  .ag-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #ffffff;
+    border-bottom: 1px solid var(--slate-100);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  }
 
-/* very soft light texture */
-.page-header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-}
+  .ag-topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
 
-/* soft right glow */
-.page-header::after {
-  content: '';
-  position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(168,145,106,0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
+  .ag-topbar-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--slate-500);
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
 
-/* subtle gold line */
-.page-header-gold-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(168,145,106,.15) 25%,
-    rgba(168,145,106,.4) 50%,
-    rgba(168,145,106,.15) 75%,
-    transparent 100%
-  );
-}
+  .ag-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 
-.page-header-inner {
-  position: relative;
-  z-index: 1;
-  padding: 32px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-}
+  .topbar-icon-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--slate-100);
+    background: var(--slate-50);
+    color: var(--slate-500);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
 
-/* accent bar */
-.page-header-accent {
-  width: 3px;
-  height: 50px;
-  border-radius: 4px;
-  background: linear-gradient(
-    180deg,
-    #a8916a 0%,
-    #c4b08a 50%,
-    #a8916a 100%
-  );
-}
+  .topbar-icon-btn:hover {
+    background: var(--green-50);
+    border-color: var(--green-100);
+    color: var(--green-700);
+  }
 
-.page-header-text h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
-  font-weight: 700;
-  margin: 0 0 6px;
-  color: #1e293b;
-  letter-spacing: -0.02em;
-}
+  .notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--red-500);
+    color: white;
+    font-size: 0.58rem;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 2px solid #fff;
+  }
 
-.page-header-text p {
-  font-size: 13px;
-  margin: 0;
-  color: #64748b;
-  font-weight: 400;
-}
+  .topbar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--green-100);
+    background: var(--green-100);
+    color: var(--green-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: default;
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
 
-.page-header-text p strong {
-  color: #334155;
-  font-weight: 600;
-}
+  .topbar-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-/* badges (date & time) */
-.header-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border: 1px solid #e5eaf0;
-  border-radius: 10px;
-  padding: 8px 15px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #475569;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-}
+  /* Notification dropdown */
+  .notif-wrap { position: relative; }
 
-.header-badge i {
-  font-size: 13px;
-  color: #a8916a;
-}
+  .notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 310px;
+    background: #fff;
+    border: 1px solid var(--slate-100);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .notif-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--slate-100);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--slate-900);
+  }
+
+  .notif-dropdown-header button {
+    background: none;
+    border: none;
+    font-size: 0.7rem;
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--green-500);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .notif-dropdown-header button:hover { text-decoration: underline; }
+
+  #notif-list { max-height: 320px; overflow-y: auto; }
+
+  .notif-item {
+    display: flex;
+    gap: 10px;
+    padding: 0.75rem 1.1rem;
+    border-bottom: 1px solid var(--slate-100);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:hover      { background: var(--slate-50); }
+  .notif-item.unread     { background: var(--green-50); }
+
+  .notif-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    margin-top: 5px; flex-shrink: 0;
+  }
+
+  .notif-dot.warning { background: var(--amber-500); }
+  .notif-dot.info    { background: var(--green-500); }
+  .notif-dot.success { background: #16a34a; }
+
+  .notif-item-body { flex: 1; min-width: 0; }
+
+  .notif-item-title {
+    font-size: 0.78rem; font-weight: 600; color: var(--slate-900);
+    margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .notif-item-msg {
+    font-size: 0.72rem; color: var(--slate-500); line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .notif-item-time { font-size: 0.65rem; color: var(--slate-300); margin-top: 3px; }
+
+  .notif-empty {
+    padding: 2rem; text-align: center;
+    font-size: 0.8rem; color: var(--slate-300);
+  }
+
+  .d-none { display: none !important; }
+
+  /* ══════════════════════ PAGE HEADER ══════════════════════════ */
+  .page-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 40%, #f3f6f9 100%);
+    border-bottom: 1px solid #e9eef3;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+
+  .page-header::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(168,145,106,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .page-header-gold-line {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(168,145,106,.15) 25%,
+      rgba(168,145,106,.4) 50%,
+      rgba(168,145,106,.15) 75%,
+      transparent 100%
+    );
+  }
+
+  .page-header-inner {
+    position: relative; z-index: 1;
+    padding: 32px 36px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+  }
+
+  .page-header-left  { display: flex; align-items: center; gap: 14px; }
+  .page-header-right { display: flex; align-items: center; gap: 10px; }
+
+  .page-header-accent {
+    width: 3px; height: 50px; border-radius: 4px;
+    background: linear-gradient(180deg, #a8916a 0%, #c4b08a 50%, #a8916a 100%);
+  }
+
+  .page-header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700;
+    margin: 0 0 6px; color: #1e293b; letter-spacing: -0.02em;
+  }
+
+  .page-header-text p { font-size: 13px; margin: 0; color: #64748b; font-weight: 400; }
+  .page-header-text p strong { color: #334155; font-weight: 600; }
+
+  .header-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: #ffffff; border: 1px solid #e5eaf0;
+    border-radius: 10px; padding: 8px 15px;
+    font-size: 12.5px; font-weight: 500; color: #475569;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  .header-badge i { font-size: 13px; color: #a8916a; }
+
+  /* ══════════════════════ DASH CONTENT ════════════════════════ */
   .dash-content { padding: 28px 32px 48px; max-width: 1400px; }
 
   .section-label {
@@ -257,11 +397,6 @@
 
   .chart-subtitle { font-size: 12px; color: var(--slate-500); margin: 0 0 16px; }
 
-  /* ── This is the key part for UX bundle charts ── */
-  /* render_chart() outputs a <canvas> inside a div[data-controller] */
-  .chart-wrap canvas { max-height: 200px; }
-  .chart-wrap-tall canvas { max-height: 220px; }
-
   .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
   .role-item {
     background: var(--green-50); border: 1px solid var(--green-100);
@@ -339,8 +474,9 @@
   }
 
   @media (max-width: 640px) {
-    .page-header-inner { padding: 20px 20px; }
+    .page-header-inner { padding: 20px; }
     .dash-content { padding: 20px 16px 40px; }
+    .ag-topbar { padding: 0 1rem; }
   }
 </style>
 {% endblock %}
@@ -354,7 +490,48 @@
   {# ── Main ─────────────────────────────────────────────────────── #}
   <main>
 
-      {# Page Header #}
+    {# ══════════════════════ TOPBAR ══════════════════════ #}
+    <header class="ag-topbar">
+      <div class="ag-topbar-inner">
+
+        <span class="ag-topbar-title">{{ topbar_title ?? 'Dashboard' }}</span>
+
+        <div class="ag-topbar-right">
+
+          {# Notification Bell #}
+          <div class="notif-wrap" id="notif-wrap">
+            <button class="topbar-icon-btn" id="bell-btn" onclick="toggleDropdown(event)">
+              <i class="bi bi-bell"></i>
+              <span class="notif-badge d-none" id="badge-count">0</span>
+            </button>
+
+            <div class="notif-dropdown d-none" id="notif-dropdown">
+              <div class="notif-dropdown-header">
+                <span>Notifications</span>
+                <button onclick="markAllRead()">Tout marquer lu</button>
+              </div>
+              <div id="notif-list">
+                <div class="notif-empty">Aucune notification</div>
+              </div>
+            </div>
+          </div>
+
+          {# Admin avatar #}
+          <div class="topbar-avatar" title="{{ app.user ? app.user.firstName : 'Admin' }}">
+            {% if app.user and app.user.image %}
+              <img src="{{ asset('uploads/users/images/' ~ app.user.image) }}" alt="avatar">
+            {% elseif app.user %}
+              {{ app.user.firstName|first|upper }}{{ app.user.lastName|first|upper }}
+            {% else %}
+              <i class="bi bi-person"></i>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    {# ══════════════════════ PAGE HEADER ══════════════════════ #}
     <div class="page-header">
       <div class="page-header-gold-line"></div>
       <div class="page-header-inner">
@@ -377,6 +554,7 @@
         </div>
       </div>
     </div>
+
     <div class="dash-content">
 
       {# ══════════════════════ USERS ══════════════════════ #}
@@ -428,10 +606,8 @@
         </div>
       </div>
 
-      {# Users charts row #}
       <div class="charts-grid" style="margin-top:16px;">
 
-        {# Donut — status #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-pie-chart-fill"></i> Statuts des comptes</h5>
@@ -440,20 +616,13 @@
             <p class="chart-subtitle">Répartition active / en attente / désactivé</p>
             <div id="chartUserStatus" style="min-height:200px;"></div>
             <div class="legend-list">
-              <div class="legend-item">
-                <div class="legend-dot" style="background:#3d8b5a"></div> Actifs <span>{{ activeUsers }}</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background:#d97706"></div> En attente <span>{{ pendingUsers }}</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background:#dc2626"></div> Désactivés <span>{{ disabledUsers }}</span>
-              </div>
+              <div class="legend-item"><div class="legend-dot" style="background:#3d8b5a"></div> Actifs <span>{{ activeUsers }}</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> En attente <span>{{ pendingUsers }}</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> Désactivés <span>{{ disabledUsers }}</span></div>
             </div>
           </div>
         </div>
 
-        {# Roles card #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-diagram-3-fill"></i> Répartition par rôle</h5>
@@ -462,38 +631,25 @@
             <div class="role-grid">
               <div class="role-item">
                 <div class="role-icon"><i class="bi bi-flower1"></i></div>
-                <div>
-                  <div class="role-count">{{ usersByRole.agriculteur ?? 0 }}</div>
-                  <div class="role-name">Agriculteurs</div>
-                </div>
+                <div><div class="role-count">{{ usersByRole.agriculteur ?? 0 }}</div><div class="role-name">Agriculteurs</div></div>
               </div>
               <div class="role-item">
                 <div class="role-icon"><i class="bi bi-building"></i></div>
-                <div>
-                  <div class="role-count">{{ usersByRole.fournisseur ?? 0 }}</div>
-                  <div class="role-name">Fournisseurs</div>
-                </div>
+                <div><div class="role-count">{{ usersByRole.fournisseur ?? 0 }}</div><div class="role-name">Fournisseurs</div></div>
               </div>
               <div class="role-item">
                 <div class="role-icon"><i class="bi bi-briefcase-fill"></i></div>
-                <div>
-                  <div class="role-count">{{ usersByRole.employee ?? 0 }}</div>
-                  <div class="role-name">Employés</div>
-                </div>
+                <div><div class="role-count">{{ usersByRole.employee ?? 0 }}</div><div class="role-name">Employés</div></div>
               </div>
               <div class="role-item">
                 <div class="role-icon"><i class="bi bi-shield-fill-check"></i></div>
-                <div>
-                  <div class="role-count">{{ usersByRole.admin ?? 0 }}</div>
-                  <div class="role-name">Admins</div>
-                </div>
+                <div><div class="role-count">{{ usersByRole.admin ?? 0 }}</div><div class="role-name">Admins</div></div>
               </div>
             </div>
             <div id="chartUserRole" style="min-height:130px;"></div>
           </div>
         </div>
 
-        {# Recent users mini-table #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-person-lines-fill"></i> Derniers inscrits</h5>
@@ -502,12 +658,7 @@
           <div class="card-body-sm">
             {% if recentUsers|length > 0 %}
             <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>Utilisateur</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Utilisateur</th><th>Statut</th></tr></thead>
               <tbody>
                 {% for u in recentUsers %}
                 <tr>
@@ -534,10 +685,7 @@
               </tbody>
             </table>
             {% else %}
-            <div class="empty-state">
-              <i class="bi bi-person-slash"></i>
-              <p>Aucun utilisateur récent.</p>
-            </div>
+            <div class="empty-state"><i class="bi bi-person-slash"></i><p>Aucun utilisateur récent.</p></div>
             {% endif %}
           </div>
         </div>
@@ -596,7 +744,6 @@
 
       <div class="two-col" style="margin-top:16px;">
 
-        {# Offres donut #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-pie-chart-fill"></i> Validation des offres</h5>
@@ -605,20 +752,13 @@
             <p class="chart-subtitle">Approuvées · En attente · Refusées</p>
             <div id="chartOffres" style="min-height:200px;"></div>
             <div class="legend-list">
-              <div class="legend-item">
-                <div class="legend-dot" style="background:#3d8b5a"></div> Approuvées <span>{{ offresApproved }}</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background:#d97706"></div> En attente <span>{{ offresPending }}</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background:#dc2626"></div> Refusées <span>{{ offresRefused }}</span>
-              </div>
+              <div class="legend-item"><div class="legend-dot" style="background:#3d8b5a"></div> Approuvées <span>{{ offresApproved }}</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> En attente <span>{{ offresPending }}</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> Refusées <span>{{ offresRefused }}</span></div>
             </div>
           </div>
         </div>
 
-        {# Pending offres quick-action table #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-lightning-charge-fill"></i> Offres en attente</h5>
@@ -627,12 +767,7 @@
           <div class="card-body-sm">
             {% if recentOffres|length > 0 %}
             <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>Offre</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Offre</th><th>Actions</th></tr></thead>
               <tbody>
                 {% for offre in recentOffres %}
                 <tr>
@@ -658,10 +793,7 @@
               </tbody>
             </table>
             {% else %}
-            <div class="empty-state">
-              <i class="bi bi-check2-circle"></i>
-              <p>Toutes les offres ont été traitées.</p>
-            </div>
+            <div class="empty-state"><i class="bi bi-check2-circle"></i><p>Toutes les offres ont été traitées.</p></div>
             {% endif %}
           </div>
         </div>
@@ -720,32 +852,16 @@
 
       <div class="two-col" style="margin-top:16px;">
 
-        {# Produits type bar #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-bar-chart-fill"></i> Types d'annonces</h5>
           </div>
           <div class="card-body">
             <p class="chart-subtitle">Vente · Location · Promotion · Bannis</p>
-            <div class="chart-meta">
-              <div class="chart-meta-item">
-                <div class="chart-meta-dot" style="background:#3d8b5a;border-radius:3px;width:10px;height:10px;"></div> Vente
-              </div>
-              <div class="chart-meta-item">
-                <div class="chart-meta-dot" style="background:#2563eb;border-radius:3px;width:10px;height:10px;"></div> Location
-              </div>
-              <div class="chart-meta-item">
-                <div class="chart-meta-dot" style="background:#d97706;border-radius:3px;width:10px;height:10px;"></div> Promo
-              </div>
-              <div class="chart-meta-item">
-                <div class="chart-meta-dot" style="background:#dc2626;border-radius:3px;width:10px;height:10px;"></div> Bannis
-              </div>
-            </div>
             <div id="chartProduitType" style="min-height:220px;"></div>
           </div>
         </div>
 
-        {# Produits by category #}
         <div class="card">
           <div class="card-header">
             <h5 class="card-header-title"><i class="bi bi-bar-chart-steps"></i> Top catégories</h5>
@@ -768,7 +884,7 @@
 {{ parent() }}
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.46.0/dist/apexcharts.min.js"></script>
 <script>
-// ── Live clock ────────────────────────────────────────────────────
+/* ══════════════ Live clock ══════════════ */
 (function() {
   const days   = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
   const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
@@ -782,112 +898,144 @@
   tick(); setInterval(tick, 1000);
 })();
 
-// ── Shared palette ────────────────────────────────────────────────
-const C = {
-  green:  '#3d8b5a',
-  greenL: '#52a872',
-  amber:  '#d97706',
-  red:    '#dc2626',
-  blue:   '#2563eb',
-  blueL:  '#60a5fa',
-  slate:  '#64748b',
-  sand:   '#a8916a',
-};
-
+/* ══════════════ ApexCharts ══════════════ */
+const C = { green:'#3d8b5a', amber:'#d97706', red:'#dc2626', blue:'#2563eb' };
 const fontFamily = "'Plus Jakarta Sans', sans-serif";
 
-// ── User status donut ─────────────────────────────────────────────
 new ApexCharts(document.getElementById('chartUserStatus'), {
-  chart: { type: 'donut', height: 200, fontFamily, toolbar: { show: false } },
+  chart: { type:'donut', height:200, fontFamily, toolbar:{show:false} },
   series: [{{ activeUsers }}, {{ pendingUsers }}, {{ disabledUsers }}],
-  labels: ['Actifs', 'En attente', 'Désactivés'],
+  labels: ['Actifs','En attente','Désactivés'],
   colors: [C.green, C.amber, C.red],
-  plotOptions: { pie: { donut: { size: '68%', labels: {
-    show: true,
-    total: { show: true, label: 'Total', color: '#64748b',
-      formatter: (w) => w.globals.seriesTotals.reduce((a,b) => a+b, 0)
-    }
+  plotOptions: { pie: { donut: { size:'68%', labels: { show:true,
+    total: { show:true, label:'Total', color:'#64748b',
+      formatter: (w) => w.globals.seriesTotals.reduce((a,b) => a+b, 0) }
   } } } },
-  dataLabels: { enabled: false },
-  legend: { show: false },
-  stroke: { width: 0 },
+  dataLabels: { enabled:false }, legend: { show:false }, stroke: { width:0 },
 }).render();
 
-// ── User roles bar ────────────────────────────────────────────────
 new ApexCharts(document.getElementById('chartUserRole'), {
-  chart: { type: 'bar', height: 130, fontFamily, toolbar: { show: false },
-    sparkline: { enabled: false } },
-  series: [{ name: 'Utilisateurs', data: [
+  chart: { type:'bar', height:130, fontFamily, toolbar:{show:false} },
+  series: [{ name:'Utilisateurs', data:[
     {{ usersByRole.agriculteur ?? 0 }},
     {{ usersByRole.fournisseur ?? 0 }},
     {{ usersByRole.employee   ?? 0 }},
     {{ usersByRole.admin      ?? 0 }}
   ]}],
-  xaxis: { categories: ['Agriculteurs','Fournisseurs','Employés','Admins'],
-    labels: { style: { fontSize: '10px', colors: '#64748b' } } },
-  yaxis: { labels: { style: { fontSize: '10px', colors: '#64748b' } } },
+  xaxis: { categories:['Agriculteurs','Fournisseurs','Employés','Admins'],
+    labels: { style:{ fontSize:'10px', colors:'#64748b' } } },
+  yaxis: { labels: { style:{ fontSize:'10px', colors:'#64748b' } } },
   colors: [C.green],
-  plotOptions: { bar: { borderRadius: 5, columnWidth: '55%' } },
-  dataLabels: { enabled: false },
-  grid: { borderColor: '#f1f5f9', strokeDashArray: 3 },
+  plotOptions: { bar: { borderRadius:5, columnWidth:'55%' } },
+  dataLabels: { enabled:false },
+  grid: { borderColor:'#f1f5f9', strokeDashArray:3 },
   tooltip: { y: { formatter: v => v + ' utilisateurs' } },
 }).render();
 
-// ── Offres donut ──────────────────────────────────────────────────
 new ApexCharts(document.getElementById('chartOffres'), {
-  chart: { type: 'donut', height: 200, fontFamily, toolbar: { show: false } },
+  chart: { type:'donut', height:200, fontFamily, toolbar:{show:false} },
   series: [{{ offresApproved }}, {{ offresPending }}, {{ offresRefused }}],
-  labels: ['Approuvées', 'En attente', 'Refusées'],
+  labels: ['Approuvées','En attente','Refusées'],
   colors: [C.green, C.amber, C.red],
-  plotOptions: { pie: { donut: { size: '68%', labels: {
-    show: true,
-    total: { show: true, label: 'Total', color: '#64748b',
-      formatter: (w) => w.globals.seriesTotals.reduce((a,b) => a+b, 0)
-    }
+  plotOptions: { pie: { donut: { size:'68%', labels: { show:true,
+    total: { show:true, label:'Total', color:'#64748b',
+      formatter: (w) => w.globals.seriesTotals.reduce((a,b) => a+b, 0) }
   } } } },
-  dataLabels: { enabled: false },
-  legend: { show: false },
-  stroke: { width: 0 },
+  dataLabels: { enabled:false }, legend: { show:false }, stroke: { width:0 },
 }).render();
 
-// ── Produits type bar ─────────────────────────────────────────────
 new ApexCharts(document.getElementById('chartProduitType'), {
-  chart: { type: 'bar', height: 220, fontFamily, toolbar: { show: false } },
-  series: [{ name: 'Produits', data: [
-    {{ produitsVente }}, {{ produitsLocation }}, {{ produitsPromo }}, {{ produitsBanned }}
-  ]}],
-  xaxis: { categories: ['Vente', 'Location', 'Promotion', 'Bannis'],
-    labels: { style: { fontSize: '11px', colors: '#64748b' } } },
-  yaxis: { labels: { style: { fontSize: '11px', colors: '#64748b' } } },
+  chart: { type:'bar', height:220, fontFamily, toolbar:{show:false} },
+  series: [{ name:'Produits', data:[{{ produitsVente }}, {{ produitsLocation }}, {{ produitsPromo }}, {{ produitsBanned }}] }],
+  xaxis: { categories:['Vente','Location','Promotion','Bannis'],
+    labels: { style:{ fontSize:'11px', colors:'#64748b' } } },
+  yaxis: { labels: { style:{ fontSize:'11px', colors:'#64748b' } } },
   colors: [C.green, C.blue, C.amber, C.red],
-  fill: { type: 'solid' },
-  plotOptions: { bar: {
-    borderRadius: 6,
-    columnWidth: '50%',
-    distributed: true,
-  } },
-  dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 600 } },
-  legend: { show: false },
-  grid: { borderColor: '#f1f5f9', strokeDashArray: 3 },
+  plotOptions: { bar: { borderRadius:6, columnWidth:'50%', distributed:true } },
+  dataLabels: { enabled:true, style:{ fontSize:'11px', fontWeight:600 } },
+  legend: { show:false },
+  grid: { borderColor:'#f1f5f9', strokeDashArray:3 },
   tooltip: { y: { formatter: v => v + ' produits' } },
 }).render();
 
-// ── Produits categories horizontal bar ────────────────────────────
 const catLabels = {{ produitCategories|raw }};
 const catCounts = {{ produitCatCounts|raw }};
 new ApexCharts(document.getElementById('chartProduitCat'), {
-  chart: { type: 'bar', height: 220, fontFamily, toolbar: { show: false } },
-  series: [{ name: 'Produits', data: catCounts.length ? catCounts : [0] }],
-  xaxis: {
-    categories: catLabels.length ? catLabels : ['Aucune donnée'],
-    labels: { style: { fontSize: '11px', colors: '#64748b' } }
-  },
-  yaxis: { labels: { style: { fontSize: '11px', colors: '#64748b' } } },
-  plotOptions: { bar: { borderRadius: 5, horizontal: true, barHeight: '60%' } },
+  chart: { type:'bar', height:220, fontFamily, toolbar:{show:false} },
+  series: [{ name:'Produits', data: catCounts.length ? catCounts : [0] }],
+  xaxis: { categories: catLabels.length ? catLabels : ['Aucune donnée'],
+    labels: { style:{ fontSize:'11px', colors:'#64748b' } } },
+  yaxis: { labels: { style:{ fontSize:'11px', colors:'#64748b' } } },
+  plotOptions: { bar: { borderRadius:5, horizontal:true, barHeight:'60%' } },
   colors: [C.green],
-  dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 600 } },
-  grid: { borderColor: '#f1f5f9', strokeDashArray: 3 },
+  dataLabels: { enabled:true, style:{ fontSize:'11px', fontWeight:600 } },
+  grid: { borderColor:'#f1f5f9', strokeDashArray:3 },
   tooltip: { y: { formatter: v => v + ' produits' } },
 }).render();
+
+/* ══════════════ Notification Dropdown ══════════════ */
+let dropdownOpen = false;
+
+function toggleDropdown(e) {
+  e.stopPropagation();
+  dropdownOpen = !dropdownOpen;
+  document.getElementById('notif-dropdown').classList.toggle('d-none', !dropdownOpen);
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('notif-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    dropdownOpen = false;
+    document.getElementById('notif-dropdown').classList.add('d-none');
+  }
+});
+
+async function pollNotifications() {
+  try {
+    const res  = await fetch('/admin/notifications/poll');
+    const data = await res.json();
+    const badge = document.getElementById('badge-count');
+    if (data.unread > 0) {
+      badge.textContent = data.unread > 99 ? '99+' : data.unread;
+      badge.classList.remove('d-none');
+    } else {
+      badge.classList.add('d-none');
+    }
+    const list = document.getElementById('notif-list');
+    if (!data.notifications.length) {
+      list.innerHTML = '<div class="notif-empty">Aucune notification</div>';
+      return;
+    }
+    list.innerHTML = data.notifications.map(n => `
+      <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="handleNotifClick(${n.id}, '${n.link ?? ''}')">
+        <div class="notif-dot ${n.type}"></div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">${n.title}</div>
+          <div class="notif-item-msg">${n.message}</div>
+          <div class="notif-item-time">${n.createdAt}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { /* silent */ }
+}
+
+async function handleNotifClick(id, link) {
+  await fetch(`/admin/notifications/${id}/read`, { method: 'POST' });
+  if (link) {
+    window.location.href = link;
+  } else {
+    dropdownOpen = false;
+    document.getElementById('notif-dropdown').classList.add('d-none');
+    pollNotifications();
+  }
+}
+
+async function markAllRead() {
+  await fetch('/admin/notifications/read-all', { method: 'POST' });
+  pollNotifications();
+}
+
+pollNotifications();
+setInterval(pollNotifications, 10000);
 </script>
 {% endblock %}

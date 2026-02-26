@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Entity\TaskAssignment;
+use App\Entity\User;
 use App\Repository\TaskAssignmentRepository;
 use App\Repository\TaskRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,8 +21,8 @@ class TaskAssignmentController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly TaskAssignmentRepository $assignmentRepository,
         private readonly TaskRepository $taskRepository,
-    ) {
-    }
+        private readonly UserRepository $userRepository,
+    ) {}
 
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(): JsonResponse
@@ -102,7 +104,7 @@ class TaskAssignmentController extends AbstractController
 
     private function mapDataToAssignment(TaskAssignment $assignment, array $data, bool $isNew): void
     {
-        foreach (['taskId', 'workerId', 'dateAssignment', 'statut'] as $required) {
+        foreach (['taskId', 'workerId', 'dateAssignment'] as $required) {
             if ($isNew && !\array_key_exists($required, $data)) {
                 throw new \InvalidArgumentException(sprintf('Champ obligatoire manquant: %s', $required));
             }
@@ -117,7 +119,11 @@ class TaskAssignmentController extends AbstractController
         }
 
         if (isset($data['workerId'])) {
-            $assignment->setWorkerId((int) $data['workerId']);
+            $worker = $this->userRepository->find((int) $data['workerId']);
+            if (!$worker instanceof User) {
+                throw new \InvalidArgumentException('Utilisateur introuvable pour workerId=' . $data['workerId']);
+            }
+            $assignment->setWorker($worker);
         }
 
         if (isset($data['dateAssignment'])) {
@@ -143,10 +149,10 @@ class TaskAssignmentController extends AbstractController
         return [
             'idAssignment' => $assignment->getIdAssignment(),
             'taskId' => $assignment->getTask()?->getIdTask(),
-            'workerId' => $assignment->getWorkerId(),
+            'workerId' => $assignment->getWorker()?->getId(),
+            'workerName' => $assignment->getWorker() ? $assignment->getWorker()->getFirstName() . ' ' . $assignment->getWorker()->getLastName() : null,
             'dateAssignment' => $assignment->getDateAssignment()->format(\DateTimeInterface::ATOM),
             'statut' => $assignment->getStatut(),
         ];
     }
 }
-

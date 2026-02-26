@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\TaskAssignment;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,11 +22,11 @@ class TaskAssignmentRepository extends ServiceEntityRepository
      *
      * @return TaskAssignment[]
      */
-    public function findForWorker(int $workerId): array
+    public function findForWorker(User $user): array
     {
         return $this->createQueryBuilder('a')
-            ->andWhere('a.workerId = :wid')
-            ->setParameter('wid', $workerId)
+            ->andWhere('a.worker = :user')
+            ->setParameter('user', $user)
             ->leftJoin('a.task', 't')
             ->addSelect('t')
             ->orderBy('t.dateDebut', 'ASC')
@@ -33,4 +34,3 @@ class TaskAssignmentRepository extends ServiceEntityRepository
             ->getResult();
     }
 }
-

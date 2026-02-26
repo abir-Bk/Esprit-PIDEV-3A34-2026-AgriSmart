@@ -29,7 +29,7 @@
               <tr>
                 <td>{{ assignment.idAssignment }}</td>
                 <td>{{ assignment.task ? assignment.task.titre : '' }}</td>
-                <td>{{ assignment.workerId }}</td>
+                <td>{{ assignment.worker ? assignment.worker.firstName ~ ' ' ~ assignment.worker.lastName : 'N/A' }}</td>
                 <td>{{ assignment.dateAssignment ? assignment.dateAssignment|date('d/m/Y H:i') : '' }}</td>
                 <td>{{ assignment.statut }}</td>
                 <td class="text-end">

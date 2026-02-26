@@ -4114,72 +4114,55 @@
             "time": "2025-09-14T07:37:21+00:00"
         },
         {
-            "name": "scheb/2fa-bundle",
-            "version": "v7.13.1",
+            "name": "smalot/pdfparser",
+            "version": "v2.12.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/scheb/2fa-bundle.git",
-                "reference": "edcc14456b508aab37ec792cfc36793d04226784"
+                "url": "https://github.com/smalot/pdfparser.git",
+                "reference": "61c9bcafcb92899b76d8ebda6508267bae77e264"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/scheb/2fa-bundle/zipball/edcc14456b508aab37ec792cfc36793d04226784",
-                "reference": "edcc14456b508aab37ec792cfc36793d04226784",
+                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/61c9bcafcb92899b76d8ebda6508267bae77e264",
+                "reference": "61c9bcafcb92899b76d8ebda6508267bae77e264",
                 "shasum": ""
             },
             "require": {
-                "ext-json": "*",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
-                "symfony/config": "^6.4 || ^7.0",
-                "symfony/dependency-injection": "^6.4 || ^7.0",
-                "symfony/event-dispatcher": "^6.4 || ^7.0",
-                "symfony/framework-bundle": "^6.4 || ^7.0",
-                "symfony/http-foundation": "^6.4 || ^7.0",
-                "symfony/http-kernel": "^6.4 || ^7.0",
-                "symfony/property-access": "^6.4 || ^7.0",
-                "symfony/security-bundle": "^6.4 || ^7.0",
-                "symfony/service-contracts": "^2.5|^3",
-                "symfony/twig-bundle": "^6.4 || ^7.0"
+                "ext-iconv": "*",
+                "ext-zlib": "*",
+                "php": ">=7.1",
+                "symfony/polyfill-mbstring": "^1.18"
             },
-            "conflict": {
-                "scheb/two-factor-bundle": "*"
-            },
-            "suggest": {
-                "scheb/2fa-backup-code": "Emergency codes when you have no access to other methods",
-                "scheb/2fa-email": "Send codes by email",
-                "scheb/2fa-google-authenticator": "Google Authenticator support",
-                "scheb/2fa-totp": "Temporary one-time password (TOTP) support (Google Authenticator compatible)",
-                "scheb/2fa-trusted-device": "Trusted devices support"
-            },
-            "type": "symfony-bundle",
+            "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Scheb\\TwoFactorBundle\\": ""
+                "psr-0": {
+                    "Smalot\\PdfParser\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "MIT"
+                "LGPL-3.0"
             ],
             "authors": [
                 {
-                    "name": "Christian Scheb",
-                    "email": "me@christianscheb.de"
+                    "name": "Sebastien MALOT",
+                    "email": "sebastien@malot.fr"
                 }
             ],
-            "description": "A generic interface to implement two-factor authentication in Symfony applications",
-            "homepage": "https://github.com/scheb/2fa",
+            "description": "Pdf parser library. Can read and extract information from pdf file.",
+            "homepage": "https://www.pdfparser.org",
             "keywords": [
-                "2fa",
-                "Authentication",
-                "symfony",
-                "two-factor",
-                "two-step"
+                "extract",
+                "parse",
+                "parser",
+                "pdf",
+                "text"
             ],
             "support": {
-                "source": "https://github.com/scheb/2fa-bundle/tree/v7.13.1"
+                "issues": "https://github.com/smalot/pdfparser/issues",
+                "source": "https://github.com/smalot/pdfparser/tree/v2.12.3"
             },
-            "time": "2025-12-18T15:29:07+00:00"
+            "time": "2026-01-08T08:04:04+00:00"
         },
         {
             "name": "stella-maris/clock",

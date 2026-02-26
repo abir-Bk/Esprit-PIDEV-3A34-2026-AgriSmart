@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\DemandeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
-// [cite: 39, 105, 106]
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DemandeRepository::class)]
@@ -16,26 +15,44 @@ class Demande
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    // [cite: 45, 125, 130]
+#[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(
+        min: 3, 
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères"
+    )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ\s\-]+$/",
+        message: "Le nom ne doit contenir que des lettres"
+    )]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    // [cite: 45, 125, 130]
     #[Assert\NotBlank(message: "Le prénom est obligatoire")]
+    #[Assert\Length(
+        min: 3, 
+        minMessage: "Le prénom doit contenir au moins {{ limit }} caractères"
+    )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ\s\-]+$/",
+        message: "Le prénom ne doit contenir que des lettres"
+    )]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 255)]
-    // [cite: 45, 125, 130]
+
+#[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le numéro de téléphone est obligatoire")]
-    // [cite: 120, 122, 125]
     #[Assert\Length(
         min: 8, 
         max: 8, 
         exactMessage: "Le numéro de téléphone doit contenir exactement {{ limit }} chiffres"
     )]
+    #[Assert\Regex(
+        pattern: "/^[2-9][0-9]{7}$/",
+        message: "Le numéro de téléphone doit commencer par un chiffre entre 2 et 9 (ex: de 20 à 99...) et contenir 8 chiffres au total."
+    )]
     private ?string $phoneNumber = null;
+   
     #[ORM\Column]
     private ?\DateTime $datePostulation = null;
 
@@ -57,6 +74,9 @@ class Demande
 
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $score = null;
 
     public function getId(): ?int
     {
@@ -181,6 +201,18 @@ class Demande
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): static
+    {
+        $this->score = $score;
 
         return $this;
     }

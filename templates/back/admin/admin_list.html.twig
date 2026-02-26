@@ -144,21 +144,186 @@
                                         {% endif %}
                                     </td>
                                     <td class="py-3 text-end am-actions-cell">
-                                        <div class="d-flex justify-content-end gap-2 flex-nowrap align-items-center">
-                                            <a href="{{ path('app_admin_offre_details', {id: offre.id}) }}" class="btn btn-sm am-btn-outline text-nowrap">
-                                                <i class="fa-solid fa-eye me-1"></i>Voir
-                                            </a>
-                                            {% if validation == 'en_attente' %}
-                                                <form method="post" action="{{ path('app_offre_approuver', {id: offre.id}) }}" class="d-inline">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token('approuver' ~ offre.id) }}">
-                                                    <button type="submit" class="btn btn-sm am-btn-success text-nowrap"><i class="fa-solid fa-check me-1"></i>Approuver</button>
-                                                </form>
-                                                <form method="post" action="{{ path('app_offre_refuser', {id: offre.id}) }}" class="d-inline" onsubmit="return confirm('Refuser cette offre ?');">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ offre.id) }}">
-                                                    <button type="submit" class="btn btn-sm am-btn-danger text-nowrap"><i class="fa-solid fa-times me-1"></i>Refuser</button>
-                                                </form>
-                                            {% endif %}
-                                        </div>
+                                       <div class="d-flex justify-content-end gap-2 flex-nowrap align-items-center">
+    {# Boutons d'action principaux #}
+    <button type="button" class="btn btn-sm am-btn-main text-nowrap" data-bs-toggle="modal" data-bs-target="#modalOffre{{ offre.id }}">
+        <i class="fa-solid fa-eye me-1"></i>Détails
+    </button>
+
+    {% if validation == 'en_attente' %}
+        <form method="post" action="{{ path('app_offre_approuver', {id: offre.id}) }}" class="d-inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('approuver' ~ offre.id) }}">
+            <button type="submit" class="btn btn-sm am-btn-success text-nowrap">
+                <i class="fa-solid fa-circle-check me-1"></i>Approuver
+            </button>
+        </form>
+        <form method="post" action="{{ path('app_offre_refuser', {id: offre.id}) }}" class="d-inline" onsubmit="return confirm('Refuser cette offre ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('refuser' ~ offre.id) }}">
+            <button type="submit" class="btn btn-sm am-btn-danger text-nowrap">
+                <i class="fa-solid fa-circle-xmark me-1"></i>Refuser
+            </button>
+        </form>
+    {% endif %}
+</div>
+
+{# 2. Fenêtre Modal - Design "AgriSmart Crystal-Clear" #}
+<div class="modal fade" id="modalOffre{{ offre.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 24px; background: #ffffff; overflow: hidden; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.08);">
+            
+            {# Header Clair et Nature #}
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); padding: 40px 50px;">
+                <div class="w-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-uppercase fw-bold" style="color: #166534; font-size: 0.75rem; letter-spacing: 2px;">
+                            <i class="fa-solid fa-seedling me-2"></i>Administration Talent
+                        </span>
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                    </div>
+                    
+                    <h2 class="fw-bold mb-4" style="font-size: 2.2rem; color: #064e3b; letter-spacing: -0.5px;">{{ offre.title }}</h2>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge-crystal"><i class="fa-solid fa-briefcase me-2"></i>{{ offre.typeContrat }}</span>
+                        <span class="badge-crystal"><i class="fa-solid fa-location-dot me-2"></i>{{ offre.lieu }}</span>
+                        <span class="badge-crystal"><i class="fa-solid fa-fingerprint me-2"></i>REF-{{ offre.id }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    {# Colonne Gauche - Contenu #}
+                    <div class="col-lg-8 bg-white p-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div style="width: 4px; height: 24px; background: #10b981; border-radius: 4px;"></div>
+                            <h5 class="fw-bold m-0" style="color: #064e3b; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px;">Missions & Profil</h5>
+                        </div>
+                        
+                        <div class="description-box p-4">
+                            <div style="color: #374151; line-height: 1.8; font-size: 1.05rem;">
+                                {{ offre.description|default('Aucune description disponible.')|nl2br }}
+                            </div>
+                        </div>
+
+                        {% if offre.competences is defined and offre.competences %}
+                        <div class="mt-5">
+                            <h6 class="fw-bold mb-3 text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Compétences exigées</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for comp in offre.competences|split(',') %}
+                                    <span class="skill-pill">{{ comp|trim }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# Colonne Droite - Infos clés #}
+                    <div class="col-lg-4 p-5" style="background: #f9fafb; border-left: 1px solid #f3f4f6;">
+                        <div class="d-flex flex-column gap-4">
+                            
+                            {# Bloc Salaire #}
+                            <div class="info-tile bg-white p-4 shadow-sm" style="border-radius: 20px; border: 1px solid #e5e7eb;">
+                                <small class="text-success fw-bold text-uppercase d-block mb-1" style="font-size: 0.65rem;">Rémunération</small>
+                                <div class="d-flex align-items-baseline gap-1">
+                                    <span style="font-size: 2rem; font-weight: 800; color: #111827;">{{ offre.salaire }}</span>
+                                    <span class="fw-bold text-muted">DT</span>
+                                </div>
+                            </div>
+
+                            {# Bloc Dates - Design "Clarity" #}
+                            <div class="info-tile bg-white p-4 shadow-sm" style="border-radius: 20px; border: 1px solid #e5e7eb;">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="icon-box-green">
+                                        <i class="fa-solid fa-calendar-check"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted text-uppercase d-block" style="font-size: 0.6rem; font-weight: 700;">Démarrage prévu</small>
+                                        <span class="fw-bold" style="color: #111827;">{{ offre.dateDebut ? offre.dateDebut|date('d M Y') : 'Dès que possible' }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-box-amber">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted text-uppercase d-block" style="font-size: 0.6rem; font-weight: 700;">Fin de publication</small>
+                                        <span class="fw-bold" style="color: #111827;">{{ offre.dateFin ? offre.dateFin|date('d M Y') : 'Illimitée' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 p-4 bg-white justify-content-center">
+                <button type="button" class="btn btn-dark px-5 py-3 fw-bold" data-bs-dismiss="modal" style="border-radius: 50px; background: #064e3b; border: none; font-size: 0.9rem;">
+                    <i class="fa-solid fa-xmark me-2"></i>Fermer la vue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Badges Header */
+    .badge-crystal {
+        background: #ffffff;
+        color: #065f46;
+        border: 1px solid #d1fae5;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* Boite Description */
+    .description-box {
+        background: #fcfdfc;
+        border: 1px solid #f0fdf4;
+        border-radius: 16px;
+    }
+
+    /* Skill Pills */
+    .skill-pill {
+        background: #ecfdf5;
+        color: #065f46;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid #d1fae5;
+    }
+
+    /* Icones Droite */
+    .icon-box-green {
+        width: 40px; height: 40px; background: #d1fae5; color: #065f46;
+        border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .icon-box-amber {
+        width: 40px; height: 40px; background: #fef3c7; color: #92400e;
+        border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+
+    /* Boutons de la liste */
+    .am-btn-main { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; font-weight: 600; border-radius: 8px; }
+    .am-btn-success { background: #10b981; color: white; border: none; font-weight: 600; border-radius: 8px; }
+    .am-btn-danger { background: #ef4444; color: white; border: none; font-weight: 600; border-radius: 8px; }
+
+    .modal-xl { max-width: 1200px; }
+    
+    /* Animation */
+    .modal.fade .modal-dialog {
+        transform: scale(0.98);
+        transition: transform 0.2s ease-in-out;
+    }
+    .modal.show .modal-dialog {
+        transform: scale(1);
+    }
+</style>
                                     </td>
                                 </tr>
                             {% else %}

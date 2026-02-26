@@ -87,29 +87,70 @@
                  data-title="{{ offre.title|lower }}"
                  data-lieu="{{ offre.lieu|default('')|lower }}"
                  data-contrat="{{ offre.typeContrat|default('')|lower }}">
-                <div class="card h-100 border-0 am-card am-card-hover">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <span class="badge am-badge">{{ offre.typeContrat|default('CDI') }}</span>
-                            {% if validation == 'approuvée' %}
-                                <span class="badge am-badge-success small">Approuvée</span>
-                            {% elseif validation == 'refusée' %}
-                                <span class="badge am-badge-danger small">Refusée</span>
-                            {% else %}
-                                <span class="badge am-badge-warning small">En attente</span>
-                            {% endif %}
-                        </div>
-                        <h6 class="card-title fw-bold mb-2 am-text offre-title">{{ offre.title }}</h6>
-                        <div class="mb-2 small text-muted"><i class="fa-solid fa-location-dot me-1"></i>{{ offre.lieu|default('—') }}</div>
-                        <div class="mb-3 fw-semibold am-text">
-                            {% if offre.salaire %}{{ offre.salaire|number_format(0, ',', ' ') }} DT{% else %}—{% endif %}
-                        </div>
-                        {% if offre.demandes is defined %}<div class="mb-3 small text-muted"><i class="fa-solid fa-users me-1"></i>{{ offre.demandes|length }} candidature(s)</div>{% endif %}
-                        <div class="mt-auto pt-3 border-top">
-                            <a href="{{ path('app_admin_offre_details', {id: offre.id}) }}" class="btn am-btn-success w-100"><i class="fa-solid fa-eye me-2"></i>Voir l'offre</a>
-                        </div>
-                    </div>
-                </div>
+<div class="card h-100 border-0 am-card am-card-hover position-relative">
+    {# --- MENU ACTIONS (Modifier/Supprimer) --- #}
+    <div class="dropdown position-absolute" style="top: 15px; right: 15px; z-index: 10;">
+        <button class="btn btn-link text-muted p-0 border-0" type="button" data-bs-toggle="dropdown">
+            <i class="fa-solid fa-ellipsis-vertical fs-5"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+            <li>
+                <a class="dropdown-item py-2" href="{{ path('app_offre_edit', {'id': offre.id}) }}">
+                    <i class="fa-solid fa-pen-to-square me-2 text-primary"></i> Modifier
+                </a>
+            </li>
+            <li>
+                <form method="post" action="{{ path('app_offre_delete', {'id': offre.id}) }}" onsubmit="return confirm('Supprimer cette offre ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offre.id) }}">
+                    <button class="dropdown-item py-2 text-danger">
+                        <i class="fa-solid fa-trash me-2"></i> Supprimer
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card-body p-4 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="badge am-badge">{{ offre.typeContrat|default('CDI') }}</span>
+            
+            {# Correction de la variable validation #}
+            {% set validation = offre.statutValidation|default('en attente') %}
+            {% if validation == 'approuvée' %}
+                <span class="badge am-badge-success small">Approuvée</span>
+            {% elseif validation == 'refusée' %}
+                <span class="badge am-badge-danger small">Refusée</span>
+            {% else %}
+                <span class="badge am-badge-warning small">En attente</span>
+            {% endif %}
+        </div>
+
+        {# pe-4 pour ne pas chevaucher les trois points #}
+        <h6 class="card-title fw-bold mb-2 am-text offre-title pe-4">{{ offre.title }}</h6>
+        
+        <div class="mb-2 small text-muted">
+            <i class="fa-solid fa-location-dot me-1"></i>{{ offre.lieu|default('—') }}
+        </div>
+        
+        <div class="mb-3 fw-semibold am-text">
+            {% if offre.salaire %}{{ offre.salaire|number_format(0, ',', ' ') }} DT{% else %}—{% endif %}
+        </div>
+
+        {% if offre.demandes is defined %}
+            <div class="mb-3 small text-muted">
+                <i class="fa-solid fa-users me-1"></i>{{ offre.demandes|length }} candidature(s)
+            </div>
+        {% endif %}
+
+        <div class="mt-auto pt-3 border-top">
+            <a href="{{ path('app_admin_offre_details', {'id': offre.id}) }}" 
+               class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center"
+               style="background-color: #18a340; border: none; border-radius: 8px; font-weight: 500;">
+                <i class="fa-solid fa-circle-info me-2"></i> Détails de l'offre
+            </a>
+        </div>
+    </div>
+</div>
             </div>
             {% endfor %}
         </div>

@@ -4,6 +4,7 @@ parameters:
     recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
     recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
 
+    gemini_key: '%env(GEMINI_API_KEY)%'
 services:
     _defaults:
         autowire: true

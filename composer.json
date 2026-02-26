@@ -20,6 +20,7 @@
         "phpoffice/phpspreadsheet": "^5.4",
         "phpstan/phpdoc-parser": "^2.3",
         "scheb/2fa-bundle": "^7.13",
+        "smalot/pdfparser": "^2.12",
         "stripe/stripe-php": "^19.3",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Configuration de base */
+        @page { margin: 0; }
+        body { 
+            font-family: 'Helvetica', 'Arial', sans-serif; 
+            color: #2c3e50; 
+            margin: 0; 
+            padding: 0; 
+            line-height: 1.5;
+            background-color: #ffffff;
+        }
+
+        /* Barre latérale (Sidebar) */
+        .sidebar { 
+            width: 32%; 
+            background: #1a4331; /* Vert AgriSmart */
+            color: #ffffff; 
+            height: 100%; 
+            position: absolute; 
+            left: 0;
+            top: 0;
+            padding: 40px 25px;
+        }
+
+        /* Corps principal */
+        .main { 
+            margin-left: 38%; 
+            padding: 50px 40px 40px 20px; 
+        }
+
+        /* Photo de profil */
+        .profile-container { text-align: center; margin-bottom: 30px; }
+        .profile-img { 
+            width: 130px; 
+            height: 130px; 
+            border-radius: 50%; 
+            border: 4px solid rgba(255,255,255,0.2);
+            object-fit: cover;
+        }
+        .profile-placeholder { 
+            width: 130px; height: 130px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 50%; 
+            margin: 0 auto; 
+            line-height: 130px; 
+            font-size: 14px; 
+            border: 2px dashed rgba(255,255,255,0.3);
+        }
+
+        /* En-tête nom/poste */
+        .header { margin-bottom: 35px; }
+        .name { 
+            font-size: 32px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            color: #1a4331; 
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .job-title { 
+            font-size: 18px; 
+            color: #4a7c59; 
+            font-weight: 500; 
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Sections */
+        .section-title { 
+            font-size: 15px; 
+            color: #1a4331; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+            margin-top: 30px; 
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e8f5e9;
+            padding-bottom: 5px;
+        }
+
+        /* Listes et badges */
+        .contact-info { font-size: 12px; }
+        .contact-item { margin-bottom: 15px; }
+        .contact-label { font-weight: bold; display: block; color: #a8c69f; text-transform: uppercase; font-size: 10px; margin-bottom: 3px; }
+        
+        .badge { 
+            display: inline-block; 
+            background: #f0f7f4; 
+            color: #1a4331; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            margin-right: 5px;
+            margin-bottom: 8px;
+            border: 1px solid #d1e7dd;
+        }
+
+        /* Expérience et Formation */
+        .exp-item { margin-bottom: 20px; }
+        .exp-header { font-weight: bold; font-size: 13px; color: #333; }
+        .exp-meta { font-size: 11px; color: #666; font-style: italic; margin-bottom: 5px; }
+        .text-content { font-size: 12px; color: #444; text-align: justify; }
+
+        .sidebar-section-title {
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 8px;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile-container">
+            {% if resume.basics.photo %}
+                <img src="{{ resume.basics.photo }}" class="profile-img">
+            {% else %}
+                <div class="profile-placeholder">PHOTO</div>
+            {% endif %}
+        </div>
+        
+        <div class="contact-info">
+            <div class="sidebar-section-title">CONTACT</div>
+            
+            <div class="contact-item">
+                <span class="contact-label">Téléphone</span>
+                {{ resume.basics.phone }}
+            </div>
+            
+            <div class="contact-item">
+                <span class="contact-label">Email</span>
+                {{ resume.basics.email }}
+            </div>
+            
+            <div class="contact-item">
+                <span class="contact-label">Localisation</span>
+                {{ resume.basics.ville }}
+            </div>
+
+            <div class="contact-item">
+                <span class="contact-label">Informations</span>
+                {{ resume.basics.sexe }} {% if resume.basics.birthdate %}| {{ resume.basics.birthdate }}{% endif %}
+            </div>
+            
+            <div class="sidebar-section-title">LANGUES</div>
+            <div class="contact-item">
+                <strong>Français :</strong> {{ resume.basics.french }}<br>
+                <strong>Anglais :</strong> {{ resume.basics.english }}
+            </div>
+            
+            <div class="sidebar-section-title">LOISIRS</div>
+            <div class="contact-item" style="font-size: 11px; line-height: 1.8;">
+                {% for hobby in resume.interests %}
+                    • {{ hobby.name }}<br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1 class="name">{{ resume.basics.name }}</h1>
+            <div class="job-title">{{ resume.basics.label }}</div>
+            <div style="font-size: 12px; color: #666;">Spécialité : {{ resume.basics.speciality }}</div>
+        </div>
+
+        <div class="section-title">Résumé Professionnel</div>
+        <div class="text-content">
+            {{ resume.basics.summary | nl2br }}
+        </div>
+
+        <div class="section-title">Formation & Études</div>
+        <div class="exp-item">
+            <div class="exp-header">{{ resume.basics.study }}</div>
+            <div class="exp-meta">
+                {% if resume.basics.study_year %} Promotion {{ resume.basics.study_year }} {% endif %}
+            </div>
+        </div>
+
+        <div class="section-title">Expérience Professionnelle</div>
+        {% if resume.basics.experience.entreprise %}
+            <div class="exp-item">
+                <div class="exp-header">{{ resume.basics.experience.entreprise }}</div>
+                <div class="exp-meta">
+                    {{ resume.basics.experience.debut }} — {{ resume.basics.experience.fin ?: 'Présent' }}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="section-title">Outils Informatiques</div>
+        <div class="text-content" style="background: #fcfcfc; padding: 10px; border-left: 3px solid #1a4331;">
+            {{ resume.basics.it_skills ?: 'Maîtrise des outils de bureautique standard.' }}
+        </div>
+
+        <div class="section-title">Compétences Techniques</div>
+        <div style="margin-top: 10px;">
+            {% for skill in resume.skills %}
+                <span class="badge">{{ skill.name }}</span>
+            {% endfor %}
+        </div>
+
+        {% if resume.basics.permis and resume.basics.permis != 'Non' %}
+            <div class="section-title">Autres Informations</div>
+            <div class="text-content">
+                <strong>Permis de conduire :</strong> {{ resume.basics.permis }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

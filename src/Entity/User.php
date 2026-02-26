@@ -98,12 +98,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: LoginHistory::class, mappedBy: 'user')]
     private Collection $loginTime;
 
+    /**
+     * @var Collection<int, Produit>
+     */
+    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'vendeur')]
+    private Collection $produits;
+
+    /**
+     * @var Collection<int, Commande>
+     */
+    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'client')]
+    private Collection $commandes;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->offres = new ArrayCollection();
         $this->loginTime = new ArrayCollection();
+        $this->produits = new ArrayCollection();
+        $this->commandes = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -146,34 +160,70 @@ public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
         return $this->id;
     }
 
-    public function getFirstName(): ?string { return $this->firstName; }
-    public function setFirstName(string $firstName): static { $this->firstName = $firstName; return $this; }
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+    public function setFirstName(string $firstName): static
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
 
-    public function getLastName(): ?string { return $this->lastName; }
-    public function setLastName(string $lastName): static { $this->lastName = $lastName; return $this; }
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+    public function setLastName(string $lastName): static
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
 
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = $email; return $this; }
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
 
-    public function getUserIdentifier(): string { return (string) $this->email; }
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
 
     public function getRoles(): array
     {
         return match ($this->role) {
-            'admin'       => ['ROLE_ADMIN'],
-            'employee'    => ['ROLE_EMPLOYEE'],
+            'admin' => ['ROLE_ADMIN'],
+            'employee' => ['ROLE_EMPLOYEE'],
             'agriculteur' => ['ROLE_AGRICULTEUR'],
             'fournisseur' => ['ROLE_FOURNISSEUR'],
-            default       => ['ROLE_USER'],
+            default => ['ROLE_USER'],
         };
     }
 
-    public function getPassword(): string { return $this->password; }
-    public function setPassword(string $password): static { $this->password = $password; return $this; }
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
 
-    public function eraseCredentials(): void {}
+    public function eraseCredentials(): void
+    {
+    }
 
-    public function getRole(): string { return $this->role; }
+    public function getRole(): string
+    {
+        return $this->role;
+    }
     public function setRole(string $role): static
     {
         $allowed = ['admin', 'employee', 'agriculteur', 'fournisseur'];
@@ -183,8 +233,8 @@ public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
         $this->role = $role;
 
         $mapping = [
-            'admin'       => 'active',
-            'employee'    => 'active',
+            'admin' => 'active',
+            'employee' => 'active',
             'agriculteur' => 'pending',
             'fournisseur' => 'pending',
         ];
@@ -193,18 +243,46 @@ public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
         return $this;
     }
 
-    public function getStatus(): string { return $this->status; }
-    public function setStatus(string $status): static { $this->status = $status; return $this; }
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
 
-    public function getPhone(): ?string { return $this->phone; }
-    public function setPhone(?string $phone): static { $this->phone = $phone; return $this; }
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
+        return $this;
+    }
 
-    public function getAddress(): ?string { return $this->address; }
-    public function setAddress(?string $address): static { $this->address = $address; return $this; }
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+    public function setAddress(?string $address): static
+    {
+        $this->address = $address;
+        return $this;
+    }
 
     // ─── Document File Methods ────────────────────────────────────────
-    public function getDocumentFile(): ?string { return $this->documentFile; }
-    public function setDocumentFile(?string $documentFile): static { $this->documentFile = $documentFile; return $this; }
+    public function getDocumentFile(): ?string
+    {
+        return $this->documentFile;
+    }
+    public function setDocumentFile(?string $documentFile): static
+    {
+        $this->documentFile = $documentFile;
+        return $this;
+    }
 
     public function setDocumentFileFile(?File $file = null): void
     {
@@ -214,11 +292,21 @@ public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
         }
     }
 
-    public function getDocumentFileFile(): ?File { return $this->documentFileFile; }
+    public function getDocumentFileFile(): ?File
+    {
+        return $this->documentFileFile;
+    }
 
     // ─── Image File Methods ───────────────────────────────────────────
-    public function getImage(): ?string { return $this->image; }
-    public function setImage(?string $image): static { $this->image = $image; return $this; }
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
 
     public function setImageFile(?File $file = null): void
     {
@@ -228,13 +316,30 @@ public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
         }
     }
 
-    public function getImageFile(): ?File { return $this->imageFile; }
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
 
-    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static { $this->createdAt = $createdAt; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
 
-    public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static { $this->updatedAt = $updatedAt; return $this; }
+    public function getUpdatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
 
     public function getGoogleId(): ?string
     {
@@ -299,11 +404,64 @@ public function setTwoFactorExpiresAt(?\DateTimeInterface $expiresAt): self
     public function removeLoginTime(LoginHistory $loginTime): static
     {
         if ($this->loginTime->removeElement($loginTime)) {
-            // set the owning side to null (unless already changed)
             if ($loginTime->getUser() === $this) {
                 $loginTime->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Produit>
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
+    }
+
+    public function addProduit(Produit $produit): static
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits->add($produit);
+            $produit->setVendeur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduit(Produit $produit): static
+    {
+        if ($this->produits->removeElement($produit)) {
+            if ($produit->getVendeur() === $this) {
+                $produit->setVendeur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    public function addCommande(Commande $commande): static
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes->add($commande);
+            $commande->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): static
+    {
+        $this->commandes->removeElement($commande);
 
         return $this;
     }

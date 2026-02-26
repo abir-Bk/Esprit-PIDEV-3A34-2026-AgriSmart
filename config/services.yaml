@@ -7,11 +7,8 @@ parameters:
   huggingface_api_key: "%env(HUGGINGFACE_API_KEY)%"
   huggingface_model: "%env(HUGGINGFACE_MODEL)%"
   gemini_key: '%env(GEMINI_API_KEY)%'
-    
-recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
-recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
-
-   
+  recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
+  recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
 services:
     _defaults:
         autowire: true

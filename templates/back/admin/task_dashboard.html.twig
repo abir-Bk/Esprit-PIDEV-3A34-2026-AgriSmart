@@ -1,0 +1,188 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Task Dashboard - AgriSmart Admin{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+
+    <div class="flex-grow-1 ag-admin-content">
+        <div class="container-fluid px-4">
+
+            {# Hero style #}
+            <section class="py-4 pb-2">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="h2 fw-bold mb-1" style="color: var(--ag-text); background: linear-gradient(135deg, var(--ag-primary), var(--am-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Tâche Dashboard</h1>
+                        <p class="text-muted mb-0">Statistiques et aperçu des tâches.</p>
+                    </div>
+                    <div class="col-lg-4 d-none d-lg-flex justify-content-lg-end">
+                        <div style="width: 200px; height: 100px; border-radius: 20px; background: linear-gradient(135deg, rgba(26,67,49,.12), rgba(46,125,50,.08)); border: 1px solid rgba(17,24,39,.06); position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: float 6s ease-in-out infinite;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {# Stats cards with enhanced design #}
+            <div class="row g-4 mb-5">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="ag-admin-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--ag-primary) 0%, var(--am-green-dark) 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(26,67,49,0.2);">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fa-solid fa-tasks fa-2x"></i>
+                        </div>
+                        <div>
+                            <div class="small text-uppercase fw-semibold opacity-75">Total Tâches</div>
+                            <div class="h2 fw-bold mb-0">{{ totalTasks }}</div>
+                            <div class="small opacity-75">Toutes les tâches</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="ag-admin-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--am-success) 0%, var(--am-green-light) 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(40,167,69,0.2);">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fa-solid fa-check fa-2x"></i>
+                        </div>
+                        <div>
+                            <div class="small text-uppercase fw-semibold opacity-75">Terminées</div>
+                            <div class="h2 fw-bold mb-0">{{ completedTasks }}</div>
+                            <div class="small opacity-75">{{ totalTasks > 0 ? (completedTasks / totalTasks * 100)|round(1) : 0 }}% du total</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="ag-admin-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--am-gold) 0%, #f4c430 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(230,191,74,0.2);">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fa-solid fa-spinner fa-2x"></i>
+                        </div>
+                        <div>
+                            <div class="small text-uppercase fw-semibold opacity-75">En Cours</div>
+                            <div class="h2 fw-bold mb-0">{{ inProgressTasks }}</div>
+                            <div class="small opacity-75">Activement travaillées</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="ag-admin-card p-4 h-100 position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--ag-muted) 0%, #9ca3af 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(107,114,128,0.2);">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fa-solid fa-clock fa-2x"></i>
+                        </div>
+                        <div>
+                            <div class="small text-uppercase fw-semibold opacity-75">En Attente</div>
+                            <div class="h2 fw-bold mb-0">{{ pendingTasks }}</div>
+                            <div class="small opacity-75">À planifier</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Charts section #}
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="ag-admin-card p-4" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <h5 class="fw-bold mb-4" style="color: var(--ag-text);">Répartition des Tâches</h5>
+                        <div class="d-flex justify-content-center">
+                            <div style="width: 100%; max-width: 300px;">
+                                <canvas id="taskStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="ag-admin-card p-4" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <h5 class="fw-bold mb-4" style="color: var(--ag-text);">Progression</h5>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>Terminées</span>
+                                <span>{{ totalTasks > 0 ? (completedTasks / totalTasks * 100)|round(1) : 0 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ totalTasks > 0 ? (completedTasks / totalTasks * 100) : 0 }}%;" aria-valuenow="{{ completedTasks }}" aria-valuemin="0" aria-valuemax="{{ totalTasks }}"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>En Cours</span>
+                                <span>{{ totalTasks > 0 ? (inProgressTasks / totalTasks * 100)|round(1) : 0 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ totalTasks > 0 ? (inProgressTasks / totalTasks * 100) : 0 }}%;" aria-valuenow="{{ inProgressTasks }}" aria-valuemin="0" aria-valuemax="{{ totalTasks }}"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>En Attente</span>
+                                <span>{{ totalTasks > 0 ? (pendingTasks / totalTasks * 100)|round(1) : 0 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ totalTasks > 0 ? (pendingTasks / totalTasks * 100) : 0 }}%;" aria-valuenow="{{ pendingTasks }}" aria-valuemin="0" aria-valuemax="{{ totalTasks }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+.ag-admin-card:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+}
+</style>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('taskStatusChart').getContext('2d');
+        const taskStatusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['En Attente', 'En Cours', 'Terminées'],
+                datasets: [{
+                    data: [{{ pendingTasks }}, {{ inProgressTasks }}, {{ completedTasks }}],
+                    backgroundColor: [
+                        '#6B7280',
+                        '#E6BF4A',
+                        '#28a745'
+                    ],
+                    borderWidth: 0,
+                    hoverBorderWidth: 2,
+                    hoverBorderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    </script>
+{% endblock %}
+{% endblock %}

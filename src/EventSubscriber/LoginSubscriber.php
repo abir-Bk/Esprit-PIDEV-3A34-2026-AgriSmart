@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use GeoIp2\Database\Reader;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
@@ -18,9 +19,9 @@ class LoginSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private RequestStack $requestStack,
-        private UrlGeneratorInterface $urlGenerator,
-        private TwoFactorCodeService $twoFactorCodeService,
+        private RequestStack           $requestStack,
+        private UrlGeneratorInterface  $urlGenerator,
+        private TwoFactorCodeService   $twoFactorCodeService,
     ) {}
 
     public function onLoginSuccessEvent(LoginSuccessEvent $event): void
@@ -30,15 +31,13 @@ class LoginSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $request = $this->requestStack->getCurrentRequest();
-        $ip      = $request->getClientIp() ?? 'unknown';
-        $userAgent = $request->headers->get('User-Agent') ?? 'unknown';
-        $country = $this->resolveCountry($ip);
+        $request   = $this->requestStack->getCurrentRequest();
+        $ip        = $this->getClientIp($request);       // ← updated
+        $userAgent = $this->getUserAgent($request);      // ← updated
+        $country   = $this->resolveCountry($ip);
 
-        // ✅ Check BEFORE saving so the new record doesn't interfere
         $suspicious = $this->isSuspicious($user, $country, $userAgent);
 
-        // Save login history
         $loginHistory = new LoginHistory();
         $loginHistory
             ->setUser($user)
@@ -73,14 +72,33 @@ class LoginSubscriber implements EventSubscriberInterface
         $loginHistory
             ->setUser(null)
             ->setLoginTime(new \DateTime())
-            ->setIpAddress($request->getClientIp() ?? 'unknown')
-            ->setUserAgent($request->headers->get('User-Agent') ?? 'unknown')
+            ->setIpAddress($this->getClientIp($request))
+            ->setUserAgent($this->getUserAgent($request))
             ->setStatus('failed')
             ->setAttemptedEmail($request->request->get('_username') ?? 'unknown');
 
         $this->em->persist($loginHistory);
         $this->em->flush();
     }
+
+    private function getClientIp(Request $request): string
+    {
+        if ($_ENV['APP_ENV'] === 'dev' && $request->query->get('test_ip')) {
+            return $request->query->get('test_ip');
+        }
+
+        return $request->getClientIp() ?? '127.0.0.1';
+    }
+
+    private function getUserAgent(Request $request): string
+    {
+        if ($_ENV['APP_ENV'] === 'dev' && $request->query->get('test_ua')) {
+            return $request->query->get('test_ua');
+        }
+
+        return $request->headers->get('User-Agent') ?? 'unknown';
+    }
+
 
     private function resolveCountry(string $ip): string
     {
@@ -98,22 +116,19 @@ class LoginSubscriber implements EventSubscriberInterface
 
     private function isSuspicious(User $user, string $country, string $userAgent): bool
     {
-        // ✅ Only fetch the last NON-suspicious successful login as the trusted baseline
         $lastLogin = $this->em->getRepository(LoginHistory::class)->findOneBy(
             [
                 'user'       => $user,
                 'status'     => 'success',
-                'suspicious' => false,  // ← only use verified safe logins as baseline
+                'suspicious' => false,
             ],
             ['loginTime' => 'DESC']
         );
 
-        // First ever clean login — not suspicious
         if (!$lastLogin) {
             return false;
         }
 
-        // ✅ Prevent false trigger if somehow called twice within same second
         $secondsSinceLast = (new \DateTime())->getTimestamp()
                           - $lastLogin->getLoginTime()->getTimestamp();
 
@@ -130,7 +145,6 @@ class LoginSubscriber implements EventSubscriberInterface
 
     private function extractBrowser(string $userAgent): string
     {
-        // Order matters — Edge contains "Chrome" so check "Edg" first
         $browsers = ['Edg', 'Chrome', 'Firefox', 'Safari', 'Opera', 'OPR'];
 
         foreach ($browsers as $browser) {

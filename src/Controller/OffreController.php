@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Form\OffreType;
 use App\Entity\Offre;
 use App\Repository\OffreRepository;
+use App\Repository\DemandeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -297,5 +298,26 @@ public function details(
         $this->addFlash('success', 'Statut mis à jour.');
         $referer = $request->headers->get('referer');
         return $referer ? $this->redirect($referer) : $this->redirectToRoute('app_admin_offres');
+    }
+    #[Route('/admin/mes-travailleurs', name: 'app_admin_travailleurs')]
+    public function listeTravailleurs(DemandeRepository $demandeRepo): Response
+    {
+        // On récupère l'agriculteur connecté
+        $user = $this->getUser();
+
+        // On cherche les demandes "Acceptée" liées aux offres de cet agriculteur
+        // On utilise le QueryBuilder pour filtrer par agriculteur et par statut
+        $travailleurs = $demandeRepo->createQueryBuilder('d')
+            ->join('d.offre', 'o')
+            ->where('o.agriculteur = :agriculteur')
+            ->andWhere('d.statut = :statut')
+            ->setParameter('agriculteur', $user)
+            ->setParameter('statut', 'Acceptée')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('back/offre/travailleurs.html.twig', [
+            'employes' => $travailleurs,
+        ]);
     }
 }

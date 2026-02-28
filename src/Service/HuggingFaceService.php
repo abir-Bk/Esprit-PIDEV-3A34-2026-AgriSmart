@@ -2,159 +2,197 @@
 
 namespace App\Service;
 
+use App\Exception\AiProviderException;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class HuggingFaceService
 {
     private string $apiKey;
     private string $model;
+    private string $tasksModel;
     private HttpClientInterface $httpClient;
 
-    public function __construct(ParameterBagInterface $params, HttpClientInterface $httpClient)
-    {
-        $this->apiKey = $params->get('huggingface_api_key');
-        $this->model = $params->get('huggingface_model');
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ?string $huggingFaceApiKey = null,
+        ?string $huggingFaceModel = null,
+        ?string $huggingFaceTasksModel = null
+    ) {
         $this->httpClient = $httpClient;
+        $this->apiKey = (string) ($huggingFaceApiKey ?? '');
+        $this->model = trim((string) ($huggingFaceModel ?? '')) ?: 'Qwen/Qwen2.5-7B-Instruct';
+        $this->tasksModel = trim((string) ($huggingFaceTasksModel ?? '')) ?: $this->model;
     }
 
     /**
-     * Generates a recommendation for a task description based on its title and type.
+     * Assistant chat.
+     *
+     * @param array<int, array{role: string, content: string}> $messages
      */
-    public function recommendDescription(string $title, string $type): string
+    public function chat(array $messages, string $catalog = ''): string
     {
-        if (empty($title)) {
-            return "Veuillez d'abord saisir un titre pour obtenir une recommandation.";
+        if ($this->apiKey === '' || trim($this->apiKey) === '') {
+            throw new AiProviderException(
+                provider: 'huggingface',
+                kind: 'config',
+                userMessage: 'Service Hugging Face non configuré.',
+                statusCode: 500
+            );
+        }
+
+        $catalogSection = $catalog
+            ? "\n\nVoici le catalogue actuel des produits disponibles en stock sur AgriSmart :\n" . $catalog
+            . "\n\nBasez vos recommandations uniquement sur ces produits réels. Citez le nom exact, la catégorie, le prix et le lien (champ Lien) du produit recommandé."
+            : '';
+
+        $systemPrompt = 'Tu es un assistant de vente intelligent pour AgriSmart, une marketplace agricole tunisienne. '
+            . 'Ton rôle est d\'aider les utilisateurs à trouver les meilleurs produits agricoles selon leurs besoins. '
+            . 'Réponds toujours en français, de manière concise, professionnelle et utile. '
+            . 'Si on te demande quelque chose hors contexte agricole, redirige poliment la conversation '
+            . 'vers les produits et services disponibles sur AgriSmart. '
+            . 'Quand tu proposes un produit, ajoute toujours un lien cliquable vers ce produit.'
+            . $catalogSection;
+
+        $fullMessages = array_merge(
+            [['role' => 'system', 'content' => $systemPrompt]],
+            $messages
+        );
+
+        return $this->requestCompletion($fullMessages, $this->model);
+    }
+
+    /**
+     * @param array<int, array{role: string, content: string}> $messages
+     */
+    private function requestCompletion(array $messages, string $model): string
+    {
+        if ($this->apiKey === '' || trim($this->apiKey) === '') {
+            throw new AiProviderException(
+                provider: 'huggingface',
+                kind: 'config',
+                userMessage: 'Service Hugging Face non configuré.',
+                statusCode: 500
+            );
         }
 
         try {
-            $response = $this->httpClient->request('POST', "https://router.huggingface.co/v1/chat/completions", [
+            $response = $this->httpClient->request('POST', 'https://router.huggingface.co/v1/chat/completions', [
+                'timeout' => 12,
+                'max_duration' => 20,
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->apiKey,
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model' => $this->model,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Tu es un assistant agricole expert. Réponds uniquement avec la description demandée, de manière concise (max 3 phrases).'
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => "Génère une description professionnelle pour l'intervention suivante :\nTitre : $title\nType : $type"
-                        ]
-                    ],
-                    'max_tokens' => 250,
+                    'model' => $model,
+                    'messages' => $messages,
+                    'max_tokens' => 350,
                     'temperature' => 0.7,
                 ],
-                'verify_peer' => false,
             ]);
+        } catch (TransportExceptionInterface $e) {
+            throw new AiProviderException(
+                provider: 'huggingface',
+                kind: 'api_error',
+                userMessage: 'Hugging Face ne répond pas à temps. Vérifiez la connexion réseau et réessayez.',
+                statusCode: 503,
+                providerMessage: $e->getMessage()
+            );
+        }
 
-            if ($response->getStatusCode() !== 200) {
-                return "Désolé, l'IA n'est pas disponible pour le moment (Erreur code " . $response->getStatusCode() . ").";
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode !== 200) {
+            $apiMessage = null;
+            try {
+                $body = $response->toArray(false);
+                $apiMessage = $body['error']['message'] ?? $body['error'] ?? null;
+            } catch (\Throwable $e) {
             }
 
-            $result = $response->toArray();
-
-            // Format for /v1/chat/completions
-            $text = $result['choices'][0]['message']['content'] ?? 'Recommandation non disponible.';
-
-            return trim($text);
-        } catch (\Exception $e) {
-            return "Une erreur technique est survenue lors de la génération : " . $e->getMessage();
-        }
-    }
-
-    /**
-     * Translates text into a target language using Hugging Face.
-     */
-    public function translateText(string $text, string $targetLanguage): string
-    {
-        if (empty($text)) {
-            return "Le texte est vide.";
-        }
-
-        try {
-            $response = $this->httpClient->request('POST', "https://router.huggingface.co/v1/chat/completions", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => $this->model,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => "Tu es un traducteur professionnel. Traduis le texte suivant en $targetLanguage. Ne renvoie QUE la traduction, sans aucun autre texte."
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $text
-                        ]
-                    ],
-                    'max_tokens' => 1000,
-                    'temperature' => 0.3,
-                ],
-                'verify_peer' => false,
-            ]);
-
-            if ($response->getStatusCode() !== 200) {
-                return "Erreur de traduction (Code " . $response->getStatusCode() . ").";
+            if ($statusCode === 429) {
+                throw new AiProviderException(
+                    provider: 'huggingface',
+                    kind: 'quota',
+                    userMessage: 'Quota Hugging Face atteint. Réessayez plus tard ou augmentez votre plan.',
+                    statusCode: 429,
+                    providerMessage: is_string($apiMessage) ? $apiMessage : null
+                );
             }
 
-            $result = $response->toArray();
-            $translated = $result['choices'][0]['message']['content'] ?? '';
+            if ($statusCode === 401 || $statusCode === 403) {
+                throw new AiProviderException(
+                    provider: 'huggingface',
+                    kind: 'auth',
+                    userMessage: 'Clé API Hugging Face invalide ou non autorisée.',
+                    statusCode: 401,
+                    providerMessage: is_string($apiMessage) ? $apiMessage : null
+                );
+            }
 
-            return trim($translated);
-        } catch (\Exception $e) {
-            return "Erreur technique de traduction : " . $e->getMessage();
+            throw new AiProviderException(
+                provider: 'huggingface',
+                kind: 'api_error',
+                userMessage: 'Erreur API Hugging Face (code ' . $statusCode . ').',
+                statusCode: 503,
+                providerMessage: is_string($apiMessage) ? $apiMessage : null
+            );
         }
+
+        $data = $response->toArray(false);
+
+        return $data['choices'][0]['message']['content']
+            ?? 'Je suis désolé, je n\'ai pas pu générer une réponse.';
     }
 
-    /**
-     * Summarizes text using Hugging Face.
-     */
     public function summarizeText(string $text): string
     {
-        if (empty($text)) {
-            return "Le texte est vide.";
-        }
+        $messages = [
+            ['role' => 'system', 'content' => 'Résume le texte en français en 3 à 5 points clairs et actionnables.'],
+            ['role' => 'user', 'content' => $text],
+        ];
 
-        try {
-            $response = $this->httpClient->request('POST', "https://router.huggingface.co/v1/chat/completions", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => $this->model,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Tu es un assistant agricole. Résume le texte suivant en une seule phrase courte et claire (max 150 car.).'
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $text
-                        ]
-                    ],
-                    'max_tokens' => 150,
-                    'temperature' => 0.7,
-                ],
-                'verify_peer' => false,
-            ]);
+        return $this->requestCompletion($messages, $this->tasksModel);
+    }
 
-            if ($response->getStatusCode() !== 200) {
-                return "Erreur de résumé (Code " . $response->getStatusCode() . ").";
-            }
+    public function translateText(string $text, string $targetLanguage = 'en'): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Traduis fidèlement le texte donné vers la langue cible. Retourne uniquement la traduction.'],
+            ['role' => 'user', 'content' => sprintf('Langue cible: %s\n\nTexte:\n%s', $targetLanguage, $text)],
+        ];
 
-            $result = $response->toArray();
-            $summary = $result['choices'][0]['message']['content'] ?? '';
+        return $this->requestCompletion($messages, $this->tasksModel);
+    }
 
-            return trim($summary);
-        } catch (\Exception $e) {
-            return "Erreur technique de résumé : " . $e->getMessage();
-        }
+    public function recommendDescription(string $title, string $type = ''): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Tu aides à améliorer la clarté des tâches. Rédige une recommandation concise et utile en français.'],
+            ['role' => 'user', 'content' => sprintf('Titre: %s\nType: %s\n\nFais une recommandation courte.', $title, $type ?: 'non précisé')],
+        ];
+
+        return $this->requestCompletion($messages, $this->tasksModel);
+    }
+
+    /**
+     * Generate a product description suggestion using Hugging Face Inference API.
+     */
+    public function suggestDescription(string $nomProduit, string $categorie): string
+    {
+        $prompt = sprintf(
+            'Tu es un assistant pour une marketplace agricole tunisienne appelée AgriSmart. '
+            . 'Génère une description commerciale courte (3-4 phrases max) et attractive en français '
+            . 'pour un produit agricole nommé "%s" dans la catégorie "%s". '
+            . 'La description doit être directe, professionnelle et mettre en valeur le produit. '
+            . 'Ne mets pas de titre, juste le texte de la description.',
+            $nomProduit,
+            $categorie
+        );
+
+        return $this->chat([
+            ['role' => 'user', 'content' => $prompt],
+        ]);
     }
 }

@@ -19,13 +19,27 @@ final class Version20260226012651 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
+        if (!$schema->hasTable('demande')) {
+            return;
+        }
+
+        if ($schema->getTable('demande')->hasColumn('score')) {
+            return;
+        }
+
         $this->addSql('ALTER TABLE demande ADD score INT DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
+        if (!$schema->hasTable('demande')) {
+            return;
+        }
+
+        if (!$schema->getTable('demande')->hasColumn('score')) {
+            return;
+        }
+
         $this->addSql('ALTER TABLE demande DROP score');
     }
 }

@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class PanierService
 {
     private const SESSION_KEY = 'panier'; // [produitId => qty]
+    private const SESSION_BOOKING_KEY = 'panier_location_bookings'; // [produitId => ['start' => Y-m-d, 'end' => Y-m-d, 'days' => int]]
     private SessionInterface $session;
 
     public function __construct(
@@ -40,9 +41,52 @@ class PanierService
         return max(0, $stock);
     }
 
+    private function isLocationProduct(int $produitId): bool
+    {
+        $p = $this->produitRepository->find($produitId);
+        if (!$p || !method_exists($p, 'getType')) {
+            return false;
+        }
+        return (string) $p->getType() === 'location';
+    }
+
+    /** @return array<string,array{start:string,end:string,days:int}> */
+    public function getLocationBookings(): array
+    {
+        return $this->session->get(self::SESSION_BOOKING_KEY, []);
+    }
+
+    public function setLocationBooking(int $produitId, string $start, string $end, int $days): void
+    {
+        $days = max(1, $days);
+        $bookings = $this->getLocationBookings();
+        $bookings[(string) $produitId] = [
+            'start' => $start,
+            'end' => $end,
+            'days' => $days,
+        ];
+        $this->session->set(self::SESSION_BOOKING_KEY, $bookings);
+    }
+
+    public function removeLocationBooking(int $produitId): void
+    {
+        $bookings = $this->getLocationBookings();
+        unset($bookings[(string) $produitId]);
+        $this->session->set(self::SESSION_BOOKING_KEY, $bookings);
+    }
+
     public function add(int $produitId, int $qty = 1): void
     {
         $qty = max(1, $qty);
+
+        if ($this->isLocationProduct($produitId)) {
+            $cart = $this->getCart();
+            $current = (int) ($cart[$produitId] ?? 0);
+            $cart[$produitId] = $current + $qty;
+            $this->saveCart($cart);
+            return;
+        }
+
         $stock = $this->getStock($produitId);
         if ($stock <= 0)
             return;
@@ -58,6 +102,20 @@ class PanierService
     public function setQty(int $produitId, int $qty): void
     {
         $qty = max(0, (int) $qty);
+
+        if ($this->isLocationProduct($produitId)) {
+            $cart = $this->getCart();
+            if ($qty <= 0) {
+                unset($cart[$produitId]);
+                $this->saveCart($cart);
+                $this->removeLocationBooking($produitId);
+                return;
+            }
+            $cart[$produitId] = $qty;
+            $this->saveCart($cart);
+            return;
+        }
+
         $stock = $this->getStock($produitId);
 
         $cart = $this->getCart();
@@ -98,11 +156,13 @@ class PanierService
         $cart = $this->getCart();
         unset($cart[$produitId]);
         $this->saveCart($cart);
+        $this->removeLocationBooking($produitId);
     }
 
     public function clear(): void
     {
         $this->saveCart([]);
+        $this->session->set(self::SESSION_BOOKING_KEY, []);
     }
 
     public function countItems(): int
@@ -119,6 +179,7 @@ class PanierService
     public function getDetails(): array
     {
         $cart = $this->getCart();
+        $bookings = $this->getLocationBookings();
         $items = [];
         $total = 0.0;
 
@@ -137,11 +198,23 @@ class PanierService
             $unitPrice = ($isPromo && $promoPrice !== null) ? (float) $promoPrice : (float) $prix;
             $lineTotal = $unitPrice * (int) $qty;
 
+            $booking = null;
+            $isLocation = method_exists($produit, 'getType') && (string) $produit->getType() === 'location';
+            if ($isLocation) {
+                $booking = $bookings[(string) $id] ?? null;
+                if (is_array($booking) && isset($booking['days'])) {
+                    $days = max(1, (int) $booking['days']);
+                    $qty = $days;
+                    $lineTotal = $unitPrice * $days;
+                }
+            }
+
             $items[] = [
                 'produit' => $produit,
                 'qty' => (int) $qty,
                 'unitPrice' => $unitPrice,
                 'lineTotal' => $lineTotal,
+                'booking' => $booking,
             ];
 
             $total += $lineTotal;

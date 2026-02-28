@@ -115,6 +115,10 @@ class CheckoutController extends AbstractController
             $produit = $row['produit'];
             $qty = (int) $row['qty'];
 
+            if (method_exists($produit, 'getType') && (string) $produit->getType() === 'location') {
+                continue;
+            }
+
             $stock = $this->readStock($produit);
             if ($stock !== null && $qty > $stock) {
                 return $this->json([
@@ -232,6 +236,10 @@ class CheckoutController extends AbstractController
         foreach ($items as $row) {
             $produit = $row['produit'];
             $qty = (int) $row['qty'];
+
+            if (method_exists($produit, 'getType') && (string) $produit->getType() === 'location') {
+                continue;
+            }
 
             $stock = $this->readStock($produit);
             if ($stock !== null && $qty > $stock) {
@@ -352,6 +360,11 @@ class CheckoutController extends AbstractController
     {
         foreach ($commande->getItems() as $item) {
             $p = $item->getProduit();
+
+            if (method_exists($p, 'getType') && (string) $p->getType() === 'location') {
+                continue;
+            }
+
             if (method_exists($p, 'getQuantiteStock') && method_exists($p, 'setQuantiteStock')) {
                 $stock = (int) ($p->getQuantiteStock() ?? 0);
                 $need = (int) $item->getQuantite();

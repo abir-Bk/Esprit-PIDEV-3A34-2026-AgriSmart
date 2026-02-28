@@ -78,6 +78,15 @@ header.header-sticky .navbar-nav .nav-link.active {
 							<li><a class="dropdown-item py-2" href="{{ path('app_profile_show') }}"><i class="bi bi-person me-2"></i>Mon profil</a></li>
 							<li><a class="dropdown-item py-2" href="{{ path('app_produit_mes_offres') }}"><i class="bi bi-journals me-2"></i>Mes annonces</a></li>
 							<li><a class="dropdown-item py-2" href="{{ path('app_my_demandes') }}"><i class="bi bi-person-badge me-2"></i>Mes candidatures</a></li>
+							<li>
+								<a class="dropdown-item py-2 d-flex align-items-center justify-content-between" href="{{ path('app_wishlist_index') }}">
+									<span><i class="bi bi-heart me-2"></i>Ma wishlist</span>
+									<span
+										class="badge rounded-pill bg-success {{ (wishlistCount|default(0)) > 0 ? '' : 'd-none' }}"
+										data-wishlist-count
+									>{{ wishlistCount|default(0) }}</span>
+								</a>
+							</li>
 							{% if _user_role == 'agriculteur' or _user_role == 'admin' %}
 							<li><a class="dropdown-item py-2" href="{{ path('app_ressource_index') }}"><i class="bi bi-box-seam me-2"></i>Ressources</a></li>
 							{% endif %}

@@ -1,20 +1,27 @@
-{# templates/front/produit/show.html.twig #}
+{# templates/front/semi-public/produit/show.html.twig #}
 {% extends 'front/base.html.twig' %}
 
 {% block title %}{{ produit.nom }} | AgriSmart{% endblock %}
 
 {% block body %}
 <style>
+@import url('https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
+
 /* ====== AgriSmart Product Show (scoped) ====== */
 .ag-show{
   --ag-primary:#1A4331;
   --ag-primary-2:#2E7D32;
   --ag-accent:#F4B400;
+  --ag-sky:#DDF0FF;
+  --ag-select:#FFE89A;
   --ag-cream:#FBF7EE;
   --ag-bg:#F6F8F7;
   --ag-text:#111827;
   --ag-muted:#6B7280;
   --ag-border:rgba(17,24,39,.08);
+  --ag-day-available:#E7F7EC;
+  --ag-day-reserved:#FDE9E9;
+  --ag-day-past:#ECEFF1;
 }
 
 .ag-show .ag-hero{
@@ -56,7 +63,7 @@
 }
 
 .ag-show .ag-badge.type-vente{ background: rgba(26,67,49,.92); color:#fff; }
-.ag-show .ag-badge.type-location{ background: rgba(30,136,229,.92); color:#fff; }
+.ag-show .ag-badge.type-location{ background: rgba(244,180,0,.95); color:#111827; }
 .ag-show .ag-badge.promo{ background: rgba(244,180,0,.95); color:#111827; }
 .ag-show .ag-badge.cat{ background: rgba(255,255,255,.90); color:#111827; border:1px solid rgba(17,24,39,.10); }
 
@@ -86,6 +93,16 @@
 }
 .ag-show .ag-btn-accent:hover{ filter: brightness(.96); }
 
+.ag-show .ag-btn-outline-accent{
+  border:1px solid rgba(244,180,0,.55);
+  background:#fffdf6;
+  color:#111827;
+}
+.ag-show .ag-btn-outline-accent:hover{
+  background: rgba(244,180,0,.2);
+  border-color: rgba(244,180,0,.7);
+}
+
 .ag-show .ag-pill{
   display:inline-flex; align-items:center; gap:.4rem;
   border: 1px solid var(--ag-border);
@@ -113,6 +130,164 @@
 }
 
 .ag-show .ag-divider{ border-top:1px solid var(--ag-border); }
+
+.ag-show .ag-fade-in{
+  animation: agFade .45s ease both;
+}
+
+@keyframes agFade{
+  from{ opacity: 0; transform: translateY(8px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+.ag-show .ag-booking{
+  border: 1px solid var(--ag-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 .55rem 1.1rem rgba(0,0,0,.05);
+}
+
+.ag-show .ag-cal-nav .btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+}
+
+.ag-show .ag-week,
+.ag-show .ag-days{
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: .45rem;
+}
+
+.ag-show .ag-week div{
+  text-align:center;
+  font-size:.75rem;
+  text-transform:uppercase;
+  font-weight:800;
+  color: var(--ag-muted);
+  letter-spacing:.05em;
+}
+
+.ag-show .ag-day{
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--ag-border);
+  border-radius: 14px;
+  background:#fff;
+  color:var(--ag-text);
+  font-weight:700;
+  transition: all .18s ease;
+  box-shadow: 0 2px 6px rgba(17,24,39,.05);
+}
+
+.ag-show .ag-day:hover:not(:disabled){
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(17,24,39,.10);
+}
+
+.ag-show .ag-day.is-outside{
+  opacity:.45;
+}
+
+.ag-show .ag-day-past{
+  background: var(--ag-day-past);
+  color:#8B95A1;
+}
+
+.ag-show .ag-day-reserved{
+  background: var(--ag-day-reserved);
+  color:#9A2A2A;
+}
+
+.ag-show .ag-day-available{
+  background: var(--ag-day-available);
+}
+
+.ag-show .ag-day-selected,
+.ag-show .ag-day-range{
+  background: var(--ag-select);
+  border-color: rgba(244,180,0,.45);
+}
+
+.ag-show .ag-day-start,
+.ag-show .ag-day-end{
+  background: var(--ag-select);
+  border-color: rgba(244,180,0,.45);
+}
+
+.ag-show .ag-legend-dot{
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border:1px solid rgba(17,24,39,.12);
+  display:inline-block;
+}
+
+.ag-show .ag-booking .flatpickr-calendar.inline{
+  width: 100%;
+  max-width: 100%;
+  box-shadow: none !important;
+  border: 0 !important;
+  background: transparent;
+}
+
+.ag-show .ag-booking .flatpickr-months .flatpickr-month{
+  background: transparent;
+}
+
+.ag-show .ag-booking .flatpickr-months{
+  border-bottom: 1px solid rgba(17,24,39,.08);
+  margin-bottom: .35rem;
+  padding-bottom: .2rem;
+}
+
+.ag-show .ag-booking .flatpickr-current-month{ font-size: 1rem; padding-top: .35rem; }
+.ag-show .ag-booking .flatpickr-weekday{ color: var(--ag-muted); font-weight: 700; text-transform: capitalize; }
+.ag-show .ag-booking .flatpickr-days{ width: 100%; }
+.ag-show .ag-booking .flatpickr-days .dayContainer{ min-width: 100%; max-width: 100%; width: 100%; }
+.ag-show .ag-booking .flatpickr-day{ max-width: 14.285%; height: 40px; line-height: 40px; border-radius: 10px; font-weight: 700; border-color: rgba(17,24,39,.08) !important; }
+.ag-show .ag-booking .flatpickr-day:hover{ background: #d8efdf !important; color:#111827 !important; }
+.ag-show .ag-booking .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.flatpickr-disabled):not(.agfp-reserved):not(.agfp-past){
+  background: var(--ag-day-available) !important;
+}
+
+.ag-show .ag-booking .flatpickr-day.agfp-reserved{ background: var(--ag-day-reserved) !important; color:#9A2A2A !important; }
+.ag-show .ag-booking .flatpickr-day.agfp-past{ background: var(--ag-day-past) !important; color:#8B95A1 !important; }
+.ag-show .ag-booking .flatpickr-day.today{ border-color: rgba(17,24,39,.14) !important; }
+.ag-show .ag-booking .flatpickr-day.inRange{ background: var(--ag-select) !important; border-color: rgba(244,180,0,.45) !important; color:#111827 !important; box-shadow:none !important; }
+.ag-show .ag-booking .flatpickr-day.startRange,
+.ag-show .ag-booking .flatpickr-day.endRange,
+.ag-show .ag-booking .flatpickr-day.selected{ background: var(--ag-select) !important; border-color: rgba(244,180,0,.45) !important; color: #111827 !important; box-shadow:none !important; }
+
+.ag-show .ag-booking .ag-input[data-booking-picker]{
+  border-radius: 12px;
+  border-color: rgba(244,180,0,.45);
+  background: #fffdf7;
+  font-weight: 600;
+}
+.ag-show .ag-booking .ag-input[data-booking-picker]:focus{
+  border-color: rgba(244,180,0,.65) !important;
+  box-shadow: 0 0 0 .2rem rgba(244,180,0,.16) !important;
+}
+
+.ag-show .ag-summary-thumb{
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--ag-border);
+}
+
+.ag-show .ag-summary-line{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:.42rem 0;
+  border-bottom:1px dashed rgba(17,24,39,.08);
+  font-size:.92rem;
+}
+
+.ag-show .ag-summary-line:last-child{ border-bottom:none; }
 
 .ag-show .toast-container{
   position: fixed;
@@ -145,6 +320,12 @@
         <div class="d-flex gap-2 flex-wrap">
           <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary rounded-pill">
             <i class="bi bi-arrow-left me-1"></i> Retour
+          </a>
+          <a href="{{ path('app_marketplace_messagerie') }}" class="btn ag-btn-outline-accent rounded-pill">
+            <i class="bi bi-chat-dots me-1"></i> Messagerie
+            {% if messagerieUnreadCount|default(0) > 0 %}
+              <span class="badge text-bg-danger ms-1">{{ messagerieUnreadCount }}</span>
+            {% endif %}
           </a>
           <button class="btn btn-outline-dark rounded-pill" type="button" data-copy-link>
             <i class="bi bi-link-45deg me-1"></i> Copier le lien
@@ -247,12 +428,36 @@
                         {% endif %}
                       </div>
                       <div class="small ag-muted mt-1">
-                        (La réservation sera gérée plus tard via Commande/Calendrier.)
+                        Sélectionnez votre plage ci-dessous pour réserver.
                       </div>
                     </div>
                   </div>
                 {% endif %}
               </div>
+
+              {% if produit.type == 'location' %}
+                {% set effectivePrice = (produit.isPromotion and produit.promotionPrice is not null) ? produit.promotionPrice : produit.prix %}
+                {% set minDate = produit.locationStart ? produit.locationStart|date('Y-m-d') : 'now'|date('Y-m-d') %}
+                {% set maxDate = produit.locationEnd ? produit.locationEnd|date('Y-m-d') : '' %}
+
+                <div class="ag-divider my-4"></div>
+
+                <div class="ag-booking ag-fade-in p-3 p-md-4"
+                     data-booking-calendar
+                     data-min-date="{{ minDate }}"
+                     data-max-date="{{ maxDate }}"
+                     data-price-per-day="{{ effectivePrice ?? 0 }}"
+                     data-reserved-ranges="{{ reservationRanges|default([])|json_encode|e('html_attr') }}">
+                  <input type="text" class="form-control ag-input" data-booking-picker placeholder="Choisir une plage" readonly>
+
+                  <div class="d-flex flex-wrap gap-3 mt-3 small">
+                    <span class="d-inline-flex align-items-center gap-2"><span class="ag-legend-dot" style="background:var(--ag-day-available);"></span>Disponible</span>
+                    <span class="d-inline-flex align-items-center gap-2"><span class="ag-legend-dot" style="background:var(--ag-day-reserved);"></span>Réservé</span>
+                    <span class="d-inline-flex align-items-center gap-2"><span class="ag-legend-dot" style="background:var(--ag-day-past);"></span>Passé</span>
+                    <span class="d-inline-flex align-items-center gap-2"><span class="ag-legend-dot" style="background:var(--ag-select);"></span>Sélection</span>
+                  </div>
+                </div>
+              {% endif %}
 
             </div>
           </div>
@@ -267,6 +472,9 @@
                 <div class="d-flex justify-content-between align-items-start gap-2">
                   <div>
                     <div class="small ag-muted">Prix</div>
+                    {% set effectivePrice = (produit.isPromotion and produit.promotionPrice is not null) ? produit.promotionPrice : produit.prix %}
+                    {% set priceEur = fx_convert(effectivePrice, 'EUR') %}
+                    {% set priceUsd = fx_convert(effectivePrice, 'USD') %}
 
                     {% if produit.isPromotion and produit.promotionPrice is not null %}
                       <div class="ag-price text-danger">
@@ -286,6 +494,21 @@
                       </div>
                       <div class="ag-muted"><small>&nbsp;</small></div>
                     {% endif %}
+
+                    {% if priceEur is not null or priceUsd is not null %}
+                      <div class="ag-muted mt-1">
+                        <small>
+                          ≈
+                          {% if priceEur is not null %}
+                            {{ priceEur|number_format(2, '.', ' ') }} EUR
+                          {% endif %}
+                          {% if priceEur is not null and priceUsd is not null %} • {% endif %}
+                          {% if priceUsd is not null %}
+                            {{ priceUsd|number_format(2, '.', ' ') }} USD
+                          {% endif %}
+                        </small>
+                      </div>
+                    {% endif %}
                   </div>
 
                   <span class="badge bg-light text-dark border">
@@ -297,21 +520,30 @@
 
                 {% set stock = produit.quantiteStock ?? 0 %}
 
-                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-                  <div class="small ag-muted">Quantité</div>
-                  <input
-                    class="ag-qty text-center"
-                    type="number"
-                    min="1"
-                    value="1"
-                    name="qty_ui"
-                    {% if stock > 0 %}max="{{ stock }}"{% endif %}
-                    data-qty
-                  >
-                </div>
-
                 <div class="d-grid gap-2">
+                  {% if app.user and produit.vendeur and produit.vendeur.id != app.user.id %}
+                    <form method="post" action="{{ path('app_marketplace_messagerie_start', {id: produit.id}) }}" class="d-grid mb-2">
+                      <input type="hidden" name="_token" value="{{ csrf_token('start_conversation_' ~ produit.id) }}">
+                      <button class="btn ag-btn-outline-accent rounded-pill py-2" type="submit">
+                        <i class="bi bi-chat-dots me-1"></i> Contacter {{ produit.vendeur.firstName|default('le vendeur') }}
+                      </button>
+                    </form>
+                  {% endif %}
+
                   {% if produit.type == 'vente' %}
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                      <div class="small ag-muted">Quantité</div>
+                      <input
+                        class="ag-qty text-center"
+                        type="number"
+                        min="1"
+                        value="1"
+                        name="qty_ui"
+                        {% if stock > 0 %}max="{{ stock }}"{% endif %}
+                        data-qty
+                      >
+                    </div>
+
                     {% if app.user and produit.vendeur and produit.vendeur.id == app.user.id %}
                       <div class="alert alert-light border rounded-pill py-2 mb-0 text-center small">
                         <i class="bi bi-person-badge me-1"></i> C'est votre offre — vous ne pouvez pas la commander.
@@ -338,9 +570,55 @@
                       </a>
                     {% endif %}
                   {% else %}
-                    <button class="btn btn-info text-white rounded-pill py-2" type="button" disabled>
-                      <i class="bi bi-calendar-check me-1"></i> Réserver (bientôt)
-                    </button>
+                    {% set todayTs = 'now'|date('U') %}
+                    {% set immediate = (not produit.locationStart or produit.locationStart|date('U') <= todayTs) and (not produit.locationEnd or produit.locationEnd|date('U') >= todayTs) %}
+                    {% set effectivePrice = (produit.isPromotion and produit.promotionPrice is not null) ? produit.promotionPrice : produit.prix %}
+
+                    <div class="ag-mini soft p-3 rounded-4">
+                      <div class="d-flex align-items-center gap-3 mb-3">
+                        <img
+                          src="{{ asset(produit.image ?: 'assets/images/placeholder-product.png') }}"
+                          alt="{{ produit.nom }}"
+                          class="ag-summary-thumb"
+                        >
+                        <div>
+                          <div class="fw-bold">{{ produit.nom }}</div>
+                          <div class="small ag-muted">{{ produit.categorie|capitalize }} • Location</div>
+                        </div>
+                      </div>
+
+                      {% if immediate %}
+                        <div class="mb-3">
+                          <span class="badge rounded-pill text-bg-success-subtle border text-success-emphasis px-3 py-2">
+                            <i class="bi bi-check2-circle me-1"></i> Disponible immédiatement
+                          </span>
+                        </div>
+                      {% endif %}
+
+                      <div class="ag-summary-line"><span>Début</span><strong data-book-start>—</strong></div>
+                      <div class="ag-summary-line"><span>Fin</span><strong data-book-end>—</strong></div>
+                      <div class="ag-summary-line"><span>Durée</span><strong data-book-days>0 jour</strong></div>
+                      <div class="ag-summary-line"><span>Tarif / jour</span><strong>{{ (effectivePrice ?? 0)|number_format(2, '.', ' ') }} TND</strong></div>
+                      <div class="ag-summary-line"><span>Total estimé</span><strong class="text-success" data-book-total>0.00 TND</strong></div>
+
+                      {% if app.user and produit.vendeur and produit.vendeur.id == app.user.id %}
+                        <div class="alert alert-light border rounded-pill py-2 mb-0 mt-3 text-center small">
+                          <i class="bi bi-person-badge me-1"></i> C'est votre offre — vous ne pouvez pas la réserver.
+                        </div>
+                      {% else %}
+                        <form method="post" action="{{ path('app_produit_reserve', {id: produit.id}) }}" class="d-grid gap-2 mt-3">
+                          <input type="hidden" name="_token" value="{{ csrf_token('produit_reserve_' ~ produit.id) }}">
+                          <input type="hidden" name="start_date" value="" data-book-start-hidden>
+                          <input type="hidden" name="end_date" value="" data-book-end-hidden>
+                          <button class="btn ag-btn-primary text-white rounded-pill py-2" type="submit" data-book-submit disabled>
+                            <i class="bi bi-calendar-check me-1"></i> Réserver et payer
+                          </button>
+                          <button class="btn btn-outline-secondary rounded-pill py-2" type="button" data-book-clear>
+                            <i class="bi bi-eraser me-1"></i> Effacer la sélection
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
                   {% endif %}
 
                   <button class="btn btn-outline-secondary rounded-pill py-2" type="button" data-copy-link>
@@ -369,10 +647,52 @@
     </div>
   </section>
 
+  {% if recommendedProducts|default([]) is not empty %}
+  <section class="pb-5">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 fw-bold mb-0" style="color:var(--ag-text);">
+          <i class="bi bi-stars me-2" style="color:var(--ag-accent);"></i>Autres recommandations
+        </h2>
+        <a href="{{ path('app_produit_index') }}" class="small text-decoration-none" style="color:var(--ag-primary);">
+          Voir plus
+        </a>
+      </div>
+
+      <div class="row g-3 g-lg-4">
+        {% for rec in recommendedProducts %}
+          <div class="col-sm-6 col-lg-4">
+            <article class="ag-mini rounded-4 overflow-hidden h-100">
+              <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="d-block text-decoration-none">
+                <img
+                  src="{{ asset(rec.image ?: 'assets/images/placeholder-product.png') }}"
+                  alt="{{ rec.nom }}"
+                  style="height: 180px; width: 100%; object-fit: cover;"
+                  loading="lazy"
+                >
+              </a>
+
+              <div class="p-3">
+                <div class="small text-uppercase fw-bold mb-1" style="color:var(--ag-muted);">{{ rec.categorie }}</div>
+                <div class="fw-bold mb-2" style="color:var(--ag-text);">{{ rec.nom }}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="fw-bold" style="color:var(--ag-primary);">{{ rec.getPrixEffectif()|number_format(2, '.', ' ') }} TND</div>
+                  <a href="{{ path('app_produit_show', {id: rec.id}) }}" class="btn btn-sm btn-outline-secondary rounded-pill">Détails</a>
+                </div>
+              </div>
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   {# ===== Toast container ===== #}
   <div class="toast-container"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 (function(){
   const toastContainer = document.querySelector('.ag-show .toast-container');
@@ -416,6 +736,111 @@
     };
     qtyInput.addEventListener('input', sync);
     sync();
+  }
+
+  const calendarEl = document.querySelector('[data-booking-calendar]');
+  if(calendarEl){
+    const pickerInput = calendarEl.querySelector('[data-booking-picker]');
+    const outStart = document.querySelector('[data-book-start]');
+    const outEnd = document.querySelector('[data-book-end]');
+    const outDays = document.querySelector('[data-book-days]');
+    const outTotal = document.querySelector('[data-book-total]');
+    const hiddenStart = document.querySelector('[data-book-start-hidden]');
+    const hiddenEnd = document.querySelector('[data-book-end-hidden]');
+    const submitBtn = document.querySelector('[data-book-submit]');
+    const clearBtn = document.querySelector('[data-book-clear]');
+
+    const parseDate = (str) => {
+      if(!str) return null;
+      const parts = String(str).split('-').map(Number);
+      if(parts.length !== 3 || parts.some(Number.isNaN)) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    };
+    const toIso = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const toHuman = (date) => {
+      return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+    const stripTime = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const addDays = (date, d) => {
+      const c = new Date(date);
+      c.setDate(c.getDate() + d);
+      return stripTime(c);
+    };
+
+    const today = stripTime(new Date());
+    const minDate = parseDate(calendarEl.dataset.minDate) || today;
+    const maxDate = parseDate(calendarEl.dataset.maxDate);
+    const pricePerDay = parseFloat(calendarEl.dataset.pricePerDay || '0') || 0;
+    const reservedRanges = (() => {
+      try { return JSON.parse(calendarEl.dataset.reservedRanges || '[]'); }
+      catch(e){ return []; }
+    })();
+
+    const reservedDates = new Set();
+    reservedRanges.forEach(range => {
+      const start = parseDate(range.start);
+      const end = parseDate(range.end);
+      if(!start || !end || end < start) return;
+      let cursor = stripTime(start);
+      const stop = stripTime(end);
+      while(cursor <= stop){
+        reservedDates.add(toIso(cursor));
+        cursor = addDays(cursor, 1);
+      }
+    });
+
+    const updateSummary = (selectedDates = []) => {
+      const start = selectedDates[0] ? stripTime(selectedDates[0]) : null;
+      const end = selectedDates[1] ? stripTime(selectedDates[1]) : null;
+
+      const days = (start && end) ? Math.floor((end - start) / 86400000) + 1 : 0;
+      outStart.textContent = start ? toHuman(start) : '—';
+      outEnd.textContent = end ? toHuman(end) : '—';
+      outDays.textContent = `${days} jour${days > 1 ? 's' : ''}`;
+      outTotal.textContent = `${(days * pricePerDay).toFixed(2)} TND`;
+
+      if(hiddenStart) hiddenStart.value = start ? toIso(start) : '';
+      if(hiddenEnd) hiddenEnd.value = end ? toIso(end) : '';
+      if(submitBtn) submitBtn.disabled = !(start && end && days > 0);
+    };
+
+    const flatpickr = window.flatpickr;
+    if(!flatpickr){
+      toast('Impossible de charger le calendrier externe.');
+      return;
+    }
+
+    const picker = flatpickr(pickerInput, {
+      mode: 'range',
+      inline: true,
+      dateFormat: 'Y-m-d',
+      minDate,
+      maxDate: maxDate || null,
+      disable: [date => reservedDates.has(toIso(stripTime(date)))],
+      onDayCreate: (_dObj, _dStr, _fp, dayElem) => {
+        const d = stripTime(dayElem.dateObj);
+        if (d < today) dayElem.classList.add('agfp-past');
+        if (reservedDates.has(toIso(d))) {
+          dayElem.classList.add('agfp-reserved');
+          dayElem.title = 'Date déjà réservée';
+        }
+      },
+      onChange: (selectedDates) => updateSummary(selectedDates),
+    });
+
+    if(clearBtn){
+      clearBtn.addEventListener('click', () => {
+        picker.clear();
+        updateSummary([]);
+      });
+    }
+
+    updateSummary([]);
   }
 })();
 </script>

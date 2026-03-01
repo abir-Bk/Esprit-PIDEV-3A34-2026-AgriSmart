@@ -23,18 +23,23 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 final class DemandeController extends AbstractController
 {
     #[Route('/mes-demandes', name: 'app_my_demandes')]
-    public function myDemandes(EntityManagerInterface $entityManager): Response
+    public function myDemandes(DemandeRepository $demandeRepository): Response
     {
         $user = $this->getUser(); 
 
         if (!$user) {
-            $this->addFlash('danger', 'Vous devez être connecté pour voir vos demandes.');
+            $this->addFlash('danger', 'Vous devez être connecté.');
             return $this->redirectToRoute('app_login');
         }
 
-        $demandes = $entityManager->getRepository(Demande::class)->findBy([
-            'user' => $user 
-        ]);
+        // ON UTILISE UN QUERY BUILDER AVEC JOIN POUR TOUT CHARGER EN 1 SEULE REQUÊTE
+        $demandes = $demandeRepository->createQueryBuilder('d')
+            ->addSelect('o') // On force le chargement de l'offre
+            ->leftJoin('d.offre', 'o')
+            ->where('d.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
 
         return $this->render('front/demande/my_demandes.html.twig', [
             'demandes' => $demandes,

@@ -1,11 +1,7 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
-
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
-
+        # On garde une seule ligne ici
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
     orm:
@@ -26,13 +22,13 @@ doctrine:
 when@test:
     doctrine:
         dbal:
-            # "TEST_TOKEN" is typically set by ParaTest
             dbname_suffix: '_test%env(default::TEST_TOKEN)%'
 
 when@dev:
     doctrine:
         dbal:
-            profiling_collect_backtrace: false
+            # C'est cette ligne que Doctrine Doctor veut absolument
+            profiling_collect_backtrace: true
 
 when@prod:
     doctrine:

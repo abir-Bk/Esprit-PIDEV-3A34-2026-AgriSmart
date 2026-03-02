@@ -46,20 +46,25 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/offre/{id}/postuler', name: 'app_demande_postuler')]
-    public function postuler(int $id, Request $request, EntityManagerInterface $entityManager): Response
+        #[Route('/offre/{id}/postuler', name: 'app_demande_postuler')]
+        public function postuler(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        $offre = $entityManager->getRepository(Offre::class)->find($id);
-        if (!$offre) throw $this->createNotFoundException('Offre non trouvée');
+        $offre = $entityManager->getRepository(Offre::class)->find((int) $id);
+        
+        if (!$offre instanceof Offre) {
+            throw $this->createNotFoundException('Offre non trouvée');
+        }
 
-        if ($offre->getDateFin() < new \DateTime() || strtolower($offre->getStatut()) === 'clôturée') {
+        if ($offre->getDateFin() < new \DateTime() || strtolower((string)$offre->getStatut()) === 'clôturée')
+            {
             $this->addFlash('danger', 'Cette offre n\'accepte plus de candidatures.');
             return $this->redirectToRoute('app_offre_index_front');
         }
 
+        /** @var User|null $currentUser */
         $currentUser = $this->getUser();
 
-        if (!$currentUser) {
+        if (!$currentUser instanceof User) {
             $this->addFlash('warning', 'Vous devez être connecté pour postuler.');
             return $this->redirectToRoute('app_login');
         }
@@ -85,18 +90,19 @@ final class DemandeController extends AbstractController
             if ($form->isValid() || ($cvIaFilename && $form->get('lettreMotivation')->isValid())) {
                 
                 // On s'assure d'utiliser le dossier public pour que les fichiers soient accessibles
-                $basePath = $this->getParameter('kernel.project_dir') . '/public/uploads';
+            $projectDir = $this->getParameter('kernel.project_dir');
+            $basePath = (is_string($projectDir) ? $projectDir : '') . '/public/uploads';
 
                 // Si upload classique
-                if ($cvFile) {
-                    $cvName = uniqid().'.'.$cvFile->guessExtension();
-                    $cvFile->move($basePath . '/cv', $cvName);
-                    $demande->setCv($cvName);
-                } 
-                // Sinon si CV IA
-                elseif ($cvIaFilename) {
-                    $demande->setCv($cvIaFilename);
-                }
+                if ($cvFile instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+                $cvName = uniqid().'.'.$cvFile->guessExtension();
+                $cvFile->move($basePath . '/cv', $cvName);
+                $demande->setCv($cvName);
+            } 
+            // Sinon si CV IA (On vérifie explicitement que c'est une chaîne)
+            elseif (is_string($cvIaFilename)) {
+                $demande->setCv($cvIaFilename);
+            }
 
                 $lettreFile = $form->get('lettreMotivation')->getData();
                 if ($lettreFile) {
@@ -129,8 +135,8 @@ final class DemandeController extends AbstractController
     public function updateStatus(Demande $demande, Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response 
     {
         $newStatus = $request->request->get('statut');
-        
-        if ($newStatus) {
+
+        if (is_string($newStatus)) {
             $demande->setStatut($newStatus);
             $demande->setDateModification(new \DateTime());
             $em->flush();
@@ -140,7 +146,8 @@ final class DemandeController extends AbstractController
                 $color = ($newStatus === 'Acceptée') ? '#2e5e41' : '#a33b3b'; 
                 $icon = ($newStatus === 'Acceptée') ? '✅' : '❌';
                 $nomCandidat = $demande->getPrenom() . ' ' . $demande->getNom();
-                $offreTitre = $demande->getOffre() ? $demande->getOffre()->getTitle() : 'Offre Mécanique';
+                $offreLiee = $demande->getOffre();
+                $offreTitre = ($offreLiee instanceof Offre) ? $offreLiee->getTitle() : 'Offre Mécanique';
 
                 // Le HTML exact de ton image
                 $htmlContent = "
@@ -201,8 +208,8 @@ final class DemandeController extends AbstractController
     public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
         $demande = $entityManager->getRepository(Demande::class)->find($id);
-        if ($demande && $this->isCsrfTokenValid('delete' . $demande->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($demande);
+        $token = $request->request->get('_token');
+        if ($demande instanceof Demande && is_string($token) && $this->isCsrfTokenValid('delete' . $demande->getId(), $token)) {            $entityManager->remove($demande);
             $entityManager->flush();
             $this->addFlash('success', 'Candidature supprimée.');
         }
@@ -266,8 +273,13 @@ public function generateCvIa(Request $request): JsonResponse
     if ($photoFile) {
         try {
             $type = $photoFile->getMimeType();
+        if ($photoFile instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            $type = $photoFile->getMimeType();
             $binary = file_get_contents($photoFile->getPathname());
-            $photoBase64 = 'data:' . $type . ';base64,' . base64_encode($binary);
+    if (is_string($binary)) {
+        $photoBase64 = 'data:' . $type . ';base64,' . base64_encode($binary);
+    }
+}
         } catch (\Exception $e) {
             // En cas d'erreur sur l'image, on laisse $photoBase64 à null
         }
@@ -325,9 +337,9 @@ public function generateCvIa(Request $request): JsonResponse
 
     // 4. Préparation du dossier et sauvegarde du fichier
     $fileName = 'CV_IA_AgriSmart_' . uniqid() . '.pdf';
-    $directory = $this->getParameter('kernel.project_dir') . '/public/uploads/cv';
-    
-    if (!file_exists($directory)) {
+    $projectDir = $this->getParameter('kernel.project_dir');
+    $directory = (is_string($projectDir) ? $projectDir : '') . '/public/uploads/cv';    
+        if (!file_exists($directory)) {
         mkdir($directory, 0777, true);
     }
     

@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\OffreType;
 use App\Entity\Offre;
+use App\Entity\User;
 use App\Repository\OffreRepository;
 use App\Repository\DemandeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,7 +20,7 @@ use App\Service\MatchingService;
 
 final class OffreController extends AbstractController
 {
-    private $httpClient;
+    private HttpClientInterface $httpClient;
 
     public function __construct(HttpClientInterface $httpClient)
     {
@@ -159,8 +160,14 @@ final class OffreController extends AbstractController
         $form = $this->createForm(OffreType::class, $offre);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $offre->setAgriculteur($this->getUser());
+            if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User|null $currentUser */
+            $currentUser = $this->getUser();
+            
+            if ($currentUser instanceof User) {
+                $offre->setAgriculteur($currentUser);
+            }
+
             $offre->setStatutValidation('en_attente');
             $offre->setIsActive(true);
             $em->persist($offre);
@@ -269,25 +276,31 @@ public function details(
     #[Route('/admin/offre/{id}/approuver', name: 'app_offre_approuver', methods: ['POST'])]
     public function approuver(Offre $offre, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('approuver'.$offre->getId(), (string) $request->request->get('_token'))) {
-            $offre->setStatutValidation('approuvée');
-            $offre->setIsActive(true);
-            $em->flush();
-            $this->addFlash('success', 'L\'offre a été approuvée.');
-        }
-        return $this->redirect($request->headers->get('referer', $this->generateUrl('app_offre_admin_index')));
+    $token = $request->request->get('_token');
+
+    if ($this->isCsrfTokenValid('approuver' . $offre->getId(), is_string($token) ? $token : null)) {
+        $offre->setStatutValidation('approuvée');
+        $offre->setIsActive(true);
+        $em->flush();
+        $this->addFlash('success', 'L\'offre a été approuvée.');
     }
+        $referer = $request->headers->get('referer');
+        // On force le type string pour satisfaire PHPStan
+        return $this->redirect(is_string($referer) ? $referer : $this->generateUrl('app_offre_admin_index'));    }
+        
 
     #[Route('/admin/offre/{id}/refuser', name: 'app_offre_refuser', methods: ['POST'])]
     public function refuser(Offre $offre, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('refuser'.$offre->getId(), (string) $request->request->get('_token'))) {
-            $offre->setStatutValidation('refusée');
-            $offre->setIsActive(false);
-            $em->flush();
-            $this->addFlash('success', 'L\'offre a été refusée.');
-        }
-        return $this->redirect($request->headers->get('referer', $this->generateUrl('app_offre_admin_index')));
+        $token = $request->request->get('_token');
+if ($this->isCsrfTokenValid('refuser'.$offre->getId(), is_string($token) ? $token : null)) {
+    $offre->setStatutValidation('refusée');
+    $offre->setIsActive(false);
+    $em->flush();
+    $this->addFlash('success', 'L\'offre a été refusée.');
+}
+$referer = $request->headers->get('referer');
+return $this->redirect(is_string($referer) ? $referer : $this->generateUrl('app_offre_admin_index'));
     }
 
     #[Route('/admin/offre/toggle/{id}', name: 'app_offre_toggle')]

@@ -19,7 +19,6 @@ class NotificationController extends AbstractController
         private EntityManagerInterface      $em,
     ) {}
 
-    // ── Polling endpoint — returns unread count + latest notifications ──
     #[Route('/poll', name: 'admin_notifications_poll', methods: ['GET'])]
     public function poll(): JsonResponse
     {
@@ -43,7 +42,6 @@ class NotificationController extends AbstractController
         ]);
     }
 
-    // ── Mark one as read ────────────────────────────────────────────────
     #[Route('/{id}/read', name: 'admin_notifications_read', methods: ['POST'])]
     public function markRead(AdminNotification $notification): JsonResponse
     {
@@ -53,7 +51,6 @@ class NotificationController extends AbstractController
         return $this->json(['success' => true]);
     }
 
-    // ── Mark all as read ────────────────────────────────────────────────
     #[Route('/read-all', name: 'admin_notifications_read_all', methods: ['POST'])]
     public function markAllRead(): JsonResponse
     {

@@ -112,6 +112,21 @@
 .ag-marketplace .table tbody td{ padding: 1rem 1.25rem; vertical-align: middle; }
 .ag-marketplace .table tbody tr:hover{ background: rgba(26,67,49,.04); }
 .ag-marketplace .ag-meta{ color: var(--ag-muted); font-size: .86rem; }
+
+/* AgriVoice Micro Style */
+#start-record-btn.listening {
+    background-color: #dc3545 !important;
+    animation: pulse-red 1.5s infinite;
+}
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* Modal Styling */
+.modal-content { border-radius: 20px; border: none; overflow: hidden; }
+.modal-header { background: #f8f9fa; border-bottom: 1px solid #eee; }
 </style>
 
 <div class="ag-marketplace">
@@ -126,13 +141,26 @@
             Suivez et optimisez vos <strong>stocks agricoles</strong> en temps réel.
           </p>
 
-          <div class="d-flex flex-wrap gap-2 mt-4">
+          <div class="d-flex flex-wrap gap-2 mt-4 align-items-center">
             <a href="{{ path('app_ressource_export_csv') }}" class="btn btn-outline-dark rounded-pill">
               <i class="bi bi-download me-2"></i>Export CSV
             </a>
             <a href="{{ path('app_ressource_new') }}" class="btn ag-btn-primary text-white rounded-pill">
               <i class="bi bi-plus-circle me-2"></i>Nouvelle ressource
             </a>
+            {# BOUTON AGRIVOICE #}
+            <button id="start-record-btn" class="btn btn-dark rounded-pill border-0 px-4 ms-lg-2">
+                <i class="bi bi-mic-fill me-2"></i><span id="mic-text">Assistant Vocal</span>
+            </button>
+            <span id="voice-status" class="badge bg-danger rounded-pill d-none animate__animated animate__fadeIn">Écoute en cours...</span>
+          </div>
+
+          {# ZONE DE TRANSCRIPTION IA #}
+          <div id="transcript-result" class="mt-3 d-none">
+            <div class="alert alert-success border-0 shadow-sm d-inline-block rounded-4 py-2 px-3">
+                <small class="fw-bold text-success"><i class="bi bi-robot me-2"></i>IA AgriVoice :</small>
+                <span id="text-detected" class="ms-2 text-dark italic"></span>
+            </div>
           </div>
 
           {# TYPE CHIPS #}
@@ -149,7 +177,6 @@
             {% endfor %}
           </div>
         </div>
-
       </div>
     </div>
   </section>
@@ -157,14 +184,28 @@
   {# CONTENT #}
   <section class="ag-content">
     <div class="container">
+      
+      {# AFFICHAGE DES MESSAGES DE SUCCÈS OU D'ÉCHEC #}
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mb-4 rounded-4 border-0 shadow-sm" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi {{ label == 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' }} me-2"></i>
+                <div>{{ message }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
       <div class="row g-4">
 
         {# SIDEBAR FILTER #}
         <aside class="col-lg-3">
           <div class="card ag-filter-card shadow-sm p-4 sticky-top" style="top: 18px;">
             <div class="fw-bold text-uppercase small mb-3" style="color:var(--ag-muted);">Filtrer par type</div>
-            <form method="get" action="{{ path('app_ressource_index') }}" class="vstack gap-3">
-              <select name="type" class="form-select ag-input" onchange="this.form.submit()">
+            <form method="get" id="filter-form" action="{{ path('app_ressource_index') }}" class="vstack gap-3">
+              <select name="type" id="type-select" class="form-select ag-input" onchange="this.form.submit()">
                 <option value="">Tous les types</option>
                 {% for t in typesDisponibles %}
                   <option value="{{ t }}" {{ t == typeSearch ? 'selected' }}>{{ t }}</option>
@@ -184,15 +225,6 @@
 
         {# MAIN: TABLE #}
         <div class="col-lg-9">
-          {% for label, messages in app.flashes %}
-            {% for message in messages %}
-              <div class="alert alert-{{ label }} alert-dismissible fade show mb-3" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          {% endfor %}
-
           <div class="ag-card p-0">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
@@ -205,15 +237,15 @@
                     <th class="text-end pe-4">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="ressource-table-body">
                   {% for ressource in ressources %}
-                  <tr>
+                  <tr class="ressource-row">
                     <td class="ps-4">
                       <div class="d-flex align-items-center">
                         <div class="rounded-3 d-flex align-items-center justify-content-center me-3" style="width:44px;height:44px;background:rgba(26,67,49,.12);color:var(--ag-primary);">
                           <i class="bi bi-archive"></i>
                         </div>
-                        <span class="fw-bold" style="color:var(--ag-text);">{{ ressource.nom }}</span>
+                        <span class="fw-bold ressource-name" style="color:var(--ag-text);">{{ ressource.nom }}</span>
                       </div>
                     </td>
                     <td>
@@ -238,12 +270,35 @@
                         <a href="{{ path('app_ressource_edit', {'id': ressource.id}) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Modifier">
                           <i class="bi bi-pencil"></i>
                         </a>
-                        <form method="post" action="{{ path('app_ressource_delete', {'id': ressource.id}) }}" onsubmit="return confirm('Confirmer la suppression ?');" class="d-inline">
-                          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.id) }}">
-                          <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Supprimer">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </form>
+                        
+                        {# BOUTON DÉCLENCHEUR MODALE #}
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#modalDelete{{ ressource.id }}" title="Supprimer">
+                          <i class="bi bi-trash"></i>
+                        </button>
+
+                        {# MODALE DE CONFIRMATION #}
+                        <div class="modal fade" id="modalDelete{{ ressource.id }}" tabindex="-1" aria-labelledby="modalLabel{{ ressource.id }}" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content shadow">
+                              <div class="modal-header">
+                                <h5 class="modal-title fw-bold text-dark" id="modalLabel{{ ressource.id }}">Confirmation de suppression</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body text-start p-4">
+                                <p class="mb-0 text-muted">Voulez-vous vraiment supprimer la ressource <strong class="text-dark">{{ ressource.nom }}</strong> ?</p>
+                                <p class="small text-danger mt-2 mb-0"><i class="bi bi-exclamation-circle me-1"></i> Cette action est définitive.</p>
+                              </div>
+                              <div class="modal-footer bg-light p-3">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                                <form method="post" action="{{ path('app_ressource_delete', {'id': ressource.id}) }}" class="d-inline">
+                                  <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.id) }}">
+                                  <button type="submit" class="btn btn-danger rounded-pill px-4">Supprimer</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                       </div>
                     </td>
                   </tr>
@@ -294,5 +349,87 @@
     </div>
   </section>
 </div>
+
+<script>
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = false;
+
+    const btn = document.getElementById('start-record-btn');
+    const micText = document.getElementById('mic-text');
+    const status = document.getElementById('voice-status');
+    const textDetected = document.getElementById('text-detected');
+    const resultZone = document.getElementById('transcript-result');
+
+    btn.addEventListener('click', () => {
+        try {
+            recognition.start();
+            btn.classList.add('listening');
+            micText.innerText = "Écoute...";
+            status.classList.remove('d-none');
+        } catch (e) {
+            console.log("Reconnaissance déjà active");
+        }
+    });
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        resultZone.classList.remove('d-none');
+        textDetected.innerText = transcript;
+
+        const rows = document.querySelectorAll('.ressource-row');
+
+        // 1. ACTION : MODIFIER
+        if (transcript.includes("modifier") || transcript.includes("éditer")) {
+            rows.forEach(row => {
+                const name = row.querySelector('.ressource-name').innerText.toLowerCase();
+                if (transcript.includes(name)) {
+                    window.location.href = row.querySelector('a[title="Modifier"]').href;
+                }
+            });
+        }
+
+        // 2. ACTION : SUPPRIMER
+        else if (transcript.includes("supprimer") || transcript.includes("effacer")) {
+            rows.forEach(row => {
+                const name = row.querySelector('.ressource-name').innerText.toLowerCase();
+                if (transcript.includes(name)) {
+                    const deleteBtn = row.querySelector('button[data-bs-toggle="modal"]');
+                    const modalId = deleteBtn.getAttribute('data-bs-target');
+                    const modalElement = document.querySelector(modalId);
+                    const modalInstance = new bootstrap.Modal(modalElement);
+                    modalInstance.show();
+                    textDetected.innerText = "Ouverture de la confirmation pour : " + name;
+                }
+            });
+        }
+
+        // 3. ACTION : FILTRAGE
+        else if (transcript.includes("type") || transcript.includes("afficher")) {
+            const select = document.querySelector('select[name="type"]');
+            for (let opt of select.options) {
+                if (opt.value !== "" && transcript.includes(opt.value.toLowerCase())) {
+                    window.location.href = "{{ path('app_ressource_index') }}?type=" + opt.value;
+                    break;
+                }
+            }
+            if (transcript.includes("tous") || transcript.includes("tout")) {
+                window.location.href = "{{ path('app_ressource_index') }}";
+            }
+        }
+
+        // 4. ACTION : AJOUTER UNE RESSOURCE
+        else if (transcript.includes("ajouter") || transcript.includes("nouveau") || transcript.includes("nouvelle")) {
+            textDetected.innerText = "Ouverture du formulaire d'ajout...";
+            window.location.href = "{{ path('app_ressource_new') }}";
+        }
+    };
+
+    recognition.onend = () => {
+        btn.classList.remove('listening');
+        micText.innerText = "Assistant Vocal";
+        status.classList.add('d-none');
+    };
+</script>
 
 {% endblock %}

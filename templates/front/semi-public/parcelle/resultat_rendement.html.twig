@@ -1,0 +1,215 @@
+{% block title %}Résultat Prediction IA - AgriSmart{% endblock %}
+
+{% block body %}
+<div class="ia-result-wrapper">
+    <div class="ia-overlay"></div>
+
+    <div class="ia-card-modal">
+        <div class="ia-top-bar"></div>
+
+        <div class="ia-content">
+            <div class="ia-header">
+                <div class="ia-header-left">
+                    <div class="ia-icon-glow">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <div class="ia-title-group">
+                        <h5 class="ia-main-title">Analyse AgriSmart</h5>
+                        <span class="ia-engine-tag">PROPULSÉ PAR MISTRAL AI</span>
+                    </div>
+                </div>
+                <a href="{{ path('app_parcelle_index') }}" class="ia-close-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+            </div>
+
+            <div class="ia-context-pill">
+                <span class="pill-left">
+                    <i class="fa-solid fa-seedling"></i>
+                    {{ culture.typeCulture|capitalize }}
+                </span>
+                <span class="pill-right">
+                    <i class="fa-solid fa-location-dot"></i>
+                    {{ culture.parcelle.nom }}
+                </span>
+            </div>
+
+            <div class="ia-result-display">
+                <p class="ia-result-label">RENDEMENT ESTIMÉ</p>
+                <div class="ia-result-value">
+                    <span class="counter-val" id="rendement-val">{{ rendement }}</span>
+                    <span class="unit-val">Tons</span>
+                </div>
+                <div class="ia-confidence-badge">
+                    <div class="pulse-dot"></div>
+                    <span>CONFIANCE IA : <strong>87%</strong></span>
+                </div>
+            </div>
+
+            <div class="ia-stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">SURFACE</span>
+                    <span class="stat-value">{{ culture.parcelle.surface }} ha</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">INTRANTS</span>
+                    <span class="stat-value">{{ totalConsomme }} unités</span>
+                </div>
+            </div>
+
+            <div class="ia-expert-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>Basé sur vos données actuelles, ce rendement est optimal. Attention à l'irrigation prévue demain.</p>
+            </div>
+
+            <div class="ia-actions">
+                <a href="{{ path('app_culture_prediction_export_pdf', {'id': culture.id}) }}" class="btn-ia-secondary mb-2" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #f8fafc; color: #475569; text-decoration: none; padding: 14px; border-radius: 15px; font-weight: 700; font-size: 0.85rem; border: 1px solid #e2e8f0; transition: 0.3s;">
+                    <i class="fa-solid fa-file-export me-1"></i>
+                    <span>TÉLÉCHARGER LE RAPPORT PDF</span>
+                </a>
+                <a href="{{ path('app_parcelle_index') }}" class="ia-btn-primary">
+                    <span>RETOUR AU TABLEAU DE BORD</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="ia-timestamp">
+                GÉNÉRÉ LE {{ "now"|date("d/m/Y à H:i") }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+
+    :root {
+        --ag-primary: #1e5128;
+        --ag-success: #22c55e;
+        --ag-dark: #0f172a;
+        --ag-white: #ffffff;
+        --ag-gray: #64748b;
+    }
+
+    /* Reset et Base */
+    body { margin: 0; font-family: 'Outfit', sans-serif; background: #f1f5f9; }
+
+    .ia-result-wrapper {
+        height: 100vh; width: 100vw;
+        display: flex; align-items: center; justify-content: center;
+        position: relative; overflow: hidden;
+    }
+
+    .ia-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 81, 40, 0.9));
+        backdrop-filter: blur(10px);
+        z-index: 1;
+    }
+
+    /* Card Modale */
+    .ia-card-modal {
+        position: relative; z-index: 10;
+        width: 90%; max-width: 420px;
+        background: var(--ag-white);
+        border-radius: 35px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(40px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .ia-top-bar {
+        height: 6px;
+        background: linear-gradient(90deg, #22c55e, #1e5128, #f59e0b);
+    }
+
+    .ia-content { padding: 30px; }
+
+    /* Header */
+    .ia-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+    .ia-header-left { display: flex; align-items: center; gap: 15px; }
+    
+    .ia-icon-glow {
+        width: 48px; height: 48px;
+        background: #f0fdf4; color: var(--ag-primary);
+        border-radius: 14px; display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; border: 1px solid #dcfce7;
+    }
+
+    .ia-main-title { font-weight: 800; color: var(--ag-dark); margin: 0; font-size: 1.1rem; }
+    .ia-engine-tag { font-size: 0.65rem; font-weight: 800; color: var(--ag-success); letter-spacing: 0.5px; }
+
+    .ia-close-btn { color: var(--ag-gray); text-decoration: none; font-size: 1.2rem; transition: 0.2s; }
+    .ia-close-btn:hover { color: #ef4444; }
+
+    /* Pill Context */
+    .ia-context-pill {
+        display: flex; justify-content: space-between;
+        background: #f8fafc; border: 1px solid #e2e8f0;
+        padding: 10px 16px; border-radius: 18px; margin-bottom: 25px;
+    }
+    .pill-left { font-weight: 700; color: var(--ag-primary); font-size: 0.85rem; }
+    .pill-right { font-weight: 600; color: var(--ag-gray); font-size: 0.85rem; }
+
+    /* Display Résultat */
+    .ia-result-display {
+        text-align: center; background: radial-gradient(circle at top, #f0fdf4, #ffffff);
+        padding: 30px 20px; border-radius: 25px; border: 1px solid #dcfce7;
+        margin-bottom: 25px;
+    }
+    .ia-result-label { font-size: 0.7rem; font-weight: 800; color: #166534; letter-spacing: 1.5px; margin-bottom: 5px; }
+    .ia-result-value { margin-bottom: 10px; }
+    .counter-val { font-size: 3.8rem; font-weight: 800; color: var(--ag-dark); letter-spacing: -2px; }
+    .unit-val { font-size: 1.2rem; font-weight: 700; color: var(--ag-gray); margin-left: 5px; }
+
+    .ia-confidence-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--ag-white); padding: 6px 14px;
+        border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        font-size: 0.75rem; color: var(--ag-dark);
+    }
+    .pulse-dot { width: 8px; height: 8px; background: var(--ag-success); border-radius: 50%; animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    /* Stats Grid */
+    .ia-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+    .stat-box {
+        background: var(--ag-white); border: 1px solid #f1f5f9;
+        padding: 15px; border-radius: 20px; text-align: center;
+    }
+    .stat-label { display: block; font-size: 0.6rem; font-weight: 700; color: var(--ag-gray); margin-bottom: 4px; }
+    .stat-value { font-weight: 800; color: var(--ag-dark); font-size: 1rem; }
+
+    /* Note Expert */
+    .ia-expert-note {
+        display: flex; gap: 12px; background: #fffbeb; border-radius: 15px;
+        padding: 12px; margin-bottom: 25px; border-left: 4px solid #f59e0b;
+    }
+    .ia-expert-note i { color: #f59e0b; font-size: 1rem; margin-top: 2px; }
+    .ia-expert-note p { margin: 0; font-size: 0.8rem; color: #92400e; font-weight: 600; line-height: 1.4; }
+
+    /* Button */
+    .ia-btn-primary {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        background: linear-gradient(135deg, var(--ag-primary), #0f172a);
+        color: white; text-decoration: none; padding: 18px;
+        border-radius: 20px; font-weight: 700; font-size: 0.9rem;
+        transition: 0.3s; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+    }
+    .ia-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(15, 23, 42, 0.3); color: white; }
+
+    .ia-timestamp { text-align: center; margin-top: 20px; font-size: 0.65rem; color: var(--ag-gray); font-weight: 600; }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}

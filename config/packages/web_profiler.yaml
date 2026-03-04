@@ -1,12 +1,14 @@
 when@dev:
     web_profiler:
         toolbar: true
+        intercept_redirects: false
 
     framework:
         profiler:
-            collect_serializer_data: false
-            only_exceptions: true
-            only_main_requests: true
+            # On passe à false pour voir la barre TOUT LE TEMPS
+            only_exceptions: false
+            collect_serializer_data: true
+            only_main_requests: false
 
 when@test:
     framework:

@@ -1,0 +1,65 @@
+<div class="modal fade" id="modalIAGlobal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom border-success border-opacity-10" style="background-color: rgba(20, 70, 50, 0.05);">
+                <h5 class="modal-title" style="color: #144632;">
+                    <i class="bi bi-robot me-2"></i>Diagnostic Santé IA
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form action="{{ path('app_ia_diagnose_global') }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="avatar avatar-xl mb-3 mx-auto">
+                            <div class="avatar-img rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 75px; height: 75px; font-size: 2.2rem; margin: 0 auto; background-color: rgba(20, 70, 50, 0.1); color: #144632;">
+                                <i class="bi bi-shield-shaded"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-1" style="color: #144632; font-weight: 700;">Analyse de Pathologie Végétale</h6>
+                        <p class="small text-muted px-3">Notre algorithme identifie les maladies, carences et parasites à partir d'une simple photo.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small" style="color: #144632;">Image de la culture <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="file" name="image_plante" class="form-control shadow-none" 
+                                   style="border-color: rgba(20, 70, 50, 0.2);" accept="image/*" required>
+                            <span class="input-group-text text-white" style="background-color: #144632; border-color: #144632;">
+                                <i class="bi bi-upload"></i>
+                            </span>
+                        </div>
+                        <div class="form-text mt-2 small">
+                            <i class="bi bi-check2-circle me-1 text-success"></i>Résultats instantanés basés sur Agri-Data.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top bg-light bg-opacity-50">
+                    <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-sm px-4 shadow-sm" 
+                            style="background-color: #144632; border-color: #144632; color: white; border-radius: 8px;">
+                        <i class="bi bi-cpu-fill me-2"></i>Lancer l'analyse
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom hover pour le bouton vert foncé */
+    #modalIAGlobal .btn-sm:hover {
+        background-color: #0d2e21 !important;
+        border-color: #0d2e21 !important;
+        transition: all 0.3s ease;
+    }
+    #modalIAGlobal .modal-content {
+        border-radius: 1.2rem;
+    }
+    #modalIAGlobal .form-control:focus {
+        border-color: #144632;
+        box-shadow: 0 0 0 0.25rem rgba(20, 70, 50, 0.1);
+    }
+</style>

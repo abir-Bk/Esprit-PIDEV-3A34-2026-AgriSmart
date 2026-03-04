@@ -1,0 +1,142 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}AgriSmart - Gestion du Personnel{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+
+    <div class="flex-grow-1 p-4 am-content">
+        {# --- HEADER SECTION --- #}
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <a href="{{ path('app_admin_offres') }}" class="btn-back-circle me-3" title="Retour aux offres">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="h3 am-title mb-0">Mon Effectif</h1>
+                        <nav aria-label="breadcrumb">
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge-total shadow-sm">
+                    <i class="fa-solid fa-user-check me-2"></i><strong>{{ employes|length }}</strong> Travailleurs
+                </span>
+            </div>
+        </div>
+
+        {# --- MAIN TABLE CARD --- #}
+        <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 16px; background: #ffffff;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="bg-light-faded">
+                            <th class="ps-4 py-3 text-muted small fw-bold text-uppercase" style="width: 35%;">Profil Employé</th>
+                            <th class="py-3 text-muted small fw-bold text-uppercase" style="width: 30%;">Poste & Contrat</th>
+                            <th class="py-3 text-muted small fw-bold text-uppercase" style="width: 20%;">Date d'embauche</th>
+                            <th class="py-3 text-muted small fw-bold text-uppercase text-center" style="width: 15%;">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for demande in employes %}
+                            <tr class="am-table-row">
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="am-avatar-circle me-3">
+                                            {{ (demande.user.firstName|default(demande.user.prenom|default('U')))|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">
+                                                {% set nom_famille = demande.user.lastName|default(demande.user.lastname|default(demande.user.nom|default('Utilisateur'))) %}
+                                                {% set prenom = demande.user.firstName|default(demande.user.firstname|default(demande.user.prenom|default(''))) %}
+                                                {{ nom_famille|upper }} {{ prenom|capitalize }}
+                                            </div>
+                                            <div class="text-muted small">{{ demande.user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-semibold text-dark">{{ demande.offre.title }}</span>
+                                        <span class="badge bg-soft-success align-self-start mt-1">
+                                            <i class="fa-solid fa-file-contract me-1" style="font-size: 10px;"></i>{{ demande.offre.typeContrat|default('Contrat') }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="py-3 text-muted small">
+                                    <i class="fa-regular fa-calendar-check me-1"></i>
+                                    {{ demande.dateModification ? demande.dateModification|date('d F Y', 'Europe/Paris') : 'Récemment' }}
+                                </td>
+                                <td class="py-3 text-center">
+                                    <span class="pill-active">
+                                        <span class="dot-pulse"></span>En poste
+                                    </span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="opacity-50">
+                                        <i class="fa-solid fa-users-slash fa-3x mb-3 text-muted"></i>
+                                        <p>Aucun employé trouvé.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Design Global AgriSmart */
+    .am-content { background-color: #f9fbf9; min-height: 100vh; font-family: 'Segoe UI', Roboto, sans-serif; }
+    .am-title { color: #1a4331; font-weight: 750; }
+
+    /* Bouton Retour Circulaire */
+    .btn-back-circle {
+        width: 40px; height: 40px; border-radius: 50%; background: white;
+        display: flex; align-items: center; justify-content: center;
+        color: #1a4331; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.2s ease;
+    }
+    .btn-back-circle:hover { background: #1a4331; color: white; transform: translateX(-3px); }
+
+    /* Avatar Minimaliste */
+    .am-avatar-circle {
+        width: 42px; height: 42px; background: #e8f5e9; color: #18a340;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; font-weight: 700; border: 2px solid #fff;
+    }
+
+    /* Badge Total */
+    .badge-total {
+        background: white; padding: 10px 20px; border-radius: 12px;
+        color: #1a4331; border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Table & Rows */
+    .bg-light-faded { background-color: #f4f7f4; }
+    .am-table-row:hover { background-color: #f0fdf4; }
+    
+    .bg-soft-success { background: #e6f4ea; color: #1e7e34; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+
+    /* Pill Active avec Petit Point */
+    .pill-active {
+        background: #18a340; color: white; padding: 5px 15px;
+        border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+        display: inline-flex; align-items: center;
+    }
+    .dot-pulse {
+        width: 6px; height: 6px; background: white; border-radius: 50%;
+        margin-right: 8px; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+</style>
+{% endblock %}

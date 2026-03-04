@@ -4,13 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Parcelle;
 use App\Form\ParcelleType;
+use App\Entity\Culture;
 use App\Repository\ParcelleRepository;
 use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\PdfService;
 
 #[Route('/parcelle')]
 class ParcelleController extends AbstractController
@@ -22,11 +26,11 @@ class ParcelleController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
-
+/** @var \App\Entity\User $user */
+$user = $this->getUser();
+if (!$user) {
+    return $this->redirectToRoute('app_login');
+}
         // Recherche et tri
         $search = trim((string) $request->query->get('search', ''));
         $sort = (string) $request->query->get('sort', 'nbCultures');
@@ -69,9 +73,9 @@ class ParcelleController extends AbstractController
 
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
-                try {
-                    $parcelle->setUser($user);
-                    $entityManager->persist($parcelle);
+              try {
+    $parcelle->setUser($user);
+    $entityManager->persist($parcelle);
                     $entityManager->flush();
 
                     $this->addFlash('success', '✅ Parcelle créée avec succès !');
@@ -152,12 +156,161 @@ class ParcelleController extends AbstractController
             try {
                 $entityManager->remove($parcelle);
                 $entityManager->flush();
-                $this->addFlash('success', '✅ Parcelle supprimée.');
+                $this->addFlash('success', ' Parcelle supprimée.');
             } catch (\Exception $e) {
-                $this->addFlash('danger', '❌ Impossible de supprimer cette parcelle.');
+                $this->addFlash('danger', ' Impossible de supprimer cette parcelle.');
             }
         }
 
         return $this->redirectToRoute('app_parcelle_index');
+    }
+
+    #[Route('/{id}/conseiller-ia', name: 'app_parcelle_conseiller_ia', methods: ['POST'])]
+    public function conseillerIa(
+        Request $request,
+        Parcelle $parcelle,
+        HttpClientInterface $httpClient
+    ): JsonResponse {
+        if ($parcelle->getUser() !== $this->getUser()) {
+            return new JsonResponse(['success' => false, 'error' => 'Accès refusé.'], 403);
+        }
+
+        if (!$this->isCsrfTokenValid('conseiller_ia_' . $parcelle->getId(), $request->request->get('_token'))) {
+            return new JsonResponse(['success' => false, 'error' => 'Token invalide.'], 400);
+        }
+
+        $apiKey = $_ENV['GEMINI_API_KEY'] ?? null;
+        if (!$apiKey) {
+            return new JsonResponse(['success' => false, 'error' => 'Service IA non configuré.'], 503);
+        }
+
+        $nom = $parcelle->getNom();
+        $surface = $parcelle->getSurface();
+        $typeSol = $parcelle->getTypeSol();
+        $lat = $parcelle->getLatitude();
+        $lng = $parcelle->getLongitude();
+
+        $prompt = sprintf(
+            "Tu es un conseiller agricole expert. Une parcelle a les caractéristiques suivantes :\n" .
+            "- Nom : %s\n- Surface : %s hectare(s)\n- Type de sol : %s\n- Localisation : latitude %s, longitude %s\n\n" .
+            "Recommande 3 à 5 cultures adaptées à cette parcelle (variétés et pratiques si possible). " .
+            "Réponds en français, de façon claire et structurée (liste ou paragraphes courts). " .
+            "Ne mets pas de titre générique, va directement aux recommandations.",
+            $nom,
+            $surface,
+            $typeSol,
+            $lat,
+            $lng
+        );
+
+        try {
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey;
+            $response = $httpClient->request('POST', $url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'json' => [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                ],
+            ]);
+            $data = $response->toArray();
+
+            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                $text = $data['candidates'][0]['content']['parts'][0]['text'];
+                return new JsonResponse(['success' => true, 'recommendations' => $text]);
+            }
+
+            return new JsonResponse(['success' => false, 'error' => 'Réponse IA invalide.'], 502);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Erreur lors de la consultation du conseiller : ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    #[Route('/admin/toutes-les-parcelles', name: 'admin_parcelles_index', methods: ['GET'])]
+    public function adminIndex(ParcelleRepository $parcelleRepository): Response
+    {
+        // Sécurité : Uniquement accessible par l'Admin
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // On récupère tout avec les jointures pour la performance
+        $allParcelles = $parcelleRepository->createQueryBuilder('p')
+            ->leftJoin('p.cultures', 'c')
+            ->leftJoin('p.user', 'u')
+            ->addSelect('c', 'u')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('back/Allparcelle/all_parcelles.html.twig', [
+            'parcelles' => $allParcelles,
+        ]);
+    }
+
+    #[Route('/predict-rendement/{id}', name: 'app_culture_predict_ia', methods: ['POST'])]
+    public function predireRendement(Culture $culture, \App\Service\PredictionService $predictionService): Response
+    {
+        $totalConsomme = 0;
+        foreach ($culture->getConsommations() as $conso) {
+            $totalConsomme += $conso->getQuantite();
+        }
+
+        $surface = $culture->getParcelle()->getSurface();
+        $typeCulture = $culture->getTypeCulture();
+
+        // L'appel au service qui maintenant ne donnera que du 100% IA ou une erreur
+        $rendementEstime = $predictionService->predict($surface, $totalConsomme, $typeCulture);
+
+        return $this->render('front/semi-public/parcelle/resultat_rendement.html.twig', [
+            'rendement' => $rendementEstime,
+            'culture' => $culture,
+            'totalConsomme' => $totalConsomme
+        ]);
+    }
+
+    #[Route('/{id}/export-pdf', name: 'app_parcelle_export_pdf', methods: ['GET'])]
+    public function exportParcelle(Parcelle $parcelle, PdfService $pdfService): Response
+    {
+        if ($parcelle->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $pdfContent = $pdfService->generatePdfResponse('pdf/parcelle_fiche.html.twig', [
+            'parcelle' => $parcelle,
+            'user' => $this->getUser(),
+        ], 'fiche_parcelle_' . $parcelle->getId() . '.pdf');
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="fiche_parcelle_' . $parcelle->getId() . '.pdf"',
+        ]);
+    }
+
+    #[Route('/culture/{id}/export-prediction-pdf', name: 'app_culture_prediction_export_pdf', methods: ['GET'])]
+    public function exportPrediction(Culture $culture, PdfService $pdfService, \App\Service\PredictionService $predictionService): Response
+    {
+        if ($culture->getParcelle()->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $totalConsomme = 0;
+        foreach ($culture->getConsommations() as $conso) {
+            $totalConsomme += $conso->getQuantite();
+        }
+
+        $surfac = $culture->getParcelle()->getSurface();
+        $typeCulture = $culture->getTypeCulture();
+        $rendementEstime = $predictionService->predict($surfac, $totalConsomme, $typeCulture);
+
+        $pdfContent = $pdfService->generatePdfResponse('pdf/prediction_rapport.html.twig', [
+            'culture' => $culture,
+            'rendement' => $rendementEstime,
+            'totalConsomme' => $totalConsomme,
+            'user' => $this->getUser(),
+        ], 'rapport_prediction_' . $culture->getId() . '.pdf');
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="rapport_prediction_' . $culture->getId() . '.pdf"',
+        ]);
     }
 }

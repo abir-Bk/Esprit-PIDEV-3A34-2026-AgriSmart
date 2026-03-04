@@ -33,8 +33,7 @@ class userController extends AbstractController
         }
         return $this->render('front/semi-public/users/profile.html.twig');
 
-        // Default fallback
-        return $this->redirectToRoute('app_login');
+       
     }
 
     #[Route('/admin/users', name: 'admin_users')]

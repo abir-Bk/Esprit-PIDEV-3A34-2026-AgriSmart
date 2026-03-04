@@ -1,13 +1,19 @@
-{# Modal Parcelle – design aligné Marketplace AgriSmart (cohérence UI/UX) #}
+{# Modal Parcelle – design aligné Marketplace AgriSmart #}
 <div class="modal fade" id="modalAjouterParcelle" tabindex="-1" aria-labelledby="modalAjouterParcelleLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg parcelle-modal-content">
-            <div class="modal-header parcelle-modal-header">
-                <h5 class="modal-title fw-bold" id="modalAjouterParcelleLabel">
+            <div class="modal-header parcelle-modal-header d-flex align-items-center justify-content-between">
+                <h5 class="modal-title fw-bold mb-0" id="modalAjouterParcelleLabel">
                     <i class="fa-solid fa-map-location-dot me-2"></i>
                     <span class="modal-title-text">Ajouter une parcelle</span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                
+                <div class="d-flex align-items-center">
+                    <button type="button" id="form-voice-trigger" class="btn voice-header-btn me-2" title="Utiliser l'assistant vocal">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
             </div>
 
             {{ form_start(form, {'attr': {
@@ -18,6 +24,13 @@
             }}) }}
 
             <div class="modal-body p-4">
+                <div id="voice-assistant-ui" class="alert alert-info d-none mb-3 rounded-4 border-0 shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-grow spinner-grow-sm text-primary me-2" role="status"></div>
+                        <span id="voice-transcript" class="small fw-bold text-dark">L'assistant vous écoute...</span>
+                    </div>
+                </div>
+
                 <div class="row g-4">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -30,9 +43,7 @@
                                     'placeholder': 'Ex: Parcelle Nord'
                                 }
                             }) }}
-                            <div class="invalid-feedback d-block">
-                                {{ form_errors(form.nom) }}
-                            </div>
+                            <div class="invalid-feedback d-block">{{ form_errors(form.nom) }}</div>
                         </div>
 
                         <div class="mb-3">
@@ -46,9 +57,7 @@
                                     'step': '0.01'
                                 }
                             }) }}
-                            <div class="invalid-feedback d-block">
-                                {{ form_errors(form.surface) }}
-                            </div>
+                            <div class="invalid-feedback d-block">{{ form_errors(form.surface) }}</div>
                         </div>
 
                         <div class="mb-3">
@@ -60,9 +69,7 @@
                                     'class': 'form-select parcelle-modal-input ' ~ (form.typeSol.vars.errors|length > 0 ? 'is-invalid' : '')
                                 }
                             }) }}
-                            <div class="invalid-feedback d-block">
-                                {{ form_errors(form.typeSol) }}
-                            </div>
+                            <div class="invalid-feedback d-block">{{ form_errors(form.typeSol) }}</div>
                         </div>
                     </div>
 
@@ -73,32 +80,17 @@
                         <div class="row g-2 mb-2">
                             <div class="col-6">
                                 <label class="form-label parcelle-modal-label small mb-1" for="parcelle_latitude">Latitude</label>
-                                {{ form_widget(form.latitude, {
-                                    'attr': {
-                                        'class': 'form-control parcelle-modal-input ' ~ (form.latitude.vars.errors|length > 0 ? 'is-invalid' : ''),
-                                        'placeholder': 'Cliquez sur la carte',
-                                        'readonly': true,
-                                        'id': 'parcelle_latitude'
-                                    }
-                                }) }}
-                                <div class="invalid-feedback d-block">{{ form_errors(form.latitude) }}</div>
+                                {{ form_widget(form.latitude, { 'attr': { 'class': 'form-control parcelle-modal-input', 'readonly': true, 'id': 'parcelle_latitude' } }) }}
                             </div>
                             <div class="col-6">
                                 <label class="form-label parcelle-modal-label small mb-1" for="parcelle_longitude">Longitude</label>
-                                {{ form_widget(form.longitude, {
-                                    'attr': {
-                                        'class': 'form-control parcelle-modal-input ' ~ (form.longitude.vars.errors|length > 0 ? 'is-invalid' : ''),
-                                        'placeholder': 'Cliquez sur la carte',
-                                        'readonly': true,
-                                        'id': 'parcelle_longitude'
-                                    }
-                                }) }}
-                                <div class="invalid-feedback d-block">{{ form_errors(form.longitude) }}</div>
+                                {{ form_widget(form.longitude, { 'attr': { 'class': 'form-control parcelle-modal-input', 'readonly': true, 'id': 'parcelle_longitude' } }) }}
                             </div>
                         </div>
                         <div id="map" class="parcelle-modal-map"></div>
                         <p class="parcelle-modal-hint mt-2 mb-0">
-                            <i class="fa-solid fa-info-circle me-1"></i> Cliquez sur la carte pour définir l’emplacement de la parcelle.
+                            <i class="fa-solid fa-lightbulb text-success me-1"></i> 
+                            Cliquez sur le micro en haut pour dicter les infos.
                         </p>
                     </div>
                 </div>
@@ -119,61 +111,104 @@
 </div>
 
 <style>
-/* Parcelle modal – thème Marketplace AgriSmart (cohérence avec Ressources / Culture) */
-#modalAjouterParcelle .parcelle-modal-content {
-    border-radius: 20px;
-    border: 1px solid rgba(17,24,39,.06);
-}
-#modalAjouterParcelle .parcelle-modal-header {
-    background: linear-gradient(135deg, #1A4331 0%, #28a745 100%);
-    color: #fff;
-    border-radius: 20px 20px 0 0;
-    padding: 1rem 1.5rem;
-    border: 0;
-}
+/* Style AgriSmart */
+#modalAjouterParcelle .parcelle-modal-content { border-radius: 20px; border: 1px solid rgba(17,24,39,.06); }
+#modalAjouterParcelle .parcelle-modal-header { background: linear-gradient(135deg, #1A4331 0%, #28a745 100%); color: #fff; border-radius: 20px 20px 0 0; padding: 0.8rem 1.5rem; border: 0; }
 #modalAjouterParcelle .parcelle-modal-header .modal-title { color: #fff; }
-#modalAjouterParcelle .parcelle-modal-label {
-    font-weight: 600;
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    color: #6B7280;
+
+/* STYLE DU BOUTON VOCAL DANS LE HEADER */
+.voice-header-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
-#modalAjouterParcelle .parcelle-modal-input {
-    border-radius: 14px;
-    border: 1px solid #E5E7EB;
+.voice-header-btn:hover { background: white; color: #1A4331; transform: scale(1.1); }
+.voice-header-btn.listening { background: #ff4757; border-color: #ff4757; animation: pulse-red 1.5s infinite; }
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
 }
-#modalAjouterParcelle .parcelle-modal-input:focus {
-    border-color: rgba(26,67,49,.45);
-    box-shadow: 0 0 0 .25rem rgba(26,67,49,.12);
-}
-#modalAjouterParcelle .parcelle-modal-input.is-invalid {
-    border-color: #dc3545;
-}
-#modalAjouterParcelle .parcelle-modal-input.is-invalid:focus {
-    box-shadow: 0 0 0 .25rem rgba(220,53,69,.15);
-}
-#modalAjouterParcelle .parcelle-modal-hint {
-    font-size: 0.8125rem;
-    color: #6B7280;
-}
-#modalAjouterParcelle .parcelle-modal-map {
-    height: 250px;
-    width: 100%;
-    border-radius: 14px;
-    border: 1px solid #E5E7EB;
-    transition: border-color .2s;
-}
-#modalAjouterParcelle .parcelle-modal-map:hover {
-    border-color: rgba(26,67,49,.35);
-}
-#modalAjouterParcelle .parcelle-modal-btn-primary {
-    background: #1A4331 !important;
-    border: none;
-    color: #fff !important;
-}
-#modalAjouterParcelle .parcelle-modal-btn-primary:hover {
-    background: #163828 !important;
-    color: #fff !important;
-}
+
+#modalAjouterParcelle .parcelle-modal-label { font-weight: 600; font-size: 0.8125rem; text-transform: uppercase; color: #6B7280; }
+#modalAjouterParcelle .parcelle-modal-input { border-radius: 14px; border: 1px solid #E5E7EB; }
+#modalAjouterParcelle .parcelle-modal-map { height: 250px; width: 100%; border-radius: 14px; border: 1px solid #E5E7EB; }
+#modalAjouterParcelle .parcelle-modal-btn-primary { background: #1A4331 !important; border: none; color: #fff !important; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+
+    const btnTrigger = document.getElementById('form-voice-trigger');
+    const uiBox = document.getElementById('voice-assistant-ui');
+    const transcriptText = document.getElementById('voice-transcript');
+
+    const inputNom = document.getElementById('{{ form.nom.vars.id }}');
+    const inputSurface = document.getElementById('{{ form.surface.vars.id }}');
+    const selectSol = document.getElementById('{{ form.typeSol.vars.id }}');
+
+    function speak(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        window.speechSynthesis.speak(utterance);
+    }
+
+    btnTrigger.addEventListener('click', () => {
+        recognition.start();
+        btnTrigger.classList.add('listening');
+        uiBox.classList.remove('d-none');
+        transcriptText.innerText = "Je vous écoute...";
+    });
+
+    recognition.onresult = (event) => {
+        const result = event.results[0][0].transcript.toLowerCase();
+        btnTrigger.classList.remove('listening');
+        uiBox.classList.add('d-none');
+
+        if (result.includes("nom")) {
+            const val = result.split("nom")[1].trim();
+            if(inputNom) inputNom.value = val.charAt(0).toUpperCase() + val.slice(1);
+            speak("Nom saisi");
+        } 
+        else if (result.includes("surface")) {
+            const val = result.match(/\d+(\.\d+)?/);
+            if (val && inputSurface) {
+                inputSurface.value = val[0];
+                speak(val[0] + " hectares");
+            }
+        }
+        else if (result.includes("type") || result.includes("sol")) {
+            const text = result.replace("type", "").replace("sol", "").trim();
+            for (let option of selectSol.options) {
+                if (text.includes(option.text.toLowerCase())) {
+                    selectSol.value = option.value;
+                    speak("Sol " + option.text);
+                    break;
+                }
+            }
+        }
+        else if (result.includes("enregistrer") || result.includes("valider")) {
+            speak("Enregistrement en cours");
+            document.getElementById('form-parcelle').submit();
+        }
+    };
+
+    recognition.onerror = () => {
+        btnTrigger.classList.remove('listening');
+        uiBox.classList.add('d-none');
+    };
+});
+</script>

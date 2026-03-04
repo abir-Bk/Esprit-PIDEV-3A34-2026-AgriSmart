@@ -16,28 +16,27 @@ class RessourceRepository extends ServiceEntityRepository
         parent::__construct($registry, Ressource::class);
     }
 
-    //    /**
-    //     * @return Ressource[] Returns an array of Ressource objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findAllWithConsumptionQueryBuilder(?string $search = null)
+    {
+        $qb = $this->createQueryBuilder('r')
+            ->leftJoin('r.consommations', 'c')
+            ->leftJoin('r.user', 'u')
+            ->addSelect('c', 'u')
+            ->orderBy('r.nom', 'ASC');
 
-    //    public function findOneBySomeField($value): ?Ressource
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($search) {
+            $qb->andWhere('r.nom LIKE :search OR u.lastName LIKE :search OR u.firstName LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb;
+    }
+    public function sumStocksByName(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->select('r.nom as name, SUM(r.stockRestant) as total')
+            ->groupBy('r.nom')
+            ->getQuery()
+            ->getResult();
+    }
 }

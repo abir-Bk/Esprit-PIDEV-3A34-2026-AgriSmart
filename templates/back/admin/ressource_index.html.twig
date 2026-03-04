@@ -1,0 +1,123 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Monitoring des Ressources - Admin - AgriSmart{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+    <div class="flex-grow-1 ag-admin-content">
+        <div class="container-fluid px-4">
+
+            <section class="py-4 pb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 fw-bold mb-1" style="color: var(--ag-text);">Ressources & Consommations</h1>
+                        <p class="text-muted mb-0">Vue globale des stocks et de l'utilisation des intrants par les agriculteurs.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form action="{{ path('admin_ressources_index') }}" method="GET" class="d-flex gap-2">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" name="q" class="form-control border-start-0" placeholder="Rechercher par ressource ou utilisateur..." value="{{ search }}">
+                        </div>
+                        <button type="submit" class="btn btn-ag-primary px-4" style="background: var(--ag-primary); color: white;">Filtrer</button>
+                        {% if search %}
+                            <a href="{{ path('admin_ressources_index') }}" class="btn btn-outline-secondary">X</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <div class="ag-admin-card p-4">
+                <p class="ag-meta mb-3"><strong>{{ pagination.getTotalItemCount }}</strong> ressource(s) trouvée(s)</p>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ knp_pagination_sortable(pagination, 'Utilisateur', 'u.lastName') }}</th>
+                                <th>{{ knp_pagination_sortable(pagination, 'Ressource', 'r.nom') }}</th>
+                                <th>Type</th>
+                                <th>{{ knp_pagination_sortable(pagination, 'Stock Actuel', 'r.stockRestant') }}</th>
+                                <th>Consommation Totale</th>
+                                <th>Dernière utilisation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in pagination %}
+                                {% set totalConso = 0 %}
+                                {% set lastDate = null %}
+                                {% for c in r.consommations %}
+                                    {% set totalConso = totalConso + c.quantite %}
+                                    {% if lastDate == null or c.dateConsommation > lastDate %}
+                                        {% set lastDate = c.dateConsommation %}
+                                    {% endif %}
+                                {% endfor %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                <i class="fa-solid fa-user text-muted small"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold" style="color: var(--ag-text);">{{ r.user.firstName }} {{ r.user.lastName }}</div>
+                                                <div class="text-muted small">{{ r.user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="fw-medium text-dark">{{ r.nom }}</span></td>
+                                    <td><span class="badge bg-light text-dark border">{{ r.type }}</span></td>
+                                    <td>
+                                        <div class="fw-bold {{ r.stockRestant < 10 ? 'text-danger' : 'text-success' }}">
+                                            {{ r.stockRestant }} {{ r.unite }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium text-primary">
+                                            {{ totalConso }} {{ r.unite }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if lastDate %}
+                                            <span class="text-muted small"><i class="fa-regular fa-calendar me-1"></i>{{ lastDate|date('d/m/Y H:i') }}</span>
+                                        {% else %}
+                                            <span class="text-muted small fst-italic">Jamais utilisé</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <i class="fa-solid fa-box-open d-block mb-2 text-muted" style="font-size: 2rem;"></i>
+                                        <p class="text-muted">Aucune ressource trouvée pour cette recherche.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="navigation d-flex justify-content-center mt-4">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ag-admin-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .btn-ag-primary:hover {
+        background: #163828 !important;
+        box-shadow: 0 4px 12px rgba(26,67,49,0.2);
+    }
+</style>
+{% endblock %}

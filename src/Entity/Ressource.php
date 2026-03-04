@@ -39,8 +39,8 @@ class Ressource
     private ?User $user = null;
 
     /** @var Collection<int, Consommation> */
-    #[ORM\OneToMany(mappedBy: 'ressource', targetEntity: Consommation::class)]
-    private Collection $consommations;
+#[ORM\OneToMany(mappedBy: 'ressource', targetEntity: Consommation::class, cascade: ['remove'], orphanRemoval: true)]
+private Collection $consommations;
 
     public function __construct()
     {

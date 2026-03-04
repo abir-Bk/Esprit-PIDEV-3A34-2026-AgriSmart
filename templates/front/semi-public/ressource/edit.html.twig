@@ -37,6 +37,17 @@
   border-color: rgba(26,67,49,.45) !important;
   box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
 }
+
+/* AgriVoice Micro Style */
+#start-record-btn.listening {
+    background-color: #dc3545 !important;
+    animation: pulse-red 1.5s infinite;
+}
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
 </style>
 
 <div class="ag-marketplace">
@@ -45,11 +56,26 @@
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div>
           <h1 class="h2 fw-bold mb-1" style="color:#111827;">Modifier la ressource</h1>
-          <p class="text-muted mb-0">Mise à jour de <strong>{{ ressource.nom }}</strong></p>
+          <p class="text-muted mb-0">Mise à jour de <strong>{{ ressource.nom }}</strong> via l'assistant intelligent.</p>
+          
+          {# ZONE DE TRANSCRIPTION IA #}
+          <div id="transcript-result" class="mt-2 d-none">
+            <span class="badge bg-light text-success border border-success rounded-pill px-3">
+                <i class="bi bi-robot me-2"></i>AgriVoice : <span id="text-detected" class="text-dark fw-normal italic"></span>
+            </span>
+          </div>
         </div>
-        <a href="{{ path('app_ressource_index') }}" class="btn btn-outline-dark rounded-pill">
-          <i class="bi bi-arrow-left me-2"></i>Retour à l'inventaire
-        </a>
+        
+        <div class="d-flex gap-2">
+            {# BOUTON VOCAL #}
+            <button id="start-record-btn" class="btn btn-dark rounded-pill px-4">
+                <i class="bi bi-mic-fill me-2"></i><span id="mic-text">Assistant Vocal</span>
+            </button>
+            
+            <a href="{{ path('app_ressource_index') }}" class="btn btn-outline-dark rounded-pill">
+              <i class="bi bi-arrow-left me-2"></i>Retour
+            </a>
+        </div>
       </div>
     </div>
   </section>
@@ -68,53 +94,132 @@
               {% endfor %}
             {% endfor %}
 
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'resource-form'}}) }}
 
             <div class="mb-4">
               <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Nom de la ressource</label>
-              {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input'}}) }}
+              {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input', 'id': 'input-nom'}}) }}
               <div class="text-danger small mt-1">{{ form_errors(form.nom) }}</div>
             </div>
 
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Catégorie</label>
-                {{ form_widget(form.type, {'attr': {'class': 'form-select ag-input'}}) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select ag-input', 'id': 'input-type'}}) }}
                 <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Unité</label>
-                {{ form_widget(form.unite, {'attr': {'class': 'form-select ag-input'}}) }}
+                {{ form_widget(form.unite, {'attr': {'class': 'form-select ag-input', 'id': 'input-unite'}}) }}
                 <div class="text-danger small mt-1">{{ form_errors(form.unite) }}</div>
               </div>
             </div>
 
             <div class="mb-4">
               <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Quantité en stock</label>
-              {{ form_widget(form.stockRestant, {'attr': {'class': 'form-control ag-input'}}) }}
+              {{ form_widget(form.stockRestant, {'attr': {'class': 'form-control ag-input', 'id': 'input-stock'}}) }}
               <div class="text-danger small mt-1">{{ form_errors(form.stockRestant) }}</div>
             </div>
 
-            <button type="submit" class="btn ag-btn-primary text-white w-100 py-3 rounded-pill fw-bold">
-              <i class="bi bi-check2 me-2"></i>Mettre à jour le stock
+            <button type="submit" id="btn-submit" class="btn ag-btn-primary text-white w-100 py-3 rounded-pill fw-bold">
+              <i class="bi bi-check2-circle me-2"></i>Mettre à jour la ressource
             </button>
 
             {{ form_end(form) }}
           </div>
 
+          {# BOUTON SUPPRESSION (Optionnel mais cohérent avec Edit) #}
           <div class="mt-4 p-4 rounded-4 border text-center" style="background: rgba(220,53,69,.06); border-color: rgba(220,53,69,.2) !important;">
             <p class="small text-danger mb-2 fw-bold">Action irréversible</p>
             <form method="post" action="{{ path('app_ressource_delete', {'id': ressource.id}) }}" onsubmit="return confirm('Supprimer définitivement cette ressource ?');" class="d-inline">
-              <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.id) }}">
-              <button type="submit" class="btn btn-sm btn-link text-danger text-decoration-none fw-bold p-0">
-                <i class="bi bi-trash me-1"></i>Supprimer cette ressource
-              </button>
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.id) }}">
+                <button type="submit" class="btn btn-sm btn-link text-danger text-decoration-none fw-bold p-0">
+                    <i class="bi bi-trash me-1"></i>Supprimer cette ressource
+                </button>
             </form>
           </div>
+
         </div>
       </div>
     </div>
   </section>
 </div>
+
+<script>
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = false;
+    
+    const btn = document.getElementById('start-record-btn');
+    const micText = document.getElementById('mic-text');
+    const textDetected = document.getElementById('text-detected');
+    const resultZone = document.getElementById('transcript-result');
+
+    btn.addEventListener('click', () => {
+        recognition.start();
+        btn.classList.add('listening');
+        micText.innerText = "Écoute...";
+    });
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        resultZone.classList.remove('d-none');
+        textDetected.innerText = transcript;
+
+        // 1. NAVIGATION : RETOUR
+        if (transcript.includes("retour") || transcript.includes("quitter")) {
+            window.location.href = "{{ path('app_ressource_index') }}";
+        }
+
+        // 2. NOM
+        if (transcript.includes("ressource") || transcript.includes("nom")) {
+            let val = transcript.split(/ressource|nom/).pop().trim();
+            val = val.split("catégorie")[0].trim(); 
+            document.querySelector('[id$="_nom"]').value = val.charAt(0).toUpperCase() + val.slice(1);
+        }
+
+        // 3. CATÉGORIE
+        if (transcript.includes("catégorie") || transcript.includes("type")) {
+            let valSource = transcript.split(/catégorie|type/).pop().trim();
+            const select = document.querySelector('[id$="_type"]');
+            for (let option of select.options) {
+                if (valSource.includes(option.text.toLowerCase()) || option.text.toLowerCase().includes(valSource)) {
+                    select.value = option.value;
+                    select.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+        }
+
+        // 4. UNITÉ
+        if (transcript.includes("unité") || transcript.includes("unite")) {
+            let valSource = transcript.split("unité").pop().trim();
+            const select = document.querySelector('[id$="_unite"]');
+            for (let option of select.options) {
+                if (valSource.includes(option.text.toLowerCase()) || option.text.toLowerCase().includes(valSource)) {
+                    select.value = option.value;
+                    select.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+        }
+
+        // 5. QUANTITÉ
+        if (transcript.includes("stock") || transcript.includes("quantité")) {
+            const match = transcript.match(/\d+/);
+            if (match) document.querySelector('[id$="_stockRestant"]').value = match[0];
+        }
+
+        // 6. VALIDER / METTRE À JOUR
+        if (transcript.includes("valider") || transcript.includes("enregistrer") || transcript.includes("mettre à jour")) {
+            document.getElementById('resource-form').submit();
+        }
+    };
+
+    recognition.onend = () => {
+        btn.classList.remove('listening');
+        micText.innerText = "Assistant Vocal";
+    };
+</script>
 
 {% endblock %}

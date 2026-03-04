@@ -37,6 +37,17 @@
   border-color: rgba(26,67,49,.45) !important;
   box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
 }
+
+/* AgriVoice Micro Style */
+#start-record-btn.listening {
+    background-color: #dc3545 !important;
+    animation: pulse-red 1.5s infinite;
+}
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
 </style>
 
 <div class="ag-marketplace">
@@ -46,10 +57,25 @@
         <div>
           <h1 class="h2 fw-bold mb-1" style="color:#111827;">Nouvelle ressource</h1>
           <p class="text-muted mb-0">Remplissez les informations de votre stock agricole.</p>
+          
+          {# ZONE DE TRANSCRIPTION IA #}
+          <div id="transcript-result" class="mt-2 d-none">
+            <span class="badge bg-light text-success border border-success rounded-pill px-3">
+                <i class="bi bi-robot me-2"></i>AgriVoice : <span id="text-detected" class="text-dark fw-normal italic"></span>
+            </span>
+          </div>
         </div>
-        <a href="{{ path('app_ressource_index') }}" class="btn btn-outline-dark rounded-pill">
-          <i class="bi bi-arrow-left me-2"></i>Retour à l'inventaire
-        </a>
+        
+        <div class="d-flex gap-2">
+            {# BOUTON VOCAL #}
+            <button id="start-record-btn" class="btn btn-dark rounded-pill px-4">
+                <i class="bi bi-mic-fill me-2"></i><span id="mic-text">Assistant Vocal</span>
+            </button>
+            
+            <a href="{{ path('app_ressource_index') }}" class="btn btn-outline-dark rounded-pill">
+              <i class="bi bi-arrow-left me-2"></i>Retour
+            </a>
+        </div>
       </div>
     </div>
   </section>
@@ -68,34 +94,34 @@
               {% endfor %}
             {% endfor %}
 
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'resource-form'}}) }}
 
             <div class="mb-4">
               <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Nom de la ressource</label>
-              {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input', 'placeholder': 'Ex: Engrais Bio'}}) }}
+              {{ form_widget(form.nom, {'attr': {'class': 'form-control ag-input', 'placeholder': 'Ex: Engrais Bio', 'id': 'input-nom'}}) }}
               <div class="text-danger small mt-1">{{ form_errors(form.nom) }}</div>
             </div>
 
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Catégorie</label>
-                {{ form_widget(form.type, {'attr': {'class': 'form-select ag-input'}}) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select ag-input', 'id': 'input-type'}}) }}
                 <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Unité</label>
-                {{ form_widget(form.unite, {'attr': {'class': 'form-select ag-input'}}) }}
+                {{ form_widget(form.unite, {'attr': {'class': 'form-select ag-input', 'id': 'input-unite'}}) }}
                 <div class="text-danger small mt-1">{{ form_errors(form.unite) }}</div>
               </div>
             </div>
 
             <div class="mb-4">
               <label class="form-label fw-bold text-uppercase small" style="color:var(--ag-muted);">Quantité disponible</label>
-              {{ form_widget(form.stockRestant, {'attr': {'class': 'form-control ag-input', 'placeholder': '0.00'}}) }}
+              {{ form_widget(form.stockRestant, {'attr': {'class': 'form-control ag-input', 'placeholder': '0.00', 'id': 'input-stock'}}) }}
               <div class="text-danger small mt-1">{{ form_errors(form.stockRestant) }}</div>
             </div>
 
-            <button type="submit" class="btn ag-btn-primary text-white w-100 py-3 rounded-pill fw-bold">
+            <button type="submit" id="btn-submit" class="btn ag-btn-primary text-white w-100 py-3 rounded-pill fw-bold">
               <i class="bi bi-plus-circle me-2"></i>Enregistrer dans le stock
             </button>
 
@@ -106,5 +132,85 @@
     </div>
   </section>
 </div>
+
+<script>
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = false; // On écoute commande par commande
+    
+    const btn = document.getElementById('start-record-btn');
+    const micText = document.getElementById('mic-text');
+    const textDetected = document.getElementById('text-detected');
+    const resultZone = document.getElementById('transcript-result');
+
+    btn.addEventListener('click', () => {
+        recognition.start();
+        btn.classList.add('listening');
+        micText.innerText = "Écoute...";
+    });
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        resultZone.classList.remove('d-none');
+        textDetected.innerText = transcript;
+
+        // 1. NAVIGATION : RETOUR
+        if (transcript.includes("retour") || transcript.includes("annuler")) {
+            window.location.href = "{{ path('app_ressource_index') }}";
+        }
+
+        // 2. NOM (Ex: "Ressource Azote")
+        if (transcript.includes("ressource") || transcript.includes("nom")) {
+            let val = transcript.split(/ressource|nom/).pop().trim();
+            val = val.split("catégorie")[0].trim(); 
+            document.querySelector('[id$="_nom"]').value = val.charAt(0).toUpperCase() + val.slice(1);
+        }
+
+        // 3. CATÉGORIE (Correction spéciale Select)
+        if (transcript.includes("catégorie")) {
+            let valSource = transcript.split("catégorie").pop().trim();
+            const select = document.querySelector('[id$="_type"]');
+            
+            for (let option of select.options) {
+                // On compare si le mot dicté est contenu dans l'option
+                if (valSource.includes(option.text.toLowerCase()) || option.text.toLowerCase().includes(valSource)) {
+                    select.value = option.value;
+                    select.dispatchEvent(new Event('change')); // Force la mise à jour visuelle
+                    break;
+                }
+            }
+        }
+
+        // 4. UNITÉ (Correction spéciale Select)
+        if (transcript.includes("unité")) {
+            let valSource = transcript.split("unité").pop().trim();
+            const select = document.querySelector('[id$="_unite"]');
+            
+            for (let option of select.options) {
+                if (valSource.includes(option.text.toLowerCase()) || option.text.toLowerCase().includes(valSource)) {
+                    select.value = option.value;
+                    select.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+        }
+
+        // 5. QUANTITÉ
+        if (transcript.includes("stock") || transcript.includes("quantité")) {
+            const match = transcript.match(/\d+/);
+            if (match) document.querySelector('[id$="_stockRestant"]').value = match[0];
+        }
+
+        // 6. VALIDER
+        if (transcript.includes("valider") || transcript.includes("enregistrer")) {
+            document.getElementById('resource-form').submit();
+        }
+    };
+
+    recognition.onend = () => {
+        btn.classList.remove('listening');
+        micText.innerText = "Assistant Vocal";
+    };
+</script>
 
 {% endblock %}

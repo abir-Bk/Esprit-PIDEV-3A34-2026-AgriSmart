@@ -1,0 +1,15 @@
+doctrine_doctor:
+    # Cette ligne est OBLIGATOIRE et doit être un booléen (sans guillemets)
+    enabled: true
+    
+    profiler:
+        show_in_toolbar: true
+        show_debug_info: true
+
+    analyzers:
+        n_plus_one:
+            enabled: true
+            threshold: 3  # On le met à 3 pour être bien strict
+        slow_query:
+            enabled: true
+            threshold: 100

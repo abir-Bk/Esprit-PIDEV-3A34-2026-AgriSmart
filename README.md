@@ -38,7 +38,7 @@ AI Module (Python integrated with Symfony)
 
 Clone the repository
 
-git clone https://github.com/your-username/agrismart.git
+git clone https://github.com/Abir-BK/agrismart.git
 
 cd agrismart
 

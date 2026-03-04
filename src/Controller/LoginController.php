@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -22,6 +22,8 @@ class LoginController extends AbstractController
         return $this->render('front/public/login/index.html.twig', [
             'last_email' => $lastEmail,
             'error' => $error,
+             'recaptcha_site_key' => $_ENV['RECAPTCHA_SITE_KEY'],
+
         ]);
     }
 

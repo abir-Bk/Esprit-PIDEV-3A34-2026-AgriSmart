@@ -1,0 +1,210 @@
+{% extends 'front/task/layout.html.twig' %}
+
+{% block title %}Détail de la tâche - AgriSmart{% endblock %}
+
+{% block task_content %}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0 fw-bold" style="color: var(--ag-text);">Détails de la tâche</h3>
+            <a href="{{ path('employee_tasks_index') }}" class="btn btn-outline-secondary rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Retour à mes tâches
+            </a>
+        </div>
+
+        <div class="ag-card mb-4">
+            <div class="p-3 text-white" style="background-color: var(--ag-primary);">
+                <h5 class="mb-0 fw-bold">{{ task.titre }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <section class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-0">Description</h6>
+                                <div class="d-flex gap-2">
+                                    <div class="input-group input-group-sm" style="width: auto;">
+                                        <select id="select-ai-lang-show" class="form-select form-select-sm rounded-start-pill border-0 bg-light-info text-info fw-bold">
+                                            <option value="en">EN</option>
+                                            <option value="ar">AR</option>
+                                            <option value="fr">FR</option>
+                                            <option value="es">ES</option>
+                                        </select>
+                                        <button type="button" id="btn-ai-translate-show" class="btn btn-sm btn-outline-info rounded-end-pill px-3 shadow-sm border-0 bg-light-info">
+                                            <i class="bi bi-translate me-1 text-info"></i> <span class="small fw-bold">Traduire</span>
+                                        </button>
+                                    </div>
+                                    <button type="button" id="btn-ai-summarize-show" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm border-0 bg-light-info">
+                                        <i class="bi bi-stars me-1 text-info"></i> <span class="small fw-bold">Résumer l'IA</span>
+                                        <span id="ai-spinner-show" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="lead" id="task-description-show">{{ task.description ?: 'Aucune description fournie.' }}</p>
+                            
+                            <div id="ai-resume-container" class="mt-3 p-3 bg-light rounded-3 d-none border-start border-info border-4 shadow-sm">
+                                <h6 class="text-info small fw-bold mb-1"><i class="bi bi-robot me-1"></i> Résumé de l'IA</h6>
+                                <p id="ai-resume-text" class="small mb-0 text-muted italic"></p>
+                            </div>
+                            <div id="ai-error-show" class="text-danger small mt-1 d-none"></div>
+                        </section>
+
+                        <div class="row row-cols-1 row-cols-sm-2 g-3">
+                            <div class="col">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-1">Type de tâche</h6>
+                                <p>{{ task.type }}</p>
+                            </div>
+                            <div class="col">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-1">Priorité</h6>
+                                <span class="badge {% if task.priorite == 'high' %}bg-danger{% elseif task.priorite == 'medium' %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                                    {{ task.priorite|upper }}
+                                </span>
+                            </div>
+                            <div class="col">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-1">Date début</h6>
+                                <p>{{ task.dateDebut ? task.dateDebut|date('d/m/Y H:i') : '—' }}</p>
+                            </div>
+                            <div class="col">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-1">Date fin estimée</h6>
+                                <p>{{ task.dateFin ? task.dateFin|date('d/m/Y H:i') : '—' }}</p>
+                            </div>
+                        </div>
+
+                        {% if task.localisation %}
+                        <section class="mt-4">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-1">Localisation</h6>
+                            <p><i class="bi bi-geo-alt me-1"></i> {{ task.localisation }}</p>
+                        </section>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded-3 h-100">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-3">Statut de l'affectation</h6>
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="p-2 bg-white rounded-circle shadow-sm me-3">
+                                    <i class="bi bi-activity text-success fs-4"></i>
+                                </div>
+                                <h5 class="mb-0 text-success fw-bold">{{ assignment.statut|upper }}</h5>
+                            </div>
+
+                            <hr>
+
+                            <h6 class="text-muted text-uppercase small fw-bold mb-2">Action requise</h6>
+                            {% if task.statut == 'todo' %}
+                                <p class="small text-muted mb-3">La tâche n'a pas encore commencé. Vous devez la démarrer avant de pouvoir la terminer.</p>
+                                <form method="post" action="{{ path('employee_tasks_start', {id: assignment.idAssignment}) }}" class="d-inline">
+                                    <button class="btn btn-primary w-100 rounded-pill py-2">
+                                        <i class="bi bi-play-fill me-1"></i> Commencer la tâche
+                                    </button>
+                                </form>
+                            {% elseif task.statut == 'en_cours' %}
+                                <p class="small text-muted mb-3">La tâche est actuellement en cours. Une fois terminée, vous devez soumettre un suivi pour validation.</p>
+                                <a href="{{ path('suivi_tache_new', {id: task.idTask}) }}" class="btn btn-success w-100 rounded-pill py-2">
+                                    <i class="bi bi-check2-circle me-1"></i> Terminer la tâche
+                                </a>
+                            {% elseif task.statut == 'a_valider' %}
+                                <p class="small text-muted mb-0">
+                                    <i class="bi bi-clock-history me-1"></i> En attente de validation par l'agriculteur.
+                                </p>
+                            {% elseif task.statut == 'termine' %}
+                                <p class="small text-muted mb-0">
+                                    <i class="bi bi-check-all me-1"></i> Tâche clôturée avec succès.
+                                </p>
+                            {% else %}
+                                <p class="small text-muted mb-0">Aucune action immédiate requise.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+<script>
+(function() {
+    function initAiSummarizeShow() {
+        console.log('AI Summarize Show Init...');
+        const btnSummarize = document.getElementById('btn-ai-summarize-show');
+        const btnTranslate = document.getElementById('btn-ai-translate-show');
+        const langSelect = document.getElementById('select-ai-lang-show');
+        const spinner = document.getElementById('ai-spinner-show');
+        const descElement = document.getElementById('task-description-show');
+        const descriptionText = descElement ? descElement.innerText.trim() : '';
+        const resumeContainer = document.getElementById('ai-resume-container');
+        const resumeText = document.getElementById('ai-resume-text');
+        const errorDiv = document.getElementById('ai-error-show');
+
+        if (!btnSummarize) return;
+
+        // Logic for Summarize
+        btnSummarize.addEventListener('click', async function() {
+            if (descriptionText.length < 10) { alert('Description trop courte'); return; }
+            
+            toggleUI(true);
+            try {
+                const response = await fetch('{{ path('task_ai_summarize') }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: descriptionText })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    resumeText.textContent = data.summary;
+                    resumeContainer.classList.remove('d-none');
+                } else { showError(data.error); }
+            } catch (error) { showError('Erreur réseau'); }
+            finally { toggleUI(false); }
+        });
+
+        // Logic for Translate
+        if (btnTranslate) {
+            btnTranslate.addEventListener('click', async function() {
+                const targetLang = langSelect.value;
+                if (descriptionText.length < 2) { alert('Texte trop court'); return; }
+
+                toggleUI(true);
+                try {
+                    const response = await fetch('{{ path('task_ai_translate') }}', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ text: descriptionText, target: targetLanguageMapping(targetLang) })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        descElement.textContent = data.translation;
+                        descElement.classList.add('text-info');
+                        setTimeout(() => descElement.classList.remove('text-info'), 2000);
+                        if (data.warning) showError(data.warning);
+                    } else { showError(data.error); }
+                } catch (error) { showError('Erreur réseau'); }
+                finally { toggleUI(false); }
+            });
+        }
+
+        function toggleUI(loading) {
+            btnSummarize.disabled = loading;
+            if (btnTranslate) btnTranslate.disabled = loading;
+            spinner.classList.toggle('d-none', !loading);
+            if (resumeContainer) resumeContainer.classList.toggle('opacity-50', loading);
+        }
+
+        function showError(msg) {
+            errorDiv.textContent = msg || 'Erreur';
+            errorDiv.classList.remove('d-none');
+        }
+
+        function targetLanguageMapping(code) {
+            const map = { 'en': 'anglais', 'ar': 'arabe', 'fr': 'français', 'es': 'espagnol' };
+            return map[code] || code;
+        }
+    }
+
+    document.addEventListener('turbo:load', initAiSummarizeShow);
+    initAiSummarizeShow();
+})();
+</script>
+
+<style>
+    .bg-light-info { background-color: rgba(13, 202, 240, 0.1); }
+    .italic { font-style: italic; }
+</style>
+        </div>
+    </div>
+{% endblock %}

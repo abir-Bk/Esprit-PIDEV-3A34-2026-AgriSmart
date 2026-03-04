@@ -6,19 +6,14 @@
         {{ form_errors(form.task) }}
     </div>
     <div class="col-md-6">
-        {{ form_label(form.workerId, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
-        {{ form_widget(form.workerId, {'attr': {'class': 'form-control ag-input'}}) }}
-        {{ form_errors(form.workerId) }}
+        {{ form_label(form.worker, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
+        {{ form_widget(form.worker, {'attr': {'class': 'form-select ag-input'}}) }}
+        {{ form_errors(form.worker) }}
     </div>
     <div class="col-md-6">
         {{ form_label(form.dateAssignment, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
         {{ form_widget(form.dateAssignment, {'attr': {'class': 'form-control ag-input'}}) }}
         {{ form_errors(form.dateAssignment) }}
-    </div>
-    <div class="col-md-6">
-        {{ form_label(form.statut, null, {label_attr: {class: 'form-label fw-bold small', style: 'color: var(--ag-muted);'}}) }}
-        {{ form_widget(form.statut, {'attr': {'class': 'form-select ag-input'}}) }}
-        {{ form_errors(form.statut) }}
     </div>
 </div>
 <div class="mt-4 d-flex gap-2">

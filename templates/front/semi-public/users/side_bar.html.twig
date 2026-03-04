@@ -3,78 +3,221 @@
 
 <div class="offcanvas-lg offcanvas-end" tabindex="-1" id="offcanvasSidebar">
 
-<div class="offcanvas-header justify-content-end pb-2">
-<button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-</div>
+    <div class="offcanvas-header justify-content-end pb-2">
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
 
-<div class="offcanvas-body p-3 p-lg-0">
-<div class="card bg-light w-100">
+    <div class="offcanvas-body p-3 p-lg-0">
+        <div class="ag-profile-card w-100">
 
-<!-- edit icon -->
-<div class="position-absolute top-0 end-0 p-3">
-<a href="{{ path('app_profile_edit') }}" class="text-primary-hover">
-<i class="bi bi-pencil-square"></i>
-</a>
-</div>
+            <!-- Bouton modifier -->
+            <div class="position-absolute top-0 end-0 p-3">
+                <a href="{{ path('app_profile_edit') }}" class="ag-edit-btn" title="Modifier le profil">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+            </div>
 
-<div class="card-body p-3">
+            <div class="card-body p-3">
 
-<div class="text-center mb-3">
-<div class="avatar avatar-xl mb-2">
-    {% if app.user.image %}
-        <img class="avatar-img rounded-circle border border-2 border-white"
-             src="{{ asset('uploads/images/' ~ app.user.image) }}" 
-             alt="{{ app.user.firstName ~ ' ' ~ app.user.lastName }}">
-    {% else %}
-        <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-             style="width:64px; height:64px; font-size:1.5rem;">
-            {{ app.user.firstName|slice(0,1)|upper }}{{ app.user.lastName|slice(0,1)|upper }}
+                <!-- Avatar + nom -->
+                <div class="text-center mb-3">
+                    <div class="ag-avatar mb-2">
+                        {% if app.user.image %}
+                            <img class="ag-avatar__img"
+                                 src="{{ asset('uploads/users/images/' ~ app.user.image) }}"
+                                 alt="{{ app.user.firstName ~ ' ' ~ app.user.lastName }}">
+                        {% else %}
+                            <div class="ag-avatar__initials">
+                                {{ app.user.firstName|slice(0,1)|upper }}{{ app.user.lastName|slice(0,1)|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h6 class="ag-profile-name mb-0">{{ app.user.fullName ?? (app.user.firstName ~ ' ' ~ app.user.lastName) }}</h6>
+                    <a href="#" class="ag-profile-email">{{ app.user.email }}</a>
+
+                    <div class="ag-divider"></div>
+                </div>
+
+                <!-- Navigation -->
+                <ul class="ag-nav">
+
+                    <li>
+                        <a class="ag-nav__link {{ app.request.get('_route') == 'app_profile_show' ? 'ag-nav__link--active' }}"
+                           href="{{ path('app_profile_show') }}">
+                            <span class="ag-nav__icon"><i class="bi bi-person"></i></span>
+                            Mon profil
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="ag-nav__link {{ app.request.get('_route') == 'app_profile_edit' ? 'ag-nav__link--active' }}"
+                           href="{{ path('app_profile_edit') }}">
+                            <span class="ag-nav__icon"><i class="bi bi-pencil"></i></span>
+                            Modifier le profil
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="ag-nav__link {{ app.request.get('_route') == 'app_profile_delete_page' ? 'ag-nav__link--active' }}"
+                           href="{{ path('app_profile_delete_page') }}">
+                            <span class="ag-nav__icon"><i class="bi bi-trash"></i></span>
+                            Supprimer mon compte
+                        </a>
+                    </li>
+
+                    <li class="ag-nav__separator"></li>
+
+                    <li>
+                        <a class="ag-nav__link ag-nav__link--danger"
+                           href="{{ path('app_logout') }}">
+                            <span class="ag-nav__icon"><i class="fas fa-sign-out-alt"></i></span>
+                            Déconnexion
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
         </div>
-    {% endif %}
-</div>
-
-<h6 class="mb-0">{{ app.user.fullName ?? app.user.email }}</h6>
-<a href="#" class="text-reset small">{{ app.user.email }}</a>
-
-<hr>
-</div>
-
-<ul class="nav nav-pills-primary-soft flex-column">
-
-<li class="nav-item">
-<a class="nav-link {{ app.request.get('_route') == 'app_profile_show' ? 'active' }}"
-href="{{ path('app_profile_show') }}">
-<i class="bi bi-person fa-fw me-2"></i>My Profile
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link {{ app.request.get('_route') == 'app_profile_edit' ? 'active' }}"
-href="{{ path('app_profile_edit') }}">
-<i class="bi bi-pencil fa-fw me-2"></i>Edit Profile
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link {{ app.request.get('_route') == 'app_profile_delete_page' ? 'active' }}"
-href="{{ path('app_profile_delete_page') }}">
-<i class="bi bi-trash fa-fw me-2"></i>Delete Profile
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link text-danger bg-danger-soft-hover"
-href="{{ path('app_logout') }}">
-<i class="fas fa-sign-out-alt fa-fw me-2"></i>Sign Out
-</a>
-</li>
-
-</ul>
-
-</div>
-</div>
-</div>
+    </div>
 </div>
 
 </div>
 <!-- Sidebar END -->
+
+<style>
+/* ── Card ── */
+.ag-profile-card {
+    position: relative;
+    background: linear-gradient(160deg, #f0f7f2 0%, #ffffff 100%);
+    border: 1px solid #d4e6da;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* ── Bouton édition ── */
+.ag-edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(230, 191, 74, 0.15);
+    color: #E6BF4A;
+    font-size: 0.95rem;
+    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+}
+.ag-edit-btn:hover {
+    background: #E6BF4A;
+    color: #1F3D2B;
+}
+
+/* ── Avatar ── */
+.ag-avatar {
+    display: inline-block;
+}
+.ag-avatar__img {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(31, 61, 43, 0.18);
+}
+.ag-avatar__initials {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1F3D2B, #2d9c5a);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(31, 61, 43, 0.18);
+}
+
+/* ── Nom & email ── */
+.ag-profile-name {
+    color: #1F3D2B;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+}
+.ag-profile-email {
+    font-size: 0.78rem;
+    color: #6c8c78;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.ag-profile-email:hover { color: #1F3D2B; }
+
+/* ── Divider ── */
+.ag-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d4e6da, transparent);
+    margin: 0.9rem 0 0;
+}
+
+/* ── Nav ── */
+.ag-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ag-nav__link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    color: #3d5c48;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.18s, color 0.18s;
+}
+.ag-nav__link:hover {
+    background: rgba(31, 61, 43, 0.07);
+    color: #1F3D2B;
+}
+.ag-nav__link--active {
+    background: linear-gradient(135deg, #1F3D2B 0%, #2d5a3d 100%);
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(31, 61, 43, 0.22);
+}
+.ag-nav__link--active .ag-nav__icon {
+    color: #E6BF4A;
+}
+
+.ag-nav__link--danger {
+    color: #c0392b;
+}
+.ag-nav__link--danger:hover {
+    background: rgba(220, 53, 69, 0.08);
+    color: #c0392b;
+}
+
+.ag-nav__icon {
+    width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.ag-nav__separator {
+    height: 1px;
+    background: #d4e6da;
+    margin: 0.4rem 0;
+}
+</style>

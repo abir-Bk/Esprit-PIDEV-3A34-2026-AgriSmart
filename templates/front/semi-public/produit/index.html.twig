@@ -66,72 +66,223 @@
   font-size: .92rem;
   transition: .15s;
 }
-.ag-marketplace a.ag-pill:hover{
+ .ag-marketplace a.ag-pill:hover{
   border-color: rgba(26,67,49,.35);
   box-shadow: 0 .4rem 1rem rgba(0,0,0,.06);
   transform: translateY(-1px);
-}
-.ag-marketplace a.ag-pill.active,
-.ag-marketplace a.ag-pill.active:visited{
+ }
+ .ag-marketplace a.ag-pill.active,
+ .ag-marketplace a.ag-pill.active:visited{
   border-color: rgba(26,67,49,.35);
   background: rgba(26,67,49,.08);
   color: var(--ag-primary) !important;
-}
+ }
 
-/* Content background */
-.ag-marketplace .ag-content{
+ .ag-marketplace .ag-content{
   background: var(--ag-bg);
   padding: 2.0rem 0 3.0rem;
-}
+ }
 
-/* Filter card */
-.ag-marketplace .ag-filter-card{
+ .ag-marketplace .ag-filter-card{
   border: 1px solid rgba(17,24,39,.06) !important;
   border-radius: 20px !important;
-}
-.ag-marketplace .ag-input{
+ }
+
+ .ag-marketplace .ag-input{
   border-radius: 14px !important;
   border: 1px solid var(--ag-border) !important;
-}
-.ag-marketplace .ag-input:focus{
+ }
+
+ .ag-marketplace .ag-input:focus{
   border-color: rgba(26,67,49,.45) !important;
   box-shadow: 0 0 0 .25rem rgba(26,67,49,.12) !important;
-}
+ }
 
-/* Product cards */
-.ag-marketplace .ag-card{
+ .ag-marketplace .ag-search-input{
+  min-height: 52px;
+  font-size: 1.02rem;
+  padding: .8rem .95rem;
+ }
+
+ .ag-marketplace .ag-search-group{
+  border: 1px solid var(--ag-border);
+  border-radius: 26px;
+  overflow: hidden;
+  background: #fff;
+ }
+
+ .ag-marketplace .ag-search-group:focus-within{
+  border-color: rgba(26,67,49,.45);
+  box-shadow: 0 0 0 .25rem rgba(26,67,49,.12);
+ }
+
+ .ag-marketplace .ag-search-group .ag-search-input{
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent;
+ }
+
+ .ag-marketplace .ag-search-group .ag-search-input:focus{
+  box-shadow: none !important;
+  border-color: transparent !important;
+ }
+
+ .ag-marketplace .ag-search-input::placeholder{
+  font-size: 1rem;
+ }
+
+ .ag-marketplace .ag-search-group .btn{
+  min-height: 52px;
+  padding: .75rem .9rem;
+  border: 0 !important;
+  border-left: 1px solid var(--ag-border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+ }
+
+ .ag-marketplace .ag-card{
   border: 1px solid rgba(17,24,39,.06);
   border-radius: 20px;
   overflow: hidden;
   background: #fff;
   transition: .18s;
   height: 100%;
-}
-.ag-marketplace .ag-card:hover{
+  display: flex;
+  flex-direction: column;
+ }
+
+ .ag-marketplace .ag-card:hover{
   transform: translateY(-2px);
   box-shadow: 0 .9rem 1.6rem rgba(0,0,0,.08);
-}
-.ag-marketplace .ag-badges{
-  position:absolute; top: 12px; left: 12px;
-  display:flex; flex-wrap:wrap; gap:.35rem;
-}
-.ag-marketplace .ag-badge{
+ }
+
+ .ag-marketplace .ag-badges{
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+ }
+
+ .ag-marketplace .ag-badge{
   border-radius: 999px;
   padding: .35rem .55rem;
   font-weight: 800;
   font-size: .72rem;
   letter-spacing: .06em;
   backdrop-filter: blur(6px);
-}
-.ag-marketplace .ag-badge.type-vente{ background: rgba(26,67,49,.92); color:#fff; }
-.ag-marketplace .ag-badge.type-location{ background: rgba(30,136,229,.92); color:#fff; }
-.ag-marketplace .ag-badge.promo{ background: rgba(244,180,0,.95); color:#111827; }
+ }
 
-.ag-marketplace .ag-meta{
+ .ag-marketplace .ag-badge.type-vente{
+  background: rgba(26,67,49,.92);
+  color: #fff;
+ }
+
+ .ag-marketplace .ag-badge.type-location{
+  background: rgba(244,180,0,.95);
+  color: #111827;
+ }
+
+ .ag-marketplace .ag-badge.promo{
+  background: rgba(244,180,0,.95);
+  color: #111827;
+ }
+
+ .ag-marketplace .ag-meta{
   color: var(--ag-muted);
   font-size: .86rem;
-}
+ }
 
+ .ag-marketplace .ag-card-body{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+ }
+
+ .ag-marketplace .ag-head{
+  min-height: 86px;
+ }
+
+ .ag-marketplace .ag-name{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 48px;
+ }
+
+ .ag-marketplace .ag-desc{
+  min-height: 44px;
+ }
+
+ .ag-marketplace .ag-price-wrap{
+  margin-top: auto;
+ }
+
+ .ag-marketplace .ag-actions{
+  margin-top: .8rem;
+ }
+
+ .ag-marketplace .ag-wishlist-btn{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,24,39,.14);
+  background: rgba(255,255,255,.94);
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+ }
+
+ .ag-marketplace .ag-wishlist-btn:hover{
+  border-color: rgba(244,180,0,.6);
+  color: #b45309;
+  background: #fffdf6;
+ }
+
+ .ag-marketplace .ag-wishlist-btn.is-active{
+  color: #b91c1c;
+  border-color: rgba(185,28,28,.3);
+  background: #fff5f5;
+ }
+
+ .ag-marketplace .ag-pagination .pagination{
+  margin-bottom: 0;
+  gap: .25rem;
+ }
+
+ .ag-marketplace .ag-pagination .page-item .page-link{
+  border-radius: 12px;
+  border: 1px solid rgba(17,24,39,.14);
+  color: var(--ag-primary);
+  background: #fff;
+  font-weight: 700;
+  min-width: 42px;
+  text-align: center;
+ }
+
+ .ag-marketplace .ag-pagination .page-item .page-link:hover{
+  background: rgba(244,180,0,.16);
+  border-color: rgba(244,180,0,.55);
+  color: #111827;
+ }
+
+ .ag-marketplace .ag-pagination .page-item.active .page-link{
+  background: var(--ag-primary);
+  border-color: var(--ag-primary);
+  color: #fff;
+ }
+
+ .ag-marketplace .ag-pagination .page-item.disabled .page-link{
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: rgba(17,24,39,.10);
+ }
 </style>
 
 <div class="ag-marketplace">
@@ -150,6 +301,12 @@
             <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-outline-dark rounded-pill">
               <i class="bi bi-person-circle me-2"></i>Espace vendeur
             </a>
+            <a href="{{ path('app_marketplace_messagerie') }}" class="btn btn-outline-warning rounded-pill">
+              <i class="bi bi-chat-dots me-2"></i>Messagerie
+              {% if messagerieUnreadCount|default(0) > 0 %}
+                <span class="badge text-bg-danger ms-2">{{ messagerieUnreadCount }}</span>
+              {% endif %}
+            </a>
             <a href="{{ path('app_front_produit_new') }}" class="btn ag-btn-primary text-white rounded-pill">
               <i class="bi bi-plus-circle me-2"></i>Publier une annonce
             </a>
@@ -158,7 +315,6 @@
             </a>
           </div>
 
-          {# CATEGORIES CHIPS #}
           {% set chipFilters = (filters|default({}))|merge({ page: 1 }) %}
           <div class="mt-4 d-flex flex-wrap gap-2">
             <a class="ag-pill {{ not (filters.categorie|default('')) ? 'active' : '' }}"
@@ -173,7 +329,6 @@
             {% endfor %}
           </div>
         </div>
-
       </div>
     </div>
   </section>
@@ -190,8 +345,11 @@
 
               <div>
                 <div class="fw-bold text-uppercase small mb-2" style="color:var(--ag-muted);">Recherche</div>
-                <div class="input-group">
-                  <input type="text" name="q" class="form-control ag-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}">
+                <div class="input-group ag-search-group">
+                  <input type="text" name="q" class="form-control ag-input ag-search-input" placeholder="Mot-clé..." value="{{ filters.q|default('') }}" data-stt-target data-stt-auto-submit="1">
+                  <button class="btn btn-outline-warning" type="button" title="Recherche vocale" data-stt-button>
+                    <i class="bi bi-mic"></i>
+                  </button>
                   <button class="btn btn-outline-secondary" type="submit" title="Rechercher">
                     <i class="bi bi-search"></i>
                   </button>
@@ -277,15 +435,36 @@
                         <span class="ag-badge promo">PROMO</span>
                       {% endif %}
                     </div>
+
+                    {% if app.user %}
+                      {% set isWishlisted = produit.id in (wishlistProductIds|default([])) %}
+                      <form
+                        method="post"
+                        action="{{ path('app_wishlist_toggle', {id: produit.id}) }}"
+                        class="position-absolute"
+                        style="top:0;right:0;"
+                        data-wishlist-form
+                        data-toggle-url="{{ path('app_wishlist_toggle_json', {id: produit.id}) }}"
+                      >
+                        <input type="hidden" name="_token" value="{{ csrf_token('wishlist_toggle_' ~ produit.id) }}">
+                        <button type="submit" class="ag-wishlist-btn {{ isWishlisted ? 'is-active' : '' }}" title="{{ isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist' }}">
+                          <i class="bi {{ isWishlisted ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                        </button>
+                      </form>
+                    {% else %}
+                      <a href="{{ path('app_login') }}" class="ag-wishlist-btn" style="position:absolute;top:12px;right:12px;" title="Connectez-vous pour sauvegarder ce produit">
+                        <i class="bi bi-heart"></i>
+                      </a>
+                    {% endif %}
                   </div>
 
-                  <div class="p-3">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div class="p-3 ag-card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-2 ag-head">
                       <div>
                         <div class="text-uppercase fw-bold small" style="color:var(--ag-muted);">
                           {{ produit.categorie }}
                         </div>
-                        <div class="fw-bold" style="color:var(--ag-text);">
+                        <div class="fw-bold ag-name" style="color:var(--ag-text);">
                           {{ produit.nom }}
                         </div>
                       </div>
@@ -299,12 +478,16 @@
                       {% endif %}
                     </div>
 
-                    <p class="small mb-3 mt-2" style="color:var(--ag-muted); min-height: 40px;">
+                    <p class="small mb-3 mt-2 ag-desc" style="color:var(--ag-muted);">
                       {{ produit.description|default('')|slice(0, 80) }}{% if produit.description and produit.description|length > 80 %}…{% endif %}
                     </p>
 
-                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top ag-price-wrap">
                       <div>
+                        {% set effectivePrice = (produit.isPromotion and produit.promotionPrice is not null) ? produit.promotionPrice : produit.prix %}
+                        {% set priceEur = fx_convert(effectivePrice, 'EUR') %}
+                        {% set priceUsd = fx_convert(effectivePrice, 'USD') %}
+
                         {% if produit.isPromotion and produit.promotionPrice is not null %}
                           <div class="fw-bold text-danger">
                             {{ produit.promotionPrice }} TND
@@ -316,6 +499,19 @@
                           </div>
                         {% endif %}
 
+                        {% if priceEur is not null or priceUsd is not null %}
+                          <div class="ag-meta mt-1">
+                            ≈
+                            {% if priceEur is not null %}
+                              {{ priceEur|number_format(2, '.', ' ') }} EUR
+                            {% endif %}
+                            {% if priceEur is not null and priceUsd is not null %} • {% endif %}
+                            {% if priceUsd is not null %}
+                              {{ priceUsd|number_format(2, '.', ' ') }} USD
+                            {% endif %}
+                          </div>
+                        {% endif %}
+
                         <div class="ag-meta mt-1">
                           <i class="bi bi-geo-alt me-1"></i>
                           {{ produit.locationAddress ?: '—' }}
@@ -324,7 +520,7 @@
                     </div>
 
                     {# ACTIONS: DETAILS + ADD TO CART (masqué si c'est sa propre offre) #}
-                    <div class="d-flex gap-2 mt-3">
+                    <div class="d-flex gap-2 ag-actions">
                       <a href="{{ path('app_produit_show', {id: produit.id}) }}"
                          class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1">
                         <i class="bi bi-eye me-1"></i> Détails
@@ -334,6 +530,11 @@
                         <span class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1 disabled" title="Vous ne pouvez pas commander votre propre offre">
                           <i class="bi bi-person-badge me-1"></i> Votre offre
                         </span>
+                      {% elseif produit.type == 'location' %}
+                        <a href="{{ path('app_produit_show', {id: produit.id}) }}"
+                           class="btn btn-sm btn-success rounded-pill flex-grow-1">
+                          <i class="bi bi-calendar-check me-1"></i> Réserver
+                        </a>
                       {% else %}
                         <form method="post"
                               action="{{ path('app_panier_add', {id: produit.id}) }}"
@@ -369,10 +570,17 @@
           </div>
 
           {# PAGINATION (KNP) #}
-          {% if produits is defined and produits.getTotalItemCount() > produits.getItemNumberPerPage() %}
-            <nav class="d-flex justify-content-center mt-4" aria-label="Pagination des produits">
-              {{ knp_pagination_render(produits, null, { query: app.request.query.all }) }}
-            </nav>
+          {% if produits is defined and produits.getTotalItemCount() > 0 %}
+            <div class="d-flex flex-column align-items-center mt-4 gap-2">
+              <div class="small text-muted">
+                Page {{ produits.getCurrentPageNumber() }} / {{ produits.getPageCount() }}
+              </div>
+              {% if produits.getPageCount() > 1 %}
+                <nav class="ag-pagination" aria-label="Pagination des produits">
+                  {{ knp_pagination_render(produits, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+                </nav>
+              {% endif %}
+            </div>
           {% endif %}
 
         </div>
@@ -380,5 +588,567 @@
     </div>
   </section>
 </div>
+
+{# =====================================================================
+   CHATBOT BUBBLE — Assistant de vente AgriSmart (OpenAI)
+   ===================================================================== #}
+
+{# ---- Styles ---- #}
+<style>
+  /* Bubble button */
+  #ag-chat-bubble {
+    position: fixed;
+    bottom: 1.75rem;
+    right: 1.75rem;
+    z-index: 1050;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: #1A4331;
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+  }
+  #ag-chat-bubble:hover { transform: scale(1.08); box-shadow: 0 8px 24px rgba(0,0,0,.28); }
+
+  /* Notification dot when closed */
+  #ag-chat-bubble .ag-bubble-dot {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 10px; height: 10px;
+    background: #F4B400;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: none;
+  }
+
+  /* Chat window */
+  #ag-chat-window {
+    position: fixed;
+    bottom: 6rem;
+    right: 1.75rem;
+    z-index: 1049;
+    width: min(370px, calc(100vw - 2rem));
+    max-height: min(520px, calc(100vh - 8rem));
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* hidden by default */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(12px) scale(.97);
+    transition: opacity .22s ease, transform .22s ease, visibility 0s .22s;
+  }
+  #ag-chat-window.ag-open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity .22s ease, transform .22s ease;
+  }
+
+  /* Header */
+  #ag-chat-window .ag-cw-header {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    background: #1A4331;
+    color: #fff;
+    padding: .85rem 1rem;
+    flex-shrink: 0;
+  }
+  .ag-cw-header .ag-cw-avatar {
+    width: 2.2rem; height: 2.2rem;
+    border-radius: 50%;
+    background: #2E7D32;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .ag-cw-header .ag-cw-title { font-weight: 700; font-size: .95rem; line-height: 1.2; }
+  .ag-cw-header .ag-cw-sub  { font-size: .75rem; color: rgba(255,255,255,.72); }
+  .ag-cw-header .ag-cw-close {
+    margin-left: auto;
+    background: none; border: none;
+    color: rgba(255,255,255,.85);
+    font-size: 1.1rem; cursor: pointer;
+    padding: .2rem .4rem; border-radius: .3rem;
+  }
+  .ag-cw-header .ag-cw-close:hover { background: rgba(255,255,255,.15); }
+
+  /* Messages */
+  #ag-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: .85rem .9rem;
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    background: #F6F8F7;
+  }
+  .ag-msg {
+    max-width: 85%;
+    padding: .55rem .8rem;
+    border-radius: .75rem;
+    font-size: .875rem;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .ag-msg.user {
+    align-self: flex-end;
+    background: #1A4331;
+    color: #fff;
+    border-bottom-right-radius: .2rem;
+  }
+  .ag-msg.bot {
+    align-self: flex-start;
+    background: #fff;
+    color: #111827;
+    border: 1px solid #E5E7EB;
+    border-bottom-left-radius: .2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  }
+  .ag-msg.typing { color: #6B7280; font-style: italic; }
+  .ag-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .ag-typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: .22rem;
+  }
+  .ag-typing-dots span {
+    width: .38rem;
+    height: .38rem;
+    border-radius: 999px;
+    background: #6B7280;
+    opacity: .35;
+    animation: agTypingPulse 1s infinite ease-in-out;
+  }
+  .ag-typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .ag-typing-dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes agTypingPulse {
+    0%, 80%, 100% { transform: translateY(0); opacity: .35; }
+    40% { transform: translateY(-2px); opacity: 1; }
+  }
+
+  /* Input area */
+  #ag-chat-form {
+    display: flex;
+    gap: .5rem;
+    padding: .7rem .85rem;
+    border-top: 1px solid #E5E7EB;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  #ag-chat-input {
+    flex: 1;
+    border: 1px solid #D1D5DB;
+    border-radius: .6rem;
+    padding: .55rem .75rem;
+    font-size: .875rem;
+    outline: none;
+    resize: none;
+    max-height: 80px;
+    line-height: 1.4;
+  }
+  #ag-chat-input:focus { border-color: #1A4331; box-shadow: 0 0 0 2px rgba(26,67,49,.12); }
+  #ag-chat-send {
+    background: #1A4331;
+    color: #fff;
+    border: none;
+    border-radius: .6rem;
+    width: 2.4rem; height: 2.4rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    align-self: flex-end;
+    transition: background .15s;
+  }
+  #ag-chat-send:hover { background: #163828; }
+  #ag-chat-send:disabled { background: #9CA3AF; cursor: not-allowed; }
+</style>
+
+{# ---- Bubble button ---- #}
+<button id="ag-chat-bubble" aria-label="Ouvrir l'assistant de vente" title="Assistant AgriSmart">
+  <i class="bi bi-chat-dots-fill" id="ag-bubble-icon"></i>
+  <span class="ag-bubble-dot" id="ag-bubble-dot"></span>
+</button>
+
+{# ---- Chat window ---- #}
+<div id="ag-chat-window" role="dialog" aria-label="Assistant de vente AgriSmart">
+  {# Header #}
+  <div class="ag-cw-header">
+    <div class="ag-cw-avatar"><i class="bi bi-robot"></i></div>
+    <div>
+      <div class="ag-cw-title">Assistant AgriSmart</div>
+      <div class="ag-cw-sub">Conseiller d'achat agricole</div>
+    </div>
+    <button class="ag-cw-close" id="ag-chat-close" aria-label="Fermer">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  {# Messages #}
+  <div id="ag-chat-messages">
+    <div class="ag-msg bot">
+      Bonjour ! 👋 Je suis votre assistant de vente AgriSmart.<br>
+      Que recherchez-vous aujourd'hui ? Je peux vous aider à trouver les meilleurs produits agricoles selon vos besoins.
+    </div>
+  </div>
+
+  {# Input #}
+  <form id="ag-chat-form" autocomplete="off">
+    <textarea id="ag-chat-input" rows="1" placeholder="Posez votre question…" maxlength="500"></textarea>
+    <button type="submit" id="ag-chat-send" aria-label="Envoyer">
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </form>
+</div>
+
+{# ---- Script ---- #}
+<script>
+(function () {
+  const bubble   = document.getElementById('ag-chat-bubble');
+  const window_  = document.getElementById('ag-chat-window');
+  const closeBtn = document.getElementById('ag-chat-close');
+  const form     = document.getElementById('ag-chat-form');
+  const input    = document.getElementById('ag-chat-input');
+  const sendBtn  = document.getElementById('ag-chat-send');
+  const messages = document.getElementById('ag-chat-messages');
+  const bubbleIcon = document.getElementById('ag-bubble-icon');
+  const bubbleDot  = document.getElementById('ag-bubble-dot');
+
+  let isOpen = false;
+  let history = [];   // [{role:'user'|'assistant', content:'...'}]
+  let isWaiting = false;
+
+  /* ---- Toggle open/close ---- */
+  function openChat() {
+    isOpen = true;
+    window_.classList.add('ag-open');
+    bubbleIcon.className = 'bi bi-x-lg';
+    bubbleDot.style.display = 'none';
+    input.focus();
+    scrollBottom();
+  }
+  function closeChat() {
+    isOpen = false;
+    window_.classList.remove('ag-open');
+    bubbleIcon.className = 'bi bi-chat-dots-fill';
+  }
+
+  bubble.addEventListener('click', () => isOpen ? closeChat() : openChat());
+  closeBtn.addEventListener('click', closeChat);
+
+  /* ---- Auto-resize textarea ---- */
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 80) + 'px';
+  });
+
+  /* ---- Send on Enter (Shift+Enter = newline) ---- */
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isWaiting) form.requestSubmit();
+    }
+  });
+
+  /* ---- Add message bubble ---- */
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderMessageHtml(text) {
+    const escaped = escapeHtml(text).replace(/\n/g, '<br>');
+    return escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
+
+  function addMessage(role, text, isTyping = false) {
+    const div = document.createElement('div');
+    div.className = 'ag-msg ' + role + (isTyping ? ' typing' : '');
+    div.innerHTML = renderMessageHtml(text);
+    messages.appendChild(div);
+    scrollBottom();
+    return div;
+  }
+
+  function scrollBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function addTypingIndicator() {
+    const div = document.createElement('div');
+    div.className = 'ag-msg bot typing';
+    div.innerHTML = '<span class="ag-typing"><span>Assistant écrit</span><span class="ag-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span></span>';
+    messages.appendChild(div);
+    scrollBottom();
+    return div;
+  }
+
+  /* ---- Submit ---- */
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || isWaiting) return;
+
+    isWaiting = true;
+    sendBtn.disabled = true;
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Add user message
+    addMessage('user', text);
+    history.push({ role: 'user', content: text });
+
+    // Typing indicator
+    const typingEl = addTypingIndicator();
+
+    try {
+      const resp = await fetch('{{ path('app_chatbot_message') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+
+      const contentType = resp.headers.get('Content-Type') || '';
+      const raw = await resp.text();
+      let data = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        data = null;
+      }
+      typingEl.remove();
+
+      if (data && data.error) {
+        let message = '⚠️ ' + data.error;
+        if (data.provider || data.kind) {
+          const meta = [data.provider, data.kind].filter(Boolean).join(' / ');
+          message += ' (' + meta + ')';
+        }
+        addMessage('bot', message);
+      } else if (data && data.reply) {
+        addMessage('bot', data.reply);
+        history.push({ role: 'assistant', content: data.reply });
+        if (history.length > 20) history = history.slice(-20);
+      } else if (!resp.ok) {
+        const textFallback = raw
+          ? raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180)
+          : '';
+        const contentHint = contentType ? ' [' + contentType + ']' : '';
+        const suffix = textFallback ? ' — ' + textFallback : '';
+        addMessage('bot', '⚠️ Erreur serveur (#' + resp.status + ')' + contentHint + suffix + '.');
+      } else {
+        addMessage('bot', '⚠️ Réponse inattendue du serveur (#' + resp.status + ').');
+      }
+    } catch (err) {
+      typingEl.remove();
+      addMessage('bot', '⚠️ Impossible de contacter l\'assistant. Vérifiez votre connexion (réseau / serveur).');
+    } finally {
+      isWaiting = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  });
+
+  /* Show dot after 3s to invite user to chat */
+  setTimeout(() => {
+    if (!isOpen) bubbleDot.style.display = 'block';
+  }, 3000);
+})();
+</script>
+
+<script>
+(function () {
+  const button = document.querySelector('[data-stt-button]');
+  const input = document.querySelector('[data-stt-target]');
+  const form = document.getElementById('filter-form');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!button || !input || !form || !SpeechRecognition) {
+    if (button) button.disabled = true;
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-FR';
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  let recording = false;
+
+  const setButtonIdle = () => {
+    button.disabled = false;
+    button.innerHTML = '<i class="bi bi-mic"></i>';
+    recording = false;
+  };
+
+  const sanitizeVoiceSearch = (value) => {
+    return value
+      .replace(/\s+pt\.?$/i, '')
+      .trim();
+  };
+
+  recognition.addEventListener('result', (event) => {
+    const text = Array.from(event.results)
+      .map(result => result[0]?.transcript || '')
+      .join(' ')
+      .trim();
+
+    if (!text) {
+      return;
+    }
+
+    const cleanedText = sanitizeVoiceSearch(text);
+    if (!cleanedText) {
+      return;
+    }
+
+    input.value = cleanedText;
+    form.submit();
+  });
+
+  recognition.addEventListener('error', (event) => {
+    let message = 'Transcription impossible pour le moment.';
+    if (event && event.error === 'not-allowed') {
+      message = 'Micro refusé. Autorisez le microphone dans le navigateur.';
+    } else if (event && event.error === 'service-not-allowed') {
+      message = 'Service vocal indisponible sur ce navigateur.';
+    } else if (event && event.error === 'no-speech') {
+      message = 'Aucune voix détectée. Parlez plus près du micro.';
+    }
+
+    alert(message);
+    setButtonIdle();
+  });
+
+  recognition.addEventListener('end', () => {
+    setButtonIdle();
+  });
+
+  button.addEventListener('click', async () => {
+    if (recording) {
+      recognition.stop();
+      return;
+    }
+
+    try {
+      recording = true;
+      button.innerHTML = '<i class="bi bi-stop-circle"></i>';
+      recognition.start();
+    } catch (error) {
+      setButtonIdle();
+      alert('Accès micro refusé ou indisponible.');
+    }
+  });
+})();
+</script>
+
+<script>
+(function () {
+  const forms = document.querySelectorAll('[data-wishlist-form]');
+  if (!forms.length) return;
+  const headerBadge = document.querySelector('[data-wishlist-count]');
+
+  const getCount = () => {
+    if (!headerBadge) return 0;
+    const count = parseInt((headerBadge.textContent || '0').trim(), 10);
+    return Number.isNaN(count) ? 0 : count;
+  };
+
+  const setCount = (count) => {
+    if (!headerBadge) return;
+    const safeCount = Math.max(0, count);
+    headerBadge.textContent = String(safeCount);
+    headerBadge.classList.toggle('d-none', safeCount === 0);
+  };
+
+  const updateButton = (button, wishlisted) => {
+    button.classList.toggle('is-active', wishlisted);
+
+    const icon = button.querySelector('i');
+    if (icon) {
+      icon.classList.toggle('bi-heart-fill', wishlisted);
+      icon.classList.toggle('bi-heart', !wishlisted);
+    }
+
+    button.title = wishlisted
+      ? 'Retirer de la wishlist'
+      : 'Ajouter à la wishlist';
+  };
+
+  forms.forEach((form) => {
+    const button = form.querySelector('.ag-wishlist-btn');
+    if (!button) return;
+
+    let isBusy = false;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (isBusy) return;
+
+      const url = form.dataset.toggleUrl;
+      const tokenInput = form.querySelector('input[name="_token"]');
+      const token = tokenInput ? tokenInput.value : '';
+
+      if (!url || !token) {
+        form.submit();
+        return;
+      }
+
+      isBusy = true;
+      const previousState = button.classList.contains('is-active');
+      const previousCount = getCount();
+      updateButton(button, !previousState);
+      setCount(previousState ? previousCount - 1 : previousCount + 1);
+      button.disabled = true;
+
+      try {
+        const body = new URLSearchParams({ _token: token });
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: body.toString(),
+        });
+
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || !data.ok || typeof data.wishlisted !== 'boolean') {
+          throw new Error('wishlist_toggle_failed');
+        }
+
+        updateButton(button, data.wishlisted);
+        setCount(previousCount + (data.wishlisted ? 1 : 0) - (previousState ? 1 : 0));
+      } catch (error) {
+        updateButton(button, previousState);
+        setCount(previousCount);
+        form.submit();
+        return;
+      } finally {
+        button.disabled = false;
+        isBusy = false;
+      }
+    });
+  });
+})();
+</script>
 
 {% endblock %}

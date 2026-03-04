@@ -10,7 +10,10 @@ when@dev:
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 # Less verbose in dev to avoid slowing down page loads
                 level: info
-                channels: ["!event"]
+                channels: ["!event", "!deprecation"]
+            deprecation:
+                type: null
+                channels: [deprecation]
             doctrine:
                 type: stream
                 path: "%kernel.logs_dir%/doctrine_dev.log"

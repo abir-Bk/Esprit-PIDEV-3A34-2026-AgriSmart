@@ -3,10 +3,30 @@
 {% block title %}Checkout | AgriSmart{% endblock %}
 
 {% block body %}
-<section class="py-5 bg-light border-bottom">
+<style>
+  .ag-checkout .ag-hero{
+    background: linear-gradient(180deg, #FBF7EE, #F8FAF9);
+    border-bottom: 1px solid rgba(17,24,39,.08);
+    padding: 2rem 0 1.75rem;
+  }
+  .ag-checkout .ag-hero-title{
+    color: #111827;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.1;
+    margin: 0;
+  }
+  .ag-checkout .ag-hero-subtitle{
+    color: #4B5563;
+    font-size: 1.03rem;
+    margin-top: .55rem;
+  }
+</style>
+
+<div class="ag-checkout">
+<section class="ag-hero">
   <div class="container">
-    <h1 class="display-6 fw-bold mb-1">🧾 Checkout</h1>
-    <div class="text-muted">Vérifiez votre commande et choisissez le mode de paiement.</div>
+    <h1 class="ag-hero-title fw-bold">🧾 Checkout</h1>
+    <div class="ag-hero-subtitle">Vérifiez votre commande et choisissez le mode de paiement.</div>
   </div>
 </section>
 
@@ -92,7 +112,15 @@
                 <tbody>
                   {% for row in items %}
                     <tr>
-                      <td>{{ row.produit.nom }}</td>
+                      <td>
+                        <div>{{ row.produit.nom }}</div>
+                        {% if row.booking is defined and row.booking %}
+                          <div class="small text-muted">
+                            <i class="bi bi-calendar-range me-1"></i>
+                            {{ row.booking.start|date('d/m/Y') }} → {{ row.booking.end|date('d/m/Y') }}
+                          </div>
+                        {% endif %}
+                      </td>
                       <td class="text-center fw-semibold">{{ row.qty }}</td>
                       <td class="text-end fw-semibold">
                         {{ row.lineTotal|number_format(2, '.', ' ') }} TND
@@ -117,6 +145,7 @@
     {% endif %}
   </div>
 </section>
+</div>
 {% endblock %}
 
 {% block javascripts %}

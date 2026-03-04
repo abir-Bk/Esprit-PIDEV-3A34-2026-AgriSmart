@@ -1,0 +1,71 @@
+{% extends 'front/semi-public/produit/layout.html.twig' %}
+
+{% block title %}Mes Réservations | AgriSmart{% endblock %}
+
+{% block produit_content %}
+<div class="row mb-4">
+  <div class="col-12 d-sm-flex justify-content-between align-items-center">
+    <div>
+      <h1 class="h3 mb-1">Mes Réservations (Location)</h1>
+      <p class="text-muted mb-0 small">Suivez les dates réservées de vos annonces de location.</p>
+    </div>
+    <a href="{{ path('app_produit_mes_offres') }}" class="btn btn-outline-secondary rounded-pill">
+      <i class="bi bi-arrow-left me-2"></i>Mes annonces
+    </a>
+  </div>
+</div>
+
+<div class="card ag-card shadow-sm rounded-4 border-0">
+  <div class="card-body">
+    {% if reservations is empty %}
+      <div class="text-center py-5">
+        <i class="bi bi-calendar2-x display-5 text-muted"></i>
+        <h5 class="mt-3">Aucune réservation pour le moment</h5>
+        <p class="text-muted mb-0">Les nouvelles réservations location apparaîtront ici.</p>
+      </div>
+    {% else %}
+      <div class="table-responsive-lg">
+        <table class="table align-middle table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Locataire</th>
+              <th>Période</th>
+              <th>Durée</th>
+              <th>Total</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for reservation in reservations %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ reservation.produit.nom }}</div>
+                <div class="small text-muted">{{ reservation.produit.categorie }}</div>
+              </td>
+              <td>
+                <div>{{ reservation.locataire.firstName }} {{ reservation.locataire.lastName }}</div>
+                <div class="small text-muted">{{ reservation.locataire.email }}</div>
+              </td>
+              <td>
+                <div>{{ reservation.startDate|date('d/m/Y') }} → {{ reservation.endDate|date('d/m/Y') }}</div>
+                <div class="small text-muted">Créée le {{ reservation.createdAt|date('d/m/Y H:i') }}</div>
+              </td>
+              <td>{{ reservation.days }} jour{{ reservation.days > 1 ? 's' : '' }}</td>
+              <td class="fw-semibold">{{ reservation.totalPrice|number_format(2, '.', ' ') }} TND</td>
+              <td>
+                {% if reservation.status == 'active' %}
+                  <span class="badge bg-success-subtle text-success-emphasis border">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ reservation.status|capitalize }}</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,246 +1,124 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <style>
-        /* Configuration de la page PDF */
-        @page { margin: 0; }
-        body { 
-            font-family: 'Helvetica', 'Arial', sans-serif; 
-            color: #2c3e50; 
-            line-height: 1.6;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* Sidebar décorative sur le côté pour le style "Agri" */
-        .sidebar-accent {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 8px;
-            background: linear-gradient(to bottom, #1e5631, #a4c639);
-        }
+{% extends 'back/admin_base.html.twig' %}
 
-        .container {
-            padding: 40px 50px;
-            margin-left: 10px;
-        }
+{% block title %}Détails Candidature - {{ demande.nom }}{% endblock %}
 
-        /* Header Professionnel */
-        .header { 
-            border-bottom: 2px solid #f1f3f5;
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-        }
-        
-        .logo-area {
-            display: table;
-            width: 100%;
-        }
-
-        .brand {
-            display: table-cell;
-            vertical-align: middle;
-        }
-
-        .brand h1 { 
-            color: #1e5631; 
-            margin: 0; 
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: -1px;
-        }
-
-        .document-type {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: right;
-            text-transform: uppercase;
-            color: #6c757d;
-            font-size: 12px;
-            letter-spacing: 2px;
-        }
-
-        /* Section Infos - Design "Clean Card" */
-        .info-section {
-            background-color: #f9fbf9;
-            border: 1px solid #e0eadd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            color: #1e5631;
-            font-size: 14px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            border-left: 3px solid #28a745;
-            padding-left: 10px;
-        }
-
-        /* Tableaux style Épuré */
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-
-        th { 
-            background-color: #1e5631; 
-            color: white;
-            font-weight: 500;
-            text-align: left;
-            padding: 12px 15px;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-
-        td { 
-            padding: 15px; 
-            font-size: 13px; 
-            border-bottom: 1px solid #edf2f7;
-        }
-
-        tr:nth-child(even) td {
-            background-color: #fafafa;
-        }
-
-        /* Badges de statut */
-        .badge {
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-accepted { background-color: #d4edda; color: #155724; }
-        .status-rejected { background-color: #f8d7da; color: #721c24; }
-        .status-pending { background-color: #fff3cd; color: #856404; }
-
-        .footer { 
-            position: fixed;
-            bottom: 30px;
-            left: 50px;
-            right: 50px;
-            text-align: center;
-            font-size: 10px;
-            color: #95a5a6;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-
-        .icon { color: #28a745; margin-right: 5px; }
-    </style>
-</head>
-<body>
-    <div class="sidebar-accent"></div>
-
-    <div class="container">
-        <div class="header">
-            <div class="logo-area">
-                <div class="brand">
-                    <h1>AGRISMART<span style="color: #a4c639;">.</span></h1>
-                    <div style="font-size: 12px; color: #7f8c8d;">Solutions pour une agriculture durable</div>
-                </div>
-                <div class="document-type">
-                    {% if demandes is defined %}Rapport d'activité{% else %}Fiche individuelle{% endif %}<br>
-                    <span style="font-weight: bold; color: #2c3e50;">RÉF: #{{ "now"|date('Ymd') }}</span>
-                </div>
-            </div>
+{% block body %}
+<div class="d-flex">
+    {% include 'back/components/sidebar.html.twig' %}
+    
+    <div class="flex-grow-1 p-4 am-content">
+        {# Barre de navigation #}
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <a href="{{ path('app_admin_offre_details', {'id': demande.offre.id}) }}" class="btn am-btn-outline">
+                <i class="fa-solid fa-arrow-left me-2"></i>Retour à l'offre
+            </a>
+            <span class="badge am-badge">ID Candidature: #{{ demande.id }}</span>
         </div>
 
-        {% if demandes is defined %}
-            {# --- LISTE DES CANDIDATURES --- #}
-            <div class="section-title">Historique global des postulations</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Intitulé du Poste</th>
-                        <th>Candidat</th>
-                        <th>Date de dépôt</th>
-                        <th>État du dossier</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in demandes %}
-                        <tr>
-                            <td>
-                                <div style="font-weight: bold; color: #1e5631;">{{ d.offre.title }}</div>
-                                <div style="font-size: 11px; color: #7f8c8d;">📍 {{ d.offre.lieu }}</div>
-                            </td>
-                            <td>{{ d.nom }} {{ d.prenom }}</td>
-                            <td>{{ d.datePostulation|date('d/m/Y') }}</td>
-                            <td>
-                                {% set statusClass = 'status-pending' %}
-                                {% if d.statut|lower == 'acceptée' %}{% set statusClass = 'status-accepted' %}
-                                {% elseif d.statut|lower == 'refusée' %}{% set statusClass = 'status-rejected' %}{% endif %}
-                                <span class="badge {{ statusClass }}">{{ d.statut }}</span>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            {# --- DÉTAILS D'UNE SEULE CANDIDATURE --- #}
-            <div class="section-title">Informations du candidat</div>
-            <div class="info-section">
-                <table style="border: none;">
-                    <tr>
-                        <td style="border: none; width: 50%;">
-                            <div style="font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Nom Complet</div>
-                            <div style="font-size: 16px; font-weight: bold;">{{ demande.nom }} {{ demande.prenom }}</div>
-                        </td>
-                        <td style="border: none; width: 50%;">
-                            <div style="font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Contact Téléphonique</div>
-                            <div style="font-size: 16px; font-weight: bold;">{{ demande.phoneNumber }}</div>
-                        </td>
-                    </tr>
-                </table>
+        <div class="row g-4">
+            {# --- COLONNE GAUCHE : INFOS CANDIDAT & STATUT --- #}
+            <div class="col-lg-5">
+                <div class="card border-0 am-card h-100">
+                    <div class="card-header am-card-header py-4 border-0 text-center">
+                        <div class="bg-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="fa-solid fa-user-tie fs-1 am-text"></i>
+                        </div>
+                        <h3 class="mb-1 fw-bold text-white">{{ demande.nom }} {{ demande.prenom }}</h3>
+                        <p class="mb-0 text-white-50"><i class="fa-solid fa-phone me-2"></i>{{ demande.phoneNumber }}</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="am-info-box p-3 rounded-3 mb-4">
+                            <label class="form-label fw-bold am-text mb-3">
+                                <i class="fa-solid fa- Pellegrin-pen me-2"></i>Mettre à jour le statut
+                            </label>
+                            <form action="{{ path('app_admin_demande_update_status', {'id': demande.id}) }}" method="POST">
+                                <div class="input-group">
+                                    <select name="statut" class="form-select border-success-subtle">
+                                        <option value="En cours" {{ demande.statut == 'En cours' ? 'selected' : '' }}>En cours</option>
+                                        <option value="Acceptée" {{ demande.statut == 'Acceptée' ? 'selected' : '' }}>Acceptée</option>
+                                        <option value="Refusée" {{ demande.statut == 'Refusée' ? 'selected' : '' }}>Refusée</option>
+                                    </select>
+                                    <button type="submit" class="btn am-btn-success">Valider</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="text-muted small">
+                            <i class="fa-solid fa-calendar-day me-2"></i>Postulé le : <strong>{{ demande.datePostulation|date('d/m/Y à H:i') }}</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="section-title">Détails de l'offre postulée</div>
-            <table>
-                <tr>
-                    <td style="width: 30%; font-weight: bold; background-color: #f9fbf9;">Poste</td>
-                    <td style="font-size: 16px; color: #1e5631; font-weight: bold;">{{ demande.offre.title }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold; background-color: #f9fbf9;">Localisation</td>
-                    <td>📍 {{ demande.offre.lieu }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold; background-color: #f9fbf9;">Contrat</td>
-                    <td>{{ demande.offre.typeContrat }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold; background-color: #f9fbf9;">Statut de la demande</td>
-                    <td>
-                        {% set statusClass = 'status-pending' %}
-                        {% if demande.statut|lower == 'acceptée' %}{% set statusClass = 'status-accepted' %}
-                        {% elseif demande.statut|lower == 'refusée' %}{% set statusClass = 'status-rejected' %}{% endif %}
-                        <span class="badge {{ statusClass }}">{{ demande.statut }}</span>
-                    </td>
-                </tr>
-            </table>
-        {% endif %}
+            {# --- COLONNE DROITE : DOCUMENTS --- #}
+            <div class="col-lg-7">
+                <div class="card border-0 am-card h-100">
+                    <div class="card-header am-card-header-light py-3 border-0">
+                        <h5 class="mb-0 fw-semibold am-text">
+                            <i class="fa-solid fa-folder-open me-2"></i>Documents joints
+                        </h5>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {# Section CV #}
+                        <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 mb-3 hover-doc">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-danger bg-opacity-10 p-3 rounded-3 me-3">
+                                    <i class="fa-solid fa-file-pdf text-danger fs-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Curriculum Vitae (CV)</h6>
+                                    <small class="text-muted">Document PDF</small>
+                                </div>
+                            </div>
+                            <a href="{{ asset('uploads/cv/' ~ demande.cv) }}" target="_blank" class="btn btn-sm am-btn-outline">
+                                <i class="fa-solid fa-eye me-1"></i>Consulter
+                            </a>
+                        </div>
 
-        <div class="footer">
-            <table style="border: none;">
-                <tr>
-                    <td style="border: none; text-align: left; padding: 0;">
-                        AgriSmart S.A. - Département des Ressources Humaines
-                    </td>
-                    <td style="border: none; text-align: right; padding: 0;">
-                        Généré le {{ "now"|date('d/m/Y à H:i') }}
-                    </td>
-                </tr>
-            </table>
-            <p style="margin-top: 10px;">Ce document est une pièce officielle issue de la plateforme de recrutement AgriSmart.</p>
+                        {# Section Lettre de Motivation #}
+                        <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 hover-doc">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                    <i class="fa-solid fa-file-lines text-primary fs-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Lettre de Motivation</h6>
+                                    <small class="text-muted">Document PDF / Texte</small>
+                                </div>
+                            </div>
+                            <a href="{{ asset('uploads/lettres/' ~ demande.lettreMotivation) }}" target="_blank" class="btn btn-sm am-btn-outline">
+                                <i class="fa-solid fa-eye me-1"></i>Consulter
+                            </a>
+                        </div>
+
+                        {# Note informative #}
+                        <div class="mt-4 p-3 bg-light rounded-3 small text-muted">
+                            <i class="fa-solid fa-circle-info me-2"></i>
+                            Cliquez sur "Consulter" pour ouvrir le document dans un nouvel onglet.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+/* Réutilisation exacte de ta charte AgriSmart */
+.am-content { background: #f8f9fa; min-height: 100vh; }
+.am-title, .am-text { color: #1a4331; }
+.am-card { box-shadow: 0 4px 20px rgba(26, 67, 49, 0.08); border-radius: 15px; overflow: hidden; }
+.am-card-header { background: linear-gradient(135deg, #1a4331 0%, #2d5a3d 100%); color: #fff; }
+.am-card-header-light { background: rgba(26, 67, 49, 0.05); border-bottom: 1px solid #eee; }
+.am-info-box { background: rgba(26, 67, 49, 0.03); border: 1px solid rgba(26, 67, 49, 0.1); }
+.am-btn-outline { border: 1.5px solid #1a4331; color: #1a4331; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+.am-btn-outline:hover { background: #1a4331; color: #fff; }
+.am-btn-success { background: #1a4331; color: #fff; border: none; border-radius: 8px; font-weight: 600; }
+.am-badge { background: rgba(26, 67, 49, 0.1); color: #1a4331; padding: 0.5rem 1rem; border-radius: 10px; font-weight: 600; }
+
+.hover-doc { transition: all 0.2s ease; }
+.hover-doc:hover { background-color: #f8fffb; border-color: #1a4331 !important; }
+</style>
+{% endblock %}

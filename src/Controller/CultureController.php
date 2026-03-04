@@ -148,7 +148,7 @@ class CultureController extends AbstractController
     $base64Image = base64_encode(file_get_contents($imageFile->getPathname()));
     $mimeType = $imageFile->getMimeType();
 
-    // UTILISATION DU MODÈLE 2.5 FLASH (VU DANS TA LISTE)
+    // UTILISATION DU MODÈLE 2.5 FLASH 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $_ENV['GEMINI_API_KEY'];
 
     $response = $httpClient->request('POST', $url, [

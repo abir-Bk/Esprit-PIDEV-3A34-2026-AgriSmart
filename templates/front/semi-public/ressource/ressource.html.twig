@@ -148,7 +148,6 @@
             <a href="{{ path('app_ressource_new') }}" class="btn ag-btn-primary text-white rounded-pill">
               <i class="bi bi-plus-circle me-2"></i>Nouvelle ressource
             </a>
-            
             {# BOUTON AGRIVOICE #}
             <button id="start-record-btn" class="btn btn-dark rounded-pill border-0 px-4 ms-lg-2">
                 <i class="bi bi-mic-fill me-2"></i><span id="mic-text">Assistant Vocal</span>
@@ -390,20 +389,16 @@
             });
         }
 
-        // 2. ACTION : SUPPRIMER (Ouvre la même modale que le clic)
+        // 2. ACTION : SUPPRIMER
         else if (transcript.includes("supprimer") || transcript.includes("effacer")) {
             rows.forEach(row => {
                 const name = row.querySelector('.ressource-name').innerText.toLowerCase();
                 if (transcript.includes(name)) {
-                    // On récupère l'ID de la modale associée à cette ligne
                     const deleteBtn = row.querySelector('button[data-bs-toggle="modal"]');
                     const modalId = deleteBtn.getAttribute('data-bs-target');
-                    
-                    // On force l'ouverture de la modale Bootstrap
                     const modalElement = document.querySelector(modalId);
                     const modalInstance = new bootstrap.Modal(modalElement);
                     modalInstance.show();
-                    
                     textDetected.innerText = "Ouverture de la confirmation pour : " + name;
                 }
             });
@@ -421,6 +416,12 @@
             if (transcript.includes("tous") || transcript.includes("tout")) {
                 window.location.href = "{{ path('app_ressource_index') }}";
             }
+        }
+
+        // 4. ACTION : AJOUTER UNE RESSOURCE
+        else if (transcript.includes("ajouter") || transcript.includes("nouveau") || transcript.includes("nouvelle")) {
+            textDetected.innerText = "Ouverture du formulaire d'ajout...";
+            window.location.href = "{{ path('app_ressource_new') }}";
         }
     };
 

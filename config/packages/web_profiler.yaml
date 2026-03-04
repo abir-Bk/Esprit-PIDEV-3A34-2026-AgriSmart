@@ -4,7 +4,9 @@ when@dev:
 
     framework:
         profiler:
-            collect_serializer_data: true
+            collect_serializer_data: false
+            only_exceptions: true
+            only_main_requests: true
 
 when@test:
     framework:

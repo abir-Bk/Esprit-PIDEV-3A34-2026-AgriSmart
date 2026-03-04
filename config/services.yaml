@@ -1,8 +1,17 @@
 parameters:
     uploads_directory: '%kernel.project_dir%/public/uploads'
     gemini_api_key: '%env(GEMINI_API_KEY)%'
-    # Ajout de la clé Mistral ici
     mistral_api_key: '%env(MISTRAL_API_KEY)%'
+    recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
+    recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
+    env_empty_string: ''
+    gemini_key: '%env(GEMINI_API_KEY)%'
+    openai_api_key: '%env(OPENAI_API_KEY)%'
+    google_calendar_api_key: '%env(GOOGLE_CALENDAR_API_KEY)%'
+    google_project_calendar_id: '%env(GOOGLE_PROJECT_CALENDAR_ID)%'
+    huggingface_api_key: '%env(HUGGINGFACE_API_KEY)%'
+    huggingface_model: '%env(HUGGINGFACE_MODEL)%'
+    huggingface_tasks_model: '%env(HUGGINGFACE_TASKS_MODEL)%'
 
 services:
     _defaults:
@@ -20,3 +29,32 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    App\Service\HuggingFaceService:
+        arguments:
+            $huggingFaceApiKey: '%env(default:env_empty_string:HUGGINGFACE_API_KEY)%'
+            $huggingFaceModel: '%env(default:env_empty_string:HUGGINGFACE_MODEL)%'
+            $huggingFaceTasksModel: '%env(default:env_empty_string:HUGGINGFACE_TASKS_MODEL)%'
+
+    App\Service\ExchangeRateService:
+        arguments:
+            $apiUrl: '%env(EXCHANGE_RATE_API_URL)%'
+            $cacheTtlSeconds: '%env(int:EXCHANGE_RATE_CACHE_TTL)%'
+
+    App\Service\ResendMailer:
+        class: App\Service\ResendMailer
+        arguments:
+            $apiKey: '%env(RESEND_API_KEY)%'
+
+    App\Service\MimeTypeNamer:
+        tags:
+            - { name: vich_uploader.namer }
+
+    App\Service\GeoIpService:
+        arguments:
+            $dbPath: '%kernel.project_dir%/config/geoip/GeoLite2-Country.mmdb'
+
+    App\Service\FaceRecognitionService:
+        arguments:
+            $uploadDir: '%kernel.project_dir%/public/uploads'
+            $projectDir: '%kernel.project_dir%'

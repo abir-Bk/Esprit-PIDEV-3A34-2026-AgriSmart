@@ -1,0 +1,867 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Conversation | AgriSmart{% endblock %}
+
+{% block body %}
+<style>
+.ag-thread{
+  --ag-primary:#1A4331;
+  --ag-accent:#F4B400;
+  --ag-cream:#FBF7EE;
+  --ag-bg:#F6F8F7;
+  --ag-text:#111827;
+  --ag-muted:#6B7280;
+  --ag-border:rgba(17,24,39,.08);
+}
+
+.ag-thread .ag-hero{
+  background:
+    radial-gradient(900px 420px at 15% 35%, rgba(46,125,50,.16), transparent 60%),
+    radial-gradient(700px 320px at 85% 10%, rgba(244,180,0,.14), transparent 55%),
+    linear-gradient(180deg, var(--ag-cream), #ffffff);
+  border-bottom: 1px solid var(--ag-border);
+  padding: 1.8rem 0;
+}
+
+.ag-thread .ag-content{
+  background: var(--ag-bg);
+  padding: 2rem 0 3rem;
+}
+
+.ag-thread .ag-back-btn{
+  border-color: rgba(244,180,0,.45);
+  color: #111827;
+  background: #fffdf6;
+}
+
+.ag-thread .ag-back-btn:hover{
+  background: rgba(244,180,0,.18);
+  border-color: rgba(244,180,0,.65);
+}
+
+.ag-thread .ag-card{
+  border: 1px solid var(--ag-border);
+  border-radius: 20px;
+  box-shadow: 0 .7rem 1.5rem rgba(0,0,0,.06);
+}
+
+.ag-thread .ag-scroll{
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.ag-thread .ag-bubble{
+  max-width: min(82%, 640px);
+  border-radius: 16px;
+  padding: .75rem .95rem;
+  border: 1px solid var(--ag-border);
+  background: #fff;
+}
+
+.ag-thread .ag-bubble.mine{
+  background: rgba(244,180,0,.18);
+  border-color: rgba(244,180,0,.42);
+}
+
+.ag-thread .ag-meta{
+  color: var(--ag-muted);
+  font-size: .77rem;
+  margin-bottom: .28rem;
+}
+
+.ag-thread .ag-seen{
+  margin-top:.4rem;
+  font-size:.72rem;
+  color:#6b7280;
+  text-align:right;
+}
+
+.ag-thread .ag-seen.is-read{
+  color:#166534;
+  font-weight:700;
+}
+
+.ag-thread .ag-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  border:1px solid rgba(17,24,39,.12);
+  border-radius: 999px;
+  padding: .32rem .62rem;
+  font-size: .76rem;
+  font-weight: 700;
+  color:#374151;
+  background:#fff;
+}
+
+.ag-thread .ag-compose textarea{
+  border-radius: 14px;
+  border-color: rgba(17,24,39,.16);
+}
+
+.ag-thread .ag-compose textarea:focus{
+  border-color: rgba(26,67,49,.45);
+  box-shadow: 0 0 0 .2rem rgba(26,67,49,.12);
+}
+
+.ag-thread .ag-voice-row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.55rem;
+  margin-top:.7rem;
+}
+
+.ag-thread .ag-voice-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  border:1px solid rgba(17,24,39,.16);
+  border-radius:999px;
+  padding:.3rem .6rem;
+  background:#fff;
+  font-size:.74rem;
+  color:#374151;
+}
+
+.ag-thread .ag-voice-badge.recording{
+  background:#fef2f2;
+  border-color:rgba(220,38,38,.28);
+  color:#b91c1c;
+}
+
+.ag-thread .ag-audio{
+  width: 100%;
+  margin-top: .5rem;
+}
+
+.ag-thread .ag-audio-preview{
+  display:none;
+  margin-top:.55rem;
+  border:1px dashed rgba(17,24,39,.2);
+  border-radius: 12px;
+  padding:.55rem;
+  background:#fff;
+}
+
+.ag-thread .ag-audio-preview.active{
+  display:block;
+}
+
+.ag-thread .ag-voice-status{
+  font-size:.78rem;
+  color:var(--ag-muted);
+}
+
+.ag-thread .ag-voice-status.active{
+  color:#166534;
+  font-weight:700;
+}
+
+.ag-thread .ag-live-dot{
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #2E7D32;
+  box-shadow: 0 0 0 0 rgba(46,125,50,.55);
+  animation: agPulse 1.8s infinite;
+}
+
+@keyframes agPulse {
+  0% { box-shadow: 0 0 0 0 rgba(46,125,50,.55); }
+  70% { box-shadow: 0 0 0 8px rgba(46,125,50,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,125,50,0); }
+}
+</style>
+
+<div class="ag-thread">
+  {% set other = conversation.buyer.id == app.user.id ? conversation.seller : conversation.buyer %}
+  <section class="ag-hero">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h1 class="h4 fw-bold mb-1" style="color:var(--ag-text);">Conversation: {{ conversation.produit.nom }}</h1>
+        <p class="mb-2" style="color:var(--ag-muted);">Messagerie liée à l’annonce marketplace.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="ag-chip"><i class="bi bi-person-badge"></i> Vendeur: {{ conversation.seller.firstName }} {{ conversation.seller.lastName }}</span>
+          <span class="ag-chip"><i class="bi bi-person"></i> Interlocuteur: {{ other.firstName }} {{ other.lastName }}</span>
+          <span class="ag-chip"><span class="ag-live-dot"></span> Live</span>
+        </div>
+      </div>
+      <a href="{{ path('app_marketplace_messagerie') }}" class="btn ag-back-btn rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Retour aux conversations
+      </a>
+    </div>
+  </section>
+
+  <section class="ag-content">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card ag-card border-0">
+            <div class="card-body p-3 p-md-4 ag-scroll" id="message-scroll">
+              <div class="d-flex flex-column gap-2" id="message-list" data-conversation-id="{{ conversation.id }}" data-current-user-id="{{ app.user.id }}">
+                {% for msg in conversation.messages %}
+                  {% set mine = msg.sender.id == app.user.id %}
+                  <div class="d-flex {{ mine ? 'justify-content-end' : 'justify-content-start' }}" data-message-id="{{ msg.id }}">
+                    <div class="ag-bubble {{ mine ? 'mine' : '' }}">
+                      <div class="ag-meta">
+                        {{ msg.sender.firstName }} {{ msg.sender.lastName }} • {{ msg.createdAt|date('d/m/Y H:i') }}
+                      </div>
+                      {% if msg.content %}
+                        <div style="white-space: pre-line; color:var(--ag-text);">{{ msg.content }}</div>
+                      {% endif %}
+                      {% if msg.audioPath %}
+                        <audio class="ag-audio" controls preload="none">
+                          <source src="{{ asset(msg.audioPath) }}">
+                        </audio>
+                      {% endif %}
+                      {% if mine %}
+                        <div class="ag-seen {{ msg.isRead ? 'is-read' : '' }}" data-seen-status>
+                          {% if msg.isRead and msg.readAt %}
+                            Vu {{ msg.readAt|date('d/m/Y H:i') }}
+                          {% else %}
+                            Envoyé
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="text-center py-4" style="color:var(--ag-muted);">Aucun message pour le moment.</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card ag-card border-0">
+            <div class="card-body p-4 ag-compose">
+              <h2 class="h6 fw-bold mb-3" style="color:var(--ag-text);">Envoyer un message</h2>
+              {{ form_start(messageForm, {attr: {id: 'message-form'}}) }}
+                {{ form_widget(messageForm.content) }}
+                {{ form_widget(messageForm.audioFile) }}
+                {{ form_widget(messageForm.audioBlob) }}
+                <div class="ag-voice-row">
+                  <button class="btn btn-outline-warning rounded-pill" type="button" data-stt-button>
+                    <i class="bi bi-mic me-1"></i> Dicter
+                  </button>
+                  <button class="btn btn-outline-primary rounded-pill" type="button" data-audio-record>
+                    <i class="bi bi-record-circle me-1"></i> Vocal
+                  </button>
+                  <button class="btn btn-outline-secondary rounded-pill" type="button" data-audio-clear>
+                    <i class="bi bi-x-circle me-1"></i> Effacer vocal
+                  </button>
+                  <span class="ag-voice-badge" data-audio-badge>
+                    <i class="bi bi-stopwatch"></i><span data-audio-timer>00:00</span>
+                  </span>
+                  <span class="ag-voice-status" data-stt-status>Reconnaissance vocale prête</span>
+                </div>
+                <div class="ag-audio-preview" data-audio-preview-wrap>
+                  <audio controls class="ag-audio" data-audio-preview></audio>
+                </div>
+                <button class="btn btn-success rounded-pill mt-3 w-100" type="submit">
+                  <i class="bi bi-send me-1"></i> Envoyer
+                </button>
+              {{ form_end(messageForm) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const form = document.getElementById('message-form');
+  const list = document.getElementById('message-list');
+  const scroll = document.getElementById('message-scroll');
+  if (!form || !list || !scroll) {
+    return;
+  }
+
+  const conversationId = list.dataset.conversationId;
+  const currentUserId = Number(list.dataset.currentUserId || '0');
+  const fallbackUrl = '{{ path('app_marketplace_messagerie_messages', {id: conversation.id})|e('js') }}';
+  const ackReadUrl = '{{ path('app_marketplace_messagerie_ack_read', {id: conversation.id})|e('js') }}';
+  const sttButton = form.querySelector('[data-stt-button]');
+  const sttStatus = form.querySelector('[data-stt-status]');
+  const audioInput = form.querySelector('[data-audio-file]');
+  const audioBlobInput = form.querySelector('[data-audio-blob]');
+  const audioRecordBtn = form.querySelector('[data-audio-record]');
+  const audioClearBtn = form.querySelector('[data-audio-clear]');
+  const audioBadge = form.querySelector('[data-audio-badge]');
+  const audioTimer = form.querySelector('[data-audio-timer]');
+  const audioPreviewWrap = form.querySelector('[data-audio-preview-wrap]');
+  const audioPreview = form.querySelector('[data-audio-preview]');
+  let pollingStarted = false;
+  let pollingTimer = null;
+  let pollingInFlight = false;
+  let sttRecognition = null;
+  let sttActive = false;
+  let mediaRecorder = null;
+  let mediaStream = null;
+  let audioChunks = [];
+  let recordTimer = null;
+  let recordStartAt = null;
+  let readAckTimer = null;
+  let readAckInFlight = false;
+  let readAfterId = 0;
+
+  const scrollToBottom = () => {
+    scroll.scrollTo({ top: scroll.scrollHeight, behavior: 'smooth' });
+  };
+
+  const notify = (message) => {
+    window.alert(message);
+  };
+
+  const normalizeAudioUrl = (audioPath) => {
+    if (!audioPath) {
+      return null;
+    }
+    if (/^https?:\/\//i.test(audioPath)) {
+      return audioPath;
+    }
+    return `/${String(audioPath).replace(/^\/+/, '')}`;
+  };
+
+  const hasAudioFile = () => !!(audioInput && audioInput.files && audioInput.files.length > 0);
+  const hasAudioBlob = () => !!(audioBlobInput && String(audioBlobInput.value || '').trim() !== '');
+
+  const formatDuration = (seconds) => {
+    const safe = Math.max(0, seconds);
+    const mm = String(Math.floor(safe / 60)).padStart(2, '0');
+    const ss = String(safe % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+  };
+
+  const stopRecordTimer = () => {
+    if (recordTimer) {
+      clearInterval(recordTimer);
+      recordTimer = null;
+    }
+    recordStartAt = null;
+  };
+
+  const resetAudioUi = () => {
+    stopRecordTimer();
+    if (audioTimer) {
+      audioTimer.textContent = '00:00';
+    }
+    audioBadge?.classList.remove('recording');
+    if (audioRecordBtn) {
+      audioRecordBtn.innerHTML = '<i class="bi bi-record-circle me-1"></i> Vocal';
+      audioRecordBtn.classList.remove('btn-danger');
+      audioRecordBtn.classList.add('btn-outline-primary');
+    }
+  };
+
+  const startRecordTimer = () => {
+    stopRecordTimer();
+    recordStartAt = Date.now();
+    audioBadge?.classList.add('recording');
+    recordTimer = setInterval(() => {
+      if (!recordStartAt || !audioTimer) {
+        return;
+      }
+      const elapsed = Math.floor((Date.now() - recordStartAt) / 1000);
+      audioTimer.textContent = formatDuration(elapsed);
+      if (elapsed >= 60 && mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    }, 200);
+  };
+
+  const clearAudioPreview = () => {
+    if (audioPreview) {
+      audioPreview.removeAttribute('src');
+      audioPreview.load();
+    }
+    if (audioBlobInput) {
+      audioBlobInput.value = '';
+    }
+    audioPreviewWrap?.classList.remove('active');
+  };
+
+  const setAudioPreview = (url) => {
+    if (!audioPreview || !audioPreviewWrap || !url) {
+      return;
+    }
+    audioPreview.src = url;
+    audioPreviewWrap.classList.add('active');
+  };
+
+  const setupAudioRecorder = async () => {
+    if (!audioRecordBtn || !audioInput) {
+      return;
+    }
+
+    const hasRecorderSupport = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+    if (!hasRecorderSupport) {
+      audioRecordBtn.disabled = true;
+      if (audioClearBtn) {
+        audioClearBtn.disabled = true;
+      }
+      return;
+    }
+
+    audioRecordBtn.addEventListener('click', async () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+
+        const preferredMimeTypes = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/ogg',
+          'audio/mp4'
+        ];
+        const selectedMimeType = preferredMimeTypes.find((mime) => window.MediaRecorder.isTypeSupported && window.MediaRecorder.isTypeSupported(mime));
+        mediaRecorder = selectedMimeType
+          ? new MediaRecorder(mediaStream, { mimeType: selectedMimeType })
+          : new MediaRecorder(mediaStream);
+
+        mediaRecorder.addEventListener('dataavailable', (event) => {
+          if (event.data && event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        });
+
+        mediaRecorder.addEventListener('stop', () => {
+          const blobType = mediaRecorder && mediaRecorder.mimeType ? mediaRecorder.mimeType : 'audio/webm';
+          const blob = new Blob(audioChunks, { type: blobType });
+          if (blob.size > 0) {
+            const fileExtension = blobType.includes('ogg') ? 'ogg' : (blobType.includes('mp4') ? 'm4a' : 'webm');
+            const file = new File([blob], `voice-${Date.now()}.${fileExtension}`, { type: blobType });
+            if (audioInput) {
+              try {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                audioInput.files = dataTransfer.files;
+              } catch (error) {
+              }
+            }
+
+            if (audioBlobInput) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                audioBlobInput.value = typeof reader.result === 'string' ? reader.result : '';
+              };
+              reader.readAsDataURL(blob);
+            }
+            setAudioPreview(URL.createObjectURL(blob));
+          }
+
+          if (mediaStream) {
+            mediaStream.getTracks().forEach((track) => track.stop());
+            mediaStream = null;
+          }
+
+          resetAudioUi();
+          sttStatus.textContent = 'Message vocal prêt';
+          sttStatus.classList.add('active');
+        });
+
+        mediaRecorder.start();
+        startRecordTimer();
+        audioRecordBtn.innerHTML = '<i class="bi bi-stop-circle me-1"></i> Stop vocal';
+        audioRecordBtn.classList.remove('btn-outline-primary');
+        audioRecordBtn.classList.add('btn-danger');
+        sttStatus.textContent = 'Enregistrement vocal...';
+        sttStatus.classList.add('active');
+      } catch (error) {
+        resetAudioUi();
+        notify('Micro indisponible pour le message vocal.');
+      }
+    });
+
+    audioClearBtn?.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+      if (audioInput) {
+        audioInput.value = '';
+      }
+      clearAudioPreview();
+      resetAudioUi();
+      sttStatus.textContent = 'Reconnaissance vocale prête';
+      sttStatus.classList.remove('active');
+    });
+  };
+
+  const setupVoice = () => {
+    if (!sttButton || !sttStatus) {
+      return;
+    }
+
+    const textarea = form.querySelector('textarea');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!textarea || !SpeechRecognition) {
+      sttButton.disabled = true;
+      sttStatus.textContent = 'Reconnaissance vocale non supportée';
+      return;
+    }
+
+    const setIdle = () => {
+      sttButton.disabled = false;
+      sttButton.innerHTML = '<i class="bi bi-mic me-1"></i> Dicter';
+      sttStatus.textContent = 'Reconnaissance vocale prête';
+      sttStatus.classList.remove('active');
+      sttActive = false;
+    };
+
+    sttRecognition = new SpeechRecognition();
+    sttRecognition.lang = 'fr-FR';
+    sttRecognition.interimResults = false;
+    sttRecognition.continuous = false;
+
+    sttRecognition.addEventListener('result', (event) => {
+      const text = Array.from(event.results)
+        .map(result => result[0]?.transcript || '')
+        .join(' ')
+        .trim();
+
+      if (!text) {
+        return;
+      }
+
+      const current = textarea.value.trim();
+      textarea.value = current ? `${current} ${text}` : text;
+      textarea.focus();
+    });
+
+    sttRecognition.addEventListener('error', (event) => {
+      let message = 'Transcription impossible pour le moment.';
+      if (event && event.error === 'not-allowed') {
+        message = 'Micro refusé. Autorisez le microphone dans le navigateur.';
+      } else if (event && event.error === 'service-not-allowed') {
+        message = 'Service vocal indisponible sur ce navigateur.';
+      } else if (event && event.error === 'no-speech') {
+        message = 'Aucune voix détectée. Parlez plus près du micro.';
+      }
+
+      notify(message);
+      setIdle();
+    });
+
+    sttRecognition.addEventListener('end', () => {
+      setIdle();
+    });
+
+    sttButton.addEventListener('click', async () => {
+      if (sttActive && sttRecognition) {
+        sttRecognition.stop();
+        return;
+      }
+
+      try {
+        sttActive = true;
+        sttButton.innerHTML = '<i class="bi bi-stop-circle me-1"></i> Stop';
+        sttStatus.textContent = 'Écoute en cours...';
+        sttStatus.classList.add('active');
+
+        sttRecognition.start();
+      } catch (error) {
+        notify('Accès micro refusé ou indisponible.');
+        setIdle();
+      }
+    });
+  };
+
+  const createMessageNode = (payload) => {
+    const mine = Number(payload.senderId) === currentUserId;
+    const safeSenderName = (payload.senderName && String(payload.senderName).trim()) ? payload.senderName : 'Utilisateur';
+    const wrapper = document.createElement('div');
+    wrapper.className = `d-flex ${mine ? 'justify-content-end' : 'justify-content-start'}`;
+    wrapper.dataset.messageId = String(payload.id);
+
+    const bubble = document.createElement('div');
+    bubble.className = `ag-bubble ${mine ? 'mine' : ''}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'ag-meta';
+    meta.textContent = `${safeSenderName} • ${payload.createdAt || ''}`;
+
+    bubble.appendChild(meta);
+
+    if (payload.content) {
+      const content = document.createElement('div');
+      content.style.whiteSpace = 'pre-line';
+      content.style.color = 'var(--ag-text)';
+      content.textContent = payload.content;
+      bubble.appendChild(content);
+    }
+
+    if (payload.audioPath) {
+      const audio = document.createElement('audio');
+      audio.className = 'ag-audio';
+      audio.controls = true;
+      audio.preload = 'none';
+      audio.src = normalizeAudioUrl(payload.audioPath);
+      bubble.appendChild(audio);
+    }
+
+    if (mine) {
+      const seen = document.createElement('div');
+      seen.className = 'ag-seen';
+      seen.dataset.seenStatus = '1';
+
+      if (payload.isRead && payload.readAt) {
+        seen.classList.add('is-read');
+        seen.textContent = `Vu ${payload.readAt}`;
+      } else {
+        seen.textContent = 'Envoyé';
+      }
+
+      bubble.appendChild(seen);
+    }
+
+    wrapper.appendChild(bubble);
+    return wrapper;
+  };
+
+  const appendMessage = (payload) => {
+    if (!payload || !payload.id) {
+      return;
+    }
+    if (list.querySelector(`[data-message-id="${payload.id}"]`)) {
+      return;
+    }
+    list.appendChild(createMessageNode(payload));
+    if (Number(payload.senderId) !== currentUserId) {
+      acknowledgeReadRealtime();
+    }
+    scrollToBottom();
+  };
+
+  const markMessagesAsRead = (messageIds, readAt) => {
+    if (!Array.isArray(messageIds) || !messageIds.length) {
+      return;
+    }
+
+    messageIds.forEach((id) => {
+      readAfterId = Math.max(readAfterId, Number(id) || 0);
+      const node = list.querySelector(`[data-message-id="${id}"]`);
+      if (!node) {
+        return;
+      }
+      const seen = node.querySelector('[data-seen-status]');
+      if (!seen) {
+        return;
+      }
+
+      seen.classList.add('is-read');
+      seen.textContent = readAt ? `Vu ${readAt}` : 'Vu';
+    });
+  };
+
+  const acknowledgeReadRealtime = () => {
+    if (readAckInFlight) {
+      return;
+    }
+
+    if (readAckTimer) {
+      clearTimeout(readAckTimer);
+    }
+
+    readAckTimer = setTimeout(async () => {
+      readAckInFlight = true;
+      try {
+        await fetch(ackReadUrl, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          }
+        });
+      } catch (error) {
+      } finally {
+        readAckInFlight = false;
+      }
+    }, 120);
+  };
+
+  const getLastMessageId = () => {
+    const nodes = list.querySelectorAll('[data-message-id]');
+    if (!nodes.length) {
+      return 0;
+    }
+    return Number(nodes[nodes.length - 1].dataset.messageId || '0');
+  };
+
+  const startPolling = () => {
+    if (pollingStarted) {
+      return;
+    }
+    pollingStarted = true;
+
+    const pollOnce = async () => {
+      if (!pollingStarted) {
+        return;
+      }
+
+      if (document.hidden || pollingInFlight) {
+        pollingTimer = setTimeout(pollOnce, 3000);
+        return;
+      }
+
+      pollingInFlight = true;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const afterId = getLastMessageId();
+        const response = await fetch(`${fallbackUrl}?afterId=${afterId}&readAfterId=${readAfterId}`, {
+          headers: {
+            'Accept': 'application/json'
+          },
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        if (!data.ok || !Array.isArray(data.messages)) {
+          return;
+        }
+        data.messages.forEach(appendMessage);
+        if (Array.isArray(data.readUpdates) && data.readUpdates.length) {
+          const ids = data.readUpdates.map((item) => Number(item.id || 0)).filter((id) => id > 0);
+          const lastReadAt = data.readUpdates[data.readUpdates.length - 1]?.readAt || null;
+          markMessagesAsRead(ids, lastReadAt);
+        }
+      } catch (error) {
+      } finally {
+        clearTimeout(timeoutId);
+        pollingInFlight = false;
+        if (pollingStarted) {
+          pollingTimer = setTimeout(pollOnce, 3000);
+        }
+      }
+    };
+
+    pollingTimer = setTimeout(pollOnce, 0);
+  };
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const textarea = form.querySelector('textarea');
+
+    if (textarea && !textarea.value.trim() && !hasAudioFile() && !hasAudioBlob()) {
+      textarea.focus();
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+
+    const formData = new FormData(form);
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!contentType.includes('application/json')) {
+        form.submit();
+        return;
+      }
+
+      const payload = await response.json();
+
+      if (!response.ok || payload.ok === false) {
+        notify(payload.error || 'Envoi impossible pour le moment.');
+        return;
+      }
+
+      if (payload.live === false) {
+        startPolling();
+      }
+
+      appendMessage(payload);
+
+      if (textarea) {
+        textarea.value = '';
+        textarea.focus();
+      }
+      if (audioInput) {
+        audioInput.value = '';
+      }
+      clearAudioPreview();
+      resetAudioUi();
+      sttStatus.textContent = 'Reconnaissance vocale prête';
+      sttStatus.classList.remove('active');
+    } catch (error) {
+      form.submit();
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+      }
+    }
+  });
+
+  const streamUrl = '{{ mercure(['/marketplace/messagerie/' ~ conversation.id])|e('js') }}';
+  const eventSource = new EventSource(streamUrl, { withCredentials: true });
+
+  eventSource.onopen = () => {
+  };
+
+  eventSource.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload && payload.type === 'read') {
+        markMessagesAsRead(payload.messageIds, payload.readAt);
+        return;
+      }
+      appendMessage(payload);
+    } catch (error) {
+    }
+  };
+
+  eventSource.onerror = () => {
+    startPolling();
+  };
+
+  window.addEventListener('beforeunload', () => {
+    pollingStarted = false;
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
+      pollingTimer = null;
+    }
+    eventSource.close();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      acknowledgeReadRealtime();
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    acknowledgeReadRealtime();
+  });
+
+  startPolling();
+  setupAudioRecorder();
+  setupVoice();
+  acknowledgeReadRealtime();
+  scrollToBottom();
+})();
+</script>
+{% endblock %}

@@ -18,12 +18,9 @@ class TaskAssignment
     #[ORM\JoinColumn(name: 'task_id', referencedColumnName: 'id_task', nullable: false, onDelete: 'CASCADE')]
     private ?Task $task = null;
 
-    /**
-     * Identifiant de l'ouvrier (Utilisateur) affecté.
-     * Stocké comme entier pour rester découplé du module Utilisateur.
-     */
-    #[ORM\Column(name: 'worker_id')]
-    private int $workerId;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'worker_id', referencedColumnName: 'id', nullable: false)]
+    private ?User $worker = null;
 
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $dateAssignment;
@@ -32,7 +29,7 @@ class TaskAssignment
      * assignée / acceptée / réalisée
      */
     #[ORM\Column(length: 20)]
-    private string $statut;
+    private string $statut = 'assignee';
 
     public function getIdAssignment(): ?int
     {
@@ -51,14 +48,14 @@ class TaskAssignment
         return $this;
     }
 
-    public function getWorkerId(): int
+    public function getWorker(): ?User
     {
-        return $this->workerId;
+        return $this->worker;
     }
 
-    public function setWorkerId(int $workerId): self
+    public function setWorker(?User $worker): self
     {
-        $this->workerId = $workerId;
+        $this->worker = $worker;
 
         return $this;
     }
@@ -87,4 +84,3 @@ class TaskAssignment
         return $this;
     }
 }
-

@@ -11,9 +11,15 @@
                 <h1 class="h3 am-title mb-1"><i class="fa-solid fa-briefcase me-2"></i>Mes offres d'emploi</h1>
                 <p class="text-muted small mb-0">Gérez vos offres et suivez les candidatures.</p>
             </div>
-            <a href="{{ path('app_offre_new') }}" class="btn am-btn-success">
-                <i class="fa-solid fa-plus me-2"></i>Nouvelle offre
-            </a>
+            {# MODIFICATION ICI : Ajout du bouton sans toucher au reste #}
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_admin_travailleurs') }}" class="btn btn-outline-success d-flex align-items-center" style="border-radius: 8px; font-weight: 500; border: 2px solid #28a745;">
+                    <i class="fa-solid fa-users-check me-2"></i>Voir mes employés
+                </a>
+                <a href="{{ path('app_offre_new') }}" class="btn am-btn-success">
+                    <i class="fa-solid fa-plus me-2"></i>Nouvelle offre
+                </a>
+            </div>
         </div>
 
         {% set count_attente = 0 %}
@@ -69,7 +75,6 @@
                 </div>
             </div>
         </div>
-
         {% if offres is empty %}
         <div class="text-center py-5 my-4">
             <div class="card border-0 am-card py-5">
@@ -109,7 +114,6 @@
             </li>
         </ul>
     </div>
-
     <div class="card-body p-4 d-flex flex-column">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <span class="badge am-badge">{{ offre.typeContrat|default('CDI') }}</span>
@@ -124,7 +128,6 @@
                 <span class="badge am-badge-warning small">En attente</span>
             {% endif %}
         </div>
-
         {# pe-4 pour ne pas chevaucher les trois points #}
         <h6 class="card-title fw-bold mb-2 am-text offre-title pe-4">{{ offre.title }}</h6>
         

@@ -38,9 +38,10 @@ security:
         - { path: ^/admin/offre, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }
         - { path: ^/admin/offres$, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }
         - { path: ^/admin/liste-offres, roles: ROLE_ADMIN }
+        - { path: ^/admin/mes-travailleurs, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR] }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/back/admin, roles: ROLE_ADMIN }
         - { path: ^/semi-public/users, roles: [ROLE_AGRICULTEUR, ROLE_EMPLOYEE, ROLE_FOURNISSEUR] }  
         - { path: ^/semi-public/checkout, roles: ROLE_USER }
         - { path: ^/semi-public/commande, roles: ROLE_USER }   
-          
+        

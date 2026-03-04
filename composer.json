@@ -16,6 +16,7 @@
         "knpuniversity/oauth2-client-bundle": "^2.20",
         "league/oauth2-google": "^4.1",
         "lexik/jwt-authentication-bundle": "^2.18",
+        "moneyphp/money": "^4.8",
         "phpdocumentor/reflection-docblock": "5.2",
         "phpoffice/phpspreadsheet": "^5.4",
         "phpstan/phpdoc-parser": "^2.3",
@@ -110,11 +111,13 @@
     },
     "extra": {
         "symfony": {
-            "allow-contrib": false,
+            "allow-contrib": true,
             "require": "6.4.*"
         }
     },
     "require-dev": {
+        "ahmed-bhs/doctrine-doctor": "*",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.5",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",

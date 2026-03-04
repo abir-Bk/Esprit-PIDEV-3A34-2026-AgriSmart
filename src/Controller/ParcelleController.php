@@ -26,11 +26,11 @@ class ParcelleController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
-
+/** @var \App\Entity\User $user */
+$user = $this->getUser();
+if (!$user) {
+    return $this->redirectToRoute('app_login');
+}
         // Recherche et tri
         $search = trim((string) $request->query->get('search', ''));
         $sort = (string) $request->query->get('sort', 'nbCultures');
@@ -73,9 +73,9 @@ class ParcelleController extends AbstractController
 
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
-                try {
-                    $parcelle->setUser($user);
-                    $entityManager->persist($parcelle);
+              try {
+    $parcelle->setUser($user);
+    $entityManager->persist($parcelle);
                     $entityManager->flush();
 
                     $this->addFlash('success', '✅ Parcelle créée avec succès !');

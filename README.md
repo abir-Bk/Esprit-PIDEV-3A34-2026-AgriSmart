@@ -1,120 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgriSmart - README</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
+# AgriSmart
 
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px 30px;
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+## Overview
+AgriSmart is a smart agricultural management system designed to digitalize farm operations and improve administrative efficiency. It integrates modern web technologies with AI-based face recognition for secure and intelligent authentication.
 
-    h1, h2 {
-      color: #2c3e50;
-    }
+## Features
+- Secure authentication with JWT
+- AI-based face recognition login
+- Farmer and user management
+- Admin dashboard with statistics
+- Full CRUD operations
+- Role-based access control
 
-    h1 {
-      border-bottom: 2px solid #2c3e50;
-      padding-bottom: 10px;
-    }
+## Tech Stack
+- Twig
+- Bootstrap
+- Symfony (PHP)
+- MySQL
+- Python
 
-    h2 {
-      margin-top: 30px;
-      margin-bottom: 10px;
-      font-size: 1.4rem;
-    }
+## Architecture
+AgriSmart follows a 3-tier architecture:
 
-    p {
-      margin: 10px 0;
-    }
+- **Presentation Layer:** Twig + JS  
+- **Business Logic Layer:** Symfony Controllers & Services  
+- **Data Layer:** MySQL Database  
+- **AI Module:** Python integrated with Symfony
 
-    ul {
-      padding-left: 20px;
-    }
+## Getting Started
+1. Clone the repository:  
+   ```bash
+   git clone https://github.com/Abir-BK/agrismart.git
 
-    ul li {
-      margin-bottom: 6px;
-    }
+Go to the project directory:
 
-    pre {
-      background: #f0f0f0;
-      padding: 10px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 0.9rem;
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>AgriSmart</h1>
-
-    <h2>Overview</h2>
-    <p>AgriSmart is a smart agricultural management system designed to digitalize farm operations and improve administrative efficiency. It integrates modern web technologies with AI-based face recognition for secure and intelligent authentication.</p>
-
-    <h2>Features</h2>
-    <ul>
-      <li>Secure authentication with JWT</li>
-      <li>AI-based face recognition login</li>
-      <li>Farmer and user management</li>
-      <li>Admin dashboard with statistics</li>
-      <li>Full CRUD operations</li>
-      <li>Role-based access control</li>
-    </ul>
-
-    <h2>Tech Stack</h2>
-    <p>Twig, Bootstrap, Symfony (PHP), MySQL, Python</p>
-
-    <h2>Architecture</h2>
-    <ul>
-      <li>Presentation Layer: Twig + JS</li>
-      <li>Business Logic Layer: Symfony Controllers & Services</li>
-      <li>Data Layer: MySQL Database</li>
-      <li>AI Module: Python integrated with Symfony</li>
-    </ul>
-
-    <h2>Getting Started</h2>
-    <pre>
-git clone https://github.com/Abir-BK/agrismart.git
 cd agrismart
+
+Install dependencies:
+
 composer install
-# Configure .env with your database credentials
+
+Configure environment: Update the .env file with your database credentials.
+
+Run migrations:
+
 php bin/console doctrine:migrations:migrate
+
+Start the server:
+
 symfony server:start
-    </pre>
+Contributors
 
-    <h2>Contributors</h2>
-    <p>PIDEV Project Team: Abir Benkhlifa, Soumaya Drydy, Aya Fdhyla, Amine Arfaoui, Akrem Zaied</p>
+PIDEV Project Team: Abir Benkhlifa, Soumaya Drydy, Aya Fdhyla, Amine Arfaoui, Akrem Zaied
 
-    <h2>Academic Context</h2>
-    <p>This project was developed as part of the PIDEV – 3rd Year Engineering Program at Esprit School of Engineering (Academic Year 2025–2026).</p>
+Academic Context
 
-    <h2>Acknowledgments</h2>
-    <p>Special thanks to our professors and mentors at Esprit School of Engineering for their support and guidance.</p>
+This project was developed as part of the PIDEV – 3rd Year Engineering Program at Esprit School of Engineering (Academic Year 2025–2026).
 
-  </div>
+Acknowledgments
 
-  <footer>
-    &copy; 2026 AgriSmart Project Team
-  </footer>
-</body>
-</html>
+Special thanks to our professors and mentors at Esprit School of Engineering for their support and guidance.
+
+
+You can now **directly save it as `README.md`** and it’s ready for GitHub or any repo.  
+
+If you want, I can also **add small badges for Symfony, MySQL, and PHP** to make it look more professional. Do you want me to do that?

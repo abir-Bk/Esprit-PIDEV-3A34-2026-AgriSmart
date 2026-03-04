@@ -18,45 +18,45 @@ class Offre
     /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le titre est obligatoire")]
     #[Assert\Length(min: 5, minMessage: "Le titre doit faire au moins {{ limit }} caractères")]
     private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le type de poste est obligatoire")]
     #[Assert\Length(min: 3, minMessage: "Le type de poste est trop court")]
     #[Assert\Regex(pattern: "/^[a-zA-ZÀ-ÿ\s\-]+$/", message: "Le type de poste ne doit contenir que des lettres")]
     private ?string $typePoste = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le type de contrat est obligatoire")]
     private ?string $typeContrat = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "La description est obligatoire")]
     #[Assert\Length(min: 10, minMessage: "La description doit faire au moins {{ limit }} caractères")]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le lieu est obligatoire")]
     #[Assert\Length(min: 3, minMessage: "Le nom du lieu est trop court")]
     private ?string $lieu = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le statut est obligatoire")]
     private ?string $statut = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: "datetime_immutable", nullable: true)]
     #[Assert\NotNull(message: "La date de début est obligatoire")]
     #[Assert\GreaterThanOrEqual("today", message: "La date de début ne peut pas être dans le passé")]
-    private ?\DateTime $dateDebut = null;
+    private ?\DateTimeImmutable $dateDebut = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: "datetime_immutable", nullable: true)]
     #[Assert\NotNull(message: "La date de fin est obligatoire")]
-    private ?\DateTime $dateFin = null;
+    private ?\DateTimeImmutable $dateFin = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Assert\NotNull(message: "Le salaire est obligatoire")]
     #[Assert\Positive(message: "Le salaire doit être un nombre positif")]
     private ?float $salaire = null;
@@ -64,10 +64,15 @@ class Offre
     /**
      * @var Collection<int, Demande>
      */
-    #[ORM\OneToMany(targetEntity: Demande::class, mappedBy: 'offre', cascade: ['remove'])]
+    #[ORM\OneToMany(
+        targetEntity: Demande::class, 
+        mappedBy: 'offre', 
+        cascade: ['persist', 'remove'], 
+        orphanRemoval: true 
+    )]
     private Collection $demandes;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $isActive = null;
 
     /** Statut de validation par l'admin : en_attente | approuvée | refusée */
@@ -98,7 +103,7 @@ class Offre
         }
     }
 
-    // --- GETTERS & SETTERS (All Setters are now Nullable) ---
+    // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
     {
@@ -171,23 +176,23 @@ class Offre
         return $this;
     }
 
-    public function getDateDebut(): ?\DateTime
+    public function getDateDebut(): ?\DateTimeImmutable
     {
         return $this->dateDebut;
     }
 
-    public function setDateDebut(?\DateTime $dateDebut): static
+    public function setDateDebut(?\DateTimeImmutable $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
         return $this;
     }
 
-    public function getDateFin(): ?\DateTime
+    public function getDateFin(): ?\DateTimeImmutable
     {
         return $this->dateFin;
     }
 
-    public function setDateFin(?\DateTime $dateFin): static
+    public function setDateFin(?\DateTimeImmutable $dateFin): static
     {
         $this->dateFin = $dateFin;
         return $this;
@@ -204,9 +209,6 @@ class Offre
         return $this;
     }
 
-    /**
-     * @return Collection<int, Demande>
-     */
     public function getDemandes(): Collection
     {
         return $this->demandes;
@@ -233,13 +235,13 @@ class Offre
 
     public function getIsActive(): ?bool
     {
-    return $this->isActive;
+        return $this->isActive;
     }
 
-    public function setIsActive(bool $isActive): self
+    public function setIsActive(?bool $isActive): self
     {
-    $this->isActive = $isActive;
-    return $this;
+        $this->isActive = $isActive;
+        return $this;
     }
 
     public function getStatutValidation(): string
@@ -261,7 +263,6 @@ class Offre
     public function setAgriculteur(?User $agriculteur): static
     {
         $this->agriculteur = $agriculteur;
-
         return $this;
     }
 }

@@ -16,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-
+use Symfony\Component\HttpFoundation\HeaderUtils;
 #[Route('/ressource')]
 #[IsGranted('ROLE_AGRICULTEUR')]
 class RessourceController extends AbstractController
@@ -204,9 +204,8 @@ class RessourceController extends AbstractController
         $writer->save($tempFile);
         
         // Retourner la réponse avec le fichier
-        return $this->file($tempFile, $fileName, Response::HTTP_OK, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+       // ✅ METTRE SEULEMENT ÇA
+return $this->file($tempFile, $fileName, HeaderUtils::DISPOSITION_ATTACHMENT);
     }
 
     public function exportCsv(RessourceRepository $repo): Response
@@ -259,8 +258,11 @@ class RessourceController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $ressource = new Ressource();
-        $ressource->setUser($this->getUser());
-
+// ✅ APRÈS - une seule fois
+$ressource = new Ressource();
+/** @var \App\Entity\User $user */
+$user = $this->getUser();
+$ressource->setUser($user);
         $form = $this->createForm(RessourceType::class, $ressource);
         $form->handleRequest($request);
 

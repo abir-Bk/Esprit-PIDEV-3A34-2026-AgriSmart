@@ -65,6 +65,10 @@ class AdminMarketplaceController extends AbstractController
     public function toggleBan(int $id, Request $request): Response
     {
         $token = $request->request->get('_token');
+        // Request::get() returns mixed; make sure we pass string|null
+        if (!is_string($token)) {
+            $token = null;
+        }
         if (!$this->isCsrfTokenValid('produit_ban_' . $id, $token)) {
             $this->addFlash('error', 'Token invalide.');
             return $this->redirectToRoute('admin_marketplace_produits');

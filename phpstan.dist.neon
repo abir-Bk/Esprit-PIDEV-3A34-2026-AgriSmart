@@ -1,0 +1,6 @@
+parameters:
+  level: 8
+  paths:
+    - src
+  # avoid false positives when types come from phpdoc (method_exists, null_coalesce)
+  treatPhpDocTypesAsCertain: false

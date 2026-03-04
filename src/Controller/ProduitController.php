@@ -207,6 +207,7 @@ final class ProduitController extends AbstractController
         if (!$vendeur) {
             throw $this->createNotFoundException("User DEV introuvable (" . self::DEV_EMAIL . ").");
         }
+        // $vendeur is App\Entity\User thanks to method signature
         $produit->setVendeur($vendeur);
 
         $form = $this->createForm(ProduitType::class, $produit);
@@ -403,8 +404,14 @@ final class ProduitController extends AbstractController
             )
         );
 
-        $this->panierService->setLocationBooking($produit->getId(), $start->format('Y-m-d'), $end->format('Y-m-d'), $days);
-        $this->panierService->setQty($produit->getId(), $days);
+        $produitId = $produit->getId();
+        
+        if ($produitId === null) {
+            throw new \LogicException('Produit ID should not be null here');
+        }
+
+        $this->panierService->setLocationBooking((int) $produitId, $start->format('Y-m-d'), $end->format('Y-m-d'), $days);
+        $this->panierService->setQty((int) $produitId, $days);
 
         return $this->redirectToRoute('app_checkout_index');
     }
@@ -481,13 +488,15 @@ final class ProduitController extends AbstractController
         return $this->redirectToRoute('app_produit_mes_offres');
     }
 
-    private function getCurrentUserOrDev(UserRepository $userRepo): ?object
+    private function getCurrentUserOrDev(UserRepository $userRepo): ?\App\Entity\User
     {
         $user = $this->getUser();
-        if ($user) {
+        if ($user instanceof \App\Entity\User) {
             return $user;
         }
-        return $userRepo->findOneBy(['email' => self::DEV_EMAIL]);
+        /** @var ?\App\Entity\User $dev */
+        $dev = $userRepo->findOneBy(['email' => self::DEV_EMAIL]);
+        return $dev;
     }
 
     private function handleImageUpload(?UploadedFile $file, Produit $produit, SluggerInterface $slugger): void
@@ -510,8 +519,12 @@ final class ProduitController extends AbstractController
         $safeFilename = $slugger->slug($originalFilename);
         $newFilename = $safeFilename . '-' . bin2hex(random_bytes(6)) . '.' . ($file->guessExtension() ?: 'jpg');
 
+        $projDir = $this->getParameter('kernel.project_dir');
+        if (!is_string($projDir)) {
+            throw new \RuntimeException('kernel.project_dir must be a string');
+        }
         $file->move(
-            $this->getParameter('kernel.project_dir') . '/public/uploads/produits',
+            $projDir . '/public/uploads/produits',
             $newFilename
         );
 

@@ -22,6 +22,9 @@ class StripeWebhookController extends AbstractController
     ): Response {
         $payload = $request->getContent();
         $sigHeader = $request->headers->get('stripe-signature');
+        if (!is_string($sigHeader)) {
+            $sigHeader = '';
+        }
 
         $secret = $_ENV['STRIPE_WEBHOOK_SECRET'] ?? null;
 
@@ -54,6 +57,9 @@ class StripeWebhookController extends AbstractController
                     // Decrement stock safely
                     foreach ($commande->getItems() as $item) {
                         $produit = $item->getProduit();
+                        if (!$produit) {
+                            continue;
+                        }
 
                         if (
                             method_exists($produit, 'getQuantiteStock') &&
@@ -80,7 +86,10 @@ class StripeWebhookController extends AbstractController
                     $em->flush();
 
                     // Async email + PDF
-                    $bus->dispatch(new OrderPaidMessage($commande->getId()));
+                    $cmdId = $commande->getId();
+                    if ($cmdId !== null) {
+                        $bus->dispatch(new OrderPaidMessage($cmdId));
+                    }
                 }
             }
         }
@@ -101,11 +110,7 @@ class StripeWebhookController extends AbstractController
 
                     foreach ($commande->getItems() as $item) {
                         $produit = $item->getProduit();
-
-                        if (
-                            method_exists($produit, 'getQuantiteStock') &&
-                            method_exists($produit, 'setQuantiteStock')
-                        ) {
+                        if ($produit && method_exists($produit, 'getQuantiteStock') && method_exists($produit, 'setQuantiteStock')) {
                             $stock = (int) $produit->getQuantiteStock();
                             $qty = (int) $item->getQuantite();
 
@@ -124,7 +129,10 @@ class StripeWebhookController extends AbstractController
                     $em->flush();
 
                     // Async email + PDF
-                    $bus->dispatch(new OrderPaidMessage($commande->getId()));
+                    $cmdId2 = $commande->getId();
+                    if ($cmdId2 !== null) {
+                        $bus->dispatch(new OrderPaidMessage($cmdId2));
+                    }
                 }
             }
         }

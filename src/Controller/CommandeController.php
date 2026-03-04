@@ -22,6 +22,7 @@ final class CommandeController extends AbstractController
     {
         $user = $this->getUser();
 
+        /** @var \App\Entity\Commande[] $commandes */
         $commandes = $repo->findBy(
             ['client' => $user],
             ['id' => 'DESC']
@@ -35,7 +36,9 @@ final class CommandeController extends AbstractController
     #[Route('/mes-commandes/export-excel', name: 'app_commande_export_mes_commandes_excel', methods: ['GET'])]
     public function exportMesCommandesExcel(CommandeRepository $repo, CommandeExcelExporter $exporter): Response
     {
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
+        /** @var \App\Entity\Commande[] $commandes */
         $commandes = $repo->findBy(['client' => $user], ['id' => 'DESC']);
         return $exporter->exportMesCommandes($commandes);
     }
@@ -43,8 +46,11 @@ final class CommandeController extends AbstractController
     #[Route('/mes-ventes', name: 'app_commande_mes_ventes', methods: ['GET'])]
     public function mesVentes(CommandeRepository $repo): Response
     {
+        // user guaranteed by IS_AUTHENTICATED_FULLY
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
+        /** @var \App\Entity\Commande[] $commandes */
         $commandes = $repo->findForVendeur($user);
 
         return $this->render('front/semi-public/commande/mes_ventes.html.twig', [
@@ -55,7 +61,10 @@ final class CommandeController extends AbstractController
     #[Route('/mes-ventes/export-excel', name: 'app_commande_export_mes_ventes_excel', methods: ['GET'])]
     public function exportMesVentesExcel(CommandeRepository $repo, CommandeExcelExporter $exporter): Response
     {
+        // user guaranteed by IS_AUTHENTICATED_FULLY
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
+        /** @var \App\Entity\Commande[] $commandes */
         $commandes = $repo->findForVendeur($user);
         return $exporter->exportMesVentes($commandes);
     }
@@ -189,6 +198,7 @@ final class CommandeController extends AbstractController
         if ($this->isGranted('ROLE_ADMIN')) {
             return;
         }
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         if (!$user || $commande->getClient() !== $user) {
             throw $this->createAccessDeniedException();
@@ -218,6 +228,7 @@ final class CommandeController extends AbstractController
         if ($this->isGranted('ROLE_ADMIN')) {
             return true;
         }
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return false;

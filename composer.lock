@@ -13635,5 +13635,5 @@
         "ext-gd": "1.0",
         "ext-zip": "1.0"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

@@ -64,23 +64,30 @@ class PredictionService
     /**
      * Une petite fonction privée pour éviter de répéter le code CURL deux fois
      */
+    /** @param array<string, mixed> $data */
     private function callHuggingFace(string $url, array $data, bool $isPrediction): string
     {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $encodedData = json_encode($data);
+        if ($encodedData === false) {
+            return $isPrediction ? "Calcul local" : "Désolé, service indisponible.";
+        }
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "Authorization: Bearer " . $this->hfApiKey, 
             "Content-Type: application/json"
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
         $result = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($httpCode === 200) {
+        if ($httpCode === 200 && is_string($result)) {
             $response = json_decode($result, true);
             $content = $response['choices'][0]['message']['content'] ?? "";
 
@@ -96,23 +103,30 @@ class PredictionService
         return $isPrediction ? "Calcul local" : "Désolé, service indisponible.";
     }
 
+    /** @param array<string, mixed> $data */
     private function callMistral(string $url, array $data, bool $isPrediction): string
     {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $encodedData = json_encode($data);
+        if ($encodedData === false) {
+            return "Calcul local";
+        }
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "Authorization: Bearer " . $this->mistralApiKey, 
             "Content-Type: application/json"
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
         $result = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($httpCode === 200) {
+        if ($httpCode === 200 && is_string($result)) {
             $response = json_decode($result, true);
             $content = $response['choices'][0]['message']['content'] ?? "";
 

@@ -42,6 +42,9 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 $googleUser = $client->fetchUserFromToken($accessToken);
 
                 $email = $googleUser->getEmail();
+                if (!is_string($email) || $email === '') {
+                    throw new AuthenticationException('Google account email is missing.');
+                }
                 $googleId = $googleUser->getId(); // Google IDs can be strings
 
                 $userRepo = $this->entityManager->getRepository(User::class);

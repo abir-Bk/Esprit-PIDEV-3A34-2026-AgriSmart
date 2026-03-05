@@ -71,7 +71,7 @@ final class ConsommationController extends AbstractController
     #[Route('/{id}', name: 'app_consommation_delete', methods: ['POST'])]
     public function delete(Request $request, Consommation $consommation, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$consommation->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$consommation->getId(), (string) $request->getPayload()->getString('_token'))) {
             $entityManager->remove($consommation);
             $entityManager->flush();
         }

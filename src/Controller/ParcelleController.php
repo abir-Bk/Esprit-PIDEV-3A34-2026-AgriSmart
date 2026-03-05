@@ -88,7 +88,9 @@ if (!$user) {
                 // Erreurs de validation : on garde le formulaire ouvert dans le modal (voir showParcelleModal)
                 $errors = $form->getErrors(true);
                 foreach ($errors as $error) {
-                    $this->addFlash('danger', '❌ ' . $error->getMessage());
+                    if ($error instanceof \Symfony\Component\Form\FormError) {
+                        $this->addFlash('danger', '❌ ' . $error->getMessage());
+                    }
                 }
             }
         }
@@ -131,7 +133,9 @@ if (!$user) {
             } else {
                 $errors = $form->getErrors(true);
                 foreach ($errors as $error) {
-                    $this->addFlash('danger', '❌ ' . $error->getMessage());
+                    if ($error instanceof \Symfony\Component\Form\FormError) {
+                        $this->addFlash('danger', '❌ ' . $error->getMessage());
+                    }
                 }
             }
         }
@@ -152,7 +156,7 @@ if (!$user) {
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isCsrfTokenValid('delete' . $parcelle->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $parcelle->getId(), (string) $request->request->get('_token'))) {
             try {
                 $entityManager->remove($parcelle);
                 $entityManager->flush();
@@ -175,7 +179,7 @@ if (!$user) {
             return new JsonResponse(['success' => false, 'error' => 'Accès refusé.'], 403);
         }
 
-        if (!$this->isCsrfTokenValid('conseiller_ia_' . $parcelle->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('conseiller_ia_' . $parcelle->getId(), (string) $request->request->get('_token'))) {
             return new JsonResponse(['success' => false, 'error' => 'Token invalide.'], 400);
         }
 
@@ -254,8 +258,12 @@ if (!$user) {
             $totalConsomme += $conso->getQuantite();
         }
 
-        $surface = $culture->getParcelle()->getSurface();
+        $surface = $culture->getParcelle()?->getSurface();
         $typeCulture = $culture->getTypeCulture();
+
+        if ($surface === null || $typeCulture === null) {
+            return $this->json(['error' => 'Parcelle non trouvée ou surface non définie'], 400);
+        }
 
         // L'appel au service qui maintenant ne donnera que du 100% IA ou une erreur
         $rendementEstime = $predictionService->predict($surface, $totalConsomme, $typeCulture);
@@ -288,7 +296,8 @@ if (!$user) {
     #[Route('/culture/{id}/export-prediction-pdf', name: 'app_culture_prediction_export_pdf', methods: ['GET'])]
     public function exportPrediction(Culture $culture, PdfService $pdfService, \App\Service\PredictionService $predictionService): Response
     {
-        if ($culture->getParcelle()->getUser() !== $this->getUser()) {
+        $parcelle = $culture->getParcelle();
+        if ($parcelle === null || $parcelle->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
@@ -297,8 +306,11 @@ if (!$user) {
             $totalConsomme += $conso->getQuantite();
         }
 
-        $surfac = $culture->getParcelle()->getSurface();
+        $surfac = $parcelle->getSurface();
         $typeCulture = $culture->getTypeCulture();
+        if ($surfac === null || $typeCulture === null) {
+            throw $this->createNotFoundException('Données de culture incomplètes pour la prédiction.');
+        }
         $rendementEstime = $predictionService->predict($surfac, $totalConsomme, $typeCulture);
 
         $pdfContent = $pdfService->generatePdfResponse('pdf/prediction_rapport.html.twig', [

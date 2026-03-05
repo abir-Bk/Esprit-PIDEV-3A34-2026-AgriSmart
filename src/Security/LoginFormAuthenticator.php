@@ -69,8 +69,9 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             throw new CustomUserMessageAuthenticationException('Captcha failed');
         }
 
-        $email = $request->request->get('_username');
-        $password = $request->request->get('_password');
+        $email = (string) $request->request->get('_username', '');
+        $password = (string) $request->request->get('_password', '');
+        $csrfToken = $request->request->get('_csrf_token');
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
@@ -78,7 +79,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             new UserBadge($email),
             new PasswordCredentials($password),
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                new CsrfTokenBadge('authenticate', is_string($csrfToken) ? $csrfToken : null),
                 new RememberMeBadge(),
             ]
         );
@@ -92,7 +93,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
         $user = $token->getUser();
 
-        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+        if ($user instanceof \Symfony\Component\Security\Core\User\UserInterface && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('user_dashboard'));
         }
 

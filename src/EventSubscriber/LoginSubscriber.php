@@ -32,6 +32,9 @@ class LoginSubscriber implements EventSubscriberInterface
         }
 
         $request   = $this->requestStack->getCurrentRequest();
+        if (!$request instanceof Request) {
+            return;
+        }
         $ip        = $this->getClientIp($request);       // ← updated
         $userAgent = $this->getUserAgent($request);      // ← updated
         $country   = $this->resolveCountry($ip);
@@ -67,6 +70,9 @@ class LoginSubscriber implements EventSubscriberInterface
     public function onLoginFailureEvent(LoginFailureEvent $event): void
     {
         $request = $this->requestStack->getCurrentRequest();
+        if (!$request instanceof Request) {
+            return;
+        }
 
         $loginHistory = new LoginHistory();
         $loginHistory
@@ -75,7 +81,7 @@ class LoginSubscriber implements EventSubscriberInterface
             ->setIpAddress($this->getClientIp($request))
             ->setUserAgent($this->getUserAgent($request))
             ->setStatus('failed')
-            ->setAttemptedEmail($request->request->get('_username') ?? 'unknown');
+            ->setAttemptedEmail((string) $request->request->get('_username', 'unknown'));
 
         $this->em->persist($loginHistory);
         $this->em->flush();
@@ -84,7 +90,7 @@ class LoginSubscriber implements EventSubscriberInterface
     private function getClientIp(Request $request): string
     {
         if ($_ENV['APP_ENV'] === 'dev' && $request->query->get('test_ip')) {
-            return $request->query->get('test_ip');
+            return (string) $request->query->get('test_ip');
         }
 
         return $request->getClientIp() ?? '127.0.0.1';
@@ -93,7 +99,7 @@ class LoginSubscriber implements EventSubscriberInterface
     private function getUserAgent(Request $request): string
     {
         if ($_ENV['APP_ENV'] === 'dev' && $request->query->get('test_ua')) {
-            return $request->query->get('test_ua');
+            return (string) $request->query->get('test_ua');
         }
 
         return $request->headers->get('User-Agent') ?? 'unknown';
@@ -129,15 +135,20 @@ class LoginSubscriber implements EventSubscriberInterface
             return false;
         }
 
+        $loginTime = $lastLogin->getLoginTime();
+        if (!$loginTime instanceof \DateTimeInterface) {
+            return false;
+        }
+
         $secondsSinceLast = (new \DateTime())->getTimestamp()
-                          - $lastLogin->getLoginTime()->getTimestamp();
+                          - $loginTime->getTimestamp();
 
         if ($secondsSinceLast < 5) {
             return false;
         }
 
         $countryChanged = $lastLogin->getCountry() !== $country;
-        $browserChanged = $this->extractBrowser($lastLogin->getUserAgent())
+        $browserChanged = $this->extractBrowser($lastLogin->getUserAgent() ?? '')
                        !== $this->extractBrowser($userAgent);
 
         return $countryChanged || $browserChanged;

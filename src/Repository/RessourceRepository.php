@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Ressource;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,7 +17,7 @@ class RessourceRepository extends ServiceEntityRepository
         parent::__construct($registry, Ressource::class);
     }
 
-    public function findAllWithConsumptionQueryBuilder(?string $search = null)
+    public function findAllWithConsumptionQueryBuilder(?string $search = null): QueryBuilder
     {
         $qb = $this->createQueryBuilder('r')
             ->leftJoin('r.consommations', 'c')
@@ -31,6 +32,7 @@ class RessourceRepository extends ServiceEntityRepository
 
         return $qb;
     }
+    /** @return array<int, array{name: string, total: numeric-string}> */
     public function sumStocksByName(): array
     {
         return $this->createQueryBuilder('r')

@@ -63,6 +63,7 @@ class Parcelle
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    /** @var Collection<int, Culture> */
     #[ORM\OneToMany(targetEntity: Culture::class, mappedBy: 'parcelle')]
     private Collection $cultures;
 
@@ -142,6 +143,7 @@ class Parcelle
         return $this;
     }
 
+    /** @return Collection<int, Culture> */
     public function getCultures(): Collection
     {
         return $this->cultures;

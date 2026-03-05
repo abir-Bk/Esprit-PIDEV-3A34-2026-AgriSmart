@@ -254,7 +254,7 @@ public function details(
     #[Route('/admin/offre/delete/{id}', name: 'app_offre_delete', methods: ['POST'])]
     public function delete(Offre $offre, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$offre->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$offre->getId(), (string) $request->request->get('_token'))) {
             $em->remove($offre);
             $em->flush();
         }

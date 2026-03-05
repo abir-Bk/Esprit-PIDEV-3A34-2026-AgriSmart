@@ -270,7 +270,9 @@ class CheckoutController extends AbstractController
 
         foreach ($items as $row) {
             $item = new CommandeItem();
-            $item->setProduit($row['produit']);
+            /** @var \App\Entity\Produit $produit */
+            $produit = $row['produit'];
+            $item->setProduit($produit);
             $item->setQuantite((int) $row['qty']);
             $item->setPrixUnitaire((float) $row['unitPrice']);
             $commande->addItem($item);

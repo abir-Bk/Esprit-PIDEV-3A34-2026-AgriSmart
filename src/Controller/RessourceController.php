@@ -6,9 +6,10 @@ use App\Entity\Ressource;
 use App\Form\RessourceType;
 use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -205,7 +206,7 @@ class RessourceController extends AbstractController
         
         // Retourner la réponse avec le fichier
        // ✅ METTRE SEULEMENT ÇA
-return $this->file($tempFile, $fileName, HeaderUtils::DISPOSITION_ATTACHMENT);
+return $this->file($tempFile, $fileName, ResponseHeaderBag::DISPOSITION_ATTACHMENT);
     }
 
     public function exportCsv(RessourceRepository $repo): Response
@@ -221,6 +222,9 @@ return $this->file($tempFile, $fileName, HeaderUtils::DISPOSITION_ATTACHMENT);
         
         // Créer le contenu CSV
         $handle = fopen('php://temp', 'r+');
+        if ($handle === false) {
+            throw new \RuntimeException('Cannot create temporary file for CSV export');
+        }
         
         // Ajouter le BOM pour UTF-8
         fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
@@ -258,11 +262,11 @@ return $this->file($tempFile, $fileName, HeaderUtils::DISPOSITION_ATTACHMENT);
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $ressource = new Ressource();
-// ✅ APRÈS - une seule fois
-$ressource = new Ressource();
-/** @var \App\Entity\User $user */
-$user = $this->getUser();
-$ressource->setUser($user);
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Utilisateur invalide.');
+        }
+        $ressource->setUser($user);
         $form = $this->createForm(RessourceType::class, $ressource);
         $form->handleRequest($request);
 
@@ -319,7 +323,7 @@ $ressource->setUser($user);
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isCsrfTokenValid('delete'.$ressource->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$ressource->getId(), (string) $request->request->get('_token'))) {
             $em->remove($ressource);
             $em->flush();
             $this->addFlash('warning', 'Ressource supprimée de votre stock.');

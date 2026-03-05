@@ -209,6 +209,7 @@ class Offre
         return $this;
     }
 
+    /** @return Collection<int, Demande> */
     public function getDemandes(): Collection
     {
         return $this->demandes;

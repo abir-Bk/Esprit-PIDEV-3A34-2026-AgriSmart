@@ -17,8 +17,8 @@ services:
         autoconfigure: true
         bind:
             # On lie les différentes clés API aux variables des constructeurs
-            $huggingfaceToken: '%env(HUGGINGFACE_TOKEN)%'
-            $mistralApiKey: '%env(MISTRAL_API_KEY)%'
+            $huggingfaceToken: '%env(default:env_empty_string:HUGGINGFACE_TOKEN)%'
+            $mistralApiKey: '%env(default:env_empty_string:MISTRAL_API_KEY)%'
             Knp\Snappy\GeneratorInterface: '@knp_snappy.pdf'
 
     App\:

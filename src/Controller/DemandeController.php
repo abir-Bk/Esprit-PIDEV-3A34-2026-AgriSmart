@@ -69,6 +69,8 @@ final class DemandeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        /** @var User $currentUser */
+
         $alreadyApplied = $entityManager->getRepository(Demande::class)->findOneBy([
             'offre' => $offre,
             'user' => $currentUser 
@@ -381,6 +383,9 @@ public function analyzeVoice(Request $request): JsonResponse
     
     // On enlève les chiffres du texte pour ne pas les confondre avec un nom
     $cleanText = preg_replace('/[0-9]+/', '', $cleanText);
+    if (!is_string($cleanText)) {
+        $cleanText = '';
+    }
     $words = array_values(array_filter(explode(' ', trim($cleanText)), function($w) {
         return strlen($w) > 2; // On garde les mots de plus de 2 lettres
     }));

@@ -29,8 +29,6 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[Route('/produit')]
 final class ProduitController extends AbstractController
 {
-    private const DEV_EMAIL = 'dev@agri.tn';
-
     public function __construct(
         private readonly PanierService $panierService,
         private readonly MarketplaceRecommendationService $recommendationService,
@@ -151,7 +149,7 @@ final class ProduitController extends AbstractController
     {
         $user = $this->getCurrentUserOrDev($userRepo);
         if (!$user) {
-            throw $this->createNotFoundException("User DEV introuvable (" . self::DEV_EMAIL . ").");
+            throw $this->createAccessDeniedException('Connexion requise.');
         }
 
         $mesProduits = $repo->findBy(['vendeur' => $user], ['createdAt' => 'DESC']);
@@ -205,7 +203,7 @@ final class ProduitController extends AbstractController
 
         $vendeur = $this->getCurrentUserOrDev($userRepo);
         if (!$vendeur) {
-            throw $this->createNotFoundException("User DEV introuvable (" . self::DEV_EMAIL . ").");
+            return $this->redirectToRoute('app_login');
         }
         // $vendeur is App\Entity\User thanks to method signature
         $produit->setVendeur($vendeur);
@@ -494,9 +492,7 @@ final class ProduitController extends AbstractController
         if ($user instanceof \App\Entity\User) {
             return $user;
         }
-        /** @var ?\App\Entity\User $dev */
-        $dev = $userRepo->findOneBy(['email' => self::DEV_EMAIL]);
-        return $dev;
+        return null;
     }
 
     private function handleImageUpload(?UploadedFile $file, Produit $produit, SluggerInterface $slugger): void

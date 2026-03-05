@@ -26,6 +26,10 @@ class TwoFactorCodeService
     public function sendByEmail(User $user): void
     {
         $code = $user->getTwoFactorCode();
+        $email = $user->getEmail();
+        if ($email === null) {
+            return;
+        }
 
         $html = sprintf(
             '<h2>Suspicious Login Detected</h2>
@@ -38,7 +42,7 @@ class TwoFactorCodeService
         );
 
         $this->mailer->sendEmail(
-            $user->getEmail(),
+            $email,
             'Suspicious Login — Verify Your Identity',
             $html
         );

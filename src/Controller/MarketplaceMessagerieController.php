@@ -171,7 +171,7 @@ final class MarketplaceMessagerieController extends AbstractController
                 }
 
                 $extension = $audioFile->guessExtension() ?: 'webm';
-                if ($extension === 'bin' || $extension === '') {
+                if ($extension === 'bin') {
                     $map = [
                         'audio/webm' => 'webm',
                         'video/webm' => 'webm',
@@ -186,12 +186,12 @@ final class MarketplaceMessagerieController extends AbstractController
                         'audio/aac' => 'aac',
                         'application/octet-stream' => 'webm',
                     ];
-                    $extension = $map[$mimeType] ?? 'webm';
+                    $extension = $map[$mimeType];
                 }
                 $filename = 'voice-' . bin2hex(random_bytes(12)) . '.' . $extension;
                 $audioFile->move($uploadDir, $filename);
                 $message->setAudioPath('uploads/marketplace/messages/audio/' . $filename);
-            } elseif ($audioBlob !== '') { // @phpstan-ignore-line
+            } elseif ($audioBlob !== '') {
                 if (!preg_match('/^data:(audio\/[a-zA-Z0-9.+-]+);base64,(.+)$/', $audioBlob, $matches)) {
                     return new JsonResponse([
                         'ok' => false,

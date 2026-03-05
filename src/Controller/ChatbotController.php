@@ -31,7 +31,7 @@ class ChatbotController extends AbstractController
         $message = $request->request->get('message');
         $user = $security->getUser();
 
-        if (!$message) {
+        if (!$message || !is_string($message)) {
             return new JsonResponse(['response' => 'Dis-moi quelque chose !']);
         }
 
@@ -45,7 +45,9 @@ class ChatbotController extends AbstractController
                 foreach ($parcelles as $p) {
                     $context .= "- Parcelle: {$p->getNom()}, Surface: {$p->getSurface()}ha, Sol: {$p->getTypeSol()}\n";
                     foreach ($p->getCultures() as $c) {
-                        $context .= "  * Culture: {$c->getTypeCulture()} ({$c->getVariete()}), Statut: {$c->getStatut()}, Plantation: {$c->getDatePlantation()->format('d/m/Y')}\n";
+                        $plantation = $c->getDatePlantation();
+                        $plantationText = $plantation instanceof \DateTimeInterface ? $plantation->format('d/m/Y') : 'N/A';
+                        $context .= "  * Culture: {$c->getTypeCulture()} ({$c->getVariete()}), Statut: {$c->getStatut()}, Plantation: {$plantationText}\n";
                         foreach ($c->getConsommations() as $conso) {
                             $output = $conso->getRessource() ? $conso->getRessource()->getNom() : 'Inconnue';
                             $context .= "    - Consommation: {$output}: {$conso->getQuantite()} {$conso->getRessource()?->getUnite()}\n";

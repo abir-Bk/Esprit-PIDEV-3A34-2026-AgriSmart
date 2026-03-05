@@ -81,6 +81,10 @@ public function request(Request $request, ResendMailer $resendMailer, Translator
             return $this->redirectToRoute('app_forgot_password_request');
         }
 
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Utilisateur invalide pour la réinitialisation.');
+        }
+
         $form = $this->createForm(ChangePasswordFormType::class);
         $form->handleRequest($request);
 
@@ -139,8 +143,13 @@ public function request(Request $request, ResendMailer $resendMailer, Translator
     ]);
 
     try {
+        $emailTo = $user->getEmail();
+        if ($emailTo === null) {
+            return $this->redirectToRoute('app_check_email');
+        }
+
         $resendMailer->sendEmail(
-            $user->getEmail(),
+            $emailTo,
             'Réinitialisation de votre mot de passe',
             $html
         );

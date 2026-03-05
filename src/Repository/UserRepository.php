@@ -6,6 +6,7 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/** @extends ServiceEntityRepository<User> */
 class UserRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -23,6 +24,8 @@ public function save(User $user, bool $flush = false): void
 }
     public function findByEmail(string $email): ?User
     {
-        return $this->findOneBy(['email' => $email]);
+        $user = $this->findOneBy(['email' => $email]);
+
+        return $user instanceof User ? $user : null;
     }
 }

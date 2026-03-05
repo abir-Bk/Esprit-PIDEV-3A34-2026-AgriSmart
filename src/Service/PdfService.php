@@ -18,6 +18,8 @@ class PdfService
 
     /**
      * Generates a PDF content from a template.
+        *
+        * @param array<string, mixed> $data
      */
     public function generatePdfResponse(string $template, array $data, string $filename): string
     {

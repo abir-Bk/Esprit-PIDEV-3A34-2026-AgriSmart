@@ -22,7 +22,7 @@ class GoogleController extends AbstractController
     }
 
     #[Route('/connect/google/check', name: 'connect_google_check')]
-    public function connectCheck()
+    public function connectCheck(): never
     {
         // This route will not be executed
         // Symfony will handle the OAuth callback automatically

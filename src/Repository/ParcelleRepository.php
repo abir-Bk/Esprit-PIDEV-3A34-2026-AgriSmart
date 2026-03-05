@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Parcelle;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,8 +16,9 @@ class ParcelleRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Parcelle::class);
     }
-    public function findBySearchQuery($user, $searchTerm, $sortBy, $direction)
-{
+    /** @return array<int, Parcelle> */
+    public function findBySearchQuery(User $user, string $searchTerm, string $sortBy, string $direction): array
+    {
     $qb = $this->createQueryBuilder('p')
         ->where('p.user = :user')
         ->setParameter('user', $user);
@@ -28,12 +30,12 @@ class ParcelleRepository extends ServiceEntityRepository
 
     // Sécurisation du tri pour éviter les injections SQL
     $validFields = ['id', 'nom', 'surface']; // Ajoutez vos champs ici
-    if (in_array($sortBy, $validFields)) {
+    if (in_array($sortBy, $validFields, true)) {
         $qb->orderBy('p.' . $sortBy, $direction === 'DESC' ? 'DESC' : 'ASC');
     }
 
     return $qb->getQuery()->getResult();
-}
+    }
 
     //    /**
     //     * @return Parcelle[] Returns an array of Parcelle objects

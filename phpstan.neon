@@ -2,5 +2,5 @@ parameters:
   level: 8
   paths:
     - src
-  ignoreErrors:
-    - '#is never assigned int so it can be removed from the property type#'
+  # avoid false positives when types come from phpdoc (method_exists, null_coalesce)
+  treatPhpDocTypesAsCertain: false

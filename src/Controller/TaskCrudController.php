@@ -117,12 +117,18 @@ class TaskCrudController extends AbstractController
 
         foreach ($tasks as $task) {
             $uid = 'task-' . $task->getIdTask() . '@agrismart.tn';
-            $summary = str_replace([",", ";"], ["\\,", "\\;"], $task->getTitre());
+            $summary = str_replace([",", ";"], ["\\,", "\\;"], $task->getTitre() ?? '');
             $description = str_replace([",", ";", "\n"], ["\\,", "\\;", "\\n"], $task->getDescription() ?? '');
 
             // Ensure we have a DateTime object to work with setTimezone
-            $startDate = \DateTimeImmutable::createFromInterface($task->getDateDebut());
-            $endDate = \DateTimeImmutable::createFromInterface($task->getDateFin() ?: $task->getDateDebut());
+            $dateDebut = $task->getDateDebut();
+            if (!$dateDebut instanceof \DateTimeInterface) {
+                continue;
+            }
+
+            $dateFin = $task->getDateFin() ?? $dateDebut;
+            $startDate = \DateTimeImmutable::createFromInterface($dateDebut);
+            $endDate = \DateTimeImmutable::createFromInterface($dateFin);
 
             $start = $startDate->setTimezone(new \DateTimeZone('UTC'))->format('Ymd\THis\Z');
             $end = $endDate->setTimezone(new \DateTimeZone('UTC'))->format('Ymd\THis\Z');
@@ -249,7 +255,7 @@ class TaskCrudController extends AbstractController
             throw $this->createNotFoundException('Tache introuvable.');
         }
 
-        if ($this->isCsrfTokenValid('delete' . $task->getIdTask(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $task->getIdTask(), (string) $request->request->get('_token'))) {
             $em->remove($task);
             $em->flush();
             $this->addFlash('success', 'Tache supprimee avec succes.');

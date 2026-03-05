@@ -19,9 +19,9 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class userController extends AbstractController
 {
     #[Route('/users/dashboard', name: 'user_dashboard')]
-    public function dashboard(Security $security)
+    public function dashboard(): Response
     {
-        $user = $security->getUser();
+        $user = $this->getUser();
 
         if (!$user) {
             return $this->redirectToRoute('app_login');
@@ -32,8 +32,6 @@ class userController extends AbstractController
             return $this->redirectToRoute('admin_marketplace_dashboard');
         }
         return $this->render('front/semi-public/users/profile.html.twig');
-
-       
     }
 
     #[Route('/admin/users', name: 'admin_users')]
@@ -98,7 +96,7 @@ class userController extends AbstractController
     ): Response {
         $user = $repo->find($id);
 
-        if (!$user) {
+        if (!$user instanceof \App\Entity\User) {
             throw $this->createNotFoundException('User not found');
         }
 
@@ -138,6 +136,7 @@ public function exportExcel(UserRepository $userRepository): Response
 
     $row = 2;
     foreach ($users as $user) {
+        /** @var \App\Entity\User $user */
         $sheet->setCellValue('A'.$row, $user->getId());
         $sheet->setCellValue('B'.$row, $user->getFirstName());
         $sheet->setCellValue('C'.$row, $user->getLastName());

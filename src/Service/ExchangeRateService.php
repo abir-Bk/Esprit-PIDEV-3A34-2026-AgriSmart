@@ -10,7 +10,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ExchangeRateService
 {
+    /** @var array<string, array<string, float>> */
     private array $ratesByBase = [];
+    /** @var array<string, \DateTimeImmutable|null> */
     private array $updatedAtByBase = [];
 
     public function __construct(
@@ -43,6 +45,7 @@ class ExchangeRateService
         return round($amount * (float) $rates[$toCurrency], 2);
     }
 
+    /** @return array<string, float>|null */
     public function getRates(string $baseCurrency = 'TND'): ?array
     {
         $baseCurrency = strtoupper(trim($baseCurrency));
@@ -63,7 +66,7 @@ class ExchangeRateService
             return $this->fetchRates($baseCurrency);
         });
 
-        if (!is_array($payload) || !isset($payload['rates']) || !is_array($payload['rates'])) {
+        if (!is_array($payload) || !isset($payload['rates'])) {
             return null;
         }
 
@@ -120,7 +123,7 @@ class ExchangeRateService
         }
 
         $data = $response->toArray(false);
-        if (!is_array($data) || !isset($data['rates']) || !is_array($data['rates'])) {
+        if (!isset($data['rates']) || !is_array($data['rates'])) {
             return null;
         }
 

@@ -13,6 +13,7 @@ class FaceRecognitionService
         private LoggerInterface $logger,
     ) {}
 
+    /** @return array{match: bool, score: float, message: string} */
     public function verifyFace(User $user, string $capturedImageBase64): array
     {
         if (!$user->getImage()) {
@@ -39,9 +40,12 @@ class FaceRecognitionService
 
         $this->logger->info('Using stored image: ' . $storedImagePath);
 
-        $imageData = base64_decode(
-            preg_replace('/^data:image\/\w+;base64,/', '', $capturedImageBase64)
-        );
+        $sanitizedBase64 = preg_replace('/^data:image\/\w+;base64,/', '', $capturedImageBase64);
+        if (!is_string($sanitizedBase64)) {
+            return ['match' => false, 'score' => 0.0, 'message' => 'Invalid image data'];
+        }
+
+        $imageData = base64_decode($sanitizedBase64, true);
 
         if (!$imageData) {
             return ['match' => false, 'score' => 0.0, 'message' => 'Invalid image data'];
@@ -65,6 +69,7 @@ class FaceRecognitionService
         return $result;
     }
 
+    /** @return array{match: bool, score: float, message: string} */
     private function runInference(string $storedPath, string $capturedPath): array
     {
         $scriptPath = $this->projectDir . '/var/ml_models/face_inference.py';

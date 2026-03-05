@@ -75,6 +75,7 @@ class Task
     #[ORM\Column(name: 'created_by', nullable: true)]
     private ?int $createdBy = null;
 
+    /** @var Collection<int, TaskAssignment> */
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskAssignment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $assignments;
 

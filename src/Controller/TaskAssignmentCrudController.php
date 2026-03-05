@@ -93,7 +93,7 @@ class TaskAssignmentCrudController extends AbstractController
             throw $this->createNotFoundException('Affectation introuvable.');
         }
 
-        if ($this->isCsrfTokenValid('delete' . $assignment->getIdAssignment(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $assignment->getIdAssignment(), (string) $request->request->get('_token'))) {
             $em->remove($assignment);
             $em->flush();
             $this->addFlash('success', 'Affectation supprimée avec succès.');

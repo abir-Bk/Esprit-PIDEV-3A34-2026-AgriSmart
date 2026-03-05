@@ -29,8 +29,8 @@ class CultureController extends AbstractController
         $datePlantationStr = $request->request->get('datePlantation');
         $dateRecolteStr = $request->request->get('dateRecoltePrevue');
         try {
-            $datePlantation = $datePlantationStr ? new \DateTime($datePlantationStr) : null;
-            $dateRecoltePrevue = $dateRecolteStr ? new \DateTime($dateRecolteStr) : (($datePlantation ? clone $datePlantation : null)?->modify('+90 days'));
+            $datePlantation = $datePlantationStr ? new \DateTime((string) $datePlantationStr) : null;
+            $dateRecoltePrevue = $dateRecolteStr ? new \DateTime((string) $dateRecolteStr) : ($datePlantation ? (clone $datePlantation)->modify('+90 days') : null);
         } catch (\Exception $e) {
             $datePlantation = null;
             $dateRecoltePrevue = null;
@@ -42,7 +42,8 @@ class CultureController extends AbstractController
         $culture->setVariete((string) $request->request->get('variete', ''));
         $culture->setStatut((string) ($request->request->get('statut') ?? 'En croissance'));
         $culture->setDatePlantation($datePlantation ?? new \DateTime());
-        $culture->setDateRecoltePrevue($dateRecoltePrevue ?? (clone $culture->getDatePlantation())->modify('+90 days'));
+        $plantationDate = $culture->getDatePlantation() ?? new \DateTime();
+        $culture->setDateRecoltePrevue($dateRecoltePrevue ?? (clone $plantationDate)->modify('+90 days'));
 
         $errors = $validator->validate($culture);
         if ($errors->count() > 0) {
@@ -107,7 +108,7 @@ class CultureController extends AbstractController
         $datePlantationStr = $request->request->get('datePlantation');
         try {
             if ($datePlantationStr) {
-                $culture->setDatePlantation(new \DateTime($datePlantationStr));
+                $culture->setDatePlantation(new \DateTime((string) $datePlantationStr));
             }
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Format de date invalide.');
@@ -126,7 +127,7 @@ class CultureController extends AbstractController
     #[Route('/{id}/delete', name: 'app_culture_delete', methods: ['POST'])]
     public function delete(Request $request, Culture $culture, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$culture->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$culture->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($culture);
             $entityManager->flush();
             $this->addFlash('warning', 'Culture supprimée.');
@@ -145,7 +146,11 @@ class CultureController extends AbstractController
         }
 
        try {
-    $base64Image = base64_encode(file_get_contents($imageFile->getPathname()));
+    $fileContent = file_get_contents($imageFile->getPathname());
+    if ($fileContent === false) {
+        throw new \Exception('Impossible de lire le fichier image.');
+    }
+    $base64Image = base64_encode($fileContent);
     $mimeType = $imageFile->getMimeType();
 
     // UTILISATION DU MODÈLE 2.5 FLASH 

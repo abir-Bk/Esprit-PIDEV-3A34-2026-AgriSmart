@@ -16,7 +16,7 @@ class AdminRessourceController extends AbstractController
     public function index(Request $request, RessourceRepository $ressourceRepository, PaginatorInterface $paginator): Response
     {
         $search = $request->query->get('q');
-        $queryBuilder = $ressourceRepository->findAllWithConsumptionQueryBuilder($search);
+        $queryBuilder = $ressourceRepository->findAllWithConsumptionQueryBuilder(is_string($search) ? $search : null);
 
         $pagination = $paginator->paginate(
             $queryBuilder,

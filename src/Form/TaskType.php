@@ -235,10 +235,17 @@ class TaskType extends AbstractType
                     $user->getFirstName(),
                     $user->getLastName()
                 ),
-                'label' => 'Créée par',
+                'label' => 'Créée par (Agriculteur)',
                 'required' => false,
-                'placeholder' => 'Sélectionner un utilisateur',
+                'placeholder' => 'Sélectionner un agriculteur',
                 'mapped' => false,
+                'query_builder' => function ($er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.role = :role')
+                        ->setParameter('role', 'agriculteur')
+                        ->orderBy('u.firstName', 'ASC')
+                        ->addOrderBy('u.lastName', 'ASC');
+                },
             ]);
     }
 

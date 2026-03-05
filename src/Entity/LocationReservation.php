@@ -36,11 +36,11 @@ class LocationReservation
     #[ORM\Column]
     private int $days = 1;
 
-    #[ORM\Column]
-    private float $unitPrice = 0.0;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $unitPrice = '0.00';
 
-    #[ORM\Column]
-    private float $totalPrice = 0.0;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $totalPrice = '0.00';
 
     #[ORM\Column(length: 20)]
     private string $status = self::STATUS_ACTIVE;
@@ -78,7 +78,6 @@ class LocationReservation
     public function setProduit(?Produit $produit): static
     {
         $this->produit = $produit;
-
         return $this;
     }
 
@@ -90,7 +89,6 @@ class LocationReservation
     public function setLocataire(?User $locataire): static
     {
         $this->locataire = $locataire;
-
         return $this;
     }
 
@@ -102,7 +100,6 @@ class LocationReservation
     public function setStartDate(?\DateTimeImmutable $startDate): static
     {
         $this->startDate = $startDate;
-
         return $this;
     }
 
@@ -114,7 +111,6 @@ class LocationReservation
     public function setEndDate(?\DateTimeImmutable $endDate): static
     {
         $this->endDate = $endDate;
-
         return $this;
     }
 
@@ -126,31 +122,28 @@ class LocationReservation
     public function setDays(int $days): static
     {
         $this->days = max(1, $days);
-
         return $this;
     }
 
-    public function getUnitPrice(): float
+    public function getUnitPrice(): string
     {
         return $this->unitPrice;
     }
 
-    public function setUnitPrice(float $unitPrice): static
+    public function setUnitPrice(string $unitPrice): static
     {
-        $this->unitPrice = max(0.0, $unitPrice);
-
+        $this->unitPrice = $unitPrice;
         return $this;
     }
 
-    public function getTotalPrice(): float
+    public function getTotalPrice(): string
     {
         return $this->totalPrice;
     }
 
-    public function setTotalPrice(float $totalPrice): static
+    public function setTotalPrice(string $totalPrice): static
     {
-        $this->totalPrice = max(0.0, $totalPrice);
-
+        $this->totalPrice = $totalPrice;
         return $this;
     }
 
@@ -162,7 +155,6 @@ class LocationReservation
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 

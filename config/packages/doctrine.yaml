@@ -1,6 +1,8 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
+        options:
+            1002: "SET time_zone = '+01:00'"
         # On garde une seule ligne ici
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true

@@ -39,8 +39,7 @@ class MarketplaceConversation
     /**
      * @var Collection<int, MarketplaceMessage>
      */
-    #[ORM\OneToMany(mappedBy: 'conversation', targetEntity: MarketplaceMessage::class, orphanRemoval: true)]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+#[ORM\OneToMany(mappedBy: 'conversation', targetEntity: MarketplaceMessage::class, cascade: ['persist', 'remove'], orphanRemoval: true)]    #[ORM\OrderBy(['createdAt' => 'ASC'])]
     private Collection $messages;
 
     public function __construct()

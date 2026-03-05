@@ -26,17 +26,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    private ?string $lastName = null;
-
+private string $firstName = '';
+   #[ORM\Column(length: 255)]
+#[Assert\NotBlank]
+private string $lastName = '';
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    private ?string $email = null;
-
+private string $email = '';
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
     private string $role = 'agriculteur';
@@ -170,20 +167,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
+    public function getLastName(): string
+{
+    return $this->lastName;
+}
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
         return $this;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
+   public function getEmail(): string
+{
+    return $this->email;
+}
     public function setEmail(string $email): static
     {
         $this->email = $email;

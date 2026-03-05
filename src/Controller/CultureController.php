@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/culture')]
 class CultureController extends AbstractController
@@ -28,8 +29,8 @@ class CultureController extends AbstractController
         $datePlantationStr = $request->request->get('datePlantation');
         $dateRecolteStr = $request->request->get('dateRecoltePrevue');
         try {
-            $datePlantation = $datePlantationStr ? new \DateTime($datePlantationStr) : null;
-            $dateRecoltePrevue = $dateRecolteStr ? new \DateTime($dateRecolteStr) : (($datePlantation ? clone $datePlantation : null)?->modify('+90 days'));
+            $datePlantation = $datePlantationStr ? new \DateTime((string) $datePlantationStr) : null;
+            $dateRecoltePrevue = $dateRecolteStr ? new \DateTime((string) $dateRecolteStr) : ($datePlantation ? (clone $datePlantation)->modify('+90 days') : null);
         } catch (\Exception $e) {
             $datePlantation = null;
             $dateRecoltePrevue = null;
@@ -41,7 +42,8 @@ class CultureController extends AbstractController
         $culture->setVariete((string) $request->request->get('variete', ''));
         $culture->setStatut((string) ($request->request->get('statut') ?? 'En croissance'));
         $culture->setDatePlantation($datePlantation ?? new \DateTime());
-        $culture->setDateRecoltePrevue($dateRecoltePrevue ?? (clone $culture->getDatePlantation())->modify('+90 days'));
+        $plantationDate = $culture->getDatePlantation() ?? new \DateTime();
+        $culture->setDateRecoltePrevue($dateRecoltePrevue ?? (clone $plantationDate)->modify('+90 days'));
 
         $errors = $validator->validate($culture);
         if ($errors->count() > 0) {
@@ -54,7 +56,7 @@ class CultureController extends AbstractController
         $entityManager->persist($culture);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Nouvelle culture ajoutée avec succès.');
+        $this->addFlash('success', '✅ Nouvelle culture ajoutée avec succès.');
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -82,27 +84,21 @@ class CultureController extends AbstractController
         }
 
         if ($ressource->getStockRestant() < $quantiteUtilisee) {
-            $this->addFlash('danger', "Stock insuffisant pour {$ressource->getNom()} (disponible : {$ressource->getStockRestant()}).");
+            $this->addFlash('danger', "Stock insuffisant.");
             return $this->redirectToRoute('app_parcelle_index');
         }
 
-        // Mise à jour du stock
         $ressource->setStockRestant($ressource->getStockRestant() - $quantiteUtilisee);
-
-        // Création de l'historique
         $consommation = new Consommation();
         $consommation->setRessource($ressource);
         $consommation->setCulture($culture);
         $consommation->setQuantite($quantiteUtilisee);
         $consommation->setDateConsommation(new \DateTimeImmutable());
         
-        // Correction ici : On ne définit pas l'agriculteur sur la consommation 
-        // car le champ n'existe pas dans l'entité Consommation fournie.
-
         $em->persist($consommation);
         $em->flush();
 
-        $this->addFlash('success', "Stock mis à jour (-{$quantiteUtilisee})");
+        $this->addFlash('success', "✅ Stock mis à jour.");
         return $this->redirectToRoute('app_parcelle_index');
     }
 
@@ -110,13 +106,9 @@ class CultureController extends AbstractController
     public function edit(Request $request, Culture $culture, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         $datePlantationStr = $request->request->get('datePlantation');
-        $dateRecolteStr = $request->request->get('dateRecoltePrevue');
         try {
             if ($datePlantationStr) {
-                $culture->setDatePlantation(new \DateTime($datePlantationStr));
-            }
-            if ($dateRecolteStr) {
-                $culture->setDateRecoltePrevue(new \DateTime($dateRecolteStr));
+                $culture->setDatePlantation(new \DateTime((string) $datePlantationStr));
             }
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Format de date invalide.');
@@ -127,27 +119,78 @@ class CultureController extends AbstractController
         $culture->setVariete((string) $request->request->get('variete', ''));
         $culture->setStatut((string) $request->request->get('statut', ''));
 
-        $errors = $validator->validate($culture);
-        if ($errors->count() > 0) {
-            foreach ($errors as $error) {
-                $this->addFlash('danger', $error->getMessage());
-            }
-            return $this->redirectToRoute('app_parcelle_index');
-        }
-
         $entityManager->flush();
-        $this->addFlash('success', 'Culture mise à jour.');
+        $this->addFlash('success', '✅ Culture mise à jour.');
         return $this->redirectToRoute('app_parcelle_index');
     }
 
     #[Route('/{id}/delete', name: 'app_culture_delete', methods: ['POST'])]
     public function delete(Request $request, Culture $culture, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$culture->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$culture->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($culture);
             $entityManager->flush();
             $this->addFlash('warning', 'Culture supprimée.');
         }
         return $this->redirectToRoute('app_parcelle_index');
     }
+
+    #[Route('/ia/diagnostiquer-global', name: 'app_ia_diagnose_global', methods: ['POST'])]
+    public function diagnostiquerGlobal(Request $request, HttpClientInterface $httpClient): Response
+    {
+        $imageFile = $request->files->get('image_plante');
+
+        if (!$imageFile) {
+            $this->addFlash('danger', 'Veuillez fournir une image.');
+            return $this->redirectToRoute('app_parcelle_index');
+        }
+
+       try {
+    $fileContent = file_get_contents($imageFile->getPathname());
+    if ($fileContent === false) {
+        throw new \Exception('Impossible de lire le fichier image.');
+    }
+    $base64Image = base64_encode($fileContent);
+    $mimeType = $imageFile->getMimeType();
+
+    // UTILISATION DU MODÈLE 2.5 FLASH 
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $_ENV['GEMINI_API_KEY'];
+
+    $response = $httpClient->request('POST', $url, [
+        'headers' => [
+            'Content-Type' => 'application/json',
+        ],
+        'json' => [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => "Tu es un expert agronome. Identifie la plante et sa maladie sur cette photo. Donne des conseils de traitement précis."],
+                        [
+                            'inline_data' => [
+                                'mime_type' => $mimeType,
+                                'data' => $base64Image
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]);
+
+    $data = $response->toArray();
+
+    if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+        return $this->render('front/semi-public/parcelle/resultat.html.twig', [
+            'diagnostic' => $data['candidates'][0]['content']['parts'][0]['text'],
+            'image_envoyee' => "data:$mimeType;base64,$base64Image",
+            'culture' => null
+        ]);
+    } else {
+        dd("Réponse reçue mais structure de texte absente :", $data);
+    }
+
+} catch (\Exception $e) {
+    // Si tu as encore une erreur, ce dd() nous dira exactement quoi
+    dd("ERREUR API : " . $e->getMessage());
 }
+    }}

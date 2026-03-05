@@ -40,4 +40,13 @@ class CultureRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    /** @return array<int, array{type: string, count: numeric-string}> */
+    public function countCulturesByType(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select('c.typeCulture as type, COUNT(c.id) as count')
+            ->groupBy('c.typeCulture')
+            ->getQuery()
+            ->getResult();
+    }
 }

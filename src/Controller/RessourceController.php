@@ -6,9 +6,10 @@ use App\Entity\Ressource;
 use App\Form\RessourceType;
 use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -16,7 +17,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-
+use Symfony\Component\HttpFoundation\HeaderUtils;
 #[Route('/ressource')]
 #[IsGranted('ROLE_AGRICULTEUR')]
 class RessourceController extends AbstractController
@@ -204,9 +205,8 @@ class RessourceController extends AbstractController
         $writer->save($tempFile);
         
         // Retourner la réponse avec le fichier
-        return $this->file($tempFile, $fileName, Response::HTTP_OK, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+       // ✅ METTRE SEULEMENT ÇA
+return $this->file($tempFile, $fileName, ResponseHeaderBag::DISPOSITION_ATTACHMENT);
     }
 
     public function exportCsv(RessourceRepository $repo): Response
@@ -222,6 +222,9 @@ class RessourceController extends AbstractController
         
         // Créer le contenu CSV
         $handle = fopen('php://temp', 'r+');
+        if ($handle === false) {
+            throw new \RuntimeException('Cannot create temporary file for CSV export');
+        }
         
         // Ajouter le BOM pour UTF-8
         fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
@@ -259,8 +262,11 @@ class RessourceController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $ressource = new Ressource();
-        $ressource->setUser($this->getUser());
-
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Utilisateur invalide.');
+        }
+        $ressource->setUser($user);
         $form = $this->createForm(RessourceType::class, $ressource);
         $form->handleRequest($request);
 
@@ -317,7 +323,7 @@ class RessourceController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isCsrfTokenValid('delete'.$ressource->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$ressource->getId(), (string) $request->request->get('_token'))) {
             $em->remove($ressource);
             $em->flush();
             $this->addFlash('warning', 'Ressource supprimée de votre stock.');

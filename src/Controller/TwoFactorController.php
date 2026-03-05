@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TwoFactorController extends AbstractController
@@ -37,7 +38,7 @@ class TwoFactorController extends AbstractController
         $error = null;
 
         if ($request->isMethod('POST')) {
-            $submittedCode = trim($request->request->get('code', ''));
+            $submittedCode = trim((string) $request->request->get('code', ''));
 
             if ($this->twoFactorCodeService->verify($user, $submittedCode)) {
                 $this->clearSession($session);
@@ -121,14 +122,14 @@ class TwoFactorController extends AbstractController
         ]);
     }
 
-    private function getSessionUser($session): ?User
+    private function getSessionUser(SessionInterface $session): ?User
     {
         $userId = $session->get('2fa_user_id');
         if (!$userId) return null;
         return $this->em->getRepository(User::class)->find($userId);
     }
 
-    private function clearSession($session): void
+    private function clearSession(SessionInterface $session): void
     {
         $session->remove('2fa_pending');
         $session->remove('2fa_user_id');
@@ -143,7 +144,11 @@ public function debugPath(Request $request): JsonResponse
         return $this->json(['error' => 'no session user']);
     }
 
-    $uploadDir       = $this->getParameter('kernel.project_dir') . '/public/uploads';
+    $uploadDir = $this->getParameter('kernel.project_dir');
+    if (!is_string($uploadDir)) {
+        throw new \RuntimeException('kernel.project_dir must be a string');
+    }
+    $uploadDir .= '/public/uploads';
     $storedImagePath = $uploadDir . '/users/images/' . $user->getImage();
 
     return $this->json([

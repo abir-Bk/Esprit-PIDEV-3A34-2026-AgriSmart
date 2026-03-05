@@ -11,8 +11,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class CalendarSubscriber implements EventSubscriberInterface
 {
-    private $taskRepository;
-    private $router;
+    private TaskRepository $taskRepository;
+    private UrlGeneratorInterface $router;
 
     public function __construct(
         TaskRepository $taskRepository,
@@ -31,21 +31,23 @@ class CalendarSubscriber implements EventSubscriberInterface
 
     public function onCalendarSetData(CalendarEvent $calendarEvent): void
     {
-        $start = $calendarEvent->getStart();
-        $end = $calendarEvent->getEnd();
-        $filters = $calendarEvent->getFilters();
-
         // Fetch tasks
-        // In a real app, you might want to filter by date using $start and $end
         $tasks = $this->taskRepository->findAll();
 
         foreach ($tasks as $task) {
-            $isMultiDay = $task->getDateFin() && $task->getDateFin()->format('Y-m-d') !== $task->getDateDebut()->format('Y-m-d');
+            $startDate = $task->getDateDebut();
+            if (!$startDate instanceof \DateTimeInterface) {
+                continue;
+            }
+
+            $endDate = $task->getDateFin() ?? $startDate;
+            $title = $task->getTitre() ?? 'Tâche';
+            $isMultiDay = $task->getDateFin() instanceof \DateTimeInterface && $task->getDateFin()->format('Y-m-d') !== $startDate->format('Y-m-d');
 
             $event = new Event(
-                $task->getTitre(),
-                $task->getDateDebut(),
-                $task->getDateFin() ?: $task->getDateDebut()
+                $title,
+                $startDate,
+                $endDate
             );
 
             $event->setOptions([

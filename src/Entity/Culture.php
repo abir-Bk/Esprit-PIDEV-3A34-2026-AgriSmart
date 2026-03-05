@@ -62,7 +62,8 @@ class Culture
     #[Assert\NotNull(message: "La parcelle est obligatoire.")]
     private ?Parcelle $parcelle = null;
 
-    #[ORM\OneToMany(targetEntity: Consommation::class, mappedBy: 'culture')]
+    /** @var Collection<int, Consommation> */
+    #[ORM\OneToMany(targetEntity: Consommation::class, mappedBy: 'culture', cascade: ['remove'])]
     private Collection $consommations;
 
     public function __construct()
@@ -141,6 +142,7 @@ class Culture
         return $this;
     }
 
+    /** @return Collection<int, Consommation> */
     public function getConsommations(): Collection
     {
         return $this->consommations;

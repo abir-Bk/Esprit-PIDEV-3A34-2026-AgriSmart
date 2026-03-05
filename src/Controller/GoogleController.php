@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use League\OAuth2\Client\Provider\GoogleUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,7 +22,7 @@ class GoogleController extends AbstractController
     }
 
     #[Route('/connect/google/check', name: 'connect_google_check')]
-    public function connectCheck(ClientRegistry $clientRegistry)
+    public function connectCheck(): never
     {
         // This route will not be executed
         // Symfony will handle the OAuth callback automatically

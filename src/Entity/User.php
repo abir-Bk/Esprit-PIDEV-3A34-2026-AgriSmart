@@ -238,8 +238,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'agriculteur' => 'pending',
             'fournisseur' => 'pending',
         ];
-        $this->status = $mapping[$role] ?? 'pending';
-
+$this->status = $mapping[$role];
         return $this;
     }
 

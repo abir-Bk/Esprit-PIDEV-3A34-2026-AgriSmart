@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Vich\UploaderBundle\Mapping\PropertyMapping;
 use Vich\UploaderBundle\Naming\NamerInterface;
 
+/** @implements NamerInterface<object> */
 class MimeTypeNamer implements NamerInterface
 {
     public function name(object $object, PropertyMapping $mapping): string
@@ -40,7 +41,11 @@ class MimeTypeNamer implements NamerInterface
                 $ext = 'bin';
             }
         } else {
-            $ext = strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION)) ?: 'bin';
+            if ($file === null) {
+                $ext = 'bin';
+            } else {
+                $ext = strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION)) ?: 'bin';
+            }
         }
 
         return sprintf('%s.%s', uniqid('', true), $ext);

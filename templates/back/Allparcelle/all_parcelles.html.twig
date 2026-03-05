@@ -1,0 +1,122 @@
+{% extends 'back/admin_base.html.twig' %}
+
+{% block title %}Admin - Liste Globale des Parcelles{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    {# Inclusion de la sidebar comme sur la page User Details #}
+    {% include 'back/components/sidebar.html.twig' %}
+
+    <div class="page-content-wrapper p-xxl-4 w-100">
+
+        <div class="row">
+            <div class="col-12 mb-4 mb-sm-5">
+                <div class="d-sm-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0 mt-2">Vue Globale des Parcelles</h1>
+                        <p class="text-muted mb-0">Supervision de tous les agriculteurs et leurs cultures.</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-dark px-3 py-2">
+                            <i class="bi bi-layers me-2"></i>{{ parcelles|length }} parcelles au total
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-transparent border-bottom">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Liste des exploitations</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4 border-0">Agriculteur</th>
+                                        <th class="border-0">Nom de la Parcelle</th>
+                                        <th class="border-0">Surface</th>
+                                        <th class="border-0">Cultures Actives</th>
+                                        <th class="text-center border-0 rounded-end">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for parcelle in parcelles %}
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-xs me-2">
+                                                        <div class="avatar-img rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
+                                                            {{ parcelle.user.firstName|slice(0, 1)|upper }}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark">{{ parcelle.user.firstName }} {{ parcelle.user.lastName }}</div>
+                                                        <small class="text-muted">{{ parcelle.user.email }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="fw-medium text-dark">{{ parcelle.nom }}</span></td>
+                                            <td>
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="bi bi-area me-1"></i>{{ parcelle.surface }} ha
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if parcelle.cultures|length > 0 %}
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        {% for culture in parcelle.cultures %}
+                                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 small">
+                                                                {{ culture.typeCulture }}
+                                                            </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted small italic">Aucune culture</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                                    {{ parcelle.cultures|length }} culture(s)
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <i class="bi bi-slash-circle fs-1 text-light d-block mb-3"></i>
+                                                <p class="text-muted">Aucune donnée disponible.</p>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+<style>
+    /* Intégration parfaite avec ton CSS existant */
+    .page-content-wrapper {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+    .table thead th {
+        font-size: 0.85rem;
+        text-transform: none;
+        letter-spacing: normal;
+        color: #74788d;
+    }
+    .avatar-xs {
+        width: 35px;
+        height: 35px;
+    }
+</style>
+{% endblock %}

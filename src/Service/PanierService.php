@@ -25,6 +25,9 @@ class PanierService
         return $this->session->get(self::SESSION_KEY, []);
     }
 
+    /**
+     * @param array<int, int> $cart
+     */
     private function saveCart(array $cart): void
     {
         $this->session->set(self::SESSION_KEY, $cart);
@@ -227,7 +230,9 @@ class PanierService
         ];
     }
 
-    // alias utilisé par CheckoutController
+    /**
+     * @return array{items: array<mixed>, total: float, count: int}
+     */
     public function getFullCart(): array
     {
         return $this->getDetails();

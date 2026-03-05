@@ -1,0 +1,16 @@
+parameters:
+<<<<<<< HEAD
+  level: 8
+  paths:
+    - src
+  # avoid false positives when types come from phpdoc (method_exists, null_coalesce)
+  treatPhpDocTypesAsCertain: false
+=======
+    level: 6
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+        - tests/
+>>>>>>> 0a84c10bf158fb8a9bbb5a3ad68b59dbf2755f4e

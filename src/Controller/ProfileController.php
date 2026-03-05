@@ -103,7 +103,7 @@ public function delete(Request $request, EntityManagerInterface $em): Response
         return $this->redirectToRoute('app_login');
     }
 
-    if ($this->isCsrfTokenValid('delete_profile', $request->request->get('_token'))) {
+    if ($this->isCsrfTokenValid('delete_profile', (string) $request->request->get('_token'))) {
 
         // logout the user first
         $this->container->get('security.token_storage')->setToken(null);

@@ -102,6 +102,9 @@ class TaskAssignmentController extends AbstractController
         return $this->json(null, 204);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function mapDataToAssignment(TaskAssignment $assignment, array $data, bool $isNew): void
     {
         foreach (['taskId', 'workerId', 'dateAssignment'] as $required) {
@@ -130,7 +133,7 @@ class TaskAssignmentController extends AbstractController
             $assignment->setDateAssignment($this->parseDate($data['dateAssignment'], 'dateAssignment'));
         }
 
-        if (isset($data['statut'])) {
+        if (isset($data['statut']) && is_string($data['statut'])) {
             $assignment->setStatut($data['statut']);
         }
     }
@@ -144,6 +147,9 @@ class TaskAssignmentController extends AbstractController
         }
     }
 
+    /**
+     * @return array<string, int|string|null>
+     */
     private function serializeAssignment(TaskAssignment $assignment): array
     {
         return [

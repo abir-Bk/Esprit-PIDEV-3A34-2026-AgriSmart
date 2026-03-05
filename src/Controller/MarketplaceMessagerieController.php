@@ -122,9 +122,18 @@ final class MarketplaceMessagerieController extends AbstractController
             $message->setContent($textContent !== '' ? $textContent : null);
 
             $audioFile = $form->has('audioFile') ? $form->get('audioFile')->getData() : null;
-            $audioBlob = $form->has('audioBlob') ? trim((string) $form->get('audioBlob')->getData()) : '';
+            // form field may be null; treat as empty string
+            if ($form->has('audioBlob')) {
+                $audioBlob = trim((string) $form->get('audioBlob')->getData());
+            } else {
+                $audioBlob = '';
+            }
 
-            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/marketplace/messages/audio';
+            $uploadDir = $this->getParameter('kernel.project_dir');
+        if (!is_string($uploadDir)) {
+            throw new \RuntimeException('kernel.project_dir must be a string');
+        }
+        $uploadDir = $uploadDir . '/public/uploads/marketplace/messages/audio';
             if (!is_dir($uploadDir)) {
                 @mkdir($uploadDir, 0775, true);
             }
@@ -153,7 +162,8 @@ final class MarketplaceMessagerieController extends AbstractController
                     ], 422);
                 }
 
-                if ($audioFile->getSize() !== null && $audioFile->getSize() > 8 * 1024 * 1024) {
+                $size = $audioFile->getSize();
+            if ($size !== false && $size > 8 * 1024 * 1024) {
                     return new JsonResponse([
                         'ok' => false,
                         'error' => 'Message vocal trop volumineux (max 8MB).',
@@ -161,7 +171,7 @@ final class MarketplaceMessagerieController extends AbstractController
                 }
 
                 $extension = $audioFile->guessExtension() ?: 'webm';
-                if ($extension === 'bin' || $extension === '') {
+                if ($extension === 'bin') {
                     $map = [
                         'audio/webm' => 'webm',
                         'video/webm' => 'webm',
@@ -176,7 +186,7 @@ final class MarketplaceMessagerieController extends AbstractController
                         'audio/aac' => 'aac',
                         'application/octet-stream' => 'webm',
                     ];
-                    $extension = $map[$mimeType] ?? 'webm';
+                    $extension = $map[$mimeType];
                 }
                 $filename = 'voice-' . bin2hex(random_bytes(12)) . '.' . $extension;
                 $audioFile->move($uploadDir, $filename);
@@ -276,7 +286,11 @@ final class MarketplaceMessagerieController extends AbstractController
 
             $topic = sprintf('/marketplace/messagerie/%d', $conversation->getId());
             try {
-                $hub->publish(new Update($topic, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
+                $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($json === false) {
+                    $json = '{}';
+                }
+                $hub->publish(new Update($topic, $json));
             } catch (\Throwable) {
                 $payload['live'] = false;
             }
@@ -291,6 +305,7 @@ final class MarketplaceMessagerieController extends AbstractController
         if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
             $errors = [];
             foreach ($form->getErrors(true) as $error) {
+                /** @var \Symfony\Component\Form\FormError $error */
                 $errors[] = $error->getMessage();
             }
 
@@ -390,15 +405,19 @@ final class MarketplaceMessagerieController extends AbstractController
             return new JsonResponse(['ok' => false, 'error' => 'Conversation introuvable.'], 404);
         }
 
+        /** @var array{messageIds:int[],readAt:\DateTimeImmutable|null} $readReceipt */
         $readReceipt = $messageRepository->markConversationAsReadForUser($conversation, $user);
         $this->publishReadReceipt($hub, $conversation, $user, $readReceipt);
 
+        $readCount = isset($readReceipt['messageIds']) ? count($readReceipt['messageIds']) : 0;
+        $readAt = $readReceipt['readAt'] instanceof \DateTimeImmutable
+            ? $readReceipt['readAt']->format('d/m/Y H:i')
+            : null;
+
         return new JsonResponse([
             'ok' => true,
-            'readCount' => count($readReceipt['messageIds'] ?? []),
-            'readAt' => $readReceipt['readAt'] instanceof \DateTimeImmutable
-                ? $readReceipt['readAt']->format('d/m/Y H:i')
-                : null,
+            'readCount' => $readCount,
+            'readAt' => $readAt,
         ]);
     }
 
@@ -421,7 +440,11 @@ final class MarketplaceMessagerieController extends AbstractController
         ];
 
         try {
-            $hub->publish(new Update($topic, json_encode($readPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
+            $json = json_encode($readPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if ($json === false) {
+                $json = '{}';
+            }
+            $hub->publish(new Update($topic, $json));
         } catch (\Throwable) {
         }
     }

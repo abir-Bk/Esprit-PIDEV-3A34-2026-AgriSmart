@@ -99,6 +99,9 @@ class TaskController extends AbstractController
         return $this->json(null, 204);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function mapDataToTask(Task $task, array $data, bool $isNew): void
     {
         foreach (['titre', 'priorite', 'statut', 'type', 'dateDebut'] as $required) {
@@ -142,7 +145,7 @@ class TaskController extends AbstractController
             $task->setDateDebut($this->parseDate($data['dateDebut'], 'dateDebut'));
         }
 
-        if (isset($data['dateFin'])) {
+        if (\array_key_exists('dateFin', $data)) {
             $task->setDateFin($data['dateFin'] !== null ? $this->parseDate($data['dateFin'], 'dateFin') : null);
         }
     }
@@ -156,13 +159,18 @@ class TaskController extends AbstractController
         }
     }
 
+    /**
+     * @return array<string, int|string|null>
+     */
     private function serializeTask(Task $task): array
     {
+        $dateDebut = $task->getDateDebut();
+
         return [
             'idTask' => $task->getIdTask(),
             'titre' => $task->getTitre(),
             'description' => $task->getDescription(),
-            'dateDebut' => $task->getDateDebut()->format(\DateTimeInterface::ATOM),
+            'dateDebut' => $dateDebut?->format(\DateTimeInterface::ATOM),
             'dateFin' => $task->getDateFin()?->format(\DateTimeInterface::ATOM),
             'priorite' => $task->getPriorite(),
             'statut' => $task->getStatut(),

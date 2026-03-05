@@ -53,8 +53,10 @@ class SuiviTacheController extends AbstractController
     public function validate(#[MapEntity(expr: 'repository.find(id)')] SuiviTache $suivi, EntityManagerInterface $em): Response
     {
         $task = $suivi->getTask();
-        $task->setStatut('termine');
-        $em->flush();
+        if ($task) {
+            $task->setStatut('termine');
+            $em->flush();
+        }
 
         $this->addFlash('success', 'La tâche a été marquée comme terminée.');
 
@@ -66,8 +68,10 @@ class SuiviTacheController extends AbstractController
     public function refuse(#[MapEntity(expr: 'repository.find(id)')] SuiviTache $suivi, EntityManagerInterface $em): Response
     {
         $task = $suivi->getTask();
-        $task->setStatut('en_cours');
-        $em->flush();
+        if ($task) {
+            $task->setStatut('en_cours');
+            $em->flush();
+        }
 
         $this->addFlash('warning', 'La demande de clôture a été refusée. La tâche repasse en cours.');
 

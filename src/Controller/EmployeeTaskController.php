@@ -80,7 +80,7 @@ class EmployeeTaskController extends AbstractController
         }
 
         $task = $assignment->getTask();
-        if ($task->getStatut() === 'todo') {
+        if ($task && $task->getStatut() === 'todo') {
             $task->setStatut('en_cours');
             $assignment->setStatut('acceptee');
             $em->flush();

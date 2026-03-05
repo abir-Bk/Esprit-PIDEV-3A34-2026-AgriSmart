@@ -42,15 +42,20 @@ class CheckoutController extends AbstractController
     #[Route('/checkout', name: 'app_checkout_index', methods: ['GET'])]
     public function index(PanierService $panier): Response
     {
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         $details = $panier->getDetails();
         $items = $details['items'];
 
         // Retirer du panier les produits dont l'utilisateur est le vendeur
         foreach ($items as $row) {
+            /** @var \App\Entity\Produit $produit */
             $produit = $row['produit'];
             if ($user && $produit->getVendeur() && $produit->getVendeur() === $user) {
-                $panier->remove($produit->getId());
+                $id = $produit->getId();
+                if ($id !== null) {
+                    $panier->remove($id);
+                }
             }
         }
         $details = $panier->getDetails();
@@ -85,6 +90,7 @@ class CheckoutController extends AbstractController
             return $this->json(['status' => 'error', 'message' => 'Token CSRF invalide.'], 400);
         }
 
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->json(['status' => 'error', 'message' => 'Vous devez être connecté.'], 401);
@@ -99,6 +105,7 @@ class CheckoutController extends AbstractController
         }
 
         foreach ($items as $row) {
+            /** @var \App\Entity\Produit $produit */
             $produit = $row['produit'];
             if ($produit->getVendeur() && $produit->getVendeur() === $user) {
                 return $this->json(['status' => 'error', 'message' => 'Vous ne pouvez pas commander votre propre offre (' . $produit->getNom() . ').'], 400);
@@ -112,6 +119,7 @@ class CheckoutController extends AbstractController
 
         // Re-check stock
         foreach ($items as $row) {
+            /** @var \App\Entity\Produit $produit */
             $produit = $row['produit'];
             $qty = (int) $row['qty'];
 
@@ -143,7 +151,9 @@ class CheckoutController extends AbstractController
 
         foreach ($items as $row) {
             $item = new CommandeItem();
-            $item->setProduit($row['produit']);
+            /** @var \App\Entity\Produit $prod */
+            $prod = $row['produit'];
+            $item->setProduit($prod);
             $item->setQuantite((int) $row['qty']);
             $item->setPrixUnitaire((float) $row['unitPrice']);
             $commande->addItem($item);
@@ -205,9 +215,13 @@ class CheckoutController extends AbstractController
         }
 
         foreach ($items as $row) {
+            /** @var \App\Entity\Produit $produit */
             $produit = $row['produit'];
             if ($produit->getVendeur() && $produit->getVendeur() === $user) {
-                $panier->remove($produit->getId());
+                $id = $produit->getId();
+                if ($id !== null) {
+                    $panier->remove($id);
+                }
                 $this->addFlash('warning', 'Vous ne pouvez pas commander votre propre offre. Les articles concernés ont été retirés du panier.');
                 return $this->redirectToRoute('app_checkout_index');
             }
@@ -220,20 +234,14 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('app_checkout_index');
         }
 
-        $paymentMethod = (string) $request->request->get('payment_method', 'domicile'); // domicile | carte
+        $paymentMethod = (string) $request->request->get('payment_method', 'domicile');
         if (!in_array($paymentMethod, ['domicile', 'carte'], true)) {
             $paymentMethod = 'domicile';
         }
 
-        // Le paiement carte est désormais géré via Stripe Payment Element en JS,
-        // on ne lance plus Stripe Checkout ici pour éviter toute redirection externe.
-        if ($paymentMethod === 'carte') {
-            $this->addFlash('danger', 'Le paiement par carte doit être effectué via le formulaire intégré.');
-            return $this->redirectToRoute('app_checkout_index');
-        }
-
         // Re-check stock (anti multi-tab)
         foreach ($items as $row) {
+            /** @var \App\Entity\Produit $produit */
             $produit = $row['produit'];
             $qty = (int) $row['qty'];
 
@@ -253,6 +261,7 @@ class CheckoutController extends AbstractController
 
         // Create Commande (ALWAYS en_attente)
         $commande = new Commande();
+        /** @var \App\Entity\User $user */
         $commande->setClient($user);
         $commande->setAdresseLivraison($adresseLivraison);
         $commande->setModePaiement(Commande::PAIEMENT_DOMICILE);
@@ -261,7 +270,9 @@ class CheckoutController extends AbstractController
 
         foreach ($items as $row) {
             $item = new CommandeItem();
-            $item->setProduit($row['produit']);
+            /** @var \App\Entity\Produit $produit */
+            $produit = $row['produit'];
+            $item->setProduit($produit);
             $item->setQuantite((int) $row['qty']);
             $item->setPrixUnitaire((float) $row['unitPrice']);
             $commande->addItem($item);
@@ -292,6 +303,7 @@ class CheckoutController extends AbstractController
 
         $lineItems = [];
         foreach ($items as $row) {
+            /** @var \App\Entity\Produit $produit */
             $produit = $row['produit'];
             $lineItems[] = [
                 'quantity' => (int) $row['qty'],
@@ -322,12 +334,17 @@ class CheckoutController extends AbstractController
         $em->flush();
 
         $panier->clear();
+        if (!$session->url) {
+            throw new \LogicException('Stripe session URL is missing');
+        }
         return $this->redirect($session->url);
     }
 
     #[Route('/checkout/confirm/{id}', name: 'app_checkout_confirm', methods: ['GET'])]
     public function confirm(Commande $commande, Request $request): Response
     {
+        // ensure the commande id is non-null when we later dispatch a message
+        
         if ($commande->getClient() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
@@ -338,8 +355,9 @@ class CheckoutController extends AbstractController
         ]);
     }
 
-    private function sendConfirmationEmail(MailerInterface $mailer, Commande $commande, object $user): void
+    private function sendConfirmationEmail(MailerInterface $mailer, Commande $commande, \Symfony\Component\Security\Core\User\UserInterface $user): void
     {
+        // the user may implement UserInterface (or your own App\Entity\User)
         $toEmail = method_exists($user, 'getEmail') ? $user->getEmail() : $user->getUserIdentifier();
         $fromEmail = $_ENV['MAIL_FROM'] ?? 'ayafdhila@gmail.com';
 
@@ -360,6 +378,9 @@ class CheckoutController extends AbstractController
     {
         foreach ($commande->getItems() as $item) {
             $p = $item->getProduit();
+            if (!$p) {
+                continue;
+            }
 
             if (method_exists($p, 'getType') && (string) $p->getType() === 'location') {
                 continue;
@@ -379,8 +400,12 @@ class CheckoutController extends AbstractController
         $em->flush();
     }
 
-    private function readStock(object $produit): ?int
+    private function readStock(?object $produit): ?int
     {
+        if (!$produit) {
+            return null;
+        }
+        // phpstan will still warn if $produit is null, so callers should ensure non-null
         if (method_exists($produit, 'getQuantiteStock'))
             return (int) ($produit->getQuantiteStock() ?? 0);
         if (method_exists($produit, 'getStock'))

@@ -117,6 +117,7 @@ class Produit
         $this->updatedAt = new \DateTimeImmutable();
     }
 
+    /** @return array<int, string> */
     public static function getCategorieValues(): array
     {
         return array_values(self::CATEGORIES);

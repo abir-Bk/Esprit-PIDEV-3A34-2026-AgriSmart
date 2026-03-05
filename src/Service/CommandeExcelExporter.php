@@ -37,7 +37,7 @@ class CommandeExcelExporter
             $firstItem = $c->getItems()->first();
             $sheet->setCellValue('A' . $row, $c->getId());
             $sheet->setCellValue('B' . $row, $c->getCreatedAt()->format('d/m/Y H:i'));
-            $sheet->setCellValue('C' . $row, $firstItem ? $firstItem->getProduit()->getNom() : '—');
+            $sheet->setCellValue('C' . $row, $firstItem && $firstItem->getProduit() ? $firstItem->getProduit()->getNom() : '—');
             $sheet->setCellValue('D' . $row, $c->getItems()->count());
             $sheet->setCellValue('E' . $row, $c->getMontantTotal());
             $sheet->setCellValue('F' . $row, $c->getStatut());
@@ -80,7 +80,7 @@ class CommandeExcelExporter
             $sheet->setCellValue('B' . $row, $c->getCreatedAt()->format('d/m/Y H:i'));
             $sheet->setCellValue('C' . $row, $clientName);
             $sheet->setCellValue('D' . $row, $client ? ($client->getEmail() ?? $client->getUserIdentifier()) : '—');
-            $sheet->setCellValue('E' . $row, $firstItem ? $firstItem->getProduit()->getNom() : '—');
+            $sheet->setCellValue('E' . $row, $firstItem && $firstItem->getProduit() ? $firstItem->getProduit()->getNom() : '—');
             $sheet->setCellValue('F' . $row, $c->getItems()->count());
             $sheet->setCellValue('G' . $row, $c->getMontantTotal());
             $sheet->setCellValue('H' . $row, $c->getStatut());

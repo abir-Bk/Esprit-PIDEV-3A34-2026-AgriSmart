@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche d'Identité Parcelle - AgriSmart</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.6; }
+        .header { text-align: center; border-bottom: 2px solid #1A4331; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #1A4331; }
+        .title { font-size: 22px; margin-top: 10px; color: #555; }
+        .section { margin-bottom: 30px; }
+        .section-title { font-size: 18px; font-weight: bold; color: #1A4331; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+        .label { font-weight: bold; width: 150px; color: #666; }
+        .value { color: #111; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .history-table th { background-color: #f4f4f4; text-align: left; padding: 10px; font-size: 14px; }
+        .history-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">AgriSmart Intelligence</div>
+        <div class="title">Fiche d'Identité Technique de la Parcelle</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Informations Générales</div>
+        <table class="info-table">
+            <tr>
+                <td class="label">Nom de la Parcelle</td>
+                <td class="value">{{ parcelle.nom }}</td>
+            </tr>
+            <tr>
+                <td class="label">Surface Totale</td>
+                <td class="value">{{ parcelle.surface }} Hectares</td>
+            </tr>
+            <tr>
+                <td class="label">Type de Sol</td>
+                <td class="value">{{ parcelle.typeSol }}</td>
+            </tr>
+            <tr>
+                <td class="label">Coordonnées</td>
+                <td class="value">{{ parcelle.latitude }}, {{ parcelle.longitude }}</td>
+            </tr>
+            <tr>
+                <td class="label">Propriétaire</td>
+                <td class="value">{{ user.firstName }} {{ user.lastName }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Historique des Cultures Actuelles</div>
+        {% if parcelle.cultures|length > 0 %}
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Culture</th>
+                        <th>Variété</th>
+                        <th>Date de Plantation</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for culture in parcelle.cultures %}
+                        <tr>
+                            <td>{{ culture.typeCulture }}</td>
+                            <td>{{ culture.variete }}</td>
+                            <td>{{ culture.datePlantation|date('d/m/Y') }}</td>
+                            <td>{{ culture.statut }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aucune culture enregistrée sur cette parcelle.</p>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        Document généré automatiquement par AgriSmart - {{ "now"|date('d/m/Y H:i') }}
+    </div>
+</body>
+</html>

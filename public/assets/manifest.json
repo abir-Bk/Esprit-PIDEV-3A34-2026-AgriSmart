@@ -1,0 +1,19 @@
+{
+    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-dc17a6083f823784f791a0c76afc3718.js",
+    "@symfony\/stimulus-bundle\/loader.js": "\/assets\/@symfony\/stimulus-bundle\/loader-5751ad1ee2975e725a94d8121d153d17.js",
+    "@symfony\/ux-chartjs\/controller.js": "\/assets\/@symfony\/ux-chartjs\/controller-2b631fe9f6962343d71ebbe25f0594ec.js",
+    "@symfony\/ux-turbo\/turbo_controller.js": "\/assets\/@symfony\/ux-turbo\/turbo_controller-f3040d8b6a5a81530e1ea5ec500d1142.js",
+    "@symfony\/ux-turbo\/turbo_stream_controller.js": "\/assets\/@symfony\/ux-turbo\/turbo_stream_controller-2dc2b209912de93ed8105ab931271bb3.js",
+    "app.js": "\/assets\/app-c8937d034fd9f8825ee84218119197ed.js",
+    "bootstrap.js": "\/assets\/bootstrap-707166d115126a05612a9d081a2c5425.js",
+    "controllers\/hello_controller.js": "\/assets\/controllers\/hello_controller-87b6385829902356204e988334af9bf5.js",
+    "styles\/app.css": "\/assets\/styles\/app-eddbbd371a8b5ef0cc1ad2cb664160ba.css",
+    "styles\/parcelle.css": "\/assets\/styles\/parcelle-6c249adf7900886df972515d184004d3.css",
+    "vendor\/@hotwired\/stimulus\/stimulus.index.js": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-4b8ccd71e6b1c4ddba22853d5a50a26c.js",
+    "vendor\/@hotwired\/turbo\/turbo.index.js": "\/assets\/vendor\/@hotwired\/turbo\/turbo.index-a53d794fa85309d61a95703410716017.js",
+    "vendor\/@kurkle\/color\/color.index.js": "\/assets\/vendor\/@kurkle\/color\/color.index-cb9643b43060e01d0353a24111b0e62a.js",
+    "vendor\/@symfony\/ux-chartjs\/ux-chartjs.index.js": "\/assets\/vendor\/@symfony\/ux-chartjs\/ux-chartjs.index-1ede3cec757383a2aed4917a93f3a2ab.js",
+    "vendor\/chart.js\/chart.js.index.js": "\/assets\/vendor\/chart.js\/chart.js.index-b049dd7a3f471e5fa707180e89ea5d32.js",
+    "vendor\/flatpickr\/dist\/flatpickr.min.css": "\/assets\/vendor\/flatpickr\/dist\/flatpickr.min-f561804f3afc77a69137806e7aa8e72c.css",
+    "vendor\/flatpickr\/flatpickr.index.js": "\/assets\/vendor\/flatpickr\/flatpickr.index-7d40c565de24dba11f91188a7f50addf.js"
+}

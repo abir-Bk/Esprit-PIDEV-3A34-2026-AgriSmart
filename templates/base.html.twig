@@ -55,6 +55,41 @@
     {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+        {% if app.debug %}
+            <script>
+                (function () {
+                    function revealToolbar() {
+                        var toolbars = document.querySelectorAll('.sf-toolbar.sf-display-none');
+                        toolbars.forEach(function (toolbar) {
+                            toolbar.classList.remove('sf-display-none');
+                        });
+                    }
+
+                    function bootToolbarFix() {
+                        revealToolbar();
+
+                        var attempts = 0;
+                        var interval = setInterval(function () {
+                            revealToolbar();
+                            attempts++;
+                            if (attempts >= 20) {
+                                clearInterval(interval);
+                            }
+                        }, 200);
+
+                        var observer = new MutationObserver(revealToolbar);
+                        observer.observe(document.body, { childList: true, subtree: true });
+
+                        setTimeout(function () {
+                            observer.disconnect();
+                        }, 10000);
+                    }
+
+                    document.addEventListener('DOMContentLoaded', bootToolbarFix);
+                    document.addEventListener('turbo:load', bootToolbarFix);
+                })();
+            </script>
+        {% endif %}
     {% endblock %}
 </body>
 </html>

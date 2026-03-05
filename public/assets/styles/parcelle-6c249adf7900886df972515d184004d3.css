@@ -1,0 +1,420 @@
+/* assets/styles/parcelle.css */
+
+/* Thème Marketplace AgriSmart (cohérence Parcelles) */
+:root {
+    --ag-primary: #1A4331;
+    --ag-primary-2: #2E7D32;
+    --ag-cream: #FBF7EE;
+    --ag-bg: #F6F8F7;
+    --ag-text: #111827;
+    --ag-muted: #6B7280;
+    --ag-border: #E5E7EB;
+    --agri-green: #1A4331;
+    --agri-dark: #163828;
+    --bg-light: #F6F8F7;
+    --glass: rgba(255, 255, 255, 0.9);
+    --weather-blue: #0ea5e9;
+}
+
+body {
+    background-color: var(--ag-bg);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--ag-text);
+}
+
+.rounded-4 {
+    border-radius: 1.25rem !important;
+}
+
+/* Hero = style Marketplace */
+.ag-hero-parcelle {
+    background:
+        radial-gradient(900px 420px at 18% 25%, rgba(46, 125, 50, .16), transparent 60%),
+        radial-gradient(700px 320px at 85% 10%, rgba(244, 180, 0, .14), transparent 55%),
+        linear-gradient(180deg, var(--ag-cream), #ffffff);
+    border-bottom: 1px solid rgba(17, 24, 39, .06);
+    padding: 2.5rem 0 2rem;
+}
+
+.ag-hero-parcelle .ag-title {
+    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--ag-text);
+}
+
+.ag-hero-parcelle .ag-subtitle {
+    font-size: 1.05rem;
+    color: var(--ag-muted);
+    margin: .5rem 0 0 0;
+}
+
+.ag-hero-parcelle .ag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    border: 1px solid var(--ag-border);
+    background: #fff;
+    color: var(--ag-text) !important;
+    text-decoration: none !important;
+    border-radius: 999px;
+    padding: .5rem .9rem;
+    font-weight: 600;
+    font-size: .9rem;
+    transition: .15s;
+}
+
+.ag-hero-parcelle .ag-pill:hover {
+    border-color: rgba(26, 67, 49, .35);
+    box-shadow: 0 .4rem 1rem rgba(0, 0, 0, .06);
+    transform: translateY(-1px);
+    color: var(--ag-primary) !important;
+}
+
+.ag-hero-parcelle .ag-pill.active {
+    border-color: rgba(26, 67, 49, .35);
+    background: rgba(26, 67, 49, .08);
+    color: var(--ag-primary) !important;
+}
+
+.ag-content-parcelle {
+    background: var(--ag-bg);
+    padding: 2rem 0 3rem;
+}
+
+.ag-filter-card-parcelle {
+    border: 1px solid rgba(17, 24, 39, .06);
+    border-radius: 20px;
+}
+
+.ag-input-parcelle {
+    border-radius: 14px;
+    border: 1px solid var(--ag-border);
+}
+
+.ag-input-parcelle:focus {
+    border-color: rgba(26, 67, 49, .45);
+    box-shadow: 0 0 0 .25rem rgba(26, 67, 49, .12);
+}
+
+.agri-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--ag-border);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+}
+
+.agri-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .9rem 1.6rem rgba(0, 0, 0, .08);
+}
+
+.agri-card.active {
+    border-color: var(--ag-primary);
+    background: rgba(26, 67, 49, .04) !important;
+    box-shadow: inset 4px 0 0 0 var(--ag-primary);
+}
+
+/* Amélioration de l'affichage des cultures */
+.culture-item {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    height: 100%;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+.culture-item:hover {
+    border-color: var(--agri-green);
+    background: #fafafa;
+}
+
+/* Amélioration des boutons d'action pour les cultures */
+.culture-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    gap: 0.3rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.btn-action i {
+    font-size: 0.8rem;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action-sm {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+}
+
+.btn-utiliser {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.btn-predict {
+    background: #faf5ff;
+    color: #6b21a8;
+    border-color: #e9d5ff;
+}
+
+.btn-ia {
+    background: #ecfdf5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.btn-edit {
+    background: #fffbeb;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.btn-delete {
+    background: #fef2f2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.culture-header {
+    margin-bottom: 1.25rem;
+}
+
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    color: var(--agri-green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+#map {
+    height: 320px;
+    width: 100%;
+    border-radius: 15px;
+}
+
+#map-preview {
+    height: 250px;
+    width: 100%;
+    border-radius: 15px;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.weather-widget {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 1rem;
+}
+
+.advice-card {
+    border-radius: 1rem;
+    border-left: 5px solid;
+    transition: all 0.3s ease;
+}
+
+.badge-soft-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-soft-info {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.main-header {
+    background: linear-gradient(to right, #ffffff, #f8fafc);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Bouton principal parcelle = même vert que Marketplace */
+.btn-parcelle-primary {
+    background: #1A4331 !important;
+    border: none;
+    color: #fff !important;
+}
+
+.btn-parcelle-primary:hover {
+    background: #163828 !important;
+    color: #fff !important;
+}
+
+/* Culture modals – style Marketplace AgriSmart */
+#modalAjouterCulture .modal-content,
+#modalEditCulture .modal-content {
+    border-radius: 20px;
+    border: 1px solid rgba(17, 24, 39, .06);
+}
+
+#modalAjouterCulture .modal-header,
+#modalEditCulture .modal-header {
+    background: linear-gradient(135deg, #1A4331 0%, #28a745 100%);
+    color: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 1rem 1.5rem;
+}
+
+#modalAjouterCulture .modal-header .btn-close,
+#modalEditCulture .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#modalAjouterCulture .modal-title,
+#modalEditCulture .modal-title {
+    color: #fff;
+    font-weight: 700;
+}
+
+#modalAjouterCulture .ag-input,
+#modalEditCulture .ag-input {
+    border-radius: 14px;
+    border: 1px solid #E5E7EB;
+}
+
+#modalAjouterCulture .ag-input:focus,
+#modalEditCulture .ag-input:focus {
+    border-color: rgba(26, 67, 49, .45);
+    box-shadow: 0 0 0 .25rem rgba(26, 67, 49, .12);
+}
+
+#modalAjouterCulture .form-label,
+#modalEditCulture .form-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #6B7280;
+}
+
+#modalAjouterCulture .ag-btn-primary,
+#modalEditCulture .ag-btn-primary {
+    background: #1A4331 !important;
+    border: none;
+    color: #fff !important;
+}
+
+#modalAjouterCulture .ag-btn-primary:hover,
+#modalEditCulture .ag-btn-primary:hover {
+    background: #163828 !important;
+    color: #fff !important;
+}
+
+/* Modal Utiliser une ressource (Consommer) – design et bouton visible */
+.modal-consommer .modal-content {
+    border-radius: 1rem;
+    overflow: visible;
+}
+
+.modal-consommer .modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.modal-consommer .modal-footer.modal-consommer-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.modal-consommer .btn-consommer-submit {
+    background: #1A4331 !important;
+    border: none;
+    color: #fff !important;
+}
+
+.modal-consommer .btn-consommer-submit:hover:not(:disabled) {
+    background: #163828 !important;
+    color: #fff !important;
+}
+
+.modal-consommer .btn-consommer-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Message de contrôle de saisie "Quantité insuffisante" dans la modale */
+.modal-consommer .invalid-feedback.d-block {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* Masquer message Alpine avant init */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Badge pour les ressources */
+.ressource-badge {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #495057;
+}
+
+.ressource-badge i {
+    color: var(--ag-primary);
+}
+
+/* Amélioration responsive */
+@media (max-width: 768px) {
+    .culture-actions {
+        justify-content: flex-start;
+        margin-top: 1rem;
+    }
+
+    .culture-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+}

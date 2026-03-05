@@ -20,10 +20,12 @@ class Consommation
     private ?\DateTimeImmutable $dateConsommation = null;
 
     #[ORM\ManyToOne(inversedBy: 'consommations')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Ressource $ressource = null;
 
     #[ORM\ManyToOne(inversedBy: 'consommations')]
-    private ?Culture $culture = null;
+#[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+private ?Culture $culture = null;
 
     public function getId(): ?int
     {

@@ -14,10 +14,9 @@ class CommandeItem
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Commande $commande = null;
 
-    // Produit acheté
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Produit $produit = null;
@@ -25,9 +24,8 @@ class CommandeItem
     #[ORM\Column]
     private int $quantite = 1;
 
-    // Snapshot prix au moment de commande
-    #[ORM\Column]
-    private float $prixUnitaire = 0.0;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $prixUnitaire = '0.00';
 
     public function getId(): ?int
     {
@@ -38,6 +36,7 @@ class CommandeItem
     {
         return $this->commande;
     }
+
     public function setCommande(Commande $commande): static
     {
         $this->commande = $commande;
@@ -48,6 +47,7 @@ class CommandeItem
     {
         return $this->produit;
     }
+
     public function setProduit(Produit $produit): static
     {
         $this->produit = $produit;
@@ -58,24 +58,26 @@ class CommandeItem
     {
         return $this->quantite;
     }
+
     public function setQuantite(int $quantite): static
     {
         $this->quantite = max(1, $quantite);
         return $this;
     }
 
-    public function getPrixUnitaire(): float
+    public function getPrixUnitaire(): string
     {
         return $this->prixUnitaire;
     }
-    public function setPrixUnitaire(float $prixUnitaire): static
+
+    public function setPrixUnitaire(string $prixUnitaire): static
     {
-        $this->prixUnitaire = max(0, $prixUnitaire);
+        $this->prixUnitaire = $prixUnitaire;
         return $this;
     }
 
     public function getSousTotal(): float
     {
-        return $this->prixUnitaire * $this->quantite;
+        return (float) $this->prixUnitaire * $this->quantite;
     }
 }

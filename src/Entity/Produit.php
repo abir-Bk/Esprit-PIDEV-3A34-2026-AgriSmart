@@ -48,10 +48,10 @@ class Produit
     #[Assert\Choice(choices: [self::TYPE_VENTE, self::TYPE_LOCATION], message: 'Type invalide.')]
     private ?string $type = null;
 
-    #[ORM\Column]
-    #[Assert\NotNull(message: 'Le prix est obligatoire.')]
-    #[Assert\PositiveOrZero(message: 'Le prix doit être ≥ 0.')]
-    private ?float $prix = null;
+   #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+#[Assert\NotNull(message: 'Le prix est obligatoire.')]
+#[Assert\PositiveOrZero(message: 'Le prix doit être ≥ 0.')]
+private ?string $prix = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire.')]
@@ -70,9 +70,9 @@ class Produit
     #[ORM\Column(options: ['default' => false])]
     private bool $isPromotion = false;
 
-    #[ORM\Column(nullable: true)]
-    #[Assert\PositiveOrZero(message: 'Le prix promo doit être ≥ 0.')]
-    private ?float $promotionPrice = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+#[Assert\PositiveOrZero(message: 'Le prix promo doit être ≥ 0.')]
+private ?string $promotionPrice = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -204,16 +204,15 @@ class Produit
         return $this;
     }
 
-    public function getPrix(): ?float
-    {
-        return $this->prix;
-    }
-    public function setPrix(float $prix): static
-    {
-        $this->prix = $prix;
-        return $this;
-    }
-
+  public function getPrix(): ?string
+{
+    return $this->prix;
+}
+   public function setPrix(string $prix): static
+{
+    $this->prix = $prix;
+    return $this;
+}
     public function getCategorie(): ?string
     {
         return $this->categorie;
@@ -253,16 +252,15 @@ class Produit
         $this->isPromotion = $isPromotion;
         return $this;
     }
-
-    public function getPromotionPrice(): ?float
-    {
-        return $this->promotionPrice;
-    }
-    public function setPromotionPrice(?float $promotionPrice): static
-    {
-        $this->promotionPrice = $promotionPrice;
-        return $this;
-    }
+public function getPromotionPrice(): ?string
+{
+    return $this->promotionPrice;
+}
+public function setPromotionPrice(?string $promotionPrice): static
+{
+    $this->promotionPrice = $promotionPrice;
+    return $this;
+}
 
     public function getLocationAddress(): ?string
     {

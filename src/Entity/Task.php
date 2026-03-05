@@ -58,8 +58,9 @@ class Task
     /**
      * Référence éventuelle à une parcelle (id technique)
      */
-    #[ORM\Column(name: 'parcelle_id', nullable: true)]
-    private ?int $parcelleId = null;
+  #[ORM\ManyToOne(targetEntity: Parcelle::class)]
+#[ORM\JoinColumn(name: 'parcelle_id', nullable: true)]
+private ?Parcelle $parcelle = null;
 
     /**
      * Référence éventuelle à une culture
@@ -197,17 +198,15 @@ class Task
         return $this;
     }
 
-    public function getParcelleId(): ?int
-    {
-        return $this->parcelleId;
-    }
-
-    public function setParcelleId(?int $parcelleId): self
-    {
-        $this->parcelleId = $parcelleId;
-
-        return $this;
-    }
+   public function getParcelleId(): ?int
+{
+    return $this->parcelle?->getId();
+}
+    public function setParcelle(?Parcelle $parcelle): self
+{
+    $this->parcelle = $parcelle;
+    return $this;
+}
 
     public function getCulture(): ?Culture
     {

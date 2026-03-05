@@ -24,7 +24,6 @@ class Commande
     #[ORM\Column]
     private ?int $id = null;
 
-    // Client (acheteur)
     #[ORM\ManyToOne(inversedBy: 'commandes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $client = null;
@@ -35,23 +34,18 @@ class Commande
     #[ORM\Column(length: 30)]
     private string $modePaiement = self::PAIEMENT_DOMICILE;
 
-    // Adresse livraison
     #[ORM\Column(length: 255)]
     private string $adresseLivraison = '';
 
-    // Total (snapshot)
-    #[ORM\Column]
-    private float $montantTotal = 0.0;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $montantTotal = '0.00';
 
-    // Ref paiement (Stripe payment_intent ou session id)
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $paymentRef = null;
 
-    // ✅ Stripe confirmed paid time (idempotence + audit)
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $paidAt = null;
 
-    // ✅ Email sent time (idempotence)
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $emailSentAt = null;
 
@@ -64,9 +58,8 @@ class Commande
     /**
      * @var Collection<int, CommandeItem>
      */
-    #[ORM\OneToMany(mappedBy: 'commande', targetEntity: CommandeItem::class, cascade: ['persist'], orphanRemoval: true)]
-    private Collection $items;
-
+#[ORM\OneToMany(mappedBy: 'commande', targetEntity: CommandeItem::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+private Collection $items;
     public function __construct()
     {
         $this->items = new ArrayCollection();
@@ -78,8 +71,6 @@ class Commande
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
-
-    // -------- Getters/Setters --------
 
     public function getId(): ?int
     {
@@ -130,12 +121,12 @@ class Commande
         return $this;
     }
 
-    public function getMontantTotal(): float
+    public function getMontantTotal(): string
     {
         return $this->montantTotal;
     }
 
-    public function setMontantTotal(float $montantTotal): static
+    public function setMontantTotal(string $montantTotal): static
     {
         $this->montantTotal = $montantTotal;
         return $this;
@@ -207,14 +198,13 @@ class Commande
         return $this;
     }
 
-    // Recalcule le total depuis les items
     public function recomputeTotal(): static
     {
         $total = 0.0;
         foreach ($this->items as $item) {
             $total += $item->getPrixUnitaire() * $item->getQuantite();
         }
-        $this->montantTotal = $total;
+        $this->montantTotal = (string) $total;
         return $this;
     }
 }

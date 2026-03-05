@@ -103,6 +103,7 @@ final class ProduitController extends AbstractController
             ->where('p2.categorie IS NOT NULL')
             ->andWhere("p2.categorie <> ''")
             ->orderBy('p2.categorie', 'ASC')
+            ->setMaxResults(100)
             ->getQuery()
             ->getArrayResult();
 
@@ -370,8 +371,8 @@ final class ProduitController extends AbstractController
                 ->setStartDate($start)
                 ->setEndDate($end)
                 ->setDays($days)
-                ->setUnitPrice((float) $unitPrice)
-                ->setTotalPrice((float) $total)
+                ->setUnitPrice(number_format((float) $unitPrice, 2, '.', ''))
+                ->setTotalPrice(number_format((float) $total, 2, '.', ''))
                 ->setStatus(LocationReservation::STATUS_ACTIVE);
 
             $this->entityManager->persist($reservation);

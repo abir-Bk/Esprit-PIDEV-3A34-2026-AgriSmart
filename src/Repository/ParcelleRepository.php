@@ -29,10 +29,13 @@ class ParcelleRepository extends ServiceEntityRepository
     }
 
     // Sécurisation du tri pour éviter les injections SQL
-    $validFields = ['id', 'nom', 'surface']; // Ajoutez vos champs ici
-    if (in_array($sortBy, $validFields, true)) {
-        $qb->orderBy('p.' . $sortBy, $direction === 'DESC' ? 'DESC' : 'ASC');
-    }
+    $sortMap = [
+        'id' => 'p.id',
+        'nom' => 'p.nom',
+        'surface' => 'p.surface',
+    ];
+    $sortField = $sortMap[$sortBy] ?? $sortMap['id'];
+    $qb->orderBy($sortField, $direction === 'DESC' ? 'DESC' : 'ASC');
 
     return $qb->getQuery()->getResult();
     }

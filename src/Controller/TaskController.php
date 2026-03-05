@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use App\Repository\CultureRepository;
+use App\Repository\ParcelleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,6 +19,7 @@ class TaskController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly TaskRepository $taskRepository,
         private readonly CultureRepository $cultureRepository,
+        private readonly ParcelleRepository $parcelleRepository,
     ) {
     }
 
@@ -129,7 +131,8 @@ class TaskController extends AbstractController
             $task->setLocalisation($data['localisation']);
         }
         if (isset($data['parcelleId'])) {
-            $task->setParcelleId($data['parcelleId']);
+            $parcelle = $this->parcelleRepository->find($data['parcelleId']);
+            $task->setParcelle($parcelle);
         }
         if (isset($data['cultureId'])) {
             $culture = $this->cultureRepository->find($data['cultureId']);

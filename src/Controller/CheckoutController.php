@@ -147,7 +147,7 @@ class CheckoutController extends AbstractController
         $commande->setAdresseLivraison($adresseLivraison);
         $commande->setModePaiement(Commande::PAIEMENT_CARTE);
         $commande->setStatut(Commande::STATUT_EN_ATTENTE);
-        $commande->setMontantTotal($total);
+        $commande->setMontantTotal(number_format($total, 2, '.', ''));
 
         foreach ($items as $row) {
             $item = new CommandeItem();
@@ -155,7 +155,7 @@ class CheckoutController extends AbstractController
             $prod = $row['produit'];
             $item->setProduit($prod);
             $item->setQuantite((int) $row['qty']);
-            $item->setPrixUnitaire((float) $row['unitPrice']);
+            $item->setPrixUnitaire(number_format((float) $row['unitPrice'], 2, '.', ''));
             $commande->addItem($item);
         }
 
@@ -266,7 +266,7 @@ class CheckoutController extends AbstractController
         $commande->setAdresseLivraison($adresseLivraison);
         $commande->setModePaiement(Commande::PAIEMENT_DOMICILE);
         $commande->setStatut(Commande::STATUT_EN_ATTENTE);
-        $commande->setMontantTotal($total);
+        $commande->setMontantTotal(number_format($total, 2, '.', ''));
 
         foreach ($items as $row) {
             $item = new CommandeItem();
@@ -274,7 +274,7 @@ class CheckoutController extends AbstractController
             $produit = $row['produit'];
             $item->setProduit($produit);
             $item->setQuantite((int) $row['qty']);
-            $item->setPrixUnitaire((float) $row['unitPrice']);
+            $item->setPrixUnitaire(number_format((float) $row['unitPrice'], 2, '.', ''));
             $commande->addItem($item);
         }
 

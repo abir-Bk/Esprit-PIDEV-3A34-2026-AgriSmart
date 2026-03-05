@@ -170,7 +170,7 @@ class TaskCrudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $selectedParcelle = $form->get('parcelleId')->getData();
-            $task->setParcelleId($selectedParcelle?->getId());
+            $task->setParcelle($selectedParcelle);
 
             $selectedCulture = $form->get('culture')->getData();
             $task->setCulture($selectedCulture);
@@ -226,7 +226,7 @@ class TaskCrudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $selectedParcelle = $form->get('parcelleId')->getData();
-            $task->setParcelleId($selectedParcelle?->getId());
+            $task->setParcelle($selectedParcelle);
 
             $selectedCulture = $form->get('culture')->getData();
             $task->setCulture($selectedCulture);

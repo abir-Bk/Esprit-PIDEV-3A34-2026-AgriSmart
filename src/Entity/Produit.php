@@ -126,9 +126,9 @@ private ?string $promotionPrice = null;
     public function getPrixEffectif(): ?float
     {
         if ($this->isPromotion && $this->promotionPrice !== null) {
-            return $this->promotionPrice;
+            return (float) $this->promotionPrice;
         }
-        return $this->prix;
+        return $this->prix !== null ? (float) $this->prix : null;
     }
 
     #[Assert\Callback]

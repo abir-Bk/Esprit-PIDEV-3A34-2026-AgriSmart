@@ -266,9 +266,9 @@ final class MarketplaceMessagerieController extends AbstractController
             $entityManager->persist($message);
             $entityManager->flush();
 
-            $senderName = trim((string) ($user->getFirstName() ?? '') . ' ' . (string) ($user->getLastName() ?? ''));
+            $senderName = trim((string) ($user->getFirstName() ?? '') . ' ' . $user->getLastName());
             if ($senderName === '') {
-                $senderName = (string) ($user->getEmail() ?? 'Utilisateur');
+                $senderName = $user->getEmail();
             }
 
             $payload = [

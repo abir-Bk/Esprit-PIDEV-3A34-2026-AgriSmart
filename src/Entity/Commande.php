@@ -202,9 +202,9 @@ private Collection $items;
     {
         $total = 0.0;
         foreach ($this->items as $item) {
-            $total += $item->getPrixUnitaire() * $item->getQuantite();
+            $total += ((float) $item->getPrixUnitaire()) * $item->getQuantite();
         }
-        $this->montantTotal = (string) $total;
+        $this->montantTotal = number_format($total, 2, '.', '');
         return $this;
     }
 }

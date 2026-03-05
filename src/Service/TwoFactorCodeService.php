@@ -27,7 +27,7 @@ class TwoFactorCodeService
     {
         $code = $user->getTwoFactorCode();
         $email = $user->getEmail();
-        if ($email === null) {
+        if ($email === '') {
             return;
         }
 
